@@ -1,0 +1,215 @@
+# Architecture plan
+
+Next: 2 bounded-contexts - cut discovery.md into contexts, one language and one owner each
+
+The `Next:` line above is read by tools at the start of every session: keep it on one line,
+`Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
+
+## Needs
+
+Stated by the product owner, verbatim from `docs/architecture/needs.md`:
+
+Written by the product owner, 2026-10-26.
+
+We operate a lending platform for regional banks and credit unions. Each bank subscribes on its
+own: its data, its staff, its customers and its loans are never visible to another bank. A bank
+lends to individuals (personal loans, car loans) and to small businesses (term loans). We are
+regulated: consumer credit law, anti-money laundering law, banking supervision and data
+protection all apply, and an examiner from the supervisor must be able to rebuild any decision
+we took, years later, from what we kept.
+
+## Banks, branches and staff
+
+A bank has branches. Its staff are advisors (each belongs to a branch and holds a portfolio of
+customers), credit analysts and risk managers in the risk department, members of the credit
+committee, compliance officers, branch managers and internal auditors. A bank also works with
+brokers: outside intermediaries who bring applications. A broker must hold a registration
+number with the intermediaries register that is valid on the day the application is brought;
+a broker whose registration lapsed can no longer bring one.
+
+Staff declare their conflicts of interest: a member of staff never prepares nor decides an
+application of a customer they declared a link with (a relative, an associate), nor their own.
+
+## Customers and due diligence
+
+A customer is a person or a small business. Before any credit, the bank knows its customer:
+identity documents and proof of address for a person; for a business, its registration, its
+directors and its beneficial owners (anyone holding more than 25 percent), each of them known
+as a person. Every person is screened against the sanctions lists and the lists of politically
+exposed persons through an outside screening provider. A possible match is reviewed by a
+compliance officer, who confirms or dismisses it with a reason; a confirmed sanctions match
+ends the relationship.
+
+Each customer gets a risk rating, low, medium or high, from the country, the activity, the
+screening and the product. A high risk customer needs the approval of a compliance officer
+before any credit is granted. Due diligence is refreshed every year for high risk, every three
+years for medium and every five years for low; a customer whose refresh is overdue can apply
+but no credit is disbursed to them until it is done.
+
+## Applications
+
+A customer applies for a product of the bank's catalogue: each product has its minimum and
+maximum amount and duration, its fees and whether borrower insurance is mandatory. An
+application names its borrower, possibly a co-borrower, possibly a guarantor, the amount, the
+duration and the purpose. The applicant gives documents (payslips, tax notices, bank
+statements, the accounts of a business), stored as files; the bank may instead read the income
+and the expenses from the applicant's bank accounts through an account information provider,
+with the applicant's consent, which expires after 90 days.
+
+The application file is the record of everything that happened to the application, in order:
+who entered or changed which information, which document arrived, what each check returned,
+who looked at it, what was proposed and what was decided, with the reasons. Nothing in it is
+ever edited; a mistake is corrected by a later entry that says what it corrects and why. We must
+be able to show, for any decision, exactly what the decider had in front of them when they
+decided.
+
+## Assessment
+
+Every application is assessed before any decision:
+
+- the debt to income ratio: all monthly repayments of the household, the new one included,
+  divided by its net monthly income, at most 35 percent;
+- the residual income: what the household keeps each month after its repayments and fixed
+  charges, at least a minimum set by the bank per adult and per child;
+- the national register of repayment incidents, consulted through its provider: a borrower or
+  co-borrower listed there is refused for consumer credit;
+- the internal score, from the scoring model of the bank. The model is versioned; the
+  assessment records the version, the inputs and the score, and the main factors that pushed the
+  score down, in words a customer understands.
+
+The assessment proposes approve or refuse. A refusal is never decided by the machine alone: a
+person reviews every proposed refusal, and an applicant may ask for a human review of any
+decision, give their point of view and contest it.
+
+## Decision
+
+Who may decide depends on the amount and on the risk, the bank's delegation rules:
+
+| Decider | Up to |
+|---|---|
+| advisor | 15,000 for a personal or car loan with a green score |
+| credit analyst | 75,000 |
+| risk manager | 250,000 |
+| credit committee | above, and every exception to the policy |
+
+An exception (a ratio above 35 percent, a residual income below the minimum, a score below the
+threshold of the product) needs a written justification and the decision of the level above the
+one the amount alone would need, at least a risk manager. The person who prepared an
+application never decides it. A decision is approve, approve with conditions (a lower amount, a
+guarantor, a longer duration) or refuse with its reasons.
+
+## Price and offer
+
+The nominal rate comes from the bank's rate grid by product, risk class and duration. The
+annual percentage rate of charge includes the interest, the fees and the mandatory insurance,
+computed by the actuarial formula of the consumer credit directive. It must stay strictly below
+the legal maximum rate for the category of the loan; the maximum rates are published every
+quarter, and the one in force on the day of the offer applies. An offer above it is never
+issued.
+
+Before the offer, the borrower receives the standard pre-contractual information sheet. The
+offer is valid 15 days. The borrower accepts it by electronic signature. A consumer may
+withdraw within 14 calendar days of signing, without giving a reason; no funds are paid out
+before the 8th day after signing. A withdrawal after the payout obliges the borrower to repay
+the capital and the interest accrued until the repayment.
+
+## Loans
+
+Once paid out, a loan has its schedule of constant monthly instalments. The loan ledger records
+every movement: the payout, each instalment due, each payment received, fees, early
+repayments, reschedulings, write-offs. Nothing in it is ever edited; an error is reversed by an
+entry of opposite effect. We must be able to give the balance, the arrears and the schedule of a
+loan as they stood on any past date.
+
+Instalments are collected by direct debit through the payment provider; a rejected debit makes
+the instalment unpaid. Late fees are capped by the law. A borrower may repay early, in part or
+in full; the early repayment fee is at most 1 percent of the amount repaid when more than a
+year remains, 0.5 percent otherwise. A borrower in difficulty may obtain a rescheduling, decided
+under the same delegation rules as a credit.
+
+## Arrears and collections
+
+A loan in arrears moves through 1 to 30, 31 to 60, 61 to 90 and over 90 days past due. Two
+consecutive unpaid instalments of a consumer loan are declared to the national register of
+repayment incidents, and the declaration is withdrawn when the arrears are paid. At 90 days a
+loan is in default and handed to collections. The borrower is notified at each stage by mail and
+text message.
+
+## Money laundering
+
+Repayments are watched: an early repayment of more than 10,000 within a year of the payout, or a
+payment from an account that is not the borrower's, raises an alert. A compliance officer
+reviews the alert and either closes it with a reason or files a suspicious activity report with
+the financial intelligence unit. Nobody outside compliance may ever learn that a report exists
+or was considered, neither the customer nor the advisor nor the branch: not by a screen, not by
+an error message, not by a search, not by the audit trail.
+
+## Who sees what
+
+An advisor sees the customers of their portfolio and the applications and loans of those
+customers; a branch manager sees everything of their branch; credit analysts and risk managers
+see the applications that reach their level and the loans of the bank; the credit committee
+sees what is put before it; compliance sees due diligence, alerts and reports; internal auditors
+read everything except the content of a suspicious activity report. A broker sees only the
+applications they brought, and never the result of the register or the score. A customer sees
+their own applications and loans, through the customer portal of the API; a co-borrower sees the
+application they are part of.
+
+## Reports
+
+Each month the bank needs, per branch: the number and amount of applications, the approval
+rate, the share of exceptions, and the portfolio at risk (the share of the outstanding amount 30
+days and 90 days past due); and the list of loans in default for the supervisor. Exported as
+CSV.
+
+## Retention and personal data
+
+Due diligence records are kept five years after the end of the relationship, a loan ten years
+after it is closed, a refused application six months. After that, the personal data are erased.
+A customer may ask for a copy of all we keep about them. A scoring model processes personal data
+at scale and decides on access to credit: the processing has its impact assessment.
+
+## Running
+
+The servicing of loans (the instalments due each day, the debits, the arrears) must keep running
+when the rest of the platform is down for maintenance: it runs as its own service and talks to
+the rest only through events. Each night it computes the instalments due for each bank.
+
+Every change, every decision, every access of a member of staff to a customer file and every
+grant of a right is audited.
+
+## Steps
+
+| # | Step | Artefact | Status |
+|---|---|---|---|
+| 1 | Discover the domain | `docs/architecture/discovery.md` | done |
+| 2 | Find the bounded contexts | `docs/architecture/contexts.md` | todo |
+| 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | todo |
+| 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | todo |
+| 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | todo |
+| 6 | Plan the slices | `docs/architecture/slices.md` | todo |
+| 7 | Build | code, one commit per slice | todo |
+
+Status is `todo`, `in progress`, `done` or `skipped` (with the reason under Decisions).
+
+## Decisions
+
+One line each: `<date> <what was decided>: <why> (<who decided>)`. A decision that constrains
+the code later becomes a record in `docs/adr/` once the project exists.
+
+- 2026-10-26 Stack imposed by the owner brief (`docs/architecture/owner-brief.md`, "Imposed choices"): `ddd-ts-kit@0.94.1 init` with the regulated profile, not `@latest` (owner brief)
+- 2026-10-26 Session launched with steps 1 to 4 to run unattended; steps 5 to 7 left for a later session (owner, launch arguments)
+- 2026-10-26 Step 1 closing check passed: every need is a command and a domain event (`discovery.md`) (decided by the conductor, owner brief)
+- 2026-10-26 Advisor limit of 15,000 applies only in the best band of the scoring model, until the band is defined: most protective reading of an undefined "green" (conductor, owner brief, to confirm)
+- 2026-10-26 Decision amount is the amount of the loan requested, co-borrower total not added (conductor, owner brief, to confirm)
+- 2026-10-26 Consent to read accounts is per application, not per bank (conductor, owner brief, to confirm)
+- 2026-10-26 Customer relationship is established before any credit; an applicant is a customer once identified (conductor, owner brief)
+
+## Open questions
+
+One line each, with who can answer. A question blocks only the step that needs its answer.
+
+- Definition of the "green" score band and of the approval rate and share of exceptions in the monthly report (product owner). Blocks step 2 only if it changes a boundary.
+- How an account is matched to a borrower for the "payment from another account" alert (product owner, compliance).
+- Rules of rescheduling: change of rate, duration, or both (product owner, credit risk).
+- Retry of a rejected direct debit, and behaviour of each external system when down (product owner).
