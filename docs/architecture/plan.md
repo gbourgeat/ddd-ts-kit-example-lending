@@ -245,7 +245,7 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Step 6 rejected direct debit: no retry; the instalment stays unpaid and enters the arrears buckets; the retry is open with the owner (conductor, owner brief, to confirm)
 - 2026-10-27 Step 6 conflicts and staff roles reach credit-application by integration events into projections, checked at the decision: a conflicted person never decides (conductor, owner brief, to confirm)
 - 2026-10-27 Step 6 amounts in cents live in the shared kernel (row US0.06); if the kernel refuses the generator, a friction (conductor, owner brief)
-- 2026-10-27 Step 6 `--module` placed per the usage of `generate --help --json`: commands, queries, handlers, jobs and integration events take it, aggregates and services do not; the first row that builds one checks it (conductor, owner brief)
+- 2026-10-27 Step 6 `--module` on every generator command of a row of `credit-application` and `servicing` (the generator refuses an aggregate, a port, a domain event or a value object without it; its usage lines do not show the flag, kit issue #354); `service servicing` takes none, it hosts the whole context (owner)
 
 ## For the owner
 
