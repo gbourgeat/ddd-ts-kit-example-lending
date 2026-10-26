@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 5 bootstrap - the bare project's lint is red on two generated files (`create-event-sourcing.ts`, `compose-application.ts`, `docs/tooling/frictions.md`, 2026-10-27): the kit's fix or the owner's decision, then the bare commit, the contexts, the commits
+Next: 6 plan-slices - write `docs/architecture/slices.md`, the backlog of the eleven contexts, after the owner regenerates the contracts (`## For the owner`)
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -186,7 +186,7 @@ grant of a right is audited.
 | 2 | Find the bounded contexts | `docs/architecture/contexts.md` | done |
 | 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | done (CONTEXT.md files at bootstrap) |
 | 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | done (`docs/context-map.md` at bootstrap) |
-| 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | in progress (blocked at the bare `verify`: lint red on two generated files, see `docs/tooling/frictions.md`) |
+| 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | done (every gate green except `docs:check`, whose contracts the sandbox refuses to write: see `## For the owner`) |
 | 6 | Plan the slices | `docs/architecture/slices.md` | todo |
 | 7 | Build | code, one commit per slice | todo |
 
@@ -219,13 +219,22 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Step 5 not closed: `init` stopped at the masked `.claude/hooks` with 143 of 166 files written, nothing committed; `@ddd-ts-kit/kernel@0.94.1` tarball 404 on the registry, so `npm install` fails (conductor, owner brief). Both in `docs/tooling/frictions.md`
 - 2026-10-27 Step 5 `npm install` run with `--ignore-scripts`: the native build of `@confluentinc/kafka-javascript` needs github.com, zlib.net and curl.se, refused by the sandbox; the kafka client is not built here, the tests use fakes (conductor, owner brief, to confirm)
 - 2026-10-27 Step 5 `prisma generate` and `migrate diff` run with `PRISMA_SCHEMA_ENGINE_BINARY` pointing to the schema engine in `~/.cache/prisma`: the sandbox refuses writes there (conductor, owner brief)
-- 2026-10-27 Step 5 bare project not patched: the two lint findings are in files `init` generated; the rule is that a red bare `verify` is the kit's to fix, so the project is not committed and no context is generated on that base; only the plan and the frictions are committed (conductor, owner brief, to confirm)
+- 2026-10-27 Step 5 bare project committed (`chore: bootstrap the project`), after the owner's two lint fixes; `npm run format` applied to the one blank line the owner's `boundaryOf` edit left, no other change (conductor, owner brief)
+- 2026-10-27 Step 5 contexts generated from `contexts.md` in the order of `context-map.md`: identity with `--preset identity` as written, the other ten with their glossary terms, their purpose and their upstreams as in the context map; modules `file`, `assessment`, `decision`, `offer` (credit-application) and `ledger`, `instalments`, `arrears` (servicing) (conductor, owner brief)
+- 2026-10-27 Step 5 module names that are already a term of their context (`Assessment`, `Decision`, `Offer`, `Ledger`, `Arrears`) keep the context's glossary meaning: the generator skips them (conductor, owner brief)
+- 2026-10-27 Step 5 "Classification" sentence of each context written from `contexts.md`, with no word of the other classifications in it (conductor, owner brief, to confirm)
+- 2026-10-27 Step 5 the draft `docs/architecture/glossary.md` and `docs/architecture/context-map.md` deleted: their content lives in the `CONTEXT.md` files, the config and `docs/context-map.md` (conductor, owner brief, the skill's rule)
+- 2026-10-27 Step 5 commits: one per context in topological order, identity first; one `chore` for the wiring the generators wrote in a single run (config, composition root, permissions, persistence schema, architecture tests, docs), not split per context; one `docs(architecture)` for the deletion (conductor, owner brief)
+- 2026-10-27 Step 5 marked done as the owner asked; its own check (a green `verify`) waits on the owner's regeneration of the contracts, which the sandbox refuses (owner, launch arguments)
 
 ## For the owner
 
-- The bare project is red on `npm run lint` (two generated files, `docs/tooling/frictions.md`). Decide: wait for a kit fix (file the issue with the output in frictions, then `npm run lint` must be green), or let the conductor remove the unused import and split `composeApplication` in the generated files as a recorded workaround.
-- Native module: `npm rebuild @confluentinc/kafka-javascript` outside the sandbox, so that the kafka adapter runs.
-- Then, in order: `npm run hooks:install`, the commits of the bare project and of each context, `git push` (refused by the settings: yours).
+- `npm run docs:generate` outside the sandbox: it writes `openapi/openapi.yaml`, `docs/integration/event-catalog.md` and the clients, which are read-only here (`EROFS`, see `docs/tooling/frictions.md`). Then `npm run docs:check` ends with `The generated documentation is up to date.`, and `npm run verify` is green. Commit the regenerated contracts as `docs(api): regenerate the contracts`.
+- `npm run hooks:install` outside the sandbox: `.git/hooks` is read-only here, so no hook is installed (pre-commit and commit message checks run only after it).
+- `git push` (refused by the settings: yours).
+- A line to decide: `ddd-ts-kit check` prints `0 errors, 0 warnings, 7 suppressions`. The seven are the identity preset's directives on its repositories, each citing ADR-0001. `AGENTS.md` names the line with `0 suppressions`: accept the preset's decision and change the expected line, or ask the kit to count them apart.
+- Not run, yours when you want to see it run: `npm run infra:up`, then `npm run dev`; the API documentation is on `/docs`.
+- Kit issues to file, with the rows marked `to file` of `docs/tooling/frictions.md`: the contracts and hooks refused by the sandbox, the seven suppressions, the blank "Not to be confused with" cells that `--term` cannot carry.
 
 ## Open questions
 
