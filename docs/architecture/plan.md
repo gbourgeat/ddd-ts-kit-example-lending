@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 3 glossary - write the ubiquitous language of each context, starting with credit-application
+Next: 4 context-map - draw the relationships between the eleven contexts, each with its pattern and contract
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -184,7 +184,7 @@ grant of a right is audited.
 |---|---|---|---|
 | 1 | Discover the domain | `docs/architecture/discovery.md` | done |
 | 2 | Find the bounded contexts | `docs/architecture/contexts.md` | done |
-| 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | todo |
+| 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | done (CONTEXT.md files at bootstrap) |
 | 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | todo |
 | 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | todo |
 | 6 | Plan the slices | `docs/architecture/slices.md` | todo |
@@ -208,12 +208,15 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 Payout gated in `credit-application` by a synchronous read of due diligence, so that no credit is disbursed at the instant of payout (conductor, owner brief, to confirm)
 - 2026-10-26 Audit entries of `financial-crime` go to a stream readable by compliance only (conductor, owner brief, to confirm)
 - 2026-10-26 Step 2 closing check passed: one language and one owner per context, the cores named, each boundary argued (decided by the conductor, owner brief)
+- 2026-10-26 One word per concept across contexts: the tenant is "Bank", a staff member is not a "member", the customer's class is "risk rating", a loan movement is not an "entry" (conductor, owner brief, to confirm)
+- 2026-10-26 Identity section copied from the kit's preset word for word; per-context CONTEXT.md files written at bootstrap, not now (conductor, owner brief)
+- 2026-10-26 Step 3 closing check passed: every definition is one a domain expert would sign, shared words have a row per context (decided by the conductor, owner brief)
 
 ## Open questions
 
 One line each, with who can answer. A question blocks only the step that needs its answer.
 
-- Definition of the "green" score band and of the approval rate and share of exceptions in the monthly report (product owner). Blocks step 2 only if it changes a boundary.
+- Exact counts of the approval rate and of the share of exceptions in the monthly report (product owner). Glossary rows marked provisional.
 - How an account is matched to a borrower for the "payment from another account" alert (product owner, compliance).
 - Rules of rescheduling: change of rate, duration, or both (product owner, credit risk).
 - Retry of a rejected direct debit, and behaviour of each external system when down (product owner).
