@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 5 bootstrap - the user runs `npx -y ddd-ts-kit@0.94.1 init` with the imposed stack of owner-brief.md, then `npm run verify` green
+Next: 5 bootstrap - unblock the kit's release (`@ddd-ts-kit/kernel@0.94.1` tarball 404) and the masked `.claude/hooks`, then finish `init` and `npm install`, then `npm run verify` green
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -186,7 +186,7 @@ grant of a right is audited.
 | 2 | Find the bounded contexts | `docs/architecture/contexts.md` | done |
 | 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | done (CONTEXT.md files at bootstrap) |
 | 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | done (`docs/context-map.md` at bootstrap) |
-| 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | todo |
+| 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | in progress (blocked, see `docs/tooling/frictions.md`) |
 | 6 | Plan the slices | `docs/architecture/slices.md` | todo |
 | 7 | Build | code, one commit per slice | todo |
 
@@ -215,6 +215,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 Payout gate reads due diligence synchronously (customer-supplier); broker registration is a projection, accepted tension (conductor, owner brief, to confirm)
 - 2026-10-26 Identity is a conformist upstream of every context that acts on people, as the kit's preset (conductor, owner brief)
 - 2026-10-26 Step 4 closing check passed: every arrow has a pattern, a contract and a reason; topological order shows no cycle (decided by the conductor, owner brief)
+- 2026-10-27 Step 5 stack: the imposed `ddd-ts-kit@0.94.1 init` of `owner-brief.md` ("Imposed choices"), run as written with `--package-manager npm`, nothing inferred (owner brief)
+- 2026-10-27 Step 5 not closed: `init` stopped at the masked `.claude/hooks` with 143 of 166 files written, nothing committed; `@ddd-ts-kit/kernel@0.94.1` tarball 404 on the registry, so `npm install` fails (conductor, owner brief). Both in `docs/tooling/frictions.md`
 
 ## Open questions
 
