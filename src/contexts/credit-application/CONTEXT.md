@@ -1,0 +1,124 @@
+# Credit application
+
+## Purpose
+
+Takes an application from a customer or a broker to a decision, then to an offer the borrower accepts or withdraws. Its application file is append-only and every decision shows what the decider saw.
+
+## Classification
+
+core
+
+It is the bank's core business: every credit the bank grants is decided here, and no other context decides a credit.
+
+## Ubiquitous language
+
+| Term | Meaning | Not to be confused with |
+|---|---|---|
+| Application | A customer's or a broker's request for one loan of one product, from submission to its decision; before payout it is not yet a loan | Loan: money already paid out |
+| Applicant | The person who applied; a customer once identified | Customer: the person the bank knows, owned by customer-due-diligence |
+| Borrower | The person named as borrower on the application, who owes the loan once it is paid out | Applicant: the one who applied, who may not be the borrower |
+| Co-borrower | A person named on the application who shares the debt | Guarantor |
+| Guarantor | A person who backs the debt if the borrower does not pay | Co-borrower: who shares the debt |
+| Application file | The append-only file of everything that happened to an application, in order | Document: one item of the file |
+| Entry | One fact added to the application file, with what it corrects and why | Movement: an entry of the loan ledger, in servicing |
+| Document | A payslip, tax notice, bank statement or business account given by the applicant and stored as a file | Application file |
+| Consent | The applicant's permission to read their bank accounts for this application, valid 90 days | Account (identity) |
+| Assessment | The proposal of approve or refuse, with the ratios, the register answer and the score that support it | Decision: the decider's choice |
+| Debt to income ratio | The household's monthly repayments, the new one included, divided by its net monthly income; at most 35 percent | Residual income |
+| Residual income | What the household keeps each month after its repayments and fixed charges | Debt to income ratio |
+| Proposed refusal | An assessment's refusal, waiting for a person's review; the machine never refuses alone | Refusal |
+| Decision | The decider's choice: approve, approve with conditions, or refuse with reasons | Assessment |
+| Condition | A change of an approval: a lower amount, a guarantor, a longer duration | Exception |
+| Decider | The staff member entitled to decide, by amount and risk: advisor, credit analyst, risk manager, credit committee | Preparer |
+| Preparer | The staff member who prepared an application; never its decider | Decider |
+| Exception | A deviation from the policy: a ratio above its limit, a residual income below its minimum, a score below the product threshold | Condition |
+| Justification | The written reason of an exception | Decision |
+| Refusal | The final refusal of an application, with its reasons | Proposed refusal |
+| Human review | A person's review of a decision, asked by the applicant | Contest |
+| Contest | The applicant's written point of view against a decision | Human review |
+| Offer | The loan terms proposed to the borrower, valid 15 days | Loan |
+| Pre-contractual sheet | The standard information sheet the borrower receives before the offer | Offer |
+| Acceptance | The borrower's electronic signature of an offer | Withdrawal |
+| Withdrawal | The consumer's right to withdraw within 14 calendar days of signing, without a reason | Refusal, cancellation of an application |
+| Payout authorisation | The check that funds may be paid out: the 8th day after signing has come, and due diligence is up to date | Payout, in servicing: the release itself |
+| Rescheduling | A new schedule for a borrower in difficulty, decided as a credit | Restructuring of a loan |
+| Repayment incident register | The national register of repayment incidents, consulted for each assessment | Intermediaries register, in brokerage |
+| Requested amount | The amount the applicant asks for, the basis of the decision table | Approved amount |
+| Approved amount | The amount of the decision, after conditions | Requested amount |
+| File | The application file, the documents and the account consent. |  |
+
+## Modules
+
+| Module | Purpose |
+|---|---|
+| `file` | The application file, the documents and the account consent. |
+| `assessment` | Debt to income, residual income, register result and the score recorded. |
+| `decision` | Delegation, four eyes, exceptions and rescheduling. |
+| `offer` | Rate, annual percentage rate, pre-contract sheet, acceptance and withdrawal. |
+
+## Aggregates
+
+<!-- ddd-ts-kit:aggregates -->
+<!-- /ddd-ts-kit:aggregates -->
+
+## Published events
+
+<!-- ddd-ts-kit:events -->
+<!-- /ddd-ts-kit:events -->
+
+## Personal data
+
+<!-- ddd-ts-kit:personal-data -->
+No personal data declared.
+<!-- /ddd-ts-kit:personal-data -->
+
+## Permissions
+
+<!-- ddd-ts-kit:permissions -->
+No permission declared.
+<!-- /ddd-ts-kit:permissions -->
+
+## Scheduled jobs
+
+<!-- ddd-ts-kit:jobs -->
+No scheduled job.
+<!-- /ddd-ts-kit:jobs -->
+
+## Background jobs
+
+<!-- ddd-ts-kit:background-jobs -->
+No background job.
+<!-- /ddd-ts-kit:background-jobs -->
+
+## State machines
+
+<!-- ddd-ts-kit:state-machines -->
+No state machine.
+<!-- /ddd-ts-kit:state-machines -->
+
+## Process managers
+
+<!-- ddd-ts-kit:processes -->
+No process manager.
+<!-- /ddd-ts-kit:processes -->
+
+## Relationships
+
+<!-- ddd-ts-kit:relationships -->
+- Downstream of `credit-policy` (published-language).
+- Downstream of `credit-scoring` (customer-supplier).
+- Downstream of `customer-due-diligence` (customer-supplier).
+- Downstream of `brokerage` (published-language).
+- Downstream of `branch-network` (published-language).
+- Downstream of `identity` (conformist).
+- Upstream of `servicing` (published-language).
+- Upstream of `reporting` (published-language).
+<!-- /ddd-ts-kit:relationships -->
+
+## Reference
+
+<!-- ddd-ts-kit:reference -->
+Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe credit-application --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
+
+**Dependencies**: upstreams: `credit-policy` (published-language), `credit-scoring` (customer-supplier), `customer-due-diligence` (customer-supplier), `brokerage` (published-language), `branch-network` (published-language), `identity` (conformist); downstreams: `servicing` (published-language), `reporting` (published-language).
+<!-- /ddd-ts-kit:reference -->
