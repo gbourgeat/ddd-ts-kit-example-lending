@@ -194,6 +194,16 @@ Status is `todo`, `in progress`, `done` or `skipped` (with the reason under Deci
 
 ## Decisions
 
+- **CI: light pull requests, heavy nights** (owner, 2026-10-27). A pull request runs typecheck, lint, check,
+  dead code, unit specs of the affected contexts, build with contract drift, and security. Integration, end-to-end,
+  the Docker image and mutation run on `main` and every night at 01:00 UTC, two hours before the night of
+  ddd-ts-kit, since both repositories share the concurrent jobs of the account. The mutation reading of a pull
+  request is dropped. `gate` accepts a job skipped by its condition.
+- **Branch protection without a required human approval** (owner, 2026-10-27). The project has one human
+  owner, who cannot approve their own pull request; the review of each pull request is the
+  `architecture-reviewer` agent, the story verifier and the owner's merge. A bank would require one approval
+  by a second person (`.github/branch-protection.md`).
+
 One line each: `<date> <what was decided>: <why> (<who decided>)`. A decision that constrains
 the code later becomes a record in `docs/adr/` once the project exists.
 

@@ -8,7 +8,7 @@ of `CI` on `main` (GitHub only offers a check as "required" once it has reported
 
 | Check | Workflow | Why it is the required one |
 |---|---|---|
-| `gate` | `ci.yml` | Needs every other job of the workflow; a failed, cancelled or skipped job fails it. One required check, so adding a job never needs a settings change. |
+| `gate` | `ci.yml` | Needs every other job of the workflow; a failed or cancelled job fails it, a job skipped by its condition (the heavy jobs on a pull request, see `ci.yml`) does not. One required check, so adding a job never needs a settings change. |
 | `Conventional title` | `pr-title.yml` | The squash commit takes the pull request title. |
 | `Analyze` | `codeql.yml` | Only with `init --ci-extras codeql`: require it when code scanning is enabled on the repository. |
 

@@ -6,7 +6,8 @@ on:
   pull_request:
   schedule:
     # Every night, everything: a pull request runs the specs of the contexts its change reaches.
-    - cron: '0 3 * * *'
+    # 01:00 UTC, two hours before the night of ddd-ts-kit: both share the concurrent jobs of the account.
+    - cron: '0 1 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -126,6 +127,9 @@ jobs:
   integration:
     name: Integration tests
     needs: install
+    # Light pull requests, heavy nights: a pull request runs typecheck, lint, check, unit, build and security;
+    # this job runs on the default branch and at night (owner's decision, docs/architecture/plan.md).
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     env:
@@ -148,6 +152,9 @@ jobs:
   e2e:
     name: End-to-end tests
     needs: install
+    # Light pull requests, heavy nights: a pull request runs typecheck, lint, check, unit, build and security;
+    # this job runs on the default branch and at night (owner's decision, docs/architecture/plan.md).
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     env:
@@ -196,6 +203,9 @@ jobs:
   image:
     name: Docker image
     needs: install
+    # Light pull requests, heavy nights: a pull request runs typecheck, lint, check, unit, build and security;
+    # this job runs on the default branch and at night (owner's decision, docs/architecture/plan.md).
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     steps:
@@ -229,34 +239,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
-  mutation-changed:
-    name: Mutation score of the change
-    needs: install
-    # A pull request: the report of the last night is reused for what the change leaves alone, and the survivors of the files it touched are listed. A reading, not a gate: the floor is held by the night.
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          # The whole history: the files of the change are those since its merge base with the base branch.
-          fetch-depth: 0
-      - uses: ./.github/actions/setup
-      - name: The report of the last night, when there is one
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          run=$(gh run list --workflow "${{ github.workflow }}" --event schedule --branch "${{ github.event.repository.default_branch }}" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-          if [ -n "$run" ]; then gh run download "$run" --name mutation --dir reports/mutation || echo "The last night kept no report: a full run."; fi
-          # The night runs without a base and writes no incremental file: its json report is the same object, which Stryker reads back.
-          if [ -f reports/mutation/mutation.json ]; then cp reports/mutation/mutation.json reports/mutation/incremental.json; fi
-      - name: Stryker on what the change touches, then the survivors of its files
-        run: |
-          mkdir -p reports/mutation
-          base=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
-          DDD_TS_KIT_MUTATION_SINCE="$base" npm run --silent test:mutation | tee reports/mutation/changed.txt
-          { echo '```'; cat reports/mutation/changed.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-
   gate:
     name: gate
     if: ${{ always() }}
@@ -270,7 +252,7 @@ jobs:
         run: |
           echo "Results: $RESULTS"
           for result in $RESULTS; do
-            if [ "$result" != "success" ]; then
+            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
               echo "::error::A required job ended as $result."
               exit 1
             fi
