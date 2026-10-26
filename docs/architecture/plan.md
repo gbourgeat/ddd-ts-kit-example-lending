@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 6 plan-slices - write `docs/architecture/slices.md`, the backlog of the eleven contexts, after the owner regenerates the contracts (`## For the owner`)
+Next: 7 build - the conductor's wave 1 skeletons, then the walking skeleton US0.04, in `docs/architecture/slices.md`
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -187,7 +187,7 @@ grant of a right is audited.
 | 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | done (CONTEXT.md files at bootstrap) |
 | 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | done (`docs/context-map.md` at bootstrap) |
 | 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | done (every gate green except `docs:check`, whose contracts the sandbox refuses to write: see `## For the owner`) |
-| 6 | Plan the slices | `docs/architecture/slices.md` | todo |
+| 6 | Plan the slices | `docs/architecture/slices.md` | done (167 rows in 16 stories, `plan-waves` green; the contracts of step 5 still wait on the owner, see `## For the owner`) |
 | 7 | Build | code, one commit per slice | todo |
 
 Status is `todo`, `in progress`, `done` or `skipped` (with the reason under Decisions).
@@ -236,6 +236,16 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Step 5 the draft `docs/architecture/glossary.md` and `docs/architecture/context-map.md` deleted: their content lives in the `CONTEXT.md` files, the config and `docs/context-map.md` (conductor, owner brief, the skill's rule)
 - 2026-10-27 Step 5 commits: one per context in topological order, identity first; one `chore` for the wiring the generators wrote in a single run (config, composition root, permissions, persistence schema, architecture tests, docs), not split per context; one `docs(architecture)` for the deletion (conductor, owner brief)
 - 2026-10-27 Step 5 marked done as the owner asked; its own check (a green `verify`) waits on the owner's regeneration of the contracts, which the sandbox refuses (owner, launch arguments)
+- 2026-10-27 Step 6 closing check passed: every need of `needs.md` and every close line of the owner brief reached by a row (coverage table of `slices.md`); `plan-waves` exits 0, 25 waves, every row has one owner (decided by the conductor, owner brief)
+- 2026-10-27 Step 6 stories: sixteen stories `US0` to `US15`, one table each; `US8` (offer, withdrawal and payout) is the story of close line 14, its acceptance locked before its first row (conductor, owner brief)
+- 2026-10-27 Step 6 jobs run per bank, the tenant loop of the kit; no `--global` job: the owner's checks say "each by a scheduled job per bank" (conductor, owner brief)
+- 2026-10-27 Step 6 "payment from an account that is not the borrower's": a payer account not on the file as the borrower's raises the alert, the most protective reading until the matching is defined (conductor, owner brief, to confirm)
+- 2026-10-27 Step 6 approval rate: applications approved (with or without conditions) over applications decided; share of exceptions: exceptions over applications decided; provisional until the owner defines them (conductor, owner brief, to confirm)
+- 2026-10-27 Step 6 rescheduling: decided like a credit (same table, same four eyes), keeps the rate and the amount, changes only the schedule; the owner's rules of change stay open (conductor, owner brief, to confirm)
+- 2026-10-27 Step 6 rejected direct debit: no retry; the instalment stays unpaid and enters the arrears buckets; the retry is open with the owner (conductor, owner brief, to confirm)
+- 2026-10-27 Step 6 conflicts and staff roles reach credit-application by integration events into projections, checked at the decision: a conflicted person never decides (conductor, owner brief, to confirm)
+- 2026-10-27 Step 6 amounts in cents live in the shared kernel (row US0.06); if the kernel refuses the generator, a friction (conductor, owner brief)
+- 2026-10-27 Step 6 `--module` placed per the usage of `generate --help --json`: commands, queries, handlers, jobs and integration events take it, aggregates and services do not; the first row that builds one checks it (conductor, owner brief)
 
 ## For the owner
 
