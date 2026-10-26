@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 2 bounded-contexts - cut discovery.md into contexts, one language and one owner each
+Next: 3 glossary - write the ubiquitous language of each context, starting with credit-application
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -183,7 +183,7 @@ grant of a right is audited.
 | # | Step | Artefact | Status |
 |---|---|---|---|
 | 1 | Discover the domain | `docs/architecture/discovery.md` | done |
-| 2 | Find the bounded contexts | `docs/architecture/contexts.md` | todo |
+| 2 | Find the bounded contexts | `docs/architecture/contexts.md` | done |
 | 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | todo |
 | 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | todo |
 | 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | todo |
@@ -204,6 +204,10 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 Decision amount is the amount of the loan requested, co-borrower total not added (conductor, owner brief, to confirm)
 - 2026-10-26 Consent to read accounts is per application, not per bank (conductor, owner brief, to confirm)
 - 2026-10-26 Customer relationship is established before any credit; an applicant is a customer once identified (conductor, owner brief)
+- 2026-10-26 Eleven contexts, two cores (`credit-application`, `credit-scoring`), `financial-crime` restricted to compliance, `identity` as kit preset; access rights, external systems, notifications and audit are not contexts (`contexts.md`) (conductor, owner brief)
+- 2026-10-26 Payout gated in `credit-application` by a synchronous read of due diligence, so that no credit is disbursed at the instant of payout (conductor, owner brief, to confirm)
+- 2026-10-26 Audit entries of `financial-crime` go to a stream readable by compliance only (conductor, owner brief, to confirm)
+- 2026-10-26 Step 2 closing check passed: one language and one owner per context, the cores named, each boundary argued (decided by the conductor, owner brief)
 
 ## Open questions
 
