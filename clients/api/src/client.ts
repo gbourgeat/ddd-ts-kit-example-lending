@@ -17,17 +17,101 @@ export function connect(options: ClientOptions<SchemeName>): Connection {
 /** lending 0.1.0, every operation of its contract as a method. */
 export interface Client {
   /**
+   * Provision my account: `PUT /accounts/me`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), EMAIL_NOT_VERIFIED (422), INVALID_DISPLAY_NAME (422), INVALID_EMAIL_ADDRESS (422), VALIDATION_FAILED (422).
+   */
+  provisionAccount(input: operations.ProvisionAccountInput, options?: CallOptions): Promise<operations.ProvisionAccountResult>;
+  /**
+   * Deactivate my account: `POST /accounts/me/deactivation`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), ACCOUNT_ALREADY_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), LAST_OWNER (422), ORGANISATION_NOT_FOUND (422).
+   */
+  deactivateAccount(input?: operations.DeactivateAccountInput, options?: CallOptions): Promise<operations.DeactivateAccountResult>;
+  /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
    */
   searchAuditEntries(input?: operations.SearchAuditEntriesInput, options?: CallOptions): Promise<operations.SearchAuditEntriesResult>;
+  /**
+   * Accept an invitation: `POST /invitations/acceptance`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), ALREADY_MEMBER (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
+   */
+  acceptInvitation(input: operations.AcceptInvitationInput, options?: CallOptions): Promise<operations.AcceptInvitationResult>;
+  /**
+   * Decline an invitation: `POST /invitations/declination`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_NOT_FOUND (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
+   */
+  declineInvitation(input: operations.DeclineInvitationInput, options?: CallOptions): Promise<operations.DeclineInvitationResult>;
+  /**
+   * Open an organisation: `POST /organisations`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), INVALID_ORGANISATION_NAME (422), INVALID_ORGANISATION_SLUG (422), ORGANISATION_SLUG_TAKEN (422), VALIDATION_FAILED (422).
+   */
+  openOrganisation(input: operations.OpenOrganisationInput, options?: CallOptions): Promise<operations.OpenOrganisationResult>;
+  /**
+   * Lend rights to a member: `POST /organisations/{organisationId}/delegations`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), DELEGATION_BEYOND_RIGHTS (422), DELEGATION_PERIOD_INVERTED (422), DELEGATION_TOO_LONG (422), DELEGATION_TO_ONESELF (422), DELEGATION_WITHOUT_RIGHTS (422), MEMBER_NOT_FOUND (422), VALIDATION_FAILED (422).
+   */
+  grantDelegation(input: operations.GrantDelegationInput, options?: CallOptions): Promise<operations.GrantDelegationResult>;
+  /**
+   * Revoke a delegation: `DELETE /organisations/{organisationId}/delegations/{delegationId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), DELEGATION_NOT_ACTIVE (422), DELEGATION_NOT_FOUND (422), VALIDATION_FAILED (422).
+   */
+  revokeDelegation(input: operations.RevokeDelegationInput, options?: CallOptions): Promise<operations.RevokeDelegationResult>;
+  /**
+   * Invite a person to the organisation: `POST /organisations/{organisationId}/invitations`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ABOVE_OWN_ROLE (422), INVALID_EMAIL_ADDRESS (422), OWNERS_ONLY (422), VALIDATION_FAILED (422).
+   */
+  inviteMember(input: operations.InviteMemberInput, options?: CallOptions): Promise<operations.InviteMemberResult>;
+  /**
+   * Take back an invitation: `DELETE /organisations/{organisationId}/invitations/{invitationId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
+   */
+  revokeInvitation(input: operations.RevokeInvitationInput, options?: CallOptions): Promise<operations.RevokeInvitationResult>;
+  /**
+   * Search the members of an organisation: `GET /organisations/{organisationId}/members`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  searchMembers(input: operations.SearchMembersInput, options?: CallOptions): Promise<operations.SearchMembersResult>;
+  /**
+   * Remove a member: `DELETE /organisations/{organisationId}/members/{accountId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), ABOVE_OWN_ROLE (422), LAST_OWNER (422), MEMBER_NOT_FOUND (422), ORGANISATION_NOT_FOUND (422), OWNERS_ONLY (422), VALIDATION_FAILED (422).
+   */
+  removeMember(input: operations.RemoveMemberInput, options?: CallOptions): Promise<operations.RemoveMemberResult>;
+  /**
+   * Change the role of a member: `PUT /organisations/{organisationId}/members/{accountId}/role`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ABOVE_OWN_ROLE (422), LAST_OWNER (422), MEMBER_NOT_FOUND (422), ORGANISATION_NOT_FOUND (422), OWNERS_ONLY (422), OWN_ROLE (422), VALIDATION_FAILED (422).
+   */
+  changeMemberRole(input: operations.ChangeMemberRoleInput, options?: CallOptions): Promise<operations.ChangeMemberRoleResult>;
 }
 
 export function createClient(options: ClientOptions<SchemeName>): Client {
   const connection = connect(options);
 
   return {
+    provisionAccount: (input, call) => operations.provisionAccount(connection, input, call),
+    deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
+    acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
+    declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
+    openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
+    grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),
+    revokeDelegation: (input, call) => operations.revokeDelegation(connection, input, call),
+    inviteMember: (input, call) => operations.inviteMember(connection, input, call),
+    revokeInvitation: (input, call) => operations.revokeInvitation(connection, input, call),
+    searchMembers: (input, call) => operations.searchMembers(connection, input, call),
+    removeMember: (input, call) => operations.removeMember(connection, input, call),
+    changeMemberRole: (input, call) => operations.changeMemberRole(connection, input, call),
   };
 }

@@ -3,6 +3,69 @@
 import type * as Schemas from './schemas.js';
 import { send, type CallOptions, type Connection, type Failure, type Operation, type Success } from './runtime.js';
 
+export interface ProvisionAccountInput {
+  readonly body: {
+    displayName?: string;
+  };
+}
+
+export type ProvisionAccountResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ACCOUNT_DEACTIVATED' | 'EMAIL_NOT_VERIFIED' | 'INVALID_DISPLAY_NAME' | 'INVALID_EMAIL_ADDRESS' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Provision my account: `PUT /accounts/me`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), EMAIL_NOT_VERIFIED (422), INVALID_DISPLAY_NAME (422), INVALID_EMAIL_ADDRESS (422), VALIDATION_FAILED (422).
+ */
+export function provisionAccount(
+  connection: Connection,
+  input: ProvisionAccountInput,
+  options: CallOptions = {},
+): Promise<ProvisionAccountResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/accounts/me',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ProvisionAccountResult>(connection, operation, { ...input, ...options });
+}
+
+export type DeactivateAccountInput = Record<string, never>;
+
+export type DeactivateAccountResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'ACCOUNT_ALREADY_DEACTIVATED' | 'ACCOUNT_NOT_FOUND' | 'LAST_OWNER' | 'ORGANISATION_NOT_FOUND', Schemas.Problem>;
+
+/**
+ * Deactivate my account: `POST /accounts/me/deactivation`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), ACCOUNT_ALREADY_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), LAST_OWNER (422), ORGANISATION_NOT_FOUND (422).
+ */
+export function deactivateAccount(
+  connection: Connection,
+  input: DeactivateAccountInput = {},
+  options: CallOptions = {},
+): Promise<DeactivateAccountResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/accounts/me/deactivation',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<DeactivateAccountResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SearchAuditEntriesInput {
   readonly query?: {
     /** Size of the page. */
@@ -74,4 +137,380 @@ export function searchAuditEntries(
   };
 
   return send<SearchAuditEntriesResult>(connection, operation, { ...input, ...options });
+}
+
+export interface AcceptInvitationInput {
+  readonly body: Schemas.InvitationToken;
+}
+
+export type AcceptInvitationResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ACCOUNT_DEACTIVATED' | 'ACCOUNT_NOT_FOUND' | 'ALREADY_MEMBER' | 'INVITATION_ADDRESSED_TO_ANOTHER' | 'INVITATION_EXPIRED' | 'INVITATION_NOT_FOUND' | 'INVITATION_NOT_PENDING' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Accept an invitation: `POST /invitations/acceptance`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), ALREADY_MEMBER (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
+ */
+export function acceptInvitation(
+  connection: Connection,
+  input: AcceptInvitationInput,
+  options: CallOptions = {},
+): Promise<AcceptInvitationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/invitations/acceptance',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<AcceptInvitationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface DeclineInvitationInput {
+  readonly body: Schemas.InvitationToken;
+}
+
+export type DeclineInvitationResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ACCOUNT_NOT_FOUND' | 'INVITATION_ADDRESSED_TO_ANOTHER' | 'INVITATION_EXPIRED' | 'INVITATION_NOT_FOUND' | 'INVITATION_NOT_PENDING' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Decline an invitation: `POST /invitations/declination`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_NOT_FOUND (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
+ */
+export function declineInvitation(
+  connection: Connection,
+  input: DeclineInvitationInput,
+  options: CallOptions = {},
+): Promise<DeclineInvitationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/invitations/declination',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DeclineInvitationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface OpenOrganisationInput {
+  readonly body: {
+    slug: string;
+    name: string;
+  };
+}
+
+export type OpenOrganisationResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ACCOUNT_DEACTIVATED' | 'ACCOUNT_NOT_FOUND' | 'INVALID_ORGANISATION_NAME' | 'INVALID_ORGANISATION_SLUG' | 'ORGANISATION_SLUG_TAKEN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Open an organisation: `POST /organisations`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), INVALID_ORGANISATION_NAME (422), INVALID_ORGANISATION_SLUG (422), ORGANISATION_SLUG_TAKEN (422), VALIDATION_FAILED (422).
+ */
+export function openOrganisation(
+  connection: Connection,
+  input: OpenOrganisationInput,
+  options: CallOptions = {},
+): Promise<OpenOrganisationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/organisations',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<OpenOrganisationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface GrantDelegationInput {
+  readonly path: {
+    readonly organisationId: string;
+  };
+  readonly body: {
+    delegateId: string;
+    rights: Array<'read-members' | 'invite-members' | 'manage-members' | 'grant-delegations'>;
+    startsAt: string;
+    endsAt: string;
+  };
+}
+
+export type GrantDelegationResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'DELEGATION_BEYOND_RIGHTS' | 'DELEGATION_PERIOD_INVERTED' | 'DELEGATION_TOO_LONG' | 'DELEGATION_TO_ONESELF' | 'DELEGATION_WITHOUT_RIGHTS' | 'MEMBER_NOT_FOUND' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Lend rights to a member: `POST /organisations/{organisationId}/delegations`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), DELEGATION_BEYOND_RIGHTS (422), DELEGATION_PERIOD_INVERTED (422), DELEGATION_TOO_LONG (422), DELEGATION_TO_ONESELF (422), DELEGATION_WITHOUT_RIGHTS (422), MEMBER_NOT_FOUND (422), VALIDATION_FAILED (422).
+ */
+export function grantDelegation(
+  connection: Connection,
+  input: GrantDelegationInput,
+  options: CallOptions = {},
+): Promise<GrantDelegationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/organisations/{organisationId}/delegations',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<GrantDelegationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RevokeDelegationInput {
+  readonly path: {
+    readonly organisationId: string;
+    readonly delegationId: string;
+  };
+}
+
+export type RevokeDelegationResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'DELEGATION_NOT_ACTIVE' | 'DELEGATION_NOT_FOUND' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Revoke a delegation: `DELETE /organisations/{organisationId}/delegations/{delegationId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), DELEGATION_NOT_ACTIVE (422), DELEGATION_NOT_FOUND (422), VALIDATION_FAILED (422).
+ */
+export function revokeDelegation(
+  connection: Connection,
+  input: RevokeDelegationInput,
+  options: CallOptions = {},
+): Promise<RevokeDelegationResult> {
+  const operation: Operation = {
+    method: 'DELETE',
+    path: '/organisations/{organisationId}/delegations/{delegationId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<RevokeDelegationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface InviteMemberInput {
+  readonly path: {
+    readonly organisationId: string;
+  };
+  readonly body: {
+    email: string;
+    role: 'owner' | 'admin' | 'member';
+  };
+}
+
+export type InviteMemberResult =
+  | Success<201, {
+    id: string;
+    token: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ABOVE_OWN_ROLE' | 'INVALID_EMAIL_ADDRESS' | 'OWNERS_ONLY' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Invite a person to the organisation: `POST /organisations/{organisationId}/invitations`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ABOVE_OWN_ROLE (422), INVALID_EMAIL_ADDRESS (422), OWNERS_ONLY (422), VALIDATION_FAILED (422).
+ */
+export function inviteMember(
+  connection: Connection,
+  input: InviteMemberInput,
+  options: CallOptions = {},
+): Promise<InviteMemberResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/organisations/{organisationId}/invitations',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<InviteMemberResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RevokeInvitationInput {
+  readonly path: {
+    readonly organisationId: string;
+    readonly invitationId: string;
+  };
+}
+
+export type RevokeInvitationResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'INVITATION_NOT_FOUND' | 'INVITATION_NOT_PENDING' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Take back an invitation: `DELETE /organisations/{organisationId}/invitations/{invitationId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
+ */
+export function revokeInvitation(
+  connection: Connection,
+  input: RevokeInvitationInput,
+  options: CallOptions = {},
+): Promise<RevokeInvitationResult> {
+  const operation: Operation = {
+    method: 'DELETE',
+    path: '/organisations/{organisationId}/invitations/{invitationId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<RevokeInvitationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface SearchMembersInput {
+  readonly path: {
+    readonly organisationId: string;
+  };
+  readonly query?: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: joinedAt. */
+    readonly sort?: string;
+  };
+}
+
+export type SearchMembersResult =
+  | Success<200, {
+    items: Array<{
+      memberId: string;
+      accountId: string;
+      displayName: string;
+      email: string;
+      role: 'owner' | 'admin' | 'member';
+      joinedAt: string;
+    }>;
+    /** Present when it is cheap to count. */
+    total?: number;
+    /** Present when more items follow. */
+    nextCursor?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Search the members of an organisation: `GET /organisations/{organisationId}/members`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function searchMembers(
+  connection: Connection,
+  input: SearchMembersInput,
+  options: CallOptions = {},
+): Promise<SearchMembersResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/organisations/{organisationId}/members',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<SearchMembersResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RemoveMemberInput {
+  readonly path: {
+    readonly organisationId: string;
+    readonly accountId: string;
+  };
+}
+
+export type RemoveMemberResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'ABOVE_OWN_ROLE' | 'LAST_OWNER' | 'MEMBER_NOT_FOUND' | 'ORGANISATION_NOT_FOUND' | 'OWNERS_ONLY' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Remove a member: `DELETE /organisations/{organisationId}/members/{accountId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), ABOVE_OWN_ROLE (422), LAST_OWNER (422), MEMBER_NOT_FOUND (422), ORGANISATION_NOT_FOUND (422), OWNERS_ONLY (422), VALIDATION_FAILED (422).
+ */
+export function removeMember(
+  connection: Connection,
+  input: RemoveMemberInput,
+  options: CallOptions = {},
+): Promise<RemoveMemberResult> {
+  const operation: Operation = {
+    method: 'DELETE',
+    path: '/organisations/{organisationId}/members/{accountId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<RemoveMemberResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ChangeMemberRoleInput {
+  readonly path: {
+    readonly organisationId: string;
+    readonly accountId: string;
+  };
+  readonly body: {
+    role: 'owner' | 'admin' | 'member';
+  };
+}
+
+export type ChangeMemberRoleResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ABOVE_OWN_ROLE' | 'LAST_OWNER' | 'MEMBER_NOT_FOUND' | 'ORGANISATION_NOT_FOUND' | 'OWNERS_ONLY' | 'OWN_ROLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Change the role of a member: `PUT /organisations/{organisationId}/members/{accountId}/role`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ABOVE_OWN_ROLE (422), LAST_OWNER (422), MEMBER_NOT_FOUND (422), ORGANISATION_NOT_FOUND (422), OWNERS_ONLY (422), OWN_ROLE (422), VALIDATION_FAILED (422).
+ */
+export function changeMemberRole(
+  connection: Connection,
+  input: ChangeMemberRoleInput,
+  options: CallOptions = {},
+): Promise<ChangeMemberRoleResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/organisations/{organisationId}/members/{accountId}/role',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ChangeMemberRoleResult>(connection, operation, { ...input, ...options });
 }

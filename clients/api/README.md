@@ -12,24 +12,64 @@ import { createClient, unwrap, isProblem } from 'lending-api-client';
 const api = createClient({ baseUrl: 'https://api.example.com',
   credentials: { bearer: () => session.token() }, });
 
-const result = await api.searchAuditEntries();
+const result = await api.provisionAccount({ ... });
 ```
 
 Every method answers the outcome its contract declares, never throws for a declared status: `result.ok` and `result.status` narrow it to its body (`result.data`) or its problem document (`result.problem`, whose `code` is one of the codes of that status). `unwrap(api.someOperation(...))` answers the body of a success and throws a refusal as a `ProblemError`, which `isProblem(error, 'SOME_CODE')` narrows. A status the contract does not declare throws an `UnexpectedResponseError`: a fault of the server (a 500 answered as a problem document, whose `code` and `requestId`, the reference to quote to the team of the API, it reads), a proxy, or a server and a contract that disagree.
 
-A credential is given per security scheme of the contract, as a value or as a function asked before each request; an operation sends the credentials its security names. A cookie scheme is sent as a `Cookie` header, which only a server-side caller can set: in a browser, the browser sends its own cookies (`fetch` with `credentials: 'include'`). `headers` adds headers to every request, `fetch` replaces the global one. `connect(options)` and the functions of each operation (`searchAuditEntries(connection, input)`) are the same calls for a bundle that imports only what it calls.
+A credential is given per security scheme of the contract, as a value or as a function asked before each request; an operation sends the credentials its security names. A cookie scheme is sent as a `Cookie` header, which only a server-side caller can set: in a browser, the browser sends its own cookies (`fetch` with `credentials: 'include'`). `headers` adds headers to every request, `fetch` replaces the global one. `connect(options)` and the functions of each operation (`provisionAccount(connection, input)`) are the same calls for a bundle that imports only what it calls.
 
 ## Operations
 
 | Method | Request | Error codes |
 | --- | --- | --- |
+| `provisionAccount` | `PUT /accounts/me` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, ACCOUNT_DEACTIVATED, EMAIL_NOT_VERIFIED, INVALID_DISPLAY_NAME, INVALID_EMAIL_ADDRESS, VALIDATION_FAILED |
+| `deactivateAccount` | `POST /accounts/me/deactivation` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, ACCOUNT_ALREADY_DEACTIVATED, ACCOUNT_NOT_FOUND, LAST_OWNER, ORGANISATION_NOT_FOUND |
 | `searchAuditEntries` | `GET /audit/entries` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, VALIDATION_FAILED |
+| `acceptInvitation` | `POST /invitations/acceptance` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, ACCOUNT_DEACTIVATED, ACCOUNT_NOT_FOUND, ALREADY_MEMBER, INVITATION_ADDRESSED_TO_ANOTHER, INVITATION_EXPIRED, INVITATION_NOT_FOUND, INVITATION_NOT_PENDING, VALIDATION_FAILED |
+| `declineInvitation` | `POST /invitations/declination` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, ACCOUNT_NOT_FOUND, INVITATION_ADDRESSED_TO_ANOTHER, INVITATION_EXPIRED, INVITATION_NOT_FOUND, INVITATION_NOT_PENDING, VALIDATION_FAILED |
+| `openOrganisation` | `POST /organisations` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, ACCOUNT_DEACTIVATED, ACCOUNT_NOT_FOUND, INVALID_ORGANISATION_NAME, INVALID_ORGANISATION_SLUG, ORGANISATION_SLUG_TAKEN, VALIDATION_FAILED |
+| `grantDelegation` | `POST /organisations/{organisationId}/delegations` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, DELEGATION_BEYOND_RIGHTS, DELEGATION_PERIOD_INVERTED, DELEGATION_TOO_LONG, DELEGATION_TO_ONESELF, DELEGATION_WITHOUT_RIGHTS, MEMBER_NOT_FOUND, VALIDATION_FAILED |
+| `revokeDelegation` | `DELETE /organisations/{organisationId}/delegations/{delegationId}` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, DELEGATION_NOT_ACTIVE, DELEGATION_NOT_FOUND, VALIDATION_FAILED |
+| `inviteMember` | `POST /organisations/{organisationId}/invitations` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, ABOVE_OWN_ROLE, INVALID_EMAIL_ADDRESS, OWNERS_ONLY, VALIDATION_FAILED |
+| `revokeInvitation` | `DELETE /organisations/{organisationId}/invitations/{invitationId}` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, INVITATION_NOT_FOUND, INVITATION_NOT_PENDING, VALIDATION_FAILED |
+| `searchMembers` | `GET /organisations/{organisationId}/members` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, VALIDATION_FAILED |
+| `removeMember` | `DELETE /organisations/{organisationId}/members/{accountId}` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, ABOVE_OWN_ROLE, LAST_OWNER, MEMBER_NOT_FOUND, ORGANISATION_NOT_FOUND, OWNERS_ONLY, VALIDATION_FAILED |
+| `changeMemberRole` | `PUT /organisations/{organisationId}/members/{accountId}/role` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, ABOVE_OWN_ROLE, LAST_OWNER, MEMBER_NOT_FOUND, ORGANISATION_NOT_FOUND, OWNERS_ONLY, OWN_ROLE, VALIDATION_FAILED |
 
 ## Error codes
 
+- `ABOVE_OWN_ROLE`
+- `ACCOUNT_ALREADY_DEACTIVATED`
+- `ACCOUNT_DEACTIVATED`
+- `ACCOUNT_NOT_FOUND`
+- `ALREADY_MEMBER`
+- `DELEGATION_BEYOND_RIGHTS`
+- `DELEGATION_NOT_ACTIVE`
+- `DELEGATION_NOT_FOUND`
+- `DELEGATION_PERIOD_INVERTED`
+- `DELEGATION_TOO_LONG`
+- `DELEGATION_TO_ONESELF`
+- `DELEGATION_WITHOUT_RIGHTS`
+- `EMAIL_NOT_VERIFIED`
 - `FORBIDDEN`
+- `INVALID_DISPLAY_NAME`
+- `INVALID_EMAIL_ADDRESS`
+- `INVALID_ORGANISATION_NAME`
+- `INVALID_ORGANISATION_SLUG`
+- `INVITATION_ADDRESSED_TO_ANOTHER`
+- `INVITATION_EXPIRED`
+- `INVITATION_NOT_FOUND`
+- `INVITATION_NOT_PENDING`
+- `LAST_OWNER`
+- `MEMBER_NOT_FOUND`
 - `NOT_ACCEPTABLE`
+- `ORGANISATION_NOT_FOUND`
+- `ORGANISATION_SLUG_TAKEN`
+- `OWNERS_ONLY`
+- `OWN_ROLE`
 - `UNAUTHORIZED`
+- `UNSUPPORTED_MEDIA_TYPE`
 - `VALIDATION_FAILED`
 
 `ERROR_CODES` lists them, `ErrorCode` is their type.

@@ -4,7 +4,139 @@ info:
   version: '0.1.0'
 tags:
   - name: audit
+  - name: identity
 paths:
+  /accounts/me:
+    put:
+      operationId: provisionAccount
+      summary: Provision my account
+      tags:
+        - identity
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                displayName:
+                  minLength: 1
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: The account, provisioned or refreshed; the body carries its identifier.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ACCOUNT_DEACTIVATED, EMAIL_NOT_VERIFIED, INVALID_DISPLAY_NAME, INVALID_EMAIL_ADDRESS, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ACCOUNT_DEACTIVATED
+            - EMAIL_NOT_VERIFIED
+            - INVALID_DISPLAY_NAME
+            - INVALID_EMAIL_ADDRESS
+            - VALIDATION_FAILED
+  /accounts/me/deactivation:
+    post:
+      operationId: deactivateAccount
+      summary: Deactivate my account
+      tags:
+        - identity
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: The account is deactivated; the body carries its identifier.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: ACCOUNT_ALREADY_DEACTIVATED, ACCOUNT_NOT_FOUND, LAST_OWNER, ORGANISATION_NOT_FOUND.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ACCOUNT_ALREADY_DEACTIVATED
+            - ACCOUNT_NOT_FOUND
+            - LAST_OWNER
+            - ORGANISATION_NOT_FOUND
   /audit/entries:
     get:
       operationId: searchAuditEntries
@@ -197,8 +329,899 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - VALIDATION_FAILED
+  /invitations/acceptance:
+    post:
+      operationId: acceptInvitation
+      summary: Accept an invitation
+      tags:
+        - identity
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationToken'
+      responses:
+        '200':
+          description: Accepted; the caller is a member, the body carries the identifier of the invitation.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ACCOUNT_DEACTIVATED, ACCOUNT_NOT_FOUND, ALREADY_MEMBER, INVITATION_ADDRESSED_TO_ANOTHER, INVITATION_EXPIRED, INVITATION_NOT_FOUND, INVITATION_NOT_PENDING, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ACCOUNT_DEACTIVATED
+            - ACCOUNT_NOT_FOUND
+            - ALREADY_MEMBER
+            - INVITATION_ADDRESSED_TO_ANOTHER
+            - INVITATION_EXPIRED
+            - INVITATION_NOT_FOUND
+            - INVITATION_NOT_PENDING
+            - VALIDATION_FAILED
+  /invitations/declination:
+    post:
+      operationId: declineInvitation
+      summary: Decline an invitation
+      tags:
+        - identity
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationToken'
+      responses:
+        '200':
+          description: Declined; the body carries the identifier of the invitation.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ACCOUNT_NOT_FOUND, INVITATION_ADDRESSED_TO_ANOTHER, INVITATION_EXPIRED, INVITATION_NOT_FOUND, INVITATION_NOT_PENDING, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ACCOUNT_NOT_FOUND
+            - INVITATION_ADDRESSED_TO_ANOTHER
+            - INVITATION_EXPIRED
+            - INVITATION_NOT_FOUND
+            - INVITATION_NOT_PENDING
+            - VALIDATION_FAILED
+  /organisations:
+    post:
+      operationId: openOrganisation
+      summary: Open an organisation
+      tags:
+        - identity
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                slug:
+                  minLength: 1
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+              type: object
+              required:
+                - slug
+                - name
+      responses:
+        '201':
+          description: Opened; the body carries its slug, the caller is its first owner.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ACCOUNT_DEACTIVATED, ACCOUNT_NOT_FOUND, INVALID_ORGANISATION_NAME, INVALID_ORGANISATION_SLUG, ORGANISATION_SLUG_TAKEN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ACCOUNT_DEACTIVATED
+            - ACCOUNT_NOT_FOUND
+            - INVALID_ORGANISATION_NAME
+            - INVALID_ORGANISATION_SLUG
+            - ORGANISATION_SLUG_TAKEN
+            - VALIDATION_FAILED
+  /organisations/{organisationId}/delegations:
+    post:
+      operationId: grantDelegation
+      summary: Lend rights to a member
+      tags:
+        - identity
+      security:
+        - bearer: []
+      parameters:
+        - name: organisationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                delegateId:
+                  minLength: 1
+                  type: string
+                rights:
+                  items:
+                    type: string
+                    enum:
+                      - read-members
+                      - invite-members
+                      - manage-members
+                      - grant-delegations
+                  type: array
+                startsAt:
+                  oneOf:
+                    - format: date
+                      type: string
+                    - format: date-time
+                      type: string
+                endsAt:
+                  oneOf:
+                    - format: date
+                      type: string
+                    - format: date-time
+                      type: string
+              type: object
+              required:
+                - delegateId
+                - rights
+                - startsAt
+                - endsAt
+      responses:
+        '201':
+          description: Granted; the body carries the identifier of the delegation.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: DELEGATION_BEYOND_RIGHTS, DELEGATION_PERIOD_INVERTED, DELEGATION_TOO_LONG, DELEGATION_TO_ONESELF, DELEGATION_WITHOUT_RIGHTS, MEMBER_NOT_FOUND, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - DELEGATION_BEYOND_RIGHTS
+            - DELEGATION_PERIOD_INVERTED
+            - DELEGATION_TOO_LONG
+            - DELEGATION_TO_ONESELF
+            - DELEGATION_WITHOUT_RIGHTS
+            - MEMBER_NOT_FOUND
+            - VALIDATION_FAILED
+  /organisations/{organisationId}/delegations/{delegationId}:
+    delete:
+      operationId: revokeDelegation
+      summary: Revoke a delegation
+      tags:
+        - identity
+      security:
+        - bearer: []
+      parameters:
+        - name: organisationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+        - name: delegationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Revoked; the body carries its identifier.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: DELEGATION_NOT_ACTIVE, DELEGATION_NOT_FOUND, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - DELEGATION_NOT_ACTIVE
+            - DELEGATION_NOT_FOUND
+            - VALIDATION_FAILED
+  /organisations/{organisationId}/invitations:
+    post:
+      operationId: inviteMember
+      summary: Invite a person to the organisation
+      tags:
+        - identity
+      security:
+        - bearer: []
+      parameters:
+        - name: organisationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  format: email
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - owner
+                    - admin
+                    - member
+              type: object
+              required:
+                - email
+                - role
+      responses:
+        '201':
+          description: Issued; the body carries the token to send to the person, given once and never stored.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  token:
+                    type: string
+                type: object
+                required:
+                  - id
+                  - token
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ABOVE_OWN_ROLE, INVALID_EMAIL_ADDRESS, OWNERS_ONLY, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ABOVE_OWN_ROLE
+            - INVALID_EMAIL_ADDRESS
+            - OWNERS_ONLY
+            - VALIDATION_FAILED
+  /organisations/{organisationId}/invitations/{invitationId}:
+    delete:
+      operationId: revokeInvitation
+      summary: Take back an invitation
+      tags:
+        - identity
+      security:
+        - bearer: []
+      parameters:
+        - name: organisationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+        - name: invitationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Taken back; the body carries its identifier.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: INVITATION_NOT_FOUND, INVITATION_NOT_PENDING, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - INVITATION_NOT_FOUND
+            - INVITATION_NOT_PENDING
+            - VALIDATION_FAILED
+  /organisations/{organisationId}/members:
+    get:
+      operationId: searchMembers
+      summary: Search the members of an organisation
+      tags:
+        - identity
+      security:
+        - bearer: []
+      parameters:
+        - name: organisationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+        - name: limit
+          in: query
+          description: Size of the page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            description: Size of the page.
+        - name: offset
+          in: query
+          description: Items to skip. Not with `cursor`.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Items to skip. Not with `cursor`.
+        - name: cursor
+          in: query
+          description: The `nextCursor` of the previous page. Not with `offset`.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            description: The `nextCursor` of the previous page. Not with `offset`.
+        - name: sort
+          in: query
+          description: 'Comma-separated fields, a leading "-" for descending. Sortable: joinedAt.'
+          required: false
+          schema:
+            type: string
+            description: 'Comma-separated fields, a leading "-" for descending. Sortable: joinedAt.'
+      responses:
+        '200':
+          description: One page of the members.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      properties:
+                        memberId:
+                          type: string
+                        accountId:
+                          type: string
+                        displayName:
+                          type: string
+                        email:
+                          format: email
+                          type: string
+                        role:
+                          type: string
+                          enum:
+                            - owner
+                            - admin
+                            - member
+                        joinedAt:
+                          oneOf:
+                            - format: date
+                              type: string
+                            - format: date-time
+                              type: string
+                      type: object
+                      required:
+                        - memberId
+                        - accountId
+                        - displayName
+                        - email
+                        - role
+                        - joinedAt
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: Present when it is cheap to count.
+                  nextCursor:
+                    type: string
+                    description: Present when more items follow.
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
+  /organisations/{organisationId}/members/{accountId}:
+    delete:
+      operationId: removeMember
+      summary: Remove a member
+      tags:
+        - identity
+      security:
+        - bearer: []
+      parameters:
+        - name: organisationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+        - name: accountId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Removed; the body carries the identifier of the membership.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: ABOVE_OWN_ROLE, LAST_OWNER, MEMBER_NOT_FOUND, ORGANISATION_NOT_FOUND, OWNERS_ONLY, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ABOVE_OWN_ROLE
+            - LAST_OWNER
+            - MEMBER_NOT_FOUND
+            - ORGANISATION_NOT_FOUND
+            - OWNERS_ONLY
+            - VALIDATION_FAILED
+  /organisations/{organisationId}/members/{accountId}/role:
+    put:
+      operationId: changeMemberRole
+      summary: Change the role of a member
+      tags:
+        - identity
+      security:
+        - bearer: []
+      parameters:
+        - name: organisationId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+        - name: accountId
+          in: path
+          schema:
+            minLength: 1
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                role:
+                  type: string
+                  enum:
+                    - owner
+                    - admin
+                    - member
+              type: object
+              required:
+                - role
+      responses:
+        '200':
+          description: Changed; the body carries the identifier of the membership.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ABOVE_OWN_ROLE, LAST_OWNER, MEMBER_NOT_FOUND, ORGANISATION_NOT_FOUND, OWNERS_ONLY, OWN_ROLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ABOVE_OWN_ROLE
+            - LAST_OWNER
+            - MEMBER_NOT_FOUND
+            - ORGANISATION_NOT_FOUND
+            - OWNERS_ONLY
+            - OWN_ROLE
+            - VALIDATION_FAILED
 components:
   schemas:
+    Accepted:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: The identifier of what the command created or changed.
+      additionalProperties: false
+    InvitationToken:
+      properties:
+        token:
+          minLength: 1
+          type: string
+      type: object
+      required:
+        - token
     Problem:
       type: object
       description: Problem details (RFC 9457) with a stable machine-readable code.
