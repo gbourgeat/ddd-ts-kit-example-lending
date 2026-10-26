@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 4 context-map - draw the relationships between the eleven contexts, each with its pattern and contract
+Next: 5 bootstrap - the user runs `npx -y ddd-ts-kit@0.94.1 init` with the imposed stack of owner-brief.md, then `npm run verify` green
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -185,7 +185,7 @@ grant of a right is audited.
 | 1 | Discover the domain | `docs/architecture/discovery.md` | done |
 | 2 | Find the bounded contexts | `docs/architecture/contexts.md` | done |
 | 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | done (CONTEXT.md files at bootstrap) |
-| 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | todo |
+| 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | done (`docs/context-map.md` at bootstrap) |
 | 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | todo |
 | 6 | Plan the slices | `docs/architecture/slices.md` | todo |
 | 7 | Build | code, one commit per slice | todo |
@@ -211,6 +211,10 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 One word per concept across contexts: the tenant is "Bank", a staff member is not a "member", the customer's class is "risk rating", a loan movement is not an "entry" (conductor, owner brief, to confirm)
 - 2026-10-26 Identity section copied from the kit's preset word for word; per-context CONTEXT.md files written at bootstrap, not now (conductor, owner brief)
 - 2026-10-26 Step 3 closing check passed: every definition is one a domain expert would sign, shared words have a row per context (decided by the conductor, owner brief)
+- 2026-10-26 Servicing and financial-crime and reporting collaborate by integration events only; financial-crime has no outbound arrow (`context-map.md`) (conductor, owner brief)
+- 2026-10-26 Payout gate reads due diligence synchronously (customer-supplier); broker registration is a projection, accepted tension (conductor, owner brief, to confirm)
+- 2026-10-26 Identity is a conformist upstream of every context that acts on people, as the kit's preset (conductor, owner brief)
+- 2026-10-26 Step 4 closing check passed: every arrow has a pattern, a contract and a reason; topological order shows no cycle (decided by the conductor, owner brief)
 
 ## Open questions
 
