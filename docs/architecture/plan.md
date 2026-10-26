@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 5 bootstrap - unblock the kit's release (`@ddd-ts-kit/kernel@0.94.1` tarball 404) and the masked `.claude/hooks`, then finish `init` and `npm install`, then `npm run verify` green
+Next: 5 bootstrap - the bare project's lint is red on two generated files (`create-event-sourcing.ts`, `compose-application.ts`, `docs/tooling/frictions.md`, 2026-10-27): the kit's fix or the owner's decision, then the bare commit, the contexts, the commits
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -186,7 +186,7 @@ grant of a right is audited.
 | 2 | Find the bounded contexts | `docs/architecture/contexts.md` | done |
 | 3 | Write the glossaries | `docs/architecture/glossary.md`, then each `CONTEXT.md` | done (CONTEXT.md files at bootstrap) |
 | 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | done (`docs/context-map.md` at bootstrap) |
-| 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | in progress (blocked, see `docs/tooling/frictions.md`) |
+| 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | in progress (blocked at the bare `verify`: lint red on two generated files, see `docs/tooling/frictions.md`) |
 | 6 | Plan the slices | `docs/architecture/slices.md` | todo |
 | 7 | Build | code, one commit per slice | todo |
 
@@ -217,6 +217,15 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 Step 4 closing check passed: every arrow has a pattern, a contract and a reason; topological order shows no cycle (decided by the conductor, owner brief)
 - 2026-10-27 Step 5 stack: the imposed `ddd-ts-kit@0.94.1 init` of `owner-brief.md` ("Imposed choices"), run as written with `--package-manager npm`, nothing inferred (owner brief)
 - 2026-10-27 Step 5 not closed: `init` stopped at the masked `.claude/hooks` with 143 of 166 files written, nothing committed; `@ddd-ts-kit/kernel@0.94.1` tarball 404 on the registry, so `npm install` fails (conductor, owner brief). Both in `docs/tooling/frictions.md`
+- 2026-10-27 Step 5 `npm install` run with `--ignore-scripts`: the native build of `@confluentinc/kafka-javascript` needs github.com, zlib.net and curl.se, refused by the sandbox; the kafka client is not built here, the tests use fakes (conductor, owner brief, to confirm)
+- 2026-10-27 Step 5 `prisma generate` and `migrate diff` run with `PRISMA_SCHEMA_ENGINE_BINARY` pointing to the schema engine in `~/.cache/prisma`: the sandbox refuses writes there (conductor, owner brief)
+- 2026-10-27 Step 5 bare project not patched: the two lint findings are in files `init` generated; the rule is that a red bare `verify` is the kit's to fix, so the project is not committed and no context is generated on that base; only the plan and the frictions are committed (conductor, owner brief, to confirm)
+
+## For the owner
+
+- The bare project is red on `npm run lint` (two generated files, `docs/tooling/frictions.md`). Decide: wait for a kit fix (file the issue with the output in frictions, then `npm run lint` must be green), or let the conductor remove the unused import and split `composeApplication` in the generated files as a recorded workaround.
+- Native module: `npm rebuild @confluentinc/kafka-javascript` outside the sandbox, so that the kafka adapter runs.
+- Then, in order: `npm run hooks:install`, the commits of the bare project and of each context, `git push` (refused by the settings: yours).
 
 ## Open questions
 
