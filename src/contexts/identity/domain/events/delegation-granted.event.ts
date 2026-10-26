@@ -1,0 +1,20 @@
+import { NamedDomainEvent } from '@ddd-ts-kit/kernel';
+import type { MemberRight } from '@/contexts/identity/domain/vocabularies/member-right.vocabulary';
+
+/** A member lent some of their rights to another, for a period. */
+export class DelegationGranted extends NamedDomainEvent('identity.delegation.granted') {
+  constructor(
+    readonly aggregateId: string,
+    readonly occurredAt: Date,
+    readonly facts: {
+      readonly organisationId: string;
+      readonly delegatorId: string;
+      readonly delegateId: string;
+      readonly rights: readonly MemberRight[];
+      readonly startsAt: Date;
+      readonly endsAt: Date;
+    },
+  ) {
+    super();
+  }
+}
