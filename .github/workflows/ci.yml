@@ -1,0 +1,277 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Every night, everything: a pull request runs the specs of the contexts its change reaches.
+    - cron: '0 3 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A newer commit of a pull request supersedes the run in progress; the default branch finishes every run.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    outputs:
+      scope: ${{ steps.affected.outputs.scope }}
+      contexts: ${{ steps.affected.outputs.contexts }}
+      args: ${{ steps.affected.outputs.args }}
+      lint: ${{ steps.affected.outputs.lint }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # A pull request is checked out as its merge commit, whose first parent is the base it is compared with.
+          fetch-depth: 2
+      - uses: ./.github/actions/setup
+      - name: What this run covers (everything on the default branch and at night, the affected contexts on a pull request)
+        id: affected
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || '' }}
+        run: npx --no -- ddd-ts-kit affected --base "$BASE" --format github | tee -a "$GITHUB_OUTPUT"
+
+  typecheck:
+    name: Typecheck
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npm run ci:typecheck
+
+  lint:
+    name: Lint
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # The cache of ESLint (`ddd-ts-kit lint` keys it by the content of each file): a pull request restores the one the
+      # default branch wrote last for this lockfile and this config, and lints the files that changed since; the default
+      # branch and the night restore nothing, lint everything, which also sees a type changed in another file, and write it.
+      - name: The cache of ESLint, as the default branch wrote it last
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/cache/restore@v6
+        with:
+          path: .eslintcache/
+          key: eslint-${{ runner.os }}-${{ hashFiles('package-lock.json', 'eslint.config.mjs', 'ddd-ts-kit.config.json') }}-${{ github.sha }}
+          restore-keys: eslint-${{ runner.os }}-${{ hashFiles('package-lock.json', 'eslint.config.mjs', 'ddd-ts-kit.config.json') }}-
+      - run: npm run ci:format
+      - name: Lint (the contexts a pull request does not reach are left to the default branch)
+        env:
+          LINT: ${{ needs.install.outputs.lint }}
+        run: npm run ci:lint -- $LINT
+      - name: The cache of ESLint, for the pull requests that follow
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/cache/save@v6
+        with:
+          path: .eslintcache/
+          key: eslint-${{ runner.os }}-${{ hashFiles('package-lock.json', 'eslint.config.mjs', 'ddd-ts-kit.config.json') }}-${{ github.sha }}
+
+  architecture:
+    name: Architecture
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Architecture rules
+        run: npm run ci:arch:check -- --format github
+      - name: Dependency graph
+        run: npm run ci:arch:graph
+
+  deadcode:
+    name: Dead code
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npm run ci:deadcode
+
+  unit:
+    name: Unit tests
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Unit specs, each context held to its coverage thresholds
+        if: ${{ needs.install.outputs.scope != 'none' }}
+        env:
+          DDD_TS_KIT_AFFECTED: ${{ needs.install.outputs.contexts }}
+          PARTIAL: ${{ needs.install.outputs.args }}
+        run: npm run ci:test:unit -- $PARTIAL
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage
+          path: coverage
+          if-no-files-found: ignore
+          retention-days: 14
+
+  integration:
+    name: Integration tests
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgres://app:app@localhost:5432/app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: PostgreSQL
+        if: ${{ needs.install.outputs.scope != 'none' }}
+        run: sh .github/scripts/start-postgres.sh
+      - if: ${{ needs.install.outputs.scope != 'none' }}
+        run: npm run db:migrate
+      - name: Integration specs, each context held to its coverage thresholds
+        if: ${{ needs.install.outputs.scope != 'none' }}
+        env:
+          DDD_TS_KIT_AFFECTED: ${{ needs.install.outputs.contexts }}
+          PARTIAL: ${{ needs.install.outputs.args }}
+        run: npm run ci:test:integration -- $PARTIAL
+
+  e2e:
+    name: End-to-end tests
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgres://app:app@localhost:5432/app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: PostgreSQL
+        if: ${{ needs.install.outputs.scope != 'none' }}
+        run: sh .github/scripts/start-postgres.sh
+      - if: ${{ needs.install.outputs.scope != 'none' }}
+        run: npm run db:migrate
+      - name: End-to-end specs (the whole application, whatever the contexts a change reaches)
+        if: ${{ needs.install.outputs.scope != 'none' }}
+        run: npm run ci:test:e2e
+
+  build:
+    name: Build, docs and contract drift
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: The production build
+        run: npm run ci:build
+      - name: Generated documents and contracts, from that build
+        run: npm run ci:docs
+
+  security:
+    name: Security
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: Production dependencies audit
+        run: npm run ci:audit
+      - name: Secrets
+        if: ${{ !cancelled() }}
+        run: docker run --rm --volume "$GITHUB_WORKSPACE:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --no-banner
+
+  image:
+    name: Docker image
+    needs: install
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: app:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  mutation:
+    name: Mutation score of the domain
+    needs: install
+    # The night only: minutes per hundred files is too long for the loop of a pull request, and nothing of this run is read before a merge.
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Stryker on the domain and application layers of every context, each layer held to its "mutation" floor of ddd-ts-kit.config.json
+        run: npm run test:mutation
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: mutation
+          path: reports/mutation
+          if-no-files-found: ignore
+          retention-days: 30
+
+  mutation-changed:
+    name: Mutation score of the change
+    needs: install
+    # A pull request: the report of the last night is reused for what the change leaves alone, and the survivors of the files it touched are listed. A reading, not a gate: the floor is held by the night.
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The whole history: the files of the change are those since its merge base with the base branch.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: The report of the last night, when there is one
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run=$(gh run list --workflow "${{ github.workflow }}" --event schedule --branch "${{ github.event.repository.default_branch }}" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          if [ -n "$run" ]; then gh run download "$run" --name mutation --dir reports/mutation || echo "The last night kept no report: a full run."; fi
+          # The night runs without a base and writes no incremental file: its json report is the same object, which Stryker reads back.
+          if [ -f reports/mutation/mutation.json ]; then cp reports/mutation/mutation.json reports/mutation/incremental.json; fi
+      - name: Stryker on what the change touches, then the survivors of its files
+        run: |
+          mkdir -p reports/mutation
+          base=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          DDD_TS_KIT_MUTATION_SINCE="$base" npm run --silent test:mutation | tee reports/mutation/changed.txt
+          { echo '```'; cat reports/mutation/changed.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  gate:
+    name: gate
+    if: ${{ always() }}
+    needs: [install, typecheck, lint, architecture, deadcode, unit, integration, e2e, build, security, image]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - name: Every gate passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              echo "::error::A required job ended as $result."
+              exit 1
+            fi
+          done

@@ -1,0 +1,22 @@
+{
+  "name": "lending-api-client",
+  "version": "0.1.0",
+  "description": "Typed client of lending, generated from its OpenAPI contract by ddd-ts-kit.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  }
+}

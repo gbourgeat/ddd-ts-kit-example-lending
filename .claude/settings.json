@@ -1,0 +1,160 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx ddd-ts-kit check *)",
+      "Bash(npx ddd-ts-kit verify-slice *)",
+      "Bash(npx ddd-ts-kit cited *)",
+      "Bash(npx ddd-ts-kit acceptance *)",
+      "Bash(npx ddd-ts-kit story *)",
+      "Bash(npx ddd-ts-kit story-scope *)",
+      "Bash(npx ddd-ts-kit stories)",
+      "Bash(npx ddd-ts-kit stories *)",
+      "Bash(npx ddd-ts-kit worktree *)",
+      "Bash(npx ddd-ts-kit verify-merge)",
+      "Bash(npx ddd-ts-kit verify-merge *)",
+      "Bash(npx ddd-ts-kit story-check *)",
+      "Bash(npx ddd-ts-kit merge-trunk)",
+      "Bash(npx ddd-ts-kit merge-trunk *)",
+      "Bash(npx ddd-ts-kit list *)",
+      "Bash(npx ddd-ts-kit generate *)",
+      "Bash(npx ddd-ts-kit docs *)",
+      "Bash(npx ddd-ts-kit explain *)",
+      "Bash(npx ddd-ts-kit rules)",
+      "Bash(npm run verify)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run lint *)",
+      "Bash(npm test *)",
+      "Bash(npm run test:e2e *)",
+      "Bash(npm run regenerate)",
+      "Bash(npm run docs:generate)",
+      "Bash(npm run docs:check)",
+      "Bash(npm run openapi:generate)",
+      "Bash(npm run openapi:check)",
+      "Bash(npm run events:generate)",
+      "Bash(npm run events:check)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.production)",
+      "Read(./.env.development)",
+      "Read(./.env.test)",
+      "Edit(./openapi/**)",
+      "Edit(./docs/integration/asyncapi.*)",
+      "Edit(./docs/integration/event-catalog.md)",
+      "Edit(./test/acceptance/*.acceptance.lock.json)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(npm publish *)",
+      "Bash(npx ddd-ts-kit check --baseline write*)",
+      "Edit(./ddd-ts-kit.config.json)",
+      "Edit(./ddd-ts-kit-baseline.json)",
+      "Edit(./REVIEW.md)",
+      "Edit(./eslint.config.mjs)",
+      "Edit(./biome.json)",
+      "Edit(./.dependency-cruiser.cjs)",
+      "Edit(./knip.json)",
+      "Edit(./lefthook.yml)",
+      "Edit(./.gitlab-ci.yml)",
+      "Edit(./.github/workflows/**)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.github/copilot/settings.json)",
+      "Edit(./prisma/migrations/**)",
+      "Edit(./Dockerfile)",
+      "Edit(./docker-compose.yml)",
+      "Edit(./docker/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": ["registry.npmjs.org", "github.com"]
+    },
+    "credentials": {
+      "files": [
+        {
+          "path": "~/.ssh",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.aws",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.config/gcloud",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.azure",
+          "mode": "deny"
+        }
+      ],
+      "envVars": [
+        {
+          "name": "GITHUB_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "GH_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "GITLAB_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "NPM_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SESSION_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "GOOGLE_APPLICATION_CREDENTIALS",
+          "mode": "deny"
+        },
+        {
+          "name": "AZURE_CLIENT_SECRET",
+          "mode": "deny"
+        }
+      ]
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/production-gate.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/change-reference.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

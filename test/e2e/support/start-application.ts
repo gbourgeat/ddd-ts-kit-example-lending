@@ -1,0 +1,129 @@
+import type { RelationTuple } from '@ddd-ts-kit/auth/rebac';
+import type { IntegrationEvent, IntegrationEventSubscriber } from '@ddd-ts-kit/kernel';
+import { createHttpClient, settled, type HttpClient, type SettledOptions } from '@ddd-ts-kit/testing/e2e';
+import { relationTuples } from '@/platform/auth/relationships/relation-tuples';
+import { composeApplication } from '@/platform/composition/compose-application';
+import type { AppConfig } from '@/platform/config/app-config';
+import { loadConfig } from '@/platform/config/load-config';
+import { openTestDatabase, type TestDatabase } from '@/platform/database/open-test-database';
+import { createEventProvider } from '@/platform/events/create-event-provider';
+import type { EventProvider } from '@/platform/events/event-provider';
+import { inProcessEvents } from '@/platform/events/in-process-events';
+import { startOutboxRelay } from '@/platform/events/start-outbox-relay';
+import { startHttpServer } from '@/platform/http/start-http-server';
+import { openRedis } from '@/platform/redis/open-redis';
+import { createCredentials, type Credentials, type TestActor } from '$test/e2e/support/create-credentials';
+import { noBroker, noRedis, testEnvironment } from '$test/e2e/support/test-environment';
+
+/** The whole application, real adapters included, as a client and another context see it. */
+export interface RunningApplication {
+  readonly client: HttpClient;
+  /** Subscribe here (`collectEvents`) to assert the integration events the application publishes. */
+  readonly events: IntegrationEventSubscriber;
+
+  /** A client presenting the credential of `actor`; `client` itself presents none. */
+  as(actor: TestActor): Promise<HttpClient>;
+
+  /**
+   * Publishes integration events of an upstream as its relay would, to the handlers of the
+   * application: what starts a use case no route reaches. Await `settled()` next, before asserting
+   * what the handlers did.
+   * With a broker server (its URL in the environment), the events go to the broker: what its
+   * consumers do is awaited with `collectEvents(application.events, [...]).waitFor(...)`.
+   */
+  publish(events: readonly IntegrationEvent[]): Promise<void>;
+
+  /**
+   * Resolves once the work the requests so far started has settled: every event stored in the
+   * outbox relayed, and the handlers it reached run, with what they stored in turn. Await it
+   * before asserting what happens after the answer, instead of waiting a fixed time; it fails
+   * after `timeoutMs` (2 seconds by default) naming what is still pending, and how much of it
+   * failed and waits for a retry (a handler that throws, an adapter that cannot be reached).
+   * With a broker server (its URL in the environment), relayed means handed to the broker: what
+   * its consumers do next is awaited with `collectEvents(application.events, [...]).waitFor(...)`.
+   */
+  settled(options?: SettledOptions): Promise<void>;
+
+  /** Stores a relationship, as the application does when an element is created or shared. */
+  relate(tuple: RelationTuple): Promise<void>;
+
+  /** Empties the database: call it before each test. */
+  reset(): Promise<void>;
+
+  close(): Promise<void>;
+}
+
+/**
+ * Starts the application on a free port. The database is PostgreSQL in process unless
+ * DATABASE_URL names a migrated server (`npm run infra:up && npm run db:migrate`).
+ */
+export async function startApplication(): Promise<RunningApplication> {
+  // An empty variable (a blank line of .env) means the same as none.
+  const url = process.env['DATABASE_URL'] === '' ? undefined : process.env['DATABASE_URL'];
+  const database = await openTestDatabase(url);
+  const config = loadConfig(testEnvironment({ DATABASE_URL: url ?? 'postgres://in-process/tests' }));
+  const credentials = await createCredentials();
+  const started = await start(database, config, credentials);
+
+  return {
+    client: started.client,
+    events: started.events,
+    as: async (actor) => started.client.withHeaders(await credentials.headersOf(actor)),
+    publish: (events) => started.publish(events),
+    relate: (tuple) => relationTuples.write([tuple]),
+    settled: (options) => started.settled(options),
+    reset: () => database.reset(),
+    close: () => started.close(),
+  };
+}
+
+interface Started {
+  readonly client: HttpClient;
+  readonly events: IntegrationEventSubscriber;
+
+  publish(events: readonly IntegrationEvent[]): Promise<void>;
+
+  settled(options?: SettledOptions): Promise<void>;
+
+  close(): Promise<void>;
+}
+
+/** The application on the test database, listening on a free port; closing it closes the database last. */
+async function start(database: TestDatabase, config: AppConfig, credentials: Credentials): Promise<Started> {
+  const redis = config.redisUrl === noRedis ? undefined : openRedis(config);
+
+  const application = composeApplication(database.persistence, {
+    events: eventsOf(config),
+    authenticator: credentials.authenticator,
+    ...(redis === undefined ? {} : { redis }),
+  });
+
+  await application.start();
+
+  const relay = startOutboxRelay({
+    store: database.persistence.outbox,
+    publisher: application.eventBus,
+    intervalMs: 20,
+    logger: application.logger,
+  });
+
+  const server = await startHttpServer(application, config);
+
+  return {
+    client: createHttpClient('http://127.0.0.1:' + server.port),
+    events: application.eventSubscriber,
+    publish: (events) => application.eventBus.publish(events),
+    settled: (options) => settled({ outbox: () => database.persistence.outbox.stats() }, options),
+    close: async () => {
+      await server.close();
+      await relay.stop();
+      await application.stop();
+      await redis?.close();
+      await database.close();
+    },
+  };
+}
+
+function eventsOf(config: AppConfig): EventProvider {
+  return config.kafkaBrokers === noBroker ? inProcessEvents() : createEventProvider(config);
+}
