@@ -107,10 +107,154 @@ module.exports = {
     {
       "name": "context-declared-relationship",
       "severity": "error",
+      "comment": "\"identity\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.identity.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/identity/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(identity)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"data-protection\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.data-protection.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/data-protection/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(data-protection|identity)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"credit-policy\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.credit-policy.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/credit-policy/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(credit-policy)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"credit-scoring\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.credit-scoring.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/credit-scoring/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(credit-scoring)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"brokerage\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.brokerage.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/brokerage/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(brokerage|identity)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"customer-due-diligence\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.customer-due-diligence.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/customer-due-diligence/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(customer-due-diligence|identity|data-protection)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"branch-network\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.branch-network.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/branch-network/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(branch-network|customer-due-diligence|identity)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"credit-application\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.credit-application.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/credit-application/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(credit-application|credit-policy|credit-scoring|customer-due-diligence|brokerage|branch-network|identity)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"servicing\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.servicing.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/servicing/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(servicing|credit-application|credit-policy|identity|data-protection)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"financial-crime\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.financial-crime.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/financial-crime/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(financial-crime|servicing|identity)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
+      "comment": "\"reporting\" imports the published language of a context that is not one of its upstreams. Declare the relationship under contexts.reporting.upstreams in ddd-ts-kit.config.json, after checking that the direction is intended.",
+      "from": {
+        "path": "^src/contexts/reporting/"
+      },
+      "to": {
+        "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
+        "pathNot": "^src/contexts/(reporting|credit-application|servicing|branch-network|identity)/"
+      }
+    },
+    {
+      "name": "context-declared-relationship",
+      "severity": "error",
       "comment": "A context missing from ddd-ts-kit.config.json declares no upstream. Add it to \"contexts\" with its upstreams.",
       "from": {
         "path": "^src/contexts/([^/]+)/",
-        "pathNot": []
+        "pathNot": [
+          "^src/contexts/identity/",
+          "^src/contexts/data-protection/",
+          "^src/contexts/credit-policy/",
+          "^src/contexts/credit-scoring/",
+          "^src/contexts/brokerage/",
+          "^src/contexts/customer-due-diligence/",
+          "^src/contexts/branch-network/",
+          "^src/contexts/credit-application/",
+          "^src/contexts/servicing/",
+          "^src/contexts/financial-crime/",
+          "^src/contexts/reporting/"
+        ]
       },
       "to": {
         "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",

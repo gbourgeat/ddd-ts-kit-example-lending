@@ -12,7 +12,10 @@ says. The sections after the markers are for the controller to write.
 <!-- ddd-ts-kit:personal-data-register -->
 ## What the system knows of a person
 
-No context declares a table that keeps personal data.
+| Context | Table | About | Personal data | On erasure | Kept |
+|---|---|---|---|---|---|
+| identity | `accounts` | `id` | `email`, `display_name` | pseudonymised | until erased |
+| identity | `invitations` | `id` | `email` | row deleted | 30 days after `expires_at` |
 
 ## Where it leaves its context
 

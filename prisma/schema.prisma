@@ -3,11 +3,12 @@ generator client {
   output              = "../generated/prisma"
   moduleFormat        = "esm"
   importFileExtension = "js"
+  previewFeatures     = ["partialIndexes"]
 }
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["messaging", "event_store", "audit"]
+  schemas  = ["messaging", "event_store", "audit", "identity"]
 }
 
 // The outbox and the idempotency table, from @ddd-ts-kit/prisma. Keep the field names: the
@@ -65,6 +66,134 @@ model ProcessInstance {
 
 // One schema per bounded context, no relation across contexts.
 // ddd-ts-kit:models
+/// Keyed by the subject the identity provider gives the person. No password is stored.
+model IdentityAccount {
+  id            String                         @id
+  email         String
+  displayName   String                         @map("display_name")
+  status        IdentityAccountStatus
+  provisionedAt DateTime                       @map("provisioned_at") @db.Timestamptz(3)
+  deactivatedAt DateTime?                      @map("deactivated_at") @db.Timestamptz(3)
+  version       Int
+  createdAt     DateTime                       @map("created_at") @db.Timestamptz(3)
+  createdBy     String                         @map("created_by")
+  updatedAt     DateTime                       @map("updated_at") @db.Timestamptz(3)
+  updatedBy     String                         @map("updated_by")
+
+  @@map("accounts")
+  @@schema("identity")
+}
+
+/// Keyed by the slug, which is also the tenant id when the project has tenants.
+model IdentityOrganisation {
+  id        String   @id
+  name      String
+  openedBy  String   @map("opened_by")
+  openedAt  DateTime @map("opened_at") @db.Timestamptz(3)
+  version   Int
+  createdAt DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy String   @map("created_by")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy String   @map("updated_by")
+
+  @@map("organisations")
+  @@schema("identity")
+}
+
+/// One current membership per account and organisation: the partial unique index is the guard.
+model IdentityMember {
+  id             String                      @id
+  organisationId String                      @map("organisation_id")
+  accountId      String                      @map("account_id")
+  role           IdentityMemberRole
+  joinedAt       DateTime                    @map("joined_at") @db.Timestamptz(3)
+  removedAt      DateTime?                   @map("removed_at") @db.Timestamptz(3)
+  version        Int
+  createdAt      DateTime                    @map("created_at") @db.Timestamptz(3)
+  createdBy      String                      @map("created_by")
+  updatedAt      DateTime                    @map("updated_at") @db.Timestamptz(3)
+  updatedBy      String                      @map("updated_by")
+
+  // Preview feature `partialIndexes`: after an upgrade of Prisma, check generated/schema.sql keeps the WHERE.
+  @@unique([organisationId, accountId], map: "members_current_idx", where: { removedAt: null })
+  @@index([accountId], map: "members_account_idx")
+  @@map("members")
+  @@schema("identity")
+}
+
+model IdentityInvitation {
+  id             String                            @id
+  organisationId String                            @map("organisation_id")
+  email          String
+  role           IdentityMemberRole
+  tokenHash      String                            @unique @map("token_hash")
+  invitedBy      String                            @map("invited_by")
+  issuedAt       DateTime                          @map("issued_at") @db.Timestamptz(3)
+  expiresAt      DateTime                          @map("expires_at") @db.Timestamptz(3)
+  status         IdentityInvitationStatus
+  answeredAt     DateTime?                         @map("answered_at") @db.Timestamptz(3)
+  version        Int
+  createdAt      DateTime                          @map("created_at") @db.Timestamptz(3)
+  createdBy      String                            @map("created_by")
+  updatedAt      DateTime                          @map("updated_at") @db.Timestamptz(3)
+  updatedBy      String                            @map("updated_by")
+
+  @@index([organisationId, status], map: "invitations_organisation_idx")
+  @@map("invitations")
+  @@schema("identity")
+}
+
+model IdentityDelegation {
+  id             String    @id
+  organisationId String    @map("organisation_id")
+  delegatorId    String    @map("delegator_id")
+  delegateId     String    @map("delegate_id")
+  /// The rights lent, separated by commas: a right is a word of `MemberRight`, which holds none.
+  rights         String
+  startsAt       DateTime  @map("starts_at") @db.Timestamptz(3)
+  endsAt         DateTime  @map("ends_at") @db.Timestamptz(3)
+  endedAt        DateTime? @map("ended_at") @db.Timestamptz(3)
+  version        Int
+  createdAt      DateTime  @map("created_at") @db.Timestamptz(3)
+  createdBy      String    @map("created_by")
+  updatedAt      DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedBy      String    @map("updated_by")
+
+  @@index([organisationId, delegateId], map: "delegations_delegate_idx")
+  @@index([organisationId, delegatorId], map: "delegations_delegator_idx")
+  @@map("delegations")
+  @@schema("identity")
+}
+
+/// Whether an account may still act: a deactivated account keeps its history and signs in no more.
+enum IdentityAccountStatus {
+  active
+  deactivated
+
+  @@map("account_status")
+  @@schema("identity")
+}
+
+/// The role of a member in an organisation: what the member may do there follows from it.
+enum IdentityMemberRole {
+  owner
+  admin
+  member
+
+  @@map("member_role")
+  @@schema("identity")
+}
+
+/// Where an invitation stands: pending until its person answers, or the organisation takes it back.
+enum IdentityInvitationStatus {
+  pending
+  accepted
+  declined
+  revoked
+
+  @@map("invitation_status")
+  @@schema("identity")
+}
 // /ddd-ts-kit:models
 
 // The event store of @ddd-ts-kit/prisma: the events, the snapshots, the checkpoints and the

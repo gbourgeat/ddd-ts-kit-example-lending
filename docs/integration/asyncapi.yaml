@@ -3,6 +3,48 @@ info:
   title: lending
   version: '0.1.0'
 channels:
+  identity.account.deactivated:
+    address: identity.account.deactivated
+    description: 'An account was deactivated: its person signs in no more, and every context stops acting for it.'
+    messages:
+      v1:
+        $ref: '#/components/messages/identity.account.deactivated.v1'
+  identity.delegation.granted:
+    address: identity.delegation.granted
+    description: A member lent rights to another member of the organisation, from an instant to another.
+    messages:
+      v1:
+        $ref: '#/components/messages/identity.delegation.granted.v1'
+  identity.delegation.revoked:
+    address: identity.delegation.revoked
+    description: 'A delegation ended before its period: what it lent, the delegate holds no more.'
+    messages:
+      v1:
+        $ref: '#/components/messages/identity.delegation.revoked.v1'
+  identity.member.joined:
+    address: identity.member.joined
+    description: An account became a member of an organisation, in a role.
+    messages:
+      v1:
+        $ref: '#/components/messages/identity.member.joined.v1'
+  identity.member.removed:
+    address: identity.member.removed
+    description: 'A member left an organisation: what they reached there through it, they reach no more.'
+    messages:
+      v1:
+        $ref: '#/components/messages/identity.member.removed.v1'
+  identity.member.role-changed:
+    address: identity.member.role-changed
+    description: The role of a member of an organisation changed.
+    messages:
+      v1:
+        $ref: '#/components/messages/identity.member.role-changed.v1'
+  identity.organisation.opened:
+    address: identity.organisation.opened
+    description: An organisation was opened; with tenants, it is a new tenant.
+    messages:
+      v1:
+        $ref: '#/components/messages/identity.organisation.opened.v1'
   privacy.data-subject.erased:
     address: privacy.data-subject.erased
     description: 'Every copy the platform reaches of a data subject is erased: erase yours.'
@@ -10,6 +52,48 @@ channels:
       v1:
         $ref: '#/components/messages/privacy.data-subject.erased.v1'
 operations:
+  send.identity.account.deactivated:
+    action: send
+    channel:
+      $ref: '#/channels/identity.account.deactivated'
+    messages:
+      - $ref: '#/channels/identity.account.deactivated/messages/v1'
+  send.identity.delegation.granted:
+    action: send
+    channel:
+      $ref: '#/channels/identity.delegation.granted'
+    messages:
+      - $ref: '#/channels/identity.delegation.granted/messages/v1'
+  send.identity.delegation.revoked:
+    action: send
+    channel:
+      $ref: '#/channels/identity.delegation.revoked'
+    messages:
+      - $ref: '#/channels/identity.delegation.revoked/messages/v1'
+  send.identity.member.joined:
+    action: send
+    channel:
+      $ref: '#/channels/identity.member.joined'
+    messages:
+      - $ref: '#/channels/identity.member.joined/messages/v1'
+  send.identity.member.removed:
+    action: send
+    channel:
+      $ref: '#/channels/identity.member.removed'
+    messages:
+      - $ref: '#/channels/identity.member.removed/messages/v1'
+  send.identity.member.role-changed:
+    action: send
+    channel:
+      $ref: '#/channels/identity.member.role-changed'
+    messages:
+      - $ref: '#/channels/identity.member.role-changed/messages/v1'
+  send.identity.organisation.opened:
+    action: send
+    channel:
+      $ref: '#/channels/identity.organisation.opened'
+    messages:
+      - $ref: '#/channels/identity.organisation.opened/messages/v1'
   send.privacy.data-subject.erased:
     action: send
     channel:
@@ -18,6 +102,360 @@ operations:
       - $ref: '#/channels/privacy.data-subject.erased/messages/v1'
 components:
   messages:
+    identity.account.deactivated.v1:
+      name: identity.account.deactivated
+      title: identity.account.deactivated v1
+      summary: 'An account was deactivated: its person signs in no more, and every context stops acting for it.'
+      contentType: application/json
+      tags:
+        - name: identity
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: identity.account.deactivated
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              accountId:
+                type: string
+            type: object
+            required:
+              - accountId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    identity.delegation.granted.v1:
+      name: identity.delegation.granted
+      title: identity.delegation.granted v1
+      summary: A member lent rights to another member of the organisation, from an instant to another.
+      contentType: application/json
+      tags:
+        - name: identity
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: identity.delegation.granted
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              delegationId:
+                type: string
+              organisationId:
+                type: string
+              delegatorId:
+                type: string
+              delegateId:
+                type: string
+              rights:
+                items:
+                  type: string
+                type: array
+              startsAt:
+                oneOf:
+                  - format: date
+                    type: string
+                  - format: date-time
+                    type: string
+              endsAt:
+                oneOf:
+                  - format: date
+                    type: string
+                  - format: date-time
+                    type: string
+            type: object
+            required:
+              - delegationId
+              - organisationId
+              - delegatorId
+              - delegateId
+              - rights
+              - startsAt
+              - endsAt
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    identity.delegation.revoked.v1:
+      name: identity.delegation.revoked
+      title: identity.delegation.revoked v1
+      summary: 'A delegation ended before its period: what it lent, the delegate holds no more.'
+      contentType: application/json
+      tags:
+        - name: identity
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: identity.delegation.revoked
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              delegationId:
+                type: string
+              organisationId:
+                type: string
+              delegatorId:
+                type: string
+              delegateId:
+                type: string
+            type: object
+            required:
+              - delegationId
+              - organisationId
+              - delegatorId
+              - delegateId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    identity.member.joined.v1:
+      name: identity.member.joined
+      title: identity.member.joined v1
+      summary: An account became a member of an organisation, in a role.
+      contentType: application/json
+      tags:
+        - name: identity
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: identity.member.joined
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              memberId:
+                type: string
+              organisationId:
+                type: string
+              accountId:
+                type: string
+              role:
+                type: string
+            type: object
+            required:
+              - memberId
+              - organisationId
+              - accountId
+              - role
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    identity.member.removed.v1:
+      name: identity.member.removed
+      title: identity.member.removed v1
+      summary: 'A member left an organisation: what they reached there through it, they reach no more.'
+      contentType: application/json
+      tags:
+        - name: identity
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: identity.member.removed
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              memberId:
+                type: string
+              organisationId:
+                type: string
+              accountId:
+                type: string
+              delegationId:
+                type: string
+            type: object
+            required:
+              - memberId
+              - organisationId
+              - accountId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    identity.member.role-changed.v1:
+      name: identity.member.role-changed
+      title: identity.member.role-changed v1
+      summary: The role of a member of an organisation changed.
+      contentType: application/json
+      tags:
+        - name: identity
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: identity.member.role-changed
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              memberId:
+                type: string
+              organisationId:
+                type: string
+              accountId:
+                type: string
+              from:
+                type: string
+              to:
+                type: string
+              delegationId:
+                type: string
+            type: object
+            required:
+              - memberId
+              - organisationId
+              - accountId
+              - from
+              - to
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    identity.organisation.opened.v1:
+      name: identity.organisation.opened
+      title: identity.organisation.opened v1
+      summary: An organisation was opened; with tenants, it is a new tenant.
+      contentType: application/json
+      tags:
+        - name: identity
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: identity.organisation.opened
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              organisationId:
+                type: string
+              name:
+                type: string
+              openedBy:
+                type: string
+            type: object
+            required:
+              - organisationId
+              - name
+              - openedBy
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
     privacy.data-subject.erased.v1:
       name: privacy.data-subject.erased
       title: privacy.data-subject.erased v1

@@ -4,10 +4,32 @@ import { inertPersistence } from '@/platform/database/inert-persistence';
 import { inProcessEvents } from '@/platform/events/in-process-events';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { identityModule } from '@/contexts/identity/identity.module';
+import { dataProtectionModule } from '@/contexts/data-protection/data-protection.module';
+import { creditPolicyModule } from '@/contexts/credit-policy/credit-policy.module';
+import { creditScoringModule } from '@/contexts/credit-scoring/credit-scoring.module';
+import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
+import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
+import { branchNetworkModule } from '@/contexts/branch-network/branch-network.module';
+import { creditApplicationModule } from '@/contexts/credit-application/credit-application.module';
+import { servicingModule } from '@/contexts/servicing/servicing.module';
+import { financialCrimeModule } from '@/contexts/financial-crime/financial-crime.module';
+import { reportingModule } from '@/contexts/reporting/reporting.module';
 // /ddd-ts-kit:imports
 
 const contexts: readonly (readonly [string, (platform: Platform) => { readonly name: string }])[] = [
   // ddd-ts-kit:contexts
+  ['identity', identityModule],
+  ['data-protection', dataProtectionModule],
+  ['credit-policy', creditPolicyModule],
+  ['credit-scoring', creditScoringModule],
+  ['brokerage', brokerageModule],
+  ['customer-due-diligence', customerDueDiligenceModule],
+  ['branch-network', branchNetworkModule],
+  ['credit-application', creditApplicationModule],
+  ['servicing', servicingModule],
+  ['financial-crime', financialCrimeModule],
+  ['reporting', reportingModule],
   // /ddd-ts-kit:contexts
 ];
 

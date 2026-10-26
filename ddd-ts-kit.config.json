@@ -41,7 +41,159 @@
     "packageManager": "npm",
     "tenancy": "shared-table"
   },
-  "contexts": {},
+  "contexts": {
+    "identity": {
+      "classification": "generic",
+      "upstreams": []
+    },
+    "data-protection": {
+      "classification": "supporting",
+      "upstreams": [
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        }
+      ]
+    },
+    "credit-policy": {
+      "classification": "supporting",
+      "upstreams": []
+    },
+    "credit-scoring": {
+      "classification": "core",
+      "upstreams": []
+    },
+    "brokerage": {
+      "classification": "supporting",
+      "upstreams": [
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        }
+      ]
+    },
+    "customer-due-diligence": {
+      "classification": "supporting",
+      "upstreams": [
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        },
+        {
+          "context": "data-protection",
+          "relationship": "customer-supplier"
+        }
+      ]
+    },
+    "branch-network": {
+      "classification": "supporting",
+      "upstreams": [
+        {
+          "context": "customer-due-diligence",
+          "relationship": "published-language"
+        },
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        }
+      ]
+    },
+    "credit-application": {
+      "classification": "core",
+      "upstreams": [
+        {
+          "context": "credit-policy",
+          "relationship": "published-language"
+        },
+        {
+          "context": "credit-scoring",
+          "relationship": "customer-supplier"
+        },
+        {
+          "context": "customer-due-diligence",
+          "relationship": "customer-supplier"
+        },
+        {
+          "context": "brokerage",
+          "relationship": "published-language"
+        },
+        {
+          "context": "branch-network",
+          "relationship": "published-language"
+        },
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        }
+      ],
+      "modules": {
+        "file": {},
+        "assessment": {},
+        "decision": {},
+        "offer": {}
+      }
+    },
+    "servicing": {
+      "classification": "supporting",
+      "upstreams": [
+        {
+          "context": "credit-application",
+          "relationship": "published-language"
+        },
+        {
+          "context": "credit-policy",
+          "relationship": "published-language"
+        },
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        },
+        {
+          "context": "data-protection",
+          "relationship": "customer-supplier"
+        }
+      ],
+      "modules": {
+        "ledger": {},
+        "instalments": {},
+        "arrears": {}
+      }
+    },
+    "financial-crime": {
+      "classification": "supporting",
+      "upstreams": [
+        {
+          "context": "servicing",
+          "relationship": "published-language"
+        },
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        }
+      ]
+    },
+    "reporting": {
+      "classification": "supporting",
+      "upstreams": [
+        {
+          "context": "credit-application",
+          "relationship": "published-language"
+        },
+        {
+          "context": "servicing",
+          "relationship": "published-language"
+        },
+        {
+          "context": "branch-network",
+          "relationship": "published-language"
+        },
+        {
+          "context": "identity",
+          "relationship": "conformist"
+        }
+      ]
+    }
+  },
   "rules": {},
   "domainAllowedPackages": ["@ddd-ts-kit/kernel"],
   "applicationAllowedPackages": ["@ddd-ts-kit/kernel", "@ddd-ts-kit/auth"],

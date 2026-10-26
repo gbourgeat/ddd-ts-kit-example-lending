@@ -1,14 +1,13 @@
-import { InMemoryTenantDirectory, type TenantDirectory } from '@ddd-ts-kit/kernel';
+import type { TenantDirectory } from '@ddd-ts-kit/kernel';
 import type { Persistence } from '@/platform/database/persistence';
+import { PrismaOrganisationTenantDirectory } from '@/contexts/identity/infrastructure/persistence/prisma-organisation-tenant-directory.reader';
 
 /**
- * The tenants a job declared `per-tenant` runs for, asked again at each occurrence.
- *
- * The project has no source of tenants yet, so this is the list of `TENANTS`, read once when the
- * process starts: an organisation or a customer created later gets no run of such a job until the
- * process restarts. Where the tenants live in the database, read them here instead (the identity
- * preset writes this file that way: its organisations are the tenants).
+ * The tenants a job declared `per-tenant` runs for, asked again at each occurrence: the
+ * organisations of the identity context, read from the database. An organisation opened
+ * after the process started gets its run at the next occurrence, with no restart. `TENANTS` is
+ * not read here: it is the list of a project with no source of tenants.
  */
-export function tenantDirectory(_persistence: Persistence, fixed: readonly string[] = []): TenantDirectory {
-  return new InMemoryTenantDirectory(fixed);
+export function tenantDirectory(persistence: Persistence, _fixed: readonly string[] = []): TenantDirectory {
+  return new PrismaOrganisationTenantDirectory(persistence.database);
 }

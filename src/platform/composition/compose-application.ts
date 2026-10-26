@@ -22,6 +22,17 @@ import type { Platform } from '@/platform/composition/platform';
 import type { PlatformOptions } from '@/platform/composition/platform-options';
 import { runPurge } from '@/platform/privacy/run-purge';
 // ddd-ts-kit:imports
+import { identityModule } from '@/contexts/identity/identity.module';
+import { dataProtectionModule } from '@/contexts/data-protection/data-protection.module';
+import { creditPolicyModule } from '@/contexts/credit-policy/credit-policy.module';
+import { creditScoringModule } from '@/contexts/credit-scoring/credit-scoring.module';
+import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
+import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
+import { branchNetworkModule } from '@/contexts/branch-network/branch-network.module';
+import { creditApplicationModule } from '@/contexts/credit-application/credit-application.module';
+import { servicingModule } from '@/contexts/servicing/servicing.module';
+import { financialCrimeModule } from '@/contexts/financial-crime/financial-crime.module';
+import { reportingModule } from '@/contexts/reporting/reporting.module';
 // /ddd-ts-kit:imports
 
 interface ContextWiring {
@@ -43,6 +54,17 @@ type ContextModule = (platform: Platform) => ContextWiring;
 
 export const everyContext: readonly ContextModule[] = [
   // ddd-ts-kit:contexts
+  identityModule,
+  dataProtectionModule,
+  creditPolicyModule,
+  creditScoringModule,
+  brokerageModule,
+  customerDueDiligenceModule,
+  branchNetworkModule,
+  creditApplicationModule,
+  servicingModule,
+  financialCrimeModule,
+  reportingModule,
   // /ddd-ts-kit:contexts
 ];
 
