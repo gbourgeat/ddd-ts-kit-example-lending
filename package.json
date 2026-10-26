@@ -110,7 +110,7 @@
     "@ddd-ts-kit/eslint-plugin": "^0.94.1",
     "@ddd-ts-kit/testing": "^0.94.1",
     "@electric-sql/pglite": "0.5.9",
-    "@electric-sql/pglite-socket": "0.2.12",
+    "@electric-sql/pglite-socket": "0.2.14",
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.6.0",
     "@jest/globals": "^30.5.2",
