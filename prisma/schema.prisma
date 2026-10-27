@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["messaging", "event_store", "audit", "identity", "branch_network"]
+  schemas  = ["messaging", "event_store", "audit", "identity", "branch_network", "credit_policy"]
 }
 
 // The outbox and the idempotency table, from @ddd-ts-kit/prisma. Keep the field names: the
@@ -259,6 +259,90 @@ model BranchNetworkConflictOfInterest {
   @@index([tenantId, id], map: "conflict_of_interests_tenant_idx")
   @@map("conflict_of_interests")
   @@schema("branch_network")
+}
+
+model CreditPolicyProduct {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  scoreThreshold Int @map("score_threshold")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "products_tenant_idx")
+  @@map("products")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyRateGrid {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  productId    String @map("product_id")
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "rate_grids_tenant_idx")
+  @@map("rate_grids")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyLegalMaximumRate {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  category     String @map("category")
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "legal_maximum_rates_tenant_idx")
+  @@map("legal_maximum_rates")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyDelegationTable {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "delegation_tables_tenant_idx")
+  @@map("delegation_tables")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyResidualIncomeMinimum {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  perAdultInCents Int @map("per_adult_in_cents")
+  perChildInCents Int @map("per_child_in_cents")
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "residual_income_minimums_tenant_idx")
+  @@map("residual_income_minimums")
+  @@schema("credit_policy")
 }
 // /ddd-ts-kit:models
 
