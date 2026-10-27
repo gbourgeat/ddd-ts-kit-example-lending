@@ -28,6 +28,8 @@ import { ScreenCustomerCommand } from '@/contexts/customer-due-diligence/applica
 import { ScreenCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/screen-customer/screen-customer.handler';
 import { CustomerAdvisorAssignedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-advisor-assigned.publisher';
 import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
+import { ConfirmSanctionsMatchCommand } from '@/contexts/customer-due-diligence/application/commands/confirm-sanctions-match/confirm-sanctions-match.command';
+import { ConfirmSanctionsMatchHandler } from '@/contexts/customer-due-diligence/application/commands/confirm-sanctions-match/confirm-sanctions-match.handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -106,6 +108,12 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new ScreenCustomerHandler(customerRepository, screeningProvider, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    ConfirmSanctionsMatchCommand,
+    new ConfirmSanctionsMatchHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -182,6 +190,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(ScreenCustomerCommand, customerDueDiligencePermissions['customer.screen'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(ConfirmSanctionsMatchCommand, customerDueDiligencePermissions['match.confirm'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

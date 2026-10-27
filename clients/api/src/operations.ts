@@ -789,6 +789,39 @@ export function declareDirectorsAndOwners(
   return send<DeclareDirectorsAndOwnersResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ConfirmSanctionsMatchInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ConfirmSanctionsMatchResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'NO_POSSIBLE_MATCH' | 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Confirm the possible match of a customer as a sanctions match, which ends the relationship: `POST /customers/{id}/matches/confirm`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), NO_POSSIBLE_MATCH (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function confirmSanctionsMatch(
+  connection: Connection,
+  input: ConfirmSanctionsMatchInput,
+  options: CallOptions = {},
+): Promise<ConfirmSanctionsMatchResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{id}/matches/confirm',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ConfirmSanctionsMatchResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ScreenCustomerInput {
   readonly path: {
     readonly id: string;

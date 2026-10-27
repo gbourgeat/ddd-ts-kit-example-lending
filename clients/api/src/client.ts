@@ -137,6 +137,12 @@ export interface Client {
    */
   declareDirectorsAndOwners(input: operations.DeclareDirectorsAndOwnersInput, options?: CallOptions): Promise<operations.DeclareDirectorsAndOwnersResult>;
   /**
+   * Confirm the possible match of a customer as a sanctions match, which ends the relationship: `POST /customers/{id}/matches/confirm`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), NO_POSSIBLE_MATCH (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  confirmSanctionsMatch(input: operations.ConfirmSanctionsMatchInput, options?: CallOptions): Promise<operations.ConfirmSanctionsMatchResult>;
+  /**
    * Screen a customer against the sanctions and politically exposed lists: `POST /customers/{id}/screening`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
@@ -282,6 +288,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
     assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
+    confirmSanctionsMatch: (input, call) => operations.confirmSanctionsMatch(connection, input, call),
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
