@@ -23,6 +23,7 @@ Anti-money-laundering is a legal duty that supports the business; its restricted
 | Financial intelligence unit | The public unit that receives suspicious activity reports | Supervisor (reporting) |
 | Raised | an alert is raised on a repayment that needs a compliance review |  |
 | Filed | a suspicious activity report is filed with the financial intelligence unit |  |
+| Rule | a condition under which a repayment raises an alert: an early repayment above the threshold within a year of the payout, or a payer account not the borrower's |  |
 
 ## Aggregates
 
@@ -45,7 +46,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `financial-crime:alert.raise`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -86,11 +87,17 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `servicing` (published-language), `identity` (conformist); downstreams: none.
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `RaiseAlert` | command | `alert.raise` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `AlertRepository` | external | `PrismaAlertRepository` |
+| `AlertRepository` | repository | `PrismaAlertRepository` |
 | `FinancialIntelligenceUnit` | external | `RemoteFinancialIntelligenceUnit` |
 | `SuspiciousActivityReportRepository` | external | `PrismaSuspiciousActivityReportRepository` |
 <!-- /ddd-ts-kit:reference -->
