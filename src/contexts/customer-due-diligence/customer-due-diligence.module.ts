@@ -30,6 +30,10 @@ import { CustomerAdvisorAssignedPublisher } from '@/contexts/customer-due-dilige
 import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 import { ConfirmSanctionsMatchCommand } from '@/contexts/customer-due-diligence/application/commands/confirm-sanctions-match/confirm-sanctions-match.command';
 import { ConfirmSanctionsMatchHandler } from '@/contexts/customer-due-diligence/application/commands/confirm-sanctions-match/confirm-sanctions-match.handler';
+import { EndRelationshipCommand } from '@/contexts/customer-due-diligence/application/commands/end-relationship/end-relationship.command';
+import { EndRelationshipHandler } from '@/contexts/customer-due-diligence/application/commands/end-relationship/end-relationship.handler';
+import { EndRelationshipOnSanctionsMatchEventHandler } from '@/contexts/customer-due-diligence/application/event-handlers/end-relationship-on-sanctions-match.event-handler';
+import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -114,6 +118,10 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new ConfirmSanctionsMatchHandler(customerRepository, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(EndRelationshipCommand, new EndRelationshipHandler(customerRepository, platform.clock), {
+    context: 'customer-due-diligence',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -161,6 +169,17 @@ function registerReactions(platform: Platform): void {
       await customerAdvisorAssignedPublisher.handle(event);
     }
   });
+
+  const endRelationshipOnSanctionsMatchEventHandler = platform.adapter(
+    new EndRelationshipOnSanctionsMatchEventHandler(platform.commands),
+    { kind: 'domain-event-handler', context: 'customer-due-diligence' },
+  );
+
+  platform.domainEvents.on(CustomerSanctionsMatchConfirmed.eventName, async (event) => {
+    if (event instanceof CustomerSanctionsMatchConfirmed) {
+      await endRelationshipOnSanctionsMatchEventHandler.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 
@@ -193,6 +212,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(ConfirmSanctionsMatchCommand, customerDueDiligencePermissions['match.confirm'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(EndRelationshipCommand, customerDueDiligencePermissions['relationship.end'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

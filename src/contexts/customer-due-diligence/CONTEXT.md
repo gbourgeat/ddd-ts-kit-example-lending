@@ -47,6 +47,8 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Found | The screening found a person on a list: a possible match, waiting for compliance review |  |
 | Confirmed | Said of a possible match that compliance has confirmed: it becomes a sanctions match |  |
 | Confirm | Compliance decides that a possible match is a sanctions match |  |
+| Ended | Said of a business relationship the bank has ended: a confirmed sanctions match ends it |  |
+| End | The bank ends its business relationship with a customer |  |
 
 ## Aggregates
 
@@ -77,6 +79,7 @@ No personal data declared.
 - `customer-due-diligence:customer.assign-advisor`
 - `customer-due-diligence:customer.screen`
 - `customer-due-diligence:match.confirm`
+- `customer-due-diligence:relationship.end`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -126,6 +129,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AssignAdvisor` | command | `customer.assign-advisor` |
 | `ConfirmSanctionsMatch` | command | `match.confirm` |
 | `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
+| `EndRelationship` | command | `relationship.end` |
 | `GetCustomerFile` | query | `customer.read` |
 | `IdentifyCustomer` | command | `customer.identify` |
 | `RegisterBusiness` | command | `business.register` |

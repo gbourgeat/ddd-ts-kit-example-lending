@@ -23,6 +23,7 @@ describe('Confirm sanctions match, end to end', () => {
 
   beforeEach(async () => {
     await application.reset();
+    await grantReactionActor(application);
   });
 
   it('answers 401 to a caller who presents no credential', async () => {
@@ -97,7 +98,7 @@ describe('Confirm sanctions match, end to end', () => {
     expect(response.body).toMatchObject({ code: 'UNKNOWN_CUSTOMER' });
   });
 
-  it('is one trace: the request, the use case and what it saves', async () => {
+  it('is one trace: the request, the use case, the reaction it runs and what it saves', async () => {
     application.screening.record('Ada Lovelace', new Date(ADA_BIRTH_DATE));
     const compliance = await operatorOf(application, 'compliance');
     const { id } = (await compliance.post('/customers', aPersonBody('12AB34567'))).body as { id: string };
@@ -109,27 +110,71 @@ describe('Confirm sanctions match, end to end', () => {
     });
 
     // Exact on names and structure: the request, the use case, its reads and the save of the customer.
-    expectSpanTree(storyOf(trace), [
+    expectSpanTree(storyOf(trace), confirmationTree());
+  });
+});
+
+/**
+ * The system actor of the reaction to a confirmed match. The reset empties the relationship tuples, the system grant
+ * the application wrote at its start included, so the grant is written again after each reset.
+ */
+async function grantReactionActor(application: RunningApplication): Promise<void> {
+  await application.relate({
+    object: 'context:customer-due-diligence',
+    relation: 'operator',
+    subject: 'system:system:EndRelationshipOnSanctionsMatchEventHandler',
+  });
+}
+
+/** The spans of one confirmation: the request, the command, its save, the reaction, then the relationship's end. */
+function confirmationTree(): Parameters<typeof expectSpanTree>[1] {
+  return [
+    {
+      name: 'POST /customers/:id/matches/confirm',
+      kind: 'SERVER',
+      children: [
+        {
+          name: 'command ConfirmSanctionsMatchCommand',
+          children: [
+            { name: 'repository CustomerRepository.findById' },
+            { name: 'repository CustomerRepository.save' },
+            reactionSpan(),
+            {
+              name: 'unit-of-work before-commit',
+              children: [{ name: 'domain-event customer-due-diligence.customer.relationship-ended' }],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+}
+
+/** The reaction to the confirmed match: its event, its handler, and the command the handler sends as the system. */
+function reactionSpan() {
+  return {
+    name: 'unit-of-work before-commit',
+    children: [
       {
-        name: 'POST /customers/:id/matches/confirm',
-        kind: 'SERVER',
+        name: 'domain-event customer-due-diligence.customer.sanctions-match-confirmed',
         children: [
           {
-            name: 'command ConfirmSanctionsMatchCommand',
+            name: 'handler EndRelationshipOnSanctionsMatchEventHandler',
             children: [
-              { name: 'repository CustomerRepository.findById' },
-              { name: 'repository CustomerRepository.save' },
               {
-                name: 'unit-of-work before-commit',
-                children: [{ name: 'domain-event customer-due-diligence.customer.sanctions-match-confirmed' }],
+                name: 'command EndRelationshipCommand',
+                children: [
+                  { name: 'repository CustomerRepository.findById' },
+                  { name: 'repository CustomerRepository.save' },
+                ],
               },
             ],
           },
         ],
       },
-    ]);
-  });
-});
+    ],
+  };
+}
 
 /** The names of every span of a trace, the spans under each of them included. */
 function spanNamesOf(trace: readonly SpanNode[]): string[] {

@@ -8,6 +8,7 @@ import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-dili
 import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
+import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 
 interface CustomerBusinessRegisteredData {
   readonly legalName: string;
@@ -28,6 +29,8 @@ interface CustomerAdvisorAssignedData {
 type CustomerPossibleMatchFoundData = Record<string, never>;
 
 type CustomerSanctionsMatchConfirmedData = Record<string, never>;
+
+type CustomerRelationshipEndedData = Record<string, never>;
 
 /** The identity facts of version 2 of the birth; the document number and the address are personal, sealed by subject. */
 interface PersonIdentityData {
@@ -111,6 +114,11 @@ export const customerEvents: StoredEventTypes<CustomerEvent> = {
     version: 1,
     encode: (): CustomerSanctionsMatchConfirmedData => ({}),
     decode: (_data, { aggregateId, occurredAt }) => new CustomerSanctionsMatchConfirmed(aggregateId, occurredAt),
+  }),
+  [CustomerRelationshipEnded.eventName]: defineStoredEvent(CustomerRelationshipEnded, {
+    version: 1,
+    encode: (): CustomerRelationshipEndedData => ({}),
+    decode: (_data, { aggregateId, occurredAt }) => new CustomerRelationshipEnded(aggregateId, occurredAt),
   }),
 };
 

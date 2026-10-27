@@ -10,6 +10,7 @@ import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-dili
 import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
+import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
@@ -23,7 +24,8 @@ export type CustomerEvent =
   | CustomerDirectorsAndOwnersDeclared
   | CustomerAdvisorAssigned
   | CustomerPossibleMatchFound
-  | CustomerSanctionsMatchConfirmed;
+  | CustomerSanctionsMatchConfirmed
+  | CustomerRelationshipEnded;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -46,6 +48,7 @@ export interface CustomerState {
   readonly advisorId?: string;
   readonly possibleMatchFoundAt?: Date;
   readonly sanctionsMatchConfirmedAt?: Date;
+  readonly relationshipEndedAt?: Date;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -126,6 +129,15 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerSanctionsMatchConfirmed(this.id, now));
   }
 
+  /** Ends the business relationship with the customer; ending one already ended records nothing, so a repeated reaction is safe. */
+  endRelationship(now: Date): void {
+    if (this.state.relationshipEndedAt !== undefined) {
+      return;
+    }
+
+    this.record(new CustomerRelationshipEnded(this.id, now));
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
@@ -138,6 +150,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerAdvisorAssigned.eventName]: (event) => this.applyAdvisorAssigned(event),
       [CustomerPossibleMatchFound.eventName]: (event) => this.applyPossibleMatchFound(event),
       [CustomerSanctionsMatchConfirmed.eventName]: (event) => this.applySanctionsMatchConfirmed(event),
+      [CustomerRelationshipEnded.eventName]: (event) => this.applyRelationshipEnded(event),
     };
   }
 
@@ -197,5 +210,9 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
 
   private hasPendingPossibleMatch(): boolean {
     return this.state.possibleMatchFoundAt !== undefined && this.state.sanctionsMatchConfirmedAt === undefined;
+  }
+
+  private applyRelationshipEnded(event: CustomerRelationshipEnded): void {
+    this.state = { ...this.state, relationshipEndedAt: event.occurredAt };
   }
 }

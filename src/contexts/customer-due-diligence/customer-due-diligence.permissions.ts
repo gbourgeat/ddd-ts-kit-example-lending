@@ -9,5 +9,6 @@ export const customerDueDiligencePermissions = definePermissions('customer-due-d
   'customer.assign-advisor': { description: 'Assign advisor' },
   'customer.screen': { description: 'Screen customer' },
   'match.confirm': { description: 'Confirm sanctions match' },
+  'relationship.end': { description: 'End relationship' },
   // /ddd-ts-kit:permissions
 });
