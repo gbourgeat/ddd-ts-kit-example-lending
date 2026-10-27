@@ -23,12 +23,21 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | Type | Version | Description | Deprecated |
 | --- | --- | --- | --- |
 | `branch-network.staff-member.appointed` | 1 | A member of staff of a bank has been appointed. | no |
+| `branch-network.staff-member.appointed` | 2 | A member of staff was appointed to a branch, with the level of the appointment. | no |
 
 #### Payload of version 1
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `staffMemberId` | string | yes |  |
+
+#### Payload of version 2
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `staffMemberId` | string | yes |  |
+| `branchId` | string | yes |  |
+| `level` | string | yes |  |
 
 ## brokerage
 
@@ -63,6 +72,7 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | Type | Version | Description | Deprecated |
 | --- | --- | --- | --- |
 | `credit-application.credit-application.submitted` | 1 | A borrower or a broker has submitted a loan request: the application file is open, with its applicant, amount in cents and duration in months. | no |
+| `credit-application.credit-application.submitted` | 2 | A credit application was submitted, for an amount and a duration, on a branch. | no |
 
 #### Payload of version 1
 
@@ -73,6 +83,16 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `requestedAmountCents` | integer | yes |  |
 | `durationMonths` | integer | yes |  |
 
+#### Payload of version 2
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
+| `applicantId` | string | yes |  |
+| `requestedAmountCents` | integer | yes |  |
+| `durationMonths` | integer | yes |  |
+| `branchId` | string | yes |  |
+
 ## credit-policy
 
 ### credit-policy.delegation-table.published
@@ -80,6 +100,7 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | Type | Version | Description | Deprecated |
 | --- | --- | --- | --- |
 | `credit-policy.delegation-table.published` | 1 | A delegation table of the bank has been published, by its identifier. | no |
+| `credit-policy.delegation-table.published` | 2 | A delegation table took effect: the amount each level of decider may approve, from its date of effect. | no |
 
 #### Payload of version 1
 
@@ -87,17 +108,37 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | --- | --- | --- | --- |
 | `delegationTableId` | string | yes |  |
 
+#### Payload of version 2
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `delegationTableId` | string | yes |  |
+| `effectiveFrom` | string (date) \| string (date-time) | yes |  |
+| `levels[]` | array of object | yes |  |
+| `levels[].level` | string | yes |  |
+| `levels[].amountCents` | integer | yes |  |
+
 ### credit-policy.legal-maximum-rate.published
 
 | Type | Version | Description | Deprecated |
 | --- | --- | --- | --- |
 | `credit-policy.legal-maximum-rate.published` | 1 | A legal maximum rate of a category of loan has been published, by its identifier, from its date of effect. | no |
+| `credit-policy.legal-maximum-rate.published` | 2 | A legal maximum rate of a category took effect: its rate in basis points, from its date of effect. | no |
 
 #### Payload of version 1
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `legalMaximumRateId` | string | yes |  |
+
+#### Payload of version 2
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `legalMaximumRateId` | string | yes |  |
+| `category` | string | yes |  |
+| `rateBasisPoints` | integer | yes |  |
+| `effectiveFrom` | string (date) \| string (date-time) | yes |  |
 
 ### credit-policy.product.defined
 
@@ -116,12 +157,21 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | Type | Version | Description | Deprecated |
 | --- | --- | --- | --- |
 | `credit-policy.rate-grid.published` | 1 | A rate grid of a product has been published, by its identifier. | no |
+| `credit-policy.rate-grid.published` | 2 | A rate grid of a product took effect, from its date of effect. | no |
 
 #### Payload of version 1
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `rateGridId` | string | yes |  |
+
+#### Payload of version 2
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `rateGridId` | string | yes |  |
+| `productId` | string | yes |  |
+| `effectiveFrom` | string (date) \| string (date-time) | yes |  |
 
 ### credit-policy.residual-income-minimum.published
 

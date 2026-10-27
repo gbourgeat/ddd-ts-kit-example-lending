@@ -90,6 +90,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 
 <!-- ddd-ts-kit:events -->
 - `credit-application.credit-application.submitted` (version 1)
+- `credit-application.credit-application.submitted` (version 2)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -178,7 +179,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Versions | Publisher |
 |---|---|---|
-| `credit-application.credit-application.submitted` | 1 | `CreditApplicationSubmittedPublisher` |
+| `credit-application.credit-application.submitted` | 1, 2 | `CreditApplicationSubmittedPublisher` |
 
 ### Projections
 

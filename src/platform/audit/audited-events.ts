@@ -9,8 +9,15 @@ import {
   delegationGrantedV1,
   delegationRevokedV1,
 } from '@/contexts/identity/published-language';
-import { creditApplicationSubmittedV1 } from '@/contexts/credit-application/published-language';
-import { conflictOfInterestDeclaredV1, staffMemberAppointedV1 } from '@/contexts/branch-network/published-language';
+import {
+  creditApplicationSubmittedV1,
+  creditApplicationSubmittedV2,
+} from '@/contexts/credit-application/published-language';
+import {
+  conflictOfInterestDeclaredV1,
+  staffMemberAppointedV1,
+  staffMemberAppointedV2,
+} from '@/contexts/branch-network/published-language';
 import { customerIdentifiedV1, customerAdvisorAssignedV1 } from '@/contexts/customer-due-diligence/published-language';
 import {
   productDefinedV1,
@@ -18,6 +25,9 @@ import {
   rateGridPublishedV1,
   delegationTablePublishedV1,
   residualIncomeMinimumPublishedV1,
+  legalMaximumRatePublishedV2,
+  delegationTablePublishedV2,
+  rateGridPublishedV2,
 } from '@/contexts/credit-policy/published-language';
 import { brokerRegisteredV1, brokerRegistrationLapsedV1 } from '@/contexts/brokerage/published-language';
 // /ddd-ts-kit:imports
@@ -44,5 +54,10 @@ export const auditedEvents = createEventRegistry([
   customerAdvisorAssignedV1,
   brokerRegisteredV1,
   brokerRegistrationLapsedV1,
+  legalMaximumRatePublishedV2,
+  delegationTablePublishedV2,
+  staffMemberAppointedV2,
+  rateGridPublishedV2,
+  creditApplicationSubmittedV2,
   // /ddd-ts-kit:events
 ]);
