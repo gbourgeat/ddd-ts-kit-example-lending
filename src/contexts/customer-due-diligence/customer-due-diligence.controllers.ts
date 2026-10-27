@@ -3,6 +3,7 @@ import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { RegisterBusinessController } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.controller';
+import { GetCustomerFileController } from '@/contexts/customer-due-diligence/presentation/http/customer-files/get-customer-file/get-customer-file.controller';
 import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
@@ -15,6 +16,7 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   withSignatures(RegisterBusinessController, {
     registerBusiness: { body: RegisterBusinessBody, answer: acceptedSchema },
   }),
+  withSignatures(GetCustomerFileController, {}),
   withSignatures(DeclareDirectorsAndOwnersController, {
     declareDirectorsAndOwners: {
       params: DeclareDirectorsAndOwnersParams,

@@ -15,6 +15,10 @@ import { IdentifyCustomerCommand } from '@/contexts/customer-due-diligence/appli
 import { IdentifyCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/identify-customer/identify-customer.handler';
 import { DeclareDirectorsAndOwnersCommand } from '@/contexts/customer-due-diligence/application/commands/declare-directors-and-owners/declare-directors-and-owners.command';
 import { DeclareDirectorsAndOwnersHandler } from '@/contexts/customer-due-diligence/application/commands/declare-directors-and-owners/declare-directors-and-owners.handler';
+import { GetCustomerFileHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-file/get-customer-file.handler';
+import { GetCustomerFileQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-file/get-customer-file.query';
+import { InMemoryGetCustomerFileReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/in-memory-get-customer-file.reader';
+import { CustomerFileOnIdentifiedEventHandler } from '@/contexts/customer-due-diligence/application/event-handlers/customer-file-on-identified.event-handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -61,6 +65,15 @@ function registerHandlers(platform: Platform): void {
     new DeclareDirectorsAndOwnersHandler(customerRepository, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
+  const getCustomerFileReader = platform.adapter(new InMemoryGetCustomerFileReader(), {
+    kind: 'repository',
+    context: 'customer-due-diligence',
+  });
+
+  platform.queries.register(GetCustomerFileQuery, new GetCustomerFileHandler(getCustomerFileReader, platform.access), {
+    context: 'customer-due-diligence',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -75,6 +88,17 @@ function registerReactions(platform: Platform): void {
   platform.domainEvents.on(CustomerIdentified.eventName, async (event) => {
     if (event instanceof CustomerIdentified) {
       await customerIdentifiedPublisher.handle(event);
+    }
+  });
+
+  const customerFileOnIdentifiedEventHandler = platform.adapter(new CustomerFileOnIdentifiedEventHandler(), {
+    kind: 'domain-event-handler',
+    context: 'customer-due-diligence',
+  });
+
+  platform.domainEvents.on(CustomerIdentified.eventName, async (event) => {
+    if (event instanceof CustomerIdentified) {
+      await customerFileOnIdentifiedEventHandler.handle(event);
     }
   });
   // /ddd-ts-kit:reactions
@@ -97,6 +121,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(DeclareDirectorsAndOwnersCommand, customerDueDiligencePermissions['business.declare-owners'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(GetCustomerFileQuery, customerDueDiligencePermissions['customer.read'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization
