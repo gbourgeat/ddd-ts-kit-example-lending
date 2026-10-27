@@ -23,9 +23,25 @@ describe('Check registration, when its time comes', () => {
     expect(sent[0]).toMatchObject({ actor: { id: 'system:brokerage.check-registration', type: 'system' } });
   });
 
-  // TODO(domain): replace each entry below by a test of what "check registration" asks of the use case: the period it names from `scheduledAt`, and that a second run of the same occurrence changes nothing.
-  it.todo('names the period of the occurrence, never the instant it really runs');
-  it.todo('has the same outcome when the same occurrence runs twice');
+  it('names the day of the occurrence, never the instant the check really runs', async () => {
+    const { job, sent } = arrange();
+
+    await job.run(occurrence);
+
+    expect(sent[0]).toMatchObject({ day: occurrence.scheduledAt });
+  });
+
+  it('asks for the same day when the same occurrence runs twice', async () => {
+    const { job, sent } = arrange();
+
+    await job.run(occurrence);
+    await job.run(occurrence);
+
+    expect(sent.map((message) => (message as CheckRegistrationCommand).day)).toEqual([
+      occurrence.scheduledAt,
+      occurrence.scheduledAt,
+    ]);
+  });
 });
 
 function arrange() {
