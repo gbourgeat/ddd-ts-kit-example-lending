@@ -141,5 +141,16 @@
   },
   "workspaces": [
     "clients/*"
-  ]
+  ],
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "prisma@7.10.1": true,
+    "@confluentinc/kafka-javascript@1.11.0": true,
+    "@swc/core@1.16.20": true,
+    "esbuild@0.28.2": true,
+    "unrs-resolver@1.12.2": true,
+    "lefthook@2.2.2": true,
+    "@parcel/watcher@2.6.0": true,
+    "protobufjs@7.6.6": true
+  }
 }
