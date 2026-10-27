@@ -34,6 +34,7 @@ const elements: SchemaDefinition = {
     derived: {
       'credit-application:application.submit': 'self',
       'data-protection:data-subject.request-copy': 'self',
+      'branch-network:portfolio.search-customers': { anyOf: ['advisor'], butNot: ['conflicted'] },
       advisor: via('portfolio', 'advisor'),
     },
   },
@@ -78,6 +79,7 @@ export const relationshipSchema = defineSchema({
           .map((permission) => [permission.id, 'operator']),
       ),
       'data-protection:data.erase': { anyOf: ['operator', 'eraser'] },
+      'data-protection:data-subject.request-copy': 'operator',
     },
   },
   ...elements,
