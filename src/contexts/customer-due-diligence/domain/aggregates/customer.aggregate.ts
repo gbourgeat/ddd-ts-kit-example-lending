@@ -6,6 +6,8 @@ import { BusinessNotRegistered } from '@/contexts/customer-due-diligence/domain/
 import { IdentityDocumentExpired } from '@/contexts/customer-due-diligence/domain/errors/identity-document-expired.error';
 import { ProofOfAddressTooOld } from '@/contexts/customer-due-diligence/domain/errors/proof-of-address-too-old.error';
 import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
+import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
+import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
@@ -13,7 +15,12 @@ type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
 /** A proof of address is accepted for this many months after its date. */
 const PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS = 3;
 
-export type CustomerEvent = CustomerIdentified | CustomerBusinessRegistered | CustomerDirectorsAndOwnersDeclared;
+export type CustomerEvent =
+  | CustomerIdentified
+  | CustomerBusinessRegistered
+  | CustomerDirectorsAndOwnersDeclared
+  | CustomerAdvisorAssigned
+  | CustomerPossibleMatchFound;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -33,6 +40,8 @@ export interface CustomerState {
   readonly registeredAt: Date;
   readonly business?: BusinessRegistration;
   readonly ownersDeclaredAt?: Date;
+  readonly advisorId?: string;
+  readonly possibleMatchFoundAt?: Date;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -94,6 +103,16 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerDirectorsAndOwnersDeclared(this.id, now, owners.directors, owners.beneficialOwners));
   }
 
+  /** Gives the customer its advisor; a later assignment replaces the advisor, the earlier one is kept in the events. */
+  assignAdvisor(advisorId: string, now: Date): void {
+    this.record(new CustomerAdvisorAssigned(this.id, now, advisorId));
+  }
+
+  /** Records that the screening found a person on a list: a possible match, which waits for compliance review and is never decided here. */
+  recordPossibleMatch(now: Date): void {
+    this.record(new CustomerPossibleMatchFound(this.id, now));
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
@@ -103,6 +122,8 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerIdentified.eventName]: (event) => this.applyIdentified(event),
       [CustomerBusinessRegistered.eventName]: (event) => this.applyBusinessRegistered(event),
       [CustomerDirectorsAndOwnersDeclared.eventName]: (event) => this.applyDirectorsAndOwnersDeclared(event),
+      [CustomerAdvisorAssigned.eventName]: (event) => this.applyAdvisorAssigned(event),
+      [CustomerPossibleMatchFound.eventName]: (event) => this.applyPossibleMatchFound(event),
     };
   }
 
@@ -146,5 +167,13 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
 
   private applyDirectorsAndOwnersDeclared(event: CustomerDirectorsAndOwnersDeclared): void {
     this.state = { ...this.state, ownersDeclaredAt: event.occurredAt };
+  }
+
+  private applyAdvisorAssigned(event: CustomerAdvisorAssigned): void {
+    this.state = { ...this.state, advisorId: event.advisorId };
+  }
+
+  private applyPossibleMatchFound(event: CustomerPossibleMatchFound): void {
+    this.state = { ...this.state, possibleMatchFoundAt: event.occurredAt };
   }
 }

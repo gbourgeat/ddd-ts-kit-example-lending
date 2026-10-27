@@ -4,12 +4,18 @@ import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { RegisterBusinessController } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.controller';
 import { GetCustomerFileController } from '@/contexts/customer-due-diligence/presentation/http/customer-files/get-customer-file/get-customer-file.controller';
+import { AssignAdvisorController } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.controller';
 import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
+import { ScreenCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
+import { AssignAdvisorParams } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.params';
+import { AssignAdvisorBody } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.body';
 import { DeclareDirectorsAndOwnersParams } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.params';
 import { DeclareDirectorsAndOwnersBody } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.body';
 import { IdentifyCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.body';
+import { ScreenCustomerParams } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.params';
+import { ScreenCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.body';
 
 /** The Nest controllers of customer-due-diligence, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
@@ -17,6 +23,9 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
     registerBusiness: { body: RegisterBusinessBody, answer: acceptedSchema },
   }),
   withSignatures(GetCustomerFileController, {}),
+  withSignatures(AssignAdvisorController, {
+    assignAdvisor: { params: AssignAdvisorParams, body: AssignAdvisorBody, answer: acceptedSchema },
+  }),
   withSignatures(DeclareDirectorsAndOwnersController, {
     declareDirectorsAndOwners: {
       params: DeclareDirectorsAndOwnersParams,
@@ -26,5 +35,8 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(IdentifyCustomerController, {
     identifyCustomer: { body: IdentifyCustomerBody, answer: acceptedSchema },
+  }),
+  withSignatures(ScreenCustomerController, {
+    screenCustomer: { params: ScreenCustomerParams, body: ScreenCustomerBody, answer: acceptedSchema },
   }),
 ];
