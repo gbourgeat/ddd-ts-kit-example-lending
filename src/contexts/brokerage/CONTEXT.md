@@ -50,7 +50,9 @@ No personal data declared.
 ## Scheduled jobs
 
 <!-- ddd-ts-kit:jobs -->
-No scheduled job.
+| Job | Schedule | Command |
+|---|---|---|
+| `CheckRegistrationJob` | `` | `CheckRegistration` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs
