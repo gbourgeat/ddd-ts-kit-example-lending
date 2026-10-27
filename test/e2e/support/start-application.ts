@@ -148,6 +148,7 @@ function applicationOptions(
   return {
     events: eventsOf(config),
     authenticator: credentials.authenticator,
+    retention: config.retention,
     ...(redis === undefined ? {} : { redis }),
   };
 }

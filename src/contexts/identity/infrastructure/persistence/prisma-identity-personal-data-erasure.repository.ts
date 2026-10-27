@@ -1,4 +1,5 @@
 import { PrismaPersonalDataErasure } from '@ddd-ts-kit/prisma';
+import type { RetentionPeriod } from '@ddd-ts-kit/kernel';
 import type { IdentityPersonalDataErasure } from '@/contexts/identity/application/ports/identity-personal-data-erasure.port';
 import type { Prisma } from '$generated/prisma/client';
 import type { Database } from '@/platform/database/database';
@@ -17,13 +18,13 @@ export class PrismaIdentityPersonalDataErasure
   extends PrismaPersonalDataErasure<Prisma.TransactionClient>
   implements IdentityPersonalDataErasure
 {
-  constructor(database: Database) {
+  constructor(database: Database, invitations: RetentionPeriod) {
     super(database, {
       name: 'identity',
       declarations: [
         // ddd-ts-kit:personal-fields
         AccountPersonalFields,
-        InvitationPersonalFields,
+        { ...InvitationPersonalFields, retention: { after: 'expires_at', ...invitations } },
         // /ddd-ts-kit:personal-fields
       ],
     });
