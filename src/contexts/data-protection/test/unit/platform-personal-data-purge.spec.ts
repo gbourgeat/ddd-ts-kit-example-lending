@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { PlatformPersonalDataPurge } from '@/contexts/data-protection/infrastructure/platform/platform-personal-data-purge';
+import { PlatformPersonalDataPurge } from '@/contexts/data-protection/infrastructure/external/platform-personal-data-purge';
 
 describe('Platform personal data purge', () => {
   it('answers the rows that every copy of the platform purged', async () => {

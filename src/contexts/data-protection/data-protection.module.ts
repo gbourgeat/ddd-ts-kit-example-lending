@@ -8,7 +8,7 @@ import { CopyOfDataTimeoutBackgroundJob } from '@/contexts/data-protection/appli
 import { PrismaRetentionPeriodRepository } from '@/contexts/data-protection/infrastructure/persistence/prisma-retention-period.repository';
 import { requires } from '@ddd-ts-kit/auth';
 import { dataProtectionPermissions } from '@/contexts/data-protection/data-protection.permissions';
-import { PlatformPersonalDataPurge } from '@/contexts/data-protection/infrastructure/platform/platform-personal-data-purge';
+import { PlatformPersonalDataPurge } from '@/contexts/data-protection/infrastructure/external/platform-personal-data-purge';
 import { runPurge } from '@/platform/privacy/run-purge';
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
 import { ErasePersonalDataPastRetentionHandler } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
