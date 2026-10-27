@@ -149,7 +149,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Port | Kind | Adapters |
 |---|---|---|
+| `AccountInformationProvider` | external | `RemoteAccountInformationProvider` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
+| `ElectronicSignature` | external | `RemoteElectronicSignature` |
+| `RepaymentIncidentRegister` | external | `RemoteRepaymentIncidentRegister` |
 
 ### Errors
 

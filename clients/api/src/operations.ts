@@ -178,6 +178,114 @@ export function searchAuditEntries(
   return send<SearchAuditEntriesResult>(connection, operation, { ...input, ...options });
 }
 
+export interface OpenBranchInput {
+  readonly body: Record<string, unknown>;
+}
+
+export type OpenBranchResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Open branch: `POST /branches`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function openBranch(
+  connection: Connection,
+  input: OpenBranchInput,
+  options: CallOptions = {},
+): Promise<OpenBranchResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/branches',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<OpenBranchResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RegisterBusinessInput {
+  readonly body: {
+    customerId: string;
+    legalName: string;
+    registrationNumber: string;
+    countryOfRegistration: string;
+    registeredOn: string;
+  };
+}
+
+export type RegisterBusinessResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'BUSINESS_ALREADY_REGISTERED' | 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Register the business of a customer: `POST /businesses`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BUSINESS_ALREADY_REGISTERED (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function registerBusiness(
+  connection: Connection,
+  input: RegisterBusinessInput,
+  options: CallOptions = {},
+): Promise<RegisterBusinessResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/businesses',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RegisterBusinessResult>(connection, operation, { ...input, ...options });
+}
+
+export interface SetDelegationTableInput {
+  readonly body: {
+    effectiveFrom: string;
+    advisorLimitCents: number;
+    creditAnalystLimitCents: number;
+    riskManagerLimitCents: number;
+    creditCommitteeLimitCents: number;
+  };
+}
+
+export type SetDelegationTableResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Set delegation table: `PUT /delegation-table`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+ */
+export function setDelegationTable(
+  connection: Connection,
+  input: SetDelegationTableInput,
+  options: CallOptions = {},
+): Promise<SetDelegationTableResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/delegation-table',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<SetDelegationTableResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AcceptInvitationInput {
   readonly body: Schemas.InvitationToken;
 }
@@ -240,6 +348,42 @@ export function declineInvitation(
   };
 
   return send<DeclineInvitationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface PublishLegalMaximumRateInput {
+  readonly body: {
+    category: string;
+    rateBasisPoints: number;
+    effectiveFrom: string;
+  };
+}
+
+export type PublishLegalMaximumRateResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_LEGAL_MAXIMUM_RATE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Publish legal maximum rate: `POST /legal-maximum-rates`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+ */
+export function publishLegalMaximumRate(
+  connection: Connection,
+  input: PublishLegalMaximumRateInput,
+  options: CallOptions = {},
+): Promise<PublishLegalMaximumRateResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/legal-maximum-rates',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<PublishLegalMaximumRateResult>(connection, operation, { ...input, ...options });
 }
 
 export interface OpenOrganisationInput {
@@ -552,4 +696,114 @@ export function changeMemberRole(
   };
 
   return send<ChangeMemberRoleResult>(connection, operation, { ...input, ...options });
+}
+
+export interface DefineProductInput {
+  readonly body: {
+    amountMinimumCents: number;
+    amountMaximumCents: number;
+    durationMinimumMonths: number;
+    durationMaximumMonths: number;
+    arrangementFeeCents: number;
+    insuranceMandatory: boolean;
+    scoreThreshold: number;
+  };
+}
+
+export type DefineProductResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_ARRANGEMENT_FEE' | 'INVALID_SCORE_THRESHOLD' | 'PRODUCT_BOUNDS_INVERTED' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Define product: `POST /products`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
+ */
+export function defineProduct(
+  connection: Connection,
+  input: DefineProductInput,
+  options: CallOptions = {},
+): Promise<DefineProductResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/products',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DefineProductResult>(connection, operation, { ...input, ...options });
+}
+
+export interface PublishRateGridInput {
+  readonly body: {
+    productId: string;
+    effectiveFrom: string;
+  };
+}
+
+export type PublishRateGridResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Publish rate grid: `POST /rate-grids`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function publishRateGrid(
+  connection: Connection,
+  input: PublishRateGridInput,
+  options: CallOptions = {},
+): Promise<PublishRateGridResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/rate-grids',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<PublishRateGridResult>(connection, operation, { ...input, ...options });
+}
+
+export interface SetResidualIncomeMinimumInput {
+  readonly body: {
+    perAdultInCents: number;
+    perChildInCents: number;
+  };
+}
+
+export type SetResidualIncomeMinimumResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_RESIDUAL_INCOME_MINIMUM' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Set residual income minimum: `PUT /residual-income-minimums`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
+ */
+export function setResidualIncomeMinimum(
+  connection: Connection,
+  input: SetResidualIncomeMinimumInput,
+  options: CallOptions = {},
+): Promise<SetResidualIncomeMinimumResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/residual-income-minimums',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<SetResidualIncomeMinimumResult>(connection, operation, { ...input, ...options });
 }

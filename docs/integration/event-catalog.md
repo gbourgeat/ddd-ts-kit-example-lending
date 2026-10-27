@@ -2,6 +2,34 @@
 
 Generated from the integration event declarations. Do not edit by hand: regenerate.
 
+## branch-network
+
+### branch-network.conflict-of-interest.declared
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `branch-network.conflict-of-interest.declared` | 1 | A member of staff declared a link with a customer: they never prepare nor decide that customer's applications. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `conflictOfInterestId` | string | yes |  |
+| `staffMemberId` | string | yes |  |
+| `customerId` | string | yes |  |
+
+### branch-network.staff-member.appointed
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `branch-network.staff-member.appointed` | 1 | A member of staff of a bank has been appointed. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `staffMemberId` | string | yes |  |
+
 ## credit-application
 
 ### credit-application.credit-application.submitted
@@ -18,6 +46,20 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `applicantId` | string | yes |  |
 | `requestedAmountCents` | integer | yes |  |
 | `durationMonths` | integer | yes |  |
+
+## customer-due-diligence
+
+### customer-due-diligence.customer.identified
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `customer-due-diligence.customer.identified` | 1 | A customer, a person or a business, has been identified before any credit. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `customerId` | string | yes |  |
 
 ## identity
 

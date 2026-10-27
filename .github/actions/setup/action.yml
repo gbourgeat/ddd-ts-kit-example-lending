@@ -28,6 +28,6 @@ runs:
       if: steps.modules.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci
-    - name: The Prisma client and the schema of the tests, build products of prisma/schema.prisma
+    - name: The Prisma client and the schema of the tests, build products of prisma/schema/schema.prisma
       shell: bash
       run: npm run db:client

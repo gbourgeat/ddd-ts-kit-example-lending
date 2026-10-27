@@ -64,6 +64,5 @@ function withProfiles(members: readonly MemberRow[], accounts: readonly AccountR
 
 /** The client of the unit of work, which every statement of this file goes through. */
 function clientOf(database: Database): ReturnType<Database['client']> {
-  // ddd-ts-kit-disable-next-line tenancy/scoped-statement -- ADR-0001: the identity context is the control plane of the tenants, and its rows belong to none of them.
   return database.client();
 }

@@ -2,6 +2,7 @@ import type { PersonalDataCopy } from '@ddd-ts-kit/kernel';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { PrismaIdentityPersonalDataErasure } from '@/contexts/identity/infrastructure/persistence/prisma-identity-personal-data-erasure.repository';
+import { PrismaBranchNetworkPersonalDataErasure } from '@/contexts/branch-network/infrastructure/persistence/prisma-branch-network-personal-data-erasure.repository';
 // /ddd-ts-kit:imports
 
 /**
@@ -16,6 +17,12 @@ export const dataSubjectCopies: readonly ((platform: Platform) => PersonalDataCo
       kind: 'repository',
       context: 'identity',
       token: 'IdentityPersonalDataErasure',
+    }),
+  (platform) =>
+    platform.adapter(new PrismaBranchNetworkPersonalDataErasure(platform.persistence.database, platform.scope), {
+      kind: 'repository',
+      context: 'branch-network',
+      token: 'BranchNetworkPersonalDataErasure',
     }),
   // /ddd-ts-kit:copies
 ];

@@ -3,12 +3,30 @@ info:
   title: lending
   version: '0.1.0'
 channels:
+  branch-network.conflict-of-interest.declared:
+    address: branch-network.conflict-of-interest.declared
+    description: 'A member of staff declared a link with a customer: they never prepare nor decide that customer''s applications.'
+    messages:
+      v1:
+        $ref: '#/components/messages/branch-network.conflict-of-interest.declared.v1'
+  branch-network.staff-member.appointed:
+    address: branch-network.staff-member.appointed
+    description: A member of staff of a bank has been appointed.
+    messages:
+      v1:
+        $ref: '#/components/messages/branch-network.staff-member.appointed.v1'
   credit-application.credit-application.submitted:
     address: credit-application.credit-application.submitted
     description: 'A borrower or a broker has submitted a loan request: the application file is open, with its applicant, amount in cents and duration in months.'
     messages:
       v1:
         $ref: '#/components/messages/credit-application.credit-application.submitted.v1'
+  customer-due-diligence.customer.identified:
+    address: customer-due-diligence.customer.identified
+    description: A customer, a person or a business, has been identified before any credit.
+    messages:
+      v1:
+        $ref: '#/components/messages/customer-due-diligence.customer.identified.v1'
   identity.account.deactivated:
     address: identity.account.deactivated
     description: 'An account was deactivated: its person signs in no more, and every context stops acting for it.'
@@ -58,12 +76,30 @@ channels:
       v1:
         $ref: '#/components/messages/privacy.data-subject.erased.v1'
 operations:
+  send.branch-network.conflict-of-interest.declared:
+    action: send
+    channel:
+      $ref: '#/channels/branch-network.conflict-of-interest.declared'
+    messages:
+      - $ref: '#/channels/branch-network.conflict-of-interest.declared/messages/v1'
+  send.branch-network.staff-member.appointed:
+    action: send
+    channel:
+      $ref: '#/channels/branch-network.staff-member.appointed'
+    messages:
+      - $ref: '#/channels/branch-network.staff-member.appointed/messages/v1'
   send.credit-application.credit-application.submitted:
     action: send
     channel:
       $ref: '#/channels/credit-application.credit-application.submitted'
     messages:
       - $ref: '#/channels/credit-application.credit-application.submitted/messages/v1'
+  send.customer-due-diligence.customer.identified:
+    action: send
+    channel:
+      $ref: '#/channels/customer-due-diligence.customer.identified'
+    messages:
+      - $ref: '#/channels/customer-due-diligence.customer.identified/messages/v1'
   send.identity.account.deactivated:
     action: send
     channel:
@@ -114,6 +150,92 @@ operations:
       - $ref: '#/channels/privacy.data-subject.erased/messages/v1'
 components:
   messages:
+    branch-network.conflict-of-interest.declared.v1:
+      name: branch-network.conflict-of-interest.declared
+      title: branch-network.conflict-of-interest.declared v1
+      summary: 'A member of staff declared a link with a customer: they never prepare nor decide that customer''s applications.'
+      contentType: application/json
+      tags:
+        - name: branch-network
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: branch-network.conflict-of-interest.declared
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              conflictOfInterestId:
+                type: string
+              staffMemberId:
+                type: string
+              customerId:
+                type: string
+            type: object
+            required:
+              - conflictOfInterestId
+              - staffMemberId
+              - customerId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    branch-network.staff-member.appointed.v1:
+      name: branch-network.staff-member.appointed
+      title: branch-network.staff-member.appointed v1
+      summary: A member of staff of a bank has been appointed.
+      contentType: application/json
+      tags:
+        - name: branch-network
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: branch-network.staff-member.appointed
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              staffMemberId:
+                type: string
+            type: object
+            required:
+              - staffMemberId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
     credit-application.credit-application.submitted.v1:
       name: credit-application.credit-application.submitted
       title: credit-application.credit-application.submitted v1
@@ -158,6 +280,46 @@ components:
               - applicantId
               - requestedAmountCents
               - durationMonths
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    customer-due-diligence.customer.identified.v1:
+      name: customer-due-diligence.customer.identified
+      title: customer-due-diligence.customer.identified v1
+      summary: A customer, a person or a business, has been identified before any credit.
+      contentType: application/json
+      tags:
+        - name: customer-due-diligence
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: customer-due-diligence.customer.identified
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              customerId:
+                type: string
+            type: object
+            required:
+              - customerId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

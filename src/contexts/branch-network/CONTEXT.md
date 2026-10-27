@@ -24,27 +24,38 @@ Who follows which customer, and who may decide on it, is needed for the business
 | Branch manager | The staff member responsible for a branch; sees everything of it | Advisor |
 | Conflict of interest | A declared link between a staff member and a customer or an application: a relative, an associate, or their own file | Sanctions match |
 | Declared conflict | A conflict of interest put on record by the staff member themselves | Conflict of interest, undeclared |
+| Opened | the branch is open: it has a place, it can take its staff and its portfolios |  |
+| Appointed | a person becomes a staff member of a bank |  |
+| Declared | a staff member puts a conflict of interest on record |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `Branch`
+- `ConflictOfInterest`
+- `Portfolio`
+- `StaffMember`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `branch-network.conflict-of-interest.declared` (version 1)
+- `branch-network.staff-member.appointed` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
 
 <!-- ddd-ts-kit:personal-data -->
-No personal data declared.
+| Table | About | Personal data | On erasure | Kept |
+|---|---|---|---|---|
+| `staff_members` | `id` | `name`, `email` | pseudonymised | until erased |
 <!-- /ddd-ts-kit:personal-data -->
 
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `branch-network:branch.open`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -86,4 +97,34 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe branch-network --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `customer-due-diligence` (published-language), `identity` (conformist); downstreams: `credit-application` (published-language), `reporting` (published-language).
+
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `OpenBranch` | command | `branch.open` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `branch-network.conflict-of-interest.declared` | 1 | `ConflictOfInterestDeclaredPublisher` |
+| `branch-network.staff-member.appointed` | 1 | `StaffMemberAppointedPublisher` |
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `BranchNetworkPersonalDataErasure` | external | `PrismaBranchNetworkPersonalDataErasure` |
+| `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
+| `BranchRepository` | repository | `PrismaBranchRepository` |
+| `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
+| `PortfolioRepository` | external | `PrismaPortfolioRepository` |
+| `StaffMemberRepository` | external | `PrismaStaffMemberRepository` |
 <!-- /ddd-ts-kit:reference -->

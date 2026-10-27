@@ -29,15 +29,19 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Refresh | The renewal of due diligence: yearly for high risk, every three years for medium, every five years for low | Due diligence |
 | Overdue | Said of a due diligence whose refresh is past its date; no credit is disbursed until it is done | Refresh: the renewal itself |
 | Relationship | The bank's business relationship with a customer; it ends on a confirmed sanctions match | Portfolio (branch-network) |
+| Identified | the customer is known to the bank: identity and proof of address checked for a person, registration for a business |  |
+| Registered | The business's registration is recorded by the bank, before its directors and beneficial owners are identified |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `Customer` (event-sourced)
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `customer-due-diligence.customer.identified` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -49,7 +53,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `customer-due-diligence:business.register`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -91,4 +95,36 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe customer-due-diligence --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `identity` (conformist), `data-protection` (customer-supplier); downstreams: `branch-network` (published-language), `credit-application` (customer-supplier).
+
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `RegisterBusiness` | command | `business.register` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/businesses` | `registerBusiness` | `BusinessesRoutes` | `Authenticated` | `RegisterBusiness` | `business.register` | body: `RegisterBusinessBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `BUSINESS_ALREADY_REGISTERED` |
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `customer-due-diligence.customer.identified` | 1 | `CustomerIdentifiedPublisher` |
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `CustomerRepository` | repository | `EventStoreCustomerRepository` |
+| `ScreeningProvider` | external | `RemoteScreeningProvider` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `BusinessAlreadyRegistered` | `forCustomer` | `BUSINESS_ALREADY_REGISTERED` | none |
+| `UnknownCustomer` | `forCustomer` | `UNKNOWN_CUSTOMER` | none |
 <!-- /ddd-ts-kit:reference -->

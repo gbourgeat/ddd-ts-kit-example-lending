@@ -75,6 +75,7 @@ export const everyContext: readonly ContextModule[] = [
  */
 const extracted: readonly ContextModule[] = [
   // ddd-ts-kit:extracted
+  servicingModule,
   // /ddd-ts-kit:extracted
 ];
 

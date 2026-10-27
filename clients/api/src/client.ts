@@ -41,6 +41,24 @@ export interface Client {
    */
   searchAuditEntries(input?: operations.SearchAuditEntriesInput, options?: CallOptions): Promise<operations.SearchAuditEntriesResult>;
   /**
+   * Open branch: `POST /branches`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  openBranch(input: operations.OpenBranchInput, options?: CallOptions): Promise<operations.OpenBranchResult>;
+  /**
+   * Register the business of a customer: `POST /businesses`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BUSINESS_ALREADY_REGISTERED (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  registerBusiness(input: operations.RegisterBusinessInput, options?: CallOptions): Promise<operations.RegisterBusinessResult>;
+  /**
+   * Set delegation table: `PUT /delegation-table`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  setDelegationTable(input: operations.SetDelegationTableInput, options?: CallOptions): Promise<operations.SetDelegationTableResult>;
+  /**
    * Accept an invitation: `POST /invitations/acceptance`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), ALREADY_MEMBER (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
@@ -52,6 +70,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_NOT_FOUND (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
    */
   declineInvitation(input: operations.DeclineInvitationInput, options?: CallOptions): Promise<operations.DeclineInvitationResult>;
+  /**
+   * Publish legal maximum rate: `POST /legal-maximum-rates`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+   */
+  publishLegalMaximumRate(input: operations.PublishLegalMaximumRateInput, options?: CallOptions): Promise<operations.PublishLegalMaximumRateResult>;
   /**
    * Open an organisation: `POST /organisations`.
    *
@@ -100,6 +124,24 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ABOVE_OWN_ROLE (422), LAST_OWNER (422), MEMBER_NOT_FOUND (422), ORGANISATION_NOT_FOUND (422), OWNERS_ONLY (422), OWN_ROLE (422), VALIDATION_FAILED (422).
    */
   changeMemberRole(input: operations.ChangeMemberRoleInput, options?: CallOptions): Promise<operations.ChangeMemberRoleResult>;
+  /**
+   * Define product: `POST /products`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
+   */
+  defineProduct(input: operations.DefineProductInput, options?: CallOptions): Promise<operations.DefineProductResult>;
+  /**
+   * Publish rate grid: `POST /rate-grids`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  publishRateGrid(input: operations.PublishRateGridInput, options?: CallOptions): Promise<operations.PublishRateGridResult>;
+  /**
+   * Set residual income minimum: `PUT /residual-income-minimums`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
+   */
+  setResidualIncomeMinimum(input: operations.SetResidualIncomeMinimumInput, options?: CallOptions): Promise<operations.SetResidualIncomeMinimumResult>;
 }
 
 export function createClient(options: ClientOptions<SchemeName>): Client {
@@ -110,8 +152,12 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
+    openBranch: (input, call) => operations.openBranch(connection, input, call),
+    registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),
+    setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
+    publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
     grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),
     revokeDelegation: (input, call) => operations.revokeDelegation(connection, input, call),
@@ -120,5 +166,8 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchMembers: (input, call) => operations.searchMembers(connection, input, call),
     removeMember: (input, call) => operations.removeMember(connection, input, call),
     changeMemberRole: (input, call) => operations.changeMemberRole(connection, input, call),
+    defineProduct: (input, call) => operations.defineProduct(connection, input, call),
+    publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
+    setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
   };
 }
