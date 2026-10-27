@@ -16,11 +16,13 @@ says. The sections after the markers are for the controller to write.
 |---|---|---|---|---|---|
 | branch-network | `staff_members` | `id` | `name`, `email` | pseudonymised | until erased |
 | identity | `accounts` | `id` | `email`, `display_name` | pseudonymised | until erased |
-| identity | `invitations` | `id` | `email` | row deleted | 30 days after `expires_at` |
+| identity | `invitations` | `id` | `email` | row deleted | until erased |
 
 ## Where it leaves its context
 
 No integration event declares personal data in its payload.
+
+The retention of `identity.invitations` is the configuration's: `RETENTION_PERIODS` (`identity.invitation`, 30 days after `expires_at` in `.env.example`, owned by data-protection), not written in the declaration, so the generated column reads "until erased".
 <!-- /ddd-ts-kit:personal-data-register -->
 
 ## Purposes and lawful basis
