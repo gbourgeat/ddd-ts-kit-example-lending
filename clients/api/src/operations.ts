@@ -285,6 +285,40 @@ export function appointStaffMember(
   return send<AppointStaffMemberResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RegisterBrokerInput {
+  readonly body: {
+    registrationNumber: string;
+  };
+}
+
+export type RegisterBrokerResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_BROKER_REGISTRATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Register broker: `POST /brokers`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+ */
+export function registerBroker(
+  connection: Connection,
+  input: RegisterBrokerInput,
+  options: CallOptions = {},
+): Promise<RegisterBrokerResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/brokers',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RegisterBrokerResult>(connection, operation, { ...input, ...options });
+}
+
 export interface RegisterBusinessInput {
   readonly body: {
     customerId: string;

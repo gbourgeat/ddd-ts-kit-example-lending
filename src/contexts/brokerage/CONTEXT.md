@@ -42,7 +42,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `brokerage:broker.register`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -83,10 +83,28 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `identity` (conformist); downstreams: `credit-application` (published-language).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `RegisterBroker` | command | `broker.register` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/brokers` | `registerBroker` | `BrokersRoutes` | `Authenticated` | `RegisterBroker` | `broker.register` | body: `RegisterBrokerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BrokerageCodes.InvalidBrokerRegistration` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `BrokerRepository` | external | `PrismaBrokerRepository` |
+| `BrokerRepository` | repository | `PrismaBrokerRepository` |
 | `IntermediariesRegister` | external | `SimulatedIntermediariesRegister` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `InvalidBrokerRegistration` | `forRegistration` | `INVALID_BROKER_REGISTRATION` | `registrationNumber` |
 <!-- /ddd-ts-kit:reference -->

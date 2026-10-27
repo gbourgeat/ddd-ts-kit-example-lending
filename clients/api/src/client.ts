@@ -59,6 +59,12 @@ export interface Client {
    */
   appointStaffMember(input: operations.AppointStaffMemberInput, options?: CallOptions): Promise<operations.AppointStaffMemberResult>;
   /**
+   * Register broker: `POST /brokers`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+   */
+  registerBroker(input: operations.RegisterBrokerInput, options?: CallOptions): Promise<operations.RegisterBrokerResult>;
+  /**
    * Register the business of a customer: `POST /businesses`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BUSINESS_ALREADY_REGISTERED (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
@@ -173,6 +179,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
+    registerBroker: (input, call) => operations.registerBroker(connection, input, call),
     registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
