@@ -6,6 +6,11 @@ import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { CustomerIdentifiedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-identified.publisher';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
+import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { customerDueDiligencePermissions } from '@/contexts/customer-due-diligence/customer-due-diligence.permissions';
+import { RegisterBusinessCommand } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.command';
+import { RegisterBusinessHandler } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -32,6 +37,14 @@ export function customerDueDiligenceModule(platform: Platform): CustomerDueDilig
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
+  const customerRepository = platform.adapter(
+    new EventStoreCustomerRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
+    { kind: 'repository', context: 'customer-due-diligence', token: 'CustomerRepository' },
+  );
+
+  platform.commands.register(RegisterBusinessCommand, new RegisterBusinessHandler(customerRepository, platform.clock), {
+    context: 'customer-due-diligence',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -61,6 +74,9 @@ function registerJobs(platform: Platform): void {
 function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
+    requires(RegisterBusinessCommand, customerDueDiligencePermissions['business.register'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }
