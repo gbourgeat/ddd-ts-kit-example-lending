@@ -6,6 +6,36 @@ import { storyOf } from '$test/e2e/support/story-of';
 
 const request = { productId: 'personal-loan', amount: { cents: 1234567, currency: 'EUR' }, durationMonths: 60 };
 
+// Exact on names and structure. Once "submit application" announces a fact, its spans come after the save, under `unit-of-work before-commit`: `domain-event <name>`, `handler <Class>`, `outbox append <type>` (US0.05).
+const submissionTree = [
+  {
+    name: 'POST /applications',
+    kind: 'SERVER',
+    children: [
+      {
+        name: 'command SubmitApplicationCommand',
+        children: [
+          { name: 'repository CreditApplicationRepository.save' },
+          {
+            name: 'unit-of-work before-commit',
+            children: [
+              {
+                name: 'domain-event credit-application.credit-application.submitted',
+                children: [
+                  {
+                    name: 'handler CreditApplicationSubmittedPublisher',
+                    children: [{ name: 'outbox append credit-application.credit-application.submitted' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
 describe('Submit application, end to end', () => {
   const tracing = installTestTracing();
   let application: RunningApplication;
@@ -65,35 +95,7 @@ describe('Submit application, end to end', () => {
       expectStatus(await customer.post('/applications', request), 201);
     });
 
-    // Exact on names and structure. Once "submit application" announces a fact, its spans come after the save, under `unit-of-work before-commit`: `domain-event <name>`, `handler <Class>`, `outbox append <type>` (US0.05).
-    expectSpanTree(storyOf(trace), [
-      {
-        name: 'POST /applications',
-        kind: 'SERVER',
-        children: [
-          {
-            name: 'command SubmitApplicationCommand',
-            children: [
-              { name: 'repository CreditApplicationRepository.save' },
-              {
-                name: 'unit-of-work before-commit',
-                children: [
-                  {
-                    name: 'domain-event credit-application.credit-application.submitted',
-                    children: [
-                      {
-                        name: 'handler CreditApplicationSubmittedPublisher',
-                        children: [{ name: 'outbox append credit-application.credit-application.submitted' }],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+    expectSpanTree(storyOf(trace), submissionTree);
   });
 
   it.todo('publishes the integration events other contexts rely on (US0.05)');
