@@ -66,6 +66,45 @@ export function deactivateAccount(
   return send<DeactivateAccountResult>(connection, operation, { ...input, ...options });
 }
 
+export interface SubmitApplicationInput {
+  readonly body: {
+    productId: string;
+    amount: Schemas.RequestedAmountBody;
+    durationMonths: number;
+  };
+}
+
+export type SubmitApplicationResult =
+  | Success<201, {
+    id: string;
+    amount: Schemas.RequestedAmountBody;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_AMOUNT' | 'INVALID_DURATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Submit application: `POST /applications`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_AMOUNT (422), INVALID_DURATION (422), VALIDATION_FAILED (422).
+ */
+export function submitApplication(
+  connection: Connection,
+  input: SubmitApplicationInput,
+  options: CallOptions = {},
+): Promise<SubmitApplicationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SearchAuditEntriesInput {
   readonly query?: {
     /** Size of the page. */

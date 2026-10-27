@@ -4,6 +4,11 @@ import { creditApplicationControllers } from '@/contexts/credit-application/cred
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
+import { SubmitApplicationCommand } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.command';
+import { SubmitApplicationHandler } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -30,6 +35,16 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
+  const creditApplicationRepository = platform.adapter(
+    new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
+    { kind: 'repository', context: 'credit-application', token: 'CreditApplicationRepository' },
+  );
+
+  platform.commands.register(
+    SubmitApplicationCommand,
+    new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock),
+    { context: 'credit-application' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -49,6 +64,9 @@ function registerJobs(platform: Platform): void {
 function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
+    requires(SubmitApplicationCommand, creditApplicationPermissions['application.submit'], {
+      resource: (command) => ({ type: 'customer', id: command.actor.id }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }

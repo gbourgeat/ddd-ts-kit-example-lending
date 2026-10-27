@@ -48,6 +48,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | File | The application file, the documents and the account consent. |  |
 | Credit application | the application file of one loan request, from submission to payout |  |
 | Submitted | the application was received from an applicant or a broker, and its file opened |  |
+| Duration | The number of whole months over which the requested amount is repaid |  |
 
 ## Modules
 
@@ -78,7 +79,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `credit-application:application.submit`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -124,4 +125,29 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe credit-application --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `credit-policy` (published-language), `credit-scoring` (customer-supplier), `customer-due-diligence` (customer-supplier), `brokerage` (published-language), `branch-network` (published-language), `identity` (conformist); downstreams: `servicing` (published-language), `reporting` (published-language).
+
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `SubmitApplication` | command | `application.submit` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
+| `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
 <!-- /ddd-ts-kit:reference -->
