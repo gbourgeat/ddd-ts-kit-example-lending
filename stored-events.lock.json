@@ -30,6 +30,12 @@
   "customer-due-diligence.customer.possible-match-found": {
     "1": "sha256:733dac3b56fba725"
   },
+  "customer-due-diligence.customer.relationship-ended": {
+    "1": "sha256:733dac3b56fba725"
+  },
+  "customer-due-diligence.customer.sanctions-match-confirmed": {
+    "1": "sha256:733dac3b56fba725"
+  },
   "servicing.loan.paid-out": {
     "1": "sha256:733dac3b56fba725"
   }
