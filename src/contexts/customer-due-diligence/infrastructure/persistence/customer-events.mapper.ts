@@ -24,7 +24,7 @@ interface CustomerAdvisorAssignedData {
   readonly advisorId: string;
 }
 
-interface CustomerPossibleMatchFoundData {}
+type CustomerPossibleMatchFoundData = Record<string, never>;
 
 /** The identity facts of version 2 of the birth; the document number and the address are personal, sealed by subject. */
 interface PersonIdentityData {
