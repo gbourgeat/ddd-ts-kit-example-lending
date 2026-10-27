@@ -1,0 +1,27 @@
+{
+  "story": "US0",
+  "criteria": {
+    "AC1": "7458c7c1d1633d99",
+    "AC2": "75cd446b114963dc",
+    "AC3": "70454aa3ab32bd3f"
+  },
+  "scenarios": [
+    {
+      "title": "#US0.04 #US0.01 #US0.02 #US0.06 AC1 a customer of the bank submits an application for one loan and gets back its identifier, a Location and the amount in whole cents",
+      "criteria": ["AC1"],
+      "fingerprint": "c35ed381719f5d1a"
+    },
+    {
+      "title": "#US0.04 #US0.02 #US0.03 AC2 a caller without the right to submit an application is refused with the refusal code, and no application is recorded",
+      "criteria": ["AC2"],
+      "fingerprint": "a73f4c90c29ac8e4"
+    },
+    {
+      "title": "#US0.05 AC3 the submission is published once, as an integration event carrying the application identifier, in the same transaction that records it",
+      "criteria": ["AC3"],
+      "fingerprint": "ca8fccace5962668"
+    }
+  ],
+  "regression": [],
+  "amendments": []
+}
