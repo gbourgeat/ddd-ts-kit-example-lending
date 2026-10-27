@@ -24,10 +24,17 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 | Score threshold | The lowest score a product accepts without an exception | Score |
 | Dates of effect | The day from which a value applies | Publication date |
 | Risk rating | Low, medium or high: the customer's class, which the rate grid is organised by | Score |
+| Defined | a product is put in the catalogue with its threshold |  |
+| Published | a value of the bank is published with the day from which it applies |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `DelegationTable`
+- `LegalMaximumRate`
+- `Product`
+- `RateGrid`
+- `ResidualIncomeMinimum`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -84,4 +91,14 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe credit-policy --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: none; downstreams: `credit-application` (published-language), `servicing` (published-language).
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `DelegationTableRepository` | external | `PrismaDelegationTableRepository` |
+| `LegalMaximumRateRepository` | external | `PrismaLegalMaximumRateRepository` |
+| `ProductRepository` | external | `PrismaProductRepository` |
+| `RateGridRepository` | external | `PrismaRateGridRepository` |
+| `ResidualIncomeMinimumRepository` | external | `PrismaResidualIncomeMinimumRepository` |
 <!-- /ddd-ts-kit:reference -->

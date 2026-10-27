@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["messaging", "event_store", "audit", "identity"]
+  schemas  = ["messaging", "event_store", "audit", "identity", "branch_network", "credit_policy", "brokerage", "financial_crime", "data_protection"]
 }
 
 // The outbox and the idempotency table, from @ddd-ts-kit/prisma. Keep the field names: the
@@ -193,6 +193,222 @@ enum IdentityInvitationStatus {
 
   @@map("invitation_status")
   @@schema("identity")
+}
+
+model BranchNetworkBranch {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "branches_tenant_idx")
+  @@map("branches")
+  @@schema("branch_network")
+}
+
+model BranchNetworkStaffMember {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  name String @map("name")
+  email String @map("email")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "staff_members_tenant_idx")
+  @@map("staff_members")
+  @@schema("branch_network")
+}
+
+model BranchNetworkPortfolio {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  advisorId    String   @map("advisor_id")
+  branchId     String   @map("branch_id")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "portfolios_tenant_idx")
+  @@map("portfolios")
+  @@schema("branch_network")
+}
+
+model BranchNetworkConflictOfInterest {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  staffMemberId String  @map("staff_member_id")
+  customerId   String   @map("customer_id")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "conflict_of_interests_tenant_idx")
+  @@map("conflict_of_interests")
+  @@schema("branch_network")
+}
+
+model CreditPolicyProduct {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  scoreThreshold Int @map("score_threshold")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "products_tenant_idx")
+  @@map("products")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyRateGrid {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  productId    String @map("product_id")
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "rate_grids_tenant_idx")
+  @@map("rate_grids")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyLegalMaximumRate {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  category     String @map("category")
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "legal_maximum_rates_tenant_idx")
+  @@map("legal_maximum_rates")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyDelegationTable {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "delegation_tables_tenant_idx")
+  @@map("delegation_tables")
+  @@schema("credit_policy")
+}
+
+model CreditPolicyResidualIncomeMinimum {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  perAdultInCents Int @map("per_adult_in_cents")
+  perChildInCents Int @map("per_child_in_cents")
+  effectiveFrom DateTime @map("effective_from")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "residual_income_minimums_tenant_idx")
+  @@map("residual_income_minimums")
+  @@schema("credit_policy")
+}
+
+model BrokerageBroker {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  registrationNumber String @map("registration_number")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "brokers_tenant_idx")
+  @@map("brokers")
+  @@schema("brokerage")
+}
+
+model FinancialCrimeAlert {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  repaymentReference String @map("repayment_reference")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "alerts_tenant_idx")
+  @@map("alerts")
+  @@schema("financial_crime")
+}
+
+model FinancialCrimeSuspiciousActivityReport {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  subjectReference String @map("subject_reference")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "suspicious_activity_reports_tenant_idx")
+  @@map("suspicious_activity_reports")
+  @@schema("financial_crime")
+}
+
+model DataProtectionRetentionPeriod {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  contextName    String  @map("context_name")
+  kindOfData     String  @map("kind_of_data")
+  durationInMonths Int  @map("duration_in_months")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "retention_periods_tenant_idx")
+  @@map("retention_periods")
+  @@schema("data_protection")
 }
 // /ddd-ts-kit:models
 

@@ -31,10 +31,10 @@ ledger" (US0.06).
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
 | US1.01 | identity | slice | Banks never see each other's data (tenant isolation spec) | `e2e identity OpenOrganisation` | | identity | todo |
-| US1.02 | branch-network | skeleton | Branch | `aggregate branch-network Branch`; `domain-event branch-network Branch Opened`; `repository branch-network Branch --tenant-scoped` | | conductor | todo |
-| US1.03 | branch-network | skeleton | Staff member, with the appointment event | `aggregate branch-network StaffMember`; `domain-event branch-network StaffMember Appointed`; `repository branch-network StaffMember --tenant-scoped --personal name,email --erasure pseudonymise` | | conductor | todo |
-| US1.04 | branch-network | skeleton | Portfolio of an advisor | `aggregate branch-network Portfolio`; `domain-event branch-network Portfolio Opened`; `repository branch-network Portfolio --tenant-scoped` | | conductor | todo |
-| US1.05 | branch-network | skeleton | Declared conflict of interest | `aggregate branch-network ConflictOfInterest`; `domain-event branch-network ConflictOfInterest Declared`; `repository branch-network ConflictOfInterest --tenant-scoped` | | conductor | todo |
+| US1.02 | branch-network | skeleton | Branch | `aggregate branch-network Branch`; `domain-event branch-network Branch Opened`; `repository branch-network Branch --tenant-scoped` | | conductor | done |
+| US1.03 | branch-network | skeleton | Staff member, with the appointment event | `aggregate branch-network StaffMember`; `domain-event branch-network StaffMember Appointed`; `repository branch-network StaffMember --tenant-scoped --personal name,email --erasure pseudonymise` | | conductor | done |
+| US1.04 | branch-network | skeleton | Portfolio of an advisor | `aggregate branch-network Portfolio`; `domain-event branch-network Portfolio Opened`; `repository branch-network Portfolio --tenant-scoped` | | conductor | done |
+| US1.05 | branch-network | skeleton | Declared conflict of interest | `aggregate branch-network ConflictOfInterest`; `domain-event branch-network ConflictOfInterest Declared`; `repository branch-network ConflictOfInterest --tenant-scoped` | | conductor | done |
 | US1.06 | branch-network | slice | Open a branch | `command branch-network OpenBranch --permission branch.open --aggregate Branch`; `route branch-network OpenBranch --method POST --path /branches --command` | US1.02 | branch-network | todo |
 | US1.07 | branch-network | slice | Appoint a member of staff to a branch | `command branch-network AppointStaffMember --permission staff-member.appoint --aggregate StaffMember`; `route branch-network AppointStaffMember --method POST --path /branches/:id/staff --command` | US1.03, US1.06 | branch-network | todo |
 | US1.08 | branch-network | slice | An advisor gets a portfolio of customers | `event-handler branch-network StaffMember Appointed --name OpenPortfolioForAdvisor`; `command branch-network OpenPortfolio --permission portfolio.open --aggregate Portfolio` | US1.04, US1.07 | branch-network | todo |
@@ -56,7 +56,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US2.01 | customer-due-diligence | skeleton | Customer, event-sourced, born identified | `aggregate customer-due-diligence Customer --event-sourced --birth Identified` | | conductor | todo |
+| US2.01 | customer-due-diligence | skeleton | Customer, event-sourced, born identified | `aggregate customer-due-diligence Customer --event-sourced --birth Identified` | | conductor | done |
 | US2.02 | customer-due-diligence | skeleton | Screening provider (port and fake adapter) | `port customer-due-diligence ScreeningProvider`; `adapter customer-due-diligence ScreeningProvider --kind external` | | conductor | todo |
 | US2.03 | customer-due-diligence | contract | Customer identified, published | `integration-event customer-due-diligence Customer Identified --version 1` | US2.01 | conductor | todo |
 | US2.04 | customer-due-diligence | slice | Identify a customer (person) | `command customer-due-diligence IdentifyCustomer --permission customer.identify --aggregate Customer`; `route customer-due-diligence IdentifyCustomer --method POST --path /customers --command` | US2.01, US2.03 | customer-due-diligence | todo |
@@ -86,11 +86,11 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US3.01 | credit-policy | skeleton | Product of the catalogue, with its score threshold | `aggregate credit-policy Product`; `domain-event credit-policy Product Defined`; `repository credit-policy Product --tenant-scoped` | | conductor | todo |
-| US3.02 | credit-policy | skeleton | Rate grid by product, risk class and duration | `aggregate credit-policy RateGrid`; `domain-event credit-policy RateGrid Published`; `repository credit-policy RateGrid --tenant-scoped` | | conductor | todo |
-| US3.03 | credit-policy | skeleton | Legal maximum rate by category, with its date of effect | `aggregate credit-policy LegalMaximumRate`; `domain-event credit-policy LegalMaximumRate Published`; `repository credit-policy LegalMaximumRate --tenant-scoped` | | conductor | todo |
-| US3.04 | credit-policy | skeleton | Delegation table of the bank | `aggregate credit-policy DelegationTable`; `domain-event credit-policy DelegationTable Published`; `repository credit-policy DelegationTable --tenant-scoped` | | conductor | todo |
-| US3.05 | credit-policy | skeleton | Residual income minimum per adult and per child | `aggregate credit-policy ResidualIncomeMinimum`; `domain-event credit-policy ResidualIncomeMinimum Published`; `repository credit-policy ResidualIncomeMinimum --tenant-scoped` | | conductor | todo |
+| US3.01 | credit-policy | skeleton | Product of the catalogue, with its score threshold | `aggregate credit-policy Product`; `domain-event credit-policy Product Defined`; `repository credit-policy Product --tenant-scoped` | | conductor | done |
+| US3.02 | credit-policy | skeleton | Rate grid by product, risk class and duration | `aggregate credit-policy RateGrid`; `domain-event credit-policy RateGrid Published`; `repository credit-policy RateGrid --tenant-scoped` | | conductor | done |
+| US3.03 | credit-policy | skeleton | Legal maximum rate by category, with its date of effect | `aggregate credit-policy LegalMaximumRate`; `domain-event credit-policy LegalMaximumRate Published`; `repository credit-policy LegalMaximumRate --tenant-scoped` | | conductor | done |
+| US3.04 | credit-policy | skeleton | Delegation table of the bank | `aggregate credit-policy DelegationTable`; `domain-event credit-policy DelegationTable Published`; `repository credit-policy DelegationTable --tenant-scoped` | | conductor | done |
+| US3.05 | credit-policy | skeleton | Residual income minimum per adult and per child | `aggregate credit-policy ResidualIncomeMinimum`; `domain-event credit-policy ResidualIncomeMinimum Published`; `repository credit-policy ResidualIncomeMinimum --tenant-scoped` | | conductor | done |
 | US3.06 | credit-policy | slice | Define a product with its amounts, durations, fees, insurance and threshold | `command credit-policy DefineProduct --permission product.define --aggregate Product`; `route credit-policy DefineProduct --method POST --path /products --command` | US3.01 | credit-policy | todo |
 | US3.07 | credit-policy | slice | Publish a rate grid with its date of effect | `command credit-policy PublishRateGrid --permission rate-grid.publish --aggregate RateGrid`; `route credit-policy PublishRateGrid --method POST --path /rate-grids --command` | US3.02 | credit-policy | todo |
 | US3.08 | credit-policy | slice | Publish the legal maximum rate in force from a date | `command credit-policy PublishLegalMaximumRate --permission legal-maximum-rate.publish --aggregate LegalMaximumRate`; `route credit-policy PublishLegalMaximumRate --method POST --path /legal-maximum-rates --command` | US3.03 | credit-policy | todo |
@@ -113,7 +113,7 @@ and the residual income minimums are data of the bank with dates of effect" (eve
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US4.01 | brokerage | skeleton | Broker, with its registration events | `aggregate brokerage Broker`; `domain-event brokerage Broker Registered`; `domain-event brokerage Broker RegistrationLapsed`; `repository brokerage Broker --tenant-scoped` | | conductor | todo |
+| US4.01 | brokerage | skeleton | Broker, with its registration events | `aggregate brokerage Broker`; `domain-event brokerage Broker Registered`; `domain-event brokerage Broker RegistrationLapsed`; `repository brokerage Broker --tenant-scoped` | | conductor | done |
 | US4.02 | brokerage | skeleton | Intermediaries register (port and fake adapter) | `port brokerage IntermediariesRegister`; `adapter brokerage IntermediariesRegister --kind external` | | conductor | todo |
 | US4.03 | brokerage | slice | Register a broker with the intermediaries register | `command brokerage RegisterBroker --permission broker.register --aggregate Broker`; `route brokerage RegisterBroker --method POST --path /brokers --command` | US4.01 | brokerage | todo |
 | US4.04 | brokerage | slice | Check the registrations each day; a lapsed one is marked | `command brokerage CheckRegistration --permission broker.check --aggregate Broker`; `job brokerage CheckRegistration --cron "0 6 * * *" --time-zone Europe/Paris --command CheckRegistration` | US4.02, US4.03 | brokerage | todo |
@@ -236,7 +236,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US9.01 | servicing | skeleton | Servicing as its own service, with its standalone entry point and boot test | `service servicing` | | conductor | todo |
+| US9.01 | servicing | skeleton | Servicing as its own service, with its standalone entry point and boot test | `service servicing` | | conductor | done |
 | US9.02 | servicing | skeleton | Loan, event-sourced, born paid out | `aggregate servicing Loan --event-sourced --birth PaidOut --module ledger` | US9.01 | conductor | todo |
 | US9.03 | servicing | skeleton | Payment provider for direct debits (port, fake adapter, anti-corruption layer) | `port servicing PaymentProvider --module instalments`; `adapter servicing PaymentProvider --kind external --module instalments`; `acl servicing PaymentProvider --module instalments` | | conductor | todo |
 | US9.04 | servicing | slice | Schedule of constant monthly instalments, in cents | `domain-service servicing InstalmentSchedule --module ledger` | US9.02, US0.06 | servicing | todo |
@@ -291,8 +291,8 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US11.01 | financial-crime | skeleton | Alert on a repayment | `aggregate financial-crime Alert`; `domain-event financial-crime Alert Raised`; `repository financial-crime Alert --tenant-scoped` | | conductor | todo |
-| US11.02 | financial-crime | skeleton | Suspicious activity report, restricted to compliance | `aggregate financial-crime SuspiciousActivityReport`; `domain-event financial-crime SuspiciousActivityReport Filed`; `repository financial-crime SuspiciousActivityReport --tenant-scoped` | | conductor | todo |
+| US11.01 | financial-crime | skeleton | Alert on a repayment | `aggregate financial-crime Alert`; `domain-event financial-crime Alert Raised`; `repository financial-crime Alert --tenant-scoped` | | conductor | done |
+| US11.02 | financial-crime | skeleton | Suspicious activity report, restricted to compliance | `aggregate financial-crime SuspiciousActivityReport`; `domain-event financial-crime SuspiciousActivityReport Filed`; `repository financial-crime SuspiciousActivityReport --tenant-scoped` | | conductor | done |
 | US11.03 | financial-crime | skeleton | Financial intelligence unit (port and fake adapter) | `port financial-crime FinancialIntelligenceUnit`; `adapter financial-crime FinancialIntelligenceUnit --kind external` | | conductor | todo |
 | US11.04 | financial-crime | slice | Raise an alert: early repayment above 10,000 within a year of the payout, or a payment from an account not the borrower's | `command financial-crime RaiseAlert --permission alert.raise --aggregate Alert`; `domain-service financial-crime AlertRule` | US11.01 | financial-crime | todo |
 | US11.05 | financial-crime | slice | Watch the repayments of servicing | `integration-handler financial-crime servicing servicing.loan.payment-received --name WatchRepayments` | US9.08, US11.04 | financial-crime | todo |
@@ -331,7 +331,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US13.01 | data-protection | skeleton | Retention period by context and by kind of data | `aggregate data-protection RetentionPeriod`; `repository data-protection RetentionPeriod --tenant-scoped` | | conductor | todo |
+| US13.01 | data-protection | skeleton | Retention period by context and by kind of data | `aggregate data-protection RetentionPeriod`; `repository data-protection RetentionPeriod --tenant-scoped` | | conductor | done |
 | US13.02 | data-protection | skeleton | Copy of a customer's data: the process that gathers each context's data | `process data-protection CopyOfData` | | conductor | todo |
 | US13.03 | data-protection | slice | A customer asks for a copy of all we keep about them | `command data-protection RequestCopyOfData --permission data-subject.request-copy`; `route data-protection RequestCopyOfData --method POST --path /data-subjects/me/copies --command` | US13.02 | data-protection | todo |
 | US13.04 | data-protection | slice | Erase personal data after retention (due diligence 5 years after the relationship, loan 10 years after closing, refused application 6 months) | `command data-protection EraseExpiredPersonalData --permission data.erase --aggregate RetentionPeriod`; `job data-protection EraseExpiredPersonalData --cron "0 3 * * *" --time-zone Europe/Paris --command EraseExpiredPersonalData` | US13.01 | data-protection | todo |
@@ -353,7 +353,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US14.01 | platform | skeleton | Audit: what goes into the entries of changes (fields declared), every command audited by default | edit `src/platform/audit/create-audit.ts` (TODO(platform) line 62): `fields: [auditedFields(...)]` per command (no generator) | | conductor | todo |
+| US14.01 | platform | skeleton | Audit: what goes into the entries of changes (fields declared), every command audited by default | edit `src/platform/audit/create-audit.ts` (TODO(platform) line 62): `fields: [auditedFields(...)]` per command (no generator) | | conductor | done |
 | US14.02 | platform | skeleton | Audit stream of financial crime, readable by compliance only | edit the audit streams of the platform (no generator): the stream of `financial-crime` with its readers = compliance | US14.01, US11.01 | conductor | todo |
 | US14.03 | platform | slice | The audit search returns the reads of customer files and the grants | route of the audit search in `src/platform/audit` (no generator), covered by an e2e per read of customer files | US14.01, US2.16 | conductor | todo |
 | US14.04 | credit-application | slice | Explain a refusal to a broker or a conflicted advisor without disclosing the hidden content | `error credit-application ApplicationNotVisible forApplicationNotVisible --code APPLICATION_NOT_VISIBLE --module file`; `query credit-application ExplainRefusal --permission application.read --module file` | US6.18, US7.06 | credit-application | todo |

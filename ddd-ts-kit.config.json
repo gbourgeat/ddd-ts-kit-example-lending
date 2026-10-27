@@ -157,7 +157,8 @@
         "ledger": {},
         "instalments": {},
         "arrears": {}
-      }
+      },
+      "deployable": true
     },
     "financial-crime": {
       "classification": "supporting",

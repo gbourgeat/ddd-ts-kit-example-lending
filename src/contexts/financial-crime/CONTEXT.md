@@ -21,10 +21,14 @@ Anti-money-laundering is a legal duty that supports the business; its restricted
 | Suspicious activity report | A report filed with the financial intelligence unit about an alert; known to compliance only | Alert |
 | Filing | The act of filing a suspicious activity report | Declaration (servicing) |
 | Financial intelligence unit | The public unit that receives suspicious activity reports | Supervisor (reporting) |
+| Raised | an alert is raised on a repayment that needs a compliance review |  |
+| Filed | a suspicious activity report is filed with the financial intelligence unit |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `Alert`
+- `SuspiciousActivityReport`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -81,4 +85,12 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe financial-crime --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `servicing` (published-language), `identity` (conformist); downstreams: none.
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `AlertRepository` | external | `PrismaAlertRepository` |
+| `FinancialIntelligenceUnit` | external | `RemoteFinancialIntelligenceUnit` |
+| `SuspiciousActivityReportRepository` | external | `PrismaSuspiciousActivityReportRepository` |
 <!-- /ddd-ts-kit:reference -->

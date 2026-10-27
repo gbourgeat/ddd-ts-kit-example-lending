@@ -157,6 +157,18 @@ services:
     image: valkey/valkey:9-alpine
     profiles: [errors]
 
+  # The context "servicing" as its own service: the same image, another entry point.
+  servicing:
+    build:
+      context: .
+      args:
+        ENTRY: dist/src/apps/servicing/main.js
+    profiles: [services]
+    env_file: .env
+    ports:
+      - "${SERVICING_PORT:-3001}:3000"
+
+
 volumes:
   postgres-data:
   cache-data:

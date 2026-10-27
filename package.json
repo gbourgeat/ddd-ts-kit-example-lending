@@ -59,7 +59,8 @@
     "infra:down": "docker compose down",
     "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run test:e2e && npm run check:arch && npm run depcruise && npm run deadcode && npm run docs:check",
     "sdk:generate": "ddd-ts-kit sdk",
-    "sdk:build": "node node_modules/@typescript/native/bin/tsc -b clients"
+    "sdk:build": "node node_modules/@typescript/native/bin/tsc -b clients",
+    "start:servicing": "node dist/src/apps/servicing/main.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1150.0",

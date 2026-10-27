@@ -5,6 +5,7 @@ type Environment = Readonly<Record<string, string | undefined>>;
 /** The contexts run as services of their own (`ddd-ts-kit generate service`): the whole application schedules none of their jobs. */
 const extracted: readonly string[] = [
   // ddd-ts-kit:extracted
+  'servicing',
   // /ddd-ts-kit:extracted
 ];
 
