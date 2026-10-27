@@ -6,10 +6,12 @@ import { SetDelegationTableController } from '@/contexts/credit-policy/presentat
 import { PublishLegalMaximumRateController } from '@/contexts/credit-policy/presentation/http/legal-maximum-rates/publish-legal-maximum-rate/publish-legal-maximum-rate.controller';
 import { DefineProductController } from '@/contexts/credit-policy/presentation/http/products/define-product/define-product.controller';
 import { PublishRateGridController } from '@/contexts/credit-policy/presentation/http/rate-grids/publish-rate-grid/publish-rate-grid.controller';
+import { SetResidualIncomeMinimumController } from '@/contexts/credit-policy/presentation/http/residual-income-minimums/set-residual-income-minimum/set-residual-income-minimum.controller';
 import { SetDelegationTableBody } from '@/contexts/credit-policy/presentation/http/delegation-table/set-delegation-table/set-delegation-table.body';
 import { PublishLegalMaximumRateBody } from '@/contexts/credit-policy/presentation/http/legal-maximum-rates/publish-legal-maximum-rate/publish-legal-maximum-rate.body';
 import { DefineProductBody } from '@/contexts/credit-policy/presentation/http/products/define-product/define-product.body';
 import { PublishRateGridBody } from '@/contexts/credit-policy/presentation/http/rate-grids/publish-rate-grid/publish-rate-grid.body';
+import { SetResidualIncomeMinimumBody } from '@/contexts/credit-policy/presentation/http/residual-income-minimums/set-residual-income-minimum/set-residual-income-minimum.body';
 
 /** The Nest controllers of credit-policy, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const creditPolicyControllers: readonly Type<unknown>[] = [
@@ -21,4 +23,7 @@ export const creditPolicyControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(DefineProductController, { defineProduct: { body: DefineProductBody, answer: acceptedSchema } }),
   withSignatures(PublishRateGridController, { publishRateGrid: { body: PublishRateGridBody, answer: acceptedSchema } }),
+  withSignatures(SetResidualIncomeMinimumController, {
+    setResidualIncomeMinimum: { body: SetResidualIncomeMinimumBody, answer: acceptedSchema },
+  }),
 ];

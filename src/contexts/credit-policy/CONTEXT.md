@@ -64,6 +64,7 @@ No personal data declared.
 - `credit-policy:product.define`
 - `credit-policy:legal-maximum-rate.publish`
 - `credit-policy:delegation-table.set`
+- `credit-policy:residual-income-minimum.set`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -112,6 +113,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `PublishLegalMaximumRate` | command | `legal-maximum-rate.publish` |
 | `PublishRateGrid` | command | `rate-grid.publish` |
 | `SetDelegationTable` | command | `delegation-table.set` |
+| `SetResidualIncomeMinimum` | command | `residual-income-minimum.set` |
 
 ### Routes
 
@@ -121,6 +123,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/legal-maximum-rates` | `publishLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `PublishLegalMaximumRate` | `legal-maximum-rate.publish` | body: `PublishLegalMaximumRateBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidLegalMaximumRate` |
 | POST | `/products` | `defineProduct` | `ProductsRoutes` | `Authenticated` | `DefineProduct` | `product.define` | body: `DefineProductBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.ProductBoundsInverted`, `CreditPolicyCodes.InvalidArrangementFee`, `CreditPolicyCodes.InvalidScoreThreshold` |
 | POST | `/rate-grids` | `publishRateGrid` | `RateGridsRoutes` | `Authenticated` | `PublishRateGrid` | `rate-grid.publish` | body: `PublishRateGridBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+| PUT | `/residual-income-minimums` | `setResidualIncomeMinimum` | `ResidualIncomeMinimumsRoutes` | `Authenticated` | `SetResidualIncomeMinimum` | `residual-income-minimum.set` | body: `SetResidualIncomeMinimumBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidResidualIncomeMinimum` |
 
 ### Ports
 
@@ -130,7 +133,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `LegalMaximumRateRepository` | repository | `PrismaLegalMaximumRateRepository` |
 | `ProductRepository` | repository | `PrismaProductRepository` |
 | `RateGridRepository` | repository | `PrismaRateGridRepository` |
-| `ResidualIncomeMinimumRepository` | external | `PrismaResidualIncomeMinimumRepository` |
+| `ResidualIncomeMinimumRepository` | repository | `PrismaResidualIncomeMinimumRepository` |
 
 ### Errors
 
@@ -142,6 +145,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `InvalidLegalMaximumRate` | `forBasisPoints` | `INVALID_LEGAL_MAXIMUM_RATE` | `basisPoints` |
 | `InvalidLegalMaximumRate` | `forCategory` | `INVALID_LEGAL_MAXIMUM_RATE` | `category` |
 | `InvalidLegalMaximumRate` | `forBeforeLatest` | `INVALID_LEGAL_MAXIMUM_RATE` | `effectiveFrom`, `latestEffectiveFrom` |
+| `InvalidResidualIncomeMinimum` | `forCents` | `INVALID_RESIDUAL_INCOME_MINIMUM` | `cents` |
 | `InvalidScoreThreshold` | `forScore` | `INVALID_SCORE_THRESHOLD` | `score` |
 | `ProductBoundsInverted` | `onAmount` | `PRODUCT_BOUNDS_INVERTED` | `minimum`, `maximum` |
 | `ProductBoundsInverted` | `onDuration` | `PRODUCT_BOUNDS_INVERTED` | `minimum`, `maximum` |

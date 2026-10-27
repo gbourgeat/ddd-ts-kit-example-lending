@@ -130,6 +130,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
    */
   publishRateGrid(input: operations.PublishRateGridInput, options?: CallOptions): Promise<operations.PublishRateGridResult>;
+  /**
+   * Set residual income minimum: `PUT /residual-income-minimums`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
+   */
+  setResidualIncomeMinimum(input: operations.SetResidualIncomeMinimumInput, options?: CallOptions): Promise<operations.SetResidualIncomeMinimumResult>;
 }
 
 export function createClient(options: ClientOptions<SchemeName>): Client {
@@ -155,5 +161,6 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     changeMemberRole: (input, call) => operations.changeMemberRole(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
+    setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
   };
 }

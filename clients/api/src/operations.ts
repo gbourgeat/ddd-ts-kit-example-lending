@@ -733,3 +733,38 @@ export function publishRateGrid(
 
   return send<PublishRateGridResult>(connection, operation, { ...input, ...options });
 }
+
+export interface SetResidualIncomeMinimumInput {
+  readonly body: {
+    perAdultInCents: number;
+    perChildInCents: number;
+  };
+}
+
+export type SetResidualIncomeMinimumResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_RESIDUAL_INCOME_MINIMUM' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Set residual income minimum: `PUT /residual-income-minimums`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
+ */
+export function setResidualIncomeMinimum(
+  connection: Connection,
+  input: SetResidualIncomeMinimumInput,
+  options: CallOptions = {},
+): Promise<SetResidualIncomeMinimumResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/residual-income-minimums',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<SetResidualIncomeMinimumResult>(connection, operation, { ...input, ...options });
+}

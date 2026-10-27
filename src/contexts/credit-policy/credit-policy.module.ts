@@ -18,6 +18,9 @@ import { PublishLegalMaximumRateHandler } from '@/contexts/credit-policy/applica
 import { PrismaDelegationTableRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-delegation-table.repository';
 import { SetDelegationTableCommand } from '@/contexts/credit-policy/application/commands/set-delegation-table/set-delegation-table.command';
 import { SetDelegationTableHandler } from '@/contexts/credit-policy/application/commands/set-delegation-table/set-delegation-table.handler';
+import { PrismaResidualIncomeMinimumRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-residual-income-minimum.repository';
+import { SetResidualIncomeMinimumCommand } from '@/contexts/credit-policy/application/commands/set-residual-income-minimum/set-residual-income-minimum.command';
+import { SetResidualIncomeMinimumHandler } from '@/contexts/credit-policy/application/commands/set-residual-income-minimum/set-residual-income-minimum.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditPolicyWiring {
@@ -87,6 +90,17 @@ function registerHandlers(platform: Platform): void {
     new SetDelegationTableHandler(delegationTableRepository, platform.ids, platform.clock),
     { context: 'credit-policy' },
   );
+
+  const residualIncomeMinimumRepository = platform.adapter(
+    new PrismaResidualIncomeMinimumRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'credit-policy', token: 'ResidualIncomeMinimumRepository' },
+  );
+
+  platform.commands.register(
+    SetResidualIncomeMinimumCommand,
+    new SetResidualIncomeMinimumHandler(residualIncomeMinimumRepository, platform.ids, platform.clock),
+    { context: 'credit-policy' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -116,6 +130,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
     requires(SetDelegationTableCommand, creditPolicyPermissions['delegation-table.set'], {
+      resource: () => ({ type: 'context', id: 'credit-policy' }),
+    }),
+    requires(SetResidualIncomeMinimumCommand, creditPolicyPermissions['residual-income-minimum.set'], {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
     // /ddd-ts-kit:authorization
