@@ -22,3 +22,27 @@ describe('RemoteRepaymentIncidentRegister', () => {
   it.todo('answers what the outside system answers, in the types of credit-application');
   it.todo('fails with a business error when the outside system refuses');
 });
+
+describe('RemoteRepaymentIncidentRegister while its transport is not written', () => {
+  it('refuses each call and names the operation it was asked', async () => {
+    await expect(new RemoteRepaymentIncidentRegister().isListed('x', new Date(0))).rejects.toThrow(
+      'has no transport yet',
+    );
+  });
+});
+
+class AbortedRemoteRepaymentIncidentRegister extends RemoteRepaymentIncidentRegister {
+  sendAborted(signal: AbortSignal): Promise<unknown> {
+    return this.transport({ operation: 'probe', payload: {} }, signal);
+  }
+}
+
+describe('RemoteRepaymentIncidentRegister when its call is aborted', () => {
+  it('stops before the transport and refuses with the abort reason', async () => {
+    const controller = new AbortController();
+
+    controller.abort();
+
+    await expect(new AbortedRemoteRepaymentIncidentRegister().sendAborted(controller.signal)).rejects.toThrow();
+  });
+});

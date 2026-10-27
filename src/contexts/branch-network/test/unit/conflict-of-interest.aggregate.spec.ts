@@ -37,3 +37,12 @@ describe('ConflictOfInterest', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aConflictOfInterest exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aConflictOfInterest().build();
+
+    expect(built.staffMemberId).toEqual('staff-member-1');
+    expect(built.customerId).toEqual('customer-1');
+  });
+});

@@ -22,3 +22,27 @@ describe('RemoteAccountInformationProvider', () => {
   it.todo('answers what the outside system answers, in the types of credit-application');
   it.todo('fails with a business error when the outside system refuses');
 });
+
+describe('RemoteAccountInformationProvider while its transport is not written', () => {
+  it('refuses each call and names the operation it was asked', async () => {
+    await expect(new RemoteAccountInformationProvider().readIncomeAndExpenses('x')).rejects.toThrow(
+      'has no transport yet',
+    );
+  });
+});
+
+class AbortedRemoteAccountInformationProvider extends RemoteAccountInformationProvider {
+  sendAborted(signal: AbortSignal): Promise<unknown> {
+    return this.transport({ operation: 'probe', payload: {} }, signal);
+  }
+}
+
+describe('RemoteAccountInformationProvider when its call is aborted', () => {
+  it('stops before the transport and refuses with the abort reason', async () => {
+    const controller = new AbortController();
+
+    controller.abort();
+
+    await expect(new AbortedRemoteAccountInformationProvider().sendAborted(controller.signal)).rejects.toThrow();
+  });
+});

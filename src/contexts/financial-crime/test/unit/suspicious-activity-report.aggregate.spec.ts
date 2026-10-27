@@ -30,3 +30,11 @@ describe('SuspiciousActivityReport', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aSuspiciousActivityReport exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aSuspiciousActivityReport().build();
+
+    expect(built.subjectReference).toEqual('loan-1');
+  });
+});

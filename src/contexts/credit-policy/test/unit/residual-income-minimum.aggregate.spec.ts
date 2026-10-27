@@ -30,3 +30,13 @@ describe('ResidualIncomeMinimum', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aResidualIncomeMinimum exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aResidualIncomeMinimum().build();
+
+    expect(built.perAdultInCents).toEqual(80000);
+    expect(built.perChildInCents).toEqual(30000);
+    expect(built.effectiveFrom).toEqual(new Date('2026-01-01T00:00:00.000Z'));
+  });
+});

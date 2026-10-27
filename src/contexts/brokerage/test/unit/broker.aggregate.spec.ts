@@ -30,3 +30,11 @@ describe('Broker', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aBroker exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aBroker().build();
+
+    expect(built.registrationNumber).toEqual('REG-0001');
+  });
+});

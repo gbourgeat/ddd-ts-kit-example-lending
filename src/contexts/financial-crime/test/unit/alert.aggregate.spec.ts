@@ -30,3 +30,11 @@ describe('Alert', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('anAlert exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = anAlert().build();
+
+    expect(built.repaymentReference).toEqual('repayment-1');
+  });
+});

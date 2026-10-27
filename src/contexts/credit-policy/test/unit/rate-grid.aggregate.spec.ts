@@ -30,3 +30,12 @@ describe('RateGrid', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aRateGrid exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aRateGrid().build();
+
+    expect(built.productId).toEqual('product-1');
+    expect(built.effectiveFrom).toEqual(new Date('2026-01-01T00:00:00.000Z'));
+  });
+});

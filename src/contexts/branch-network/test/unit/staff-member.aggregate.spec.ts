@@ -37,3 +37,12 @@ describe('StaffMember', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aStaffMember exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aStaffMember().build();
+
+    expect(built.name).toEqual('Ada Lovelace');
+    expect(built.email).toEqual('ada.lovelace@bank.test');
+  });
+});

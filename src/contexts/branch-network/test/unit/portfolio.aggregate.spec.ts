@@ -32,3 +32,12 @@ describe('Portfolio', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aPortfolio exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aPortfolio().build();
+
+    expect(built.advisorId).toEqual('staff-member-1');
+    expect(built.branchId).toEqual('branch-1');
+  });
+});

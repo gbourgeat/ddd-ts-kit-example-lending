@@ -22,3 +22,25 @@ describe('RemoteScreeningProvider', () => {
   it.todo('answers what the outside system answers, in the types of customer-due-diligence');
   it.todo('fails with a business error when the outside system refuses');
 });
+
+describe('RemoteScreeningProvider while its transport is not written', () => {
+  it('refuses each call and names the operation it was asked', async () => {
+    await expect(new RemoteScreeningProvider().screen('x', new Date(0))).rejects.toThrow('has no transport yet');
+  });
+});
+
+class AbortedRemoteScreeningProvider extends RemoteScreeningProvider {
+  sendAborted(signal: AbortSignal): Promise<unknown> {
+    return this.transport({ operation: 'probe', payload: {} }, signal);
+  }
+}
+
+describe('RemoteScreeningProvider when its call is aborted', () => {
+  it('stops before the transport and refuses with the abort reason', async () => {
+    const controller = new AbortController();
+
+    controller.abort();
+
+    await expect(new AbortedRemoteScreeningProvider().sendAborted(controller.signal)).rejects.toThrow();
+  });
+});

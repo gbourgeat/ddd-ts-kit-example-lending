@@ -30,3 +30,11 @@ describe('Product', () => {
     expect(loaded.pullEvents()).toEqual([]);
   });
 });
+
+describe('aProduct exposes what it holds', () => {
+  it('gives back each fact the aggregate was born with', () => {
+    const built = aProduct().build();
+
+    expect(built.scoreThreshold).toEqual(600);
+  });
+});
