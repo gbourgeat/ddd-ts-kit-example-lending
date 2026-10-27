@@ -56,11 +56,9 @@ function registerHandlers(platform: Platform): void {
     { context: 'brokerage' },
   );
 
-  platform.commands.register(
-    CheckRegistrationCommand,
-    new CheckRegistrationHandler(brokerRepository, intermediaries, platform.clock),
-    { context: 'brokerage' },
-  );
+  platform.commands.register(CheckRegistrationCommand, new CheckRegistrationHandler(brokerRepository, intermediaries), {
+    context: 'brokerage',
+  });
   // /ddd-ts-kit:handlers
 }
 

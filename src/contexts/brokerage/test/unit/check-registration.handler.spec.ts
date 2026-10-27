@@ -17,15 +17,16 @@ const holders = authorizationMiddleware({
 });
 
 const holder = anActor().withRole('holder').build();
+const day = new Date('2026-01-01T06:00:00.000Z');
 
 describe('Check registrations', () => {
   it('marks as lapsed the broker whose registration is no longer valid on the day of the check', async () => {
-    const { commandBus, brokerRepository, clock } = arrange();
+    const { commandBus, brokerRepository } = arrange();
 
     await brokerRepository.save(aBroker().identifiedBy('broker-1').numbered('REG-0001').build());
-    await commandBus.execute(new CheckRegistrationCommand(holder));
+    await commandBus.execute(new CheckRegistrationCommand(holder, day));
 
-    expect((await brokerRepository.findById('broker-1'))?.lapsedOn).toEqual(clock.now());
+    expect((await brokerRepository.findById('broker-1'))?.lapsedOn).toEqual(day);
   });
 
   it('leaves unmarked the broker whose registration is still valid on the day of the check', async () => {
@@ -33,7 +34,7 @@ describe('Check registrations', () => {
 
     intermediaries.markValid('REG-0002');
     await brokerRepository.save(aBroker().identifiedBy('broker-2').numbered('REG-0002').build());
-    await commandBus.execute(new CheckRegistrationCommand(holder));
+    await commandBus.execute(new CheckRegistrationCommand(holder, day));
 
     expect((await brokerRepository.findById('broker-2'))?.lapsedOn).toBeUndefined();
   });
@@ -46,7 +47,7 @@ describe('Check registrations', () => {
     await brokerRepository.save(aBroker().identifiedBy('broker-2').numbered('REG-0002').build());
     await brokerRepository.save(aBroker().identifiedBy('broker-3').numbered('REG-0003').build());
 
-    expect(await commandBus.execute(new CheckRegistrationCommand(holder))).toBe(2);
+    expect(await commandBus.execute(new CheckRegistrationCommand(holder, day))).toBe(2);
   });
 
   it('announces the lapse of each broker it marks, as its save is made', async () => {
@@ -58,7 +59,7 @@ describe('Check registrations', () => {
     });
 
     await brokerRepository.save(aBroker().identifiedBy('broker-1').numbered('REG-0001').build());
-    await commandBus.execute(new CheckRegistrationCommand(holder));
+    await commandBus.execute(new CheckRegistrationCommand(holder, day));
 
     expect(announced).toEqual(['broker-1']);
   });
@@ -72,8 +73,8 @@ describe('Check registrations', () => {
     });
 
     await brokerRepository.save(aBroker().identifiedBy('broker-1').numbered('REG-0001').build());
-    await commandBus.execute(new CheckRegistrationCommand(holder));
-    const secondRun = await commandBus.execute(new CheckRegistrationCommand(holder));
+    await commandBus.execute(new CheckRegistrationCommand(holder, day));
+    const secondRun = await commandBus.execute(new CheckRegistrationCommand(holder, day));
 
     expect(secondRun).toBe(0);
     expect(announced).toEqual(['broker-1']);
@@ -90,28 +91,28 @@ describe('Check registrations', () => {
     });
 
     await brokerRepository.save(aBroker().identifiedBy('broker-2').numbered('REG-0002').build());
-    await commandBus.execute(new CheckRegistrationCommand(holder));
+    await commandBus.execute(new CheckRegistrationCommand(holder, day));
 
     expect(announced).toEqual([]);
   });
 
   it('is refused to an actor who does not hold the permission broker.check', async () => {
     const { commandBus } = arrange();
-    const command = new CheckRegistrationCommand(anActor().build());
+    const command = new CheckRegistrationCommand(anActor().build(), day);
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
 });
 
 function arrange() {
-  const { commandBus, clock, ids, dispatching, domainEvents } = createTestBuses({ idPrefix: 'broker' });
+  const { commandBus, ids, dispatching, domainEvents } = createTestBuses({ idPrefix: 'broker' });
   // As the application hands it to the handler: the save announces the events of the broker to `domainEvents`.
   const brokerRepository = dispatching(new FakeBrokerRepository());
   const intermediaries = new FakeIntermediariesRegister();
 
-  const handler = new CheckRegistrationHandler(brokerRepository, intermediaries, clock);
+  const handler = new CheckRegistrationHandler(brokerRepository, intermediaries);
 
   commandBus.use(holders).register(CheckRegistrationCommand, handler);
 
-  return { commandBus, brokerRepository, intermediaries, domainEvents, clock, ids };
+  return { commandBus, brokerRepository, intermediaries, domainEvents, ids };
 }
