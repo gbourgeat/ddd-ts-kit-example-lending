@@ -43,7 +43,7 @@ ledger" (US0.06).
 | US1.10 | branch-network | contract | Conflict of interest declared, published to credit-application | `integration-event branch-network ConflictOfInterest Declared --version 1` | US1.05 | conductor | done |
 | US1.11 | branch-network | contract | Staff member appointed, published | `integration-event branch-network StaffMember Appointed --version 1` | US1.03 | conductor | done |
 | US1.12 | branch-network | slice | Staff of the branch, read by a branch manager | `query branch-network SearchBranchStaff --permission staff-member.list --search` | US1.07 | branch-network | done |
-| US1.13 | branch-network | slice | An identified customer joins the advisor's portfolio | `integration-handler branch-network customer-due-diligence customer-due-diligence.customer.advisor-assigned --name AssignIdentifiedCustomer` (owner decision, plan.md wave 5: the advisor comes from AdvisorAssigned, not from the birth event) | US1.08, US2.17 | branch-network | todo |
+| US1.13 | branch-network | slice | An identified customer joins the advisor's portfolio | `integration-handler branch-network customer-due-diligence customer-due-diligence.customer.advisor-assigned --name AssignIdentifiedCustomer` (owner decision, plan.md wave 5: the advisor comes from AdvisorAssigned, not from the birth event) | US1.08, US2.17 | branch-network | done |
 
 Serves: "Banks, branches and staff" (rows 2, 3, 4: US1.02, US1.04, US1.06 to US1.09, US1.12); intro
 "each bank's data never visible to another" (US1.01, US1.12); "Who sees what": advisor sees the customers
