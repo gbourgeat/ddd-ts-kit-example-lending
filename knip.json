@@ -6,7 +6,8 @@
         "src/contexts/*/*.module.ts",
         "src/contexts/*/published-language/index.ts",
         "scripts/*.ts",
-        "test/e2e/**/*.ts"
+        "test/e2e/**/*.ts",
+        "src/apps/*/main.ts"
       ],
       "project": ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts", "prisma/**/*.prisma"],
       "mcp": false,

@@ -236,7 +236,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US9.01 | servicing | skeleton | Servicing as its own service, with its standalone entry point and boot test | `service servicing` | | conductor | todo |
+| US9.01 | servicing | skeleton | Servicing as its own service, with its standalone entry point and boot test | `service servicing` | | conductor | done |
 | US9.02 | servicing | skeleton | Loan, event-sourced, born paid out | `aggregate servicing Loan --event-sourced --birth PaidOut --module ledger` | US9.01 | conductor | todo |
 | US9.03 | servicing | skeleton | Payment provider for direct debits (port, fake adapter, anti-corruption layer) | `port servicing PaymentProvider --module instalments`; `adapter servicing PaymentProvider --kind external --module instalments`; `acl servicing PaymentProvider --module instalments` | | conductor | todo |
 | US9.04 | servicing | slice | Schedule of constant monthly instalments, in cents | `domain-service servicing InstalmentSchedule --module ledger` | US9.02, US0.06 | servicing | todo |
