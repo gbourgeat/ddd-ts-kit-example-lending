@@ -172,3 +172,19 @@ by the judge and not applied; the trace tree of the submission, done, `ea3ce0c`)
   `docs/tooling/frictions.md` (step 8) and `plan.md` `## For the owner`. Nothing of the story changed in this session.
 - Stopped here. Next, for the owner: run `npx ddd-ts-kit merge-trunk --trunk origin/main` outside the sandbox, then resolve the
   conflicts; the story closes after US6.18 and an e2e run where AC2 passes.
+
+### Update: merge of main recorded, verify green, blocked by US6.18 only
+
+- The merge of `origin/main` (0.95.0) is recorded: `2611095`. Six conflicts settled (`plan.md`, `frictions.md`, the three
+  behaviour pages, `prisma/schema/schema.prisma`). The Prisma schema keeps main's main file with `authorization` added to the
+  datasource `schemas`; the identity models were byte-identical to `prisma/schema/identity.prisma` and were dropped. `RelationTuple`
+  has no owning context, so it stays in the main file (for the owner to decide whether it moves to its own file).
+- `npm run db:client`, then `npm run test:e2e`: AC1 passes (`#US0.04 #US0.01 #US0.02 #US0.06`), AC3 passes (`#US0.05`), AC2
+  (`#US0.04 #US0.02 #US0.03`) is pending, not failed, until US6.18 builds `GET /applications`.
+- `npm run verify` exits 0 after the commit `66cfa1a` (the shared kernel's glossary, `src/shared-kernel/CONTEXT.md`, which the arch
+  check required). The last gates it prints: `depcruise`, `deadcode`, `docs:check`, and the build.
+- `npx ddd-ts-kit acceptance US0 --gate written` → `gate written: 1 left` (AC2). The acceptance is written and locked; the stop
+  hook's "next" (write, then lock) is already done, and a second lock would restate the same file.
+- Blocked, not closed: AC2 closes when US6.18 is built, which is another story's code. Decision kept (owner decision 1).
+- The three acceptance amendments of the judge (AC1 and AC3, see the verdict files named in the section above) wait for the owner to validate.
+- Not pushed.
