@@ -5,10 +5,13 @@ import type { Type } from '@nestjs/common';
 import { AppointStaffMemberController } from '@/contexts/branch-network/presentation/http/branches/appoint-staff-member/appoint-staff-member.controller';
 import { OpenBranchController } from '@/contexts/branch-network/presentation/http/branches/open-branch/open-branch.controller';
 import { DeclareConflictOfInterestController } from '@/contexts/branch-network/presentation/http/conflicts/declare-conflict-of-interest/declare-conflict-of-interest.controller';
+import { SearchAdvisorPortfoliosController } from '@/contexts/branch-network/presentation/http/portfolios/search-advisor-portfolios/search-advisor-portfolios.controller';
+import { SearchPortfolioCustomersController } from '@/contexts/branch-network/presentation/http/portfolios/search-portfolio-customers/search-portfolio-customers.controller';
 import { AppointStaffMemberParams } from '@/contexts/branch-network/presentation/http/branches/appoint-staff-member/appoint-staff-member.params';
 import { AppointStaffMemberBody } from '@/contexts/branch-network/presentation/http/branches/appoint-staff-member/appoint-staff-member.body';
 import { OpenBranchBody } from '@/contexts/branch-network/presentation/http/branches/open-branch/open-branch.body';
 import { DeclareConflictOfInterestBody } from '@/contexts/branch-network/presentation/http/conflicts/declare-conflict-of-interest/declare-conflict-of-interest.body';
+import { SearchPortfolioCustomersParams } from '@/contexts/branch-network/presentation/http/portfolios/search-portfolio-customers/search-portfolio-customers.params';
 
 /** The Nest controllers of branch-network, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const branchNetworkControllers: readonly Type<unknown>[] = [
@@ -18,5 +21,9 @@ export const branchNetworkControllers: readonly Type<unknown>[] = [
   withSignatures(OpenBranchController, { openBranch: { body: OpenBranchBody, answer: acceptedSchema } }),
   withSignatures(DeclareConflictOfInterestController, {
     declareConflictOfInterest: { body: DeclareConflictOfInterestBody, answer: acceptedSchema },
+  }),
+  withSignatures(SearchAdvisorPortfoliosController, {}),
+  withSignatures(SearchPortfolioCustomersController, {
+    searchPortfolioCustomers: { params: SearchPortfolioCustomersParams },
   }),
 ];

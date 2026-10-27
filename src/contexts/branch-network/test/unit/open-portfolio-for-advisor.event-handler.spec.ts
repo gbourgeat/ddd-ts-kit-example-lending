@@ -5,6 +5,7 @@ import {
   announceDomainEvents,
   unitOfWorkStage,
 } from '@ddd-ts-kit/kernel';
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { createTestBuses } from '@ddd-ts-kit/testing';
 import { OpenPortfolioForAdvisorEventHandler } from '@/contexts/branch-network/application/event-handlers/open-portfolio-for-advisor.event-handler';
 import { OpenPortfolioCommand } from '@/contexts/branch-network/application/commands/open-portfolio/open-portfolio.command';
@@ -65,7 +66,9 @@ function arrange() {
   const staffMemberRepository = new FakeStaffMemberRepository();
   const portfolioRepository = new FakePortfolioRepository();
 
-  commandBus.register(OpenPortfolioCommand, new OpenPortfolioHandler(portfolioRepository, ids, clock));
+  const relations = new InMemoryRelationTupleStore();
+
+  commandBus.register(OpenPortfolioCommand, new OpenPortfolioHandler(portfolioRepository, ids, clock, relations));
 
   const handler = new OpenPortfolioForAdvisorEventHandler(staffMemberRepository, commandBus);
 

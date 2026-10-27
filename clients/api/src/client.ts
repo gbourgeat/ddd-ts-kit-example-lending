@@ -215,6 +215,18 @@ export interface Client {
    */
   erasePersonalDataPastRetention(input: operations.ErasePersonalDataPastRetentionInput, options?: CallOptions): Promise<operations.ErasePersonalDataPastRetentionResult>;
   /**
+   * Search advisor portfolios: `GET /portfolios`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  searchAdvisorPortfolios(input?: operations.SearchAdvisorPortfoliosInput, options?: CallOptions): Promise<operations.SearchAdvisorPortfoliosResult>;
+  /**
+   * Search portfolio customers: `GET /portfolios/{id}/customers`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PORTFOLIO (422), VALIDATION_FAILED (422).
+   */
+  searchPortfolioCustomers(input: operations.SearchPortfolioCustomersInput, options?: CallOptions): Promise<operations.SearchPortfolioCustomersResult>;
+  /**
    * Define product: `POST /products`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
@@ -271,6 +283,8 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     removeMember: (input, call) => operations.removeMember(connection, input, call),
     changeMemberRole: (input, call) => operations.changeMemberRole(connection, input, call),
     erasePersonalDataPastRetention: (input, call) => operations.erasePersonalDataPastRetention(connection, input, call),
+    searchAdvisorPortfolios: (input, call) => operations.searchAdvisorPortfolios(connection, input, call),
+    searchPortfolioCustomers: (input, call) => operations.searchPortfolioCustomers(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),

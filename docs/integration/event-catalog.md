@@ -143,6 +143,8 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | --- | --- | --- | --- |
 | `customer-due-diligence.customer.advisor-assigned` | 1 | A customer was given its advisor of the branch network, who looks after it. | no |
 
+Consumers: `branch-network`
+
 #### Payload of version 1
 
 | Field | Type | Required | Description |
