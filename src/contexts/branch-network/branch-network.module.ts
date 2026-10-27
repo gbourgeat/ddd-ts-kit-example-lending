@@ -13,6 +13,9 @@ import { ConflictOfInterestDeclaredPublisher } from '@/contexts/branch-network/a
 import { ConflictOfInterestDeclared } from '@/contexts/branch-network/domain/events/conflict-of-interest-declared.event';
 import { StaffMemberAppointedPublisher } from '@/contexts/branch-network/application/integration/publishers/staff-member-appointed.publisher';
 import { StaffMemberAppointed } from '@/contexts/branch-network/domain/events/staff-member-appointed.event';
+import { PrismaStaffMemberRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-staff-member.repository';
+import { AppointStaffMemberCommand } from '@/contexts/branch-network/application/commands/appoint-staff-member/appoint-staff-member.command';
+import { AppointStaffMemberHandler } from '@/contexts/branch-network/application/commands/appoint-staff-member/appoint-staff-member.handler';
 // /ddd-ts-kit:imports
 
 export interface BranchNetworkWiring {
@@ -47,6 +50,17 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(OpenBranchCommand, new OpenBranchHandler(branchRepository, platform.ids, platform.clock), {
     context: 'branch-network',
   });
+
+  const staffMemberRepository = platform.adapter(
+    new PrismaStaffMemberRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'branch-network', token: 'StaffMemberRepository' },
+  );
+
+  platform.commands.register(
+    AppointStaffMemberCommand,
+    new AppointStaffMemberHandler(branchRepository, staffMemberRepository, platform.ids, platform.clock),
+    { context: 'branch-network' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -88,6 +102,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(OpenBranchCommand, branchNetworkPermissions['branch.open'], {
+      resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
+    requires(AppointStaffMemberCommand, branchNetworkPermissions['staff-member.appoint'], {
       resource: () => ({ type: 'context', id: 'branch-network' }),
     }),
     // /ddd-ts-kit:authorization

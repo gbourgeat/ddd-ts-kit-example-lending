@@ -56,6 +56,7 @@ Who follows which customer, and who may decide on it, is needed for the business
 
 <!-- ddd-ts-kit:permissions -->
 - `branch-network:branch.open`
+- `branch-network:staff-member.appoint`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -102,6 +103,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `AppointStaffMember` | command | `staff-member.appoint` |
 | `OpenBranch` | command | `branch.open` |
 
 ### Routes
@@ -109,6 +111,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+| POST | `/branches/:id/staff` | `appointStaffMember` | `BranchesRoutes` | `Authenticated` | `AppointStaffMember` | `staff-member.appoint` | params: `AppointStaffMemberParams`, body: `AppointStaffMemberBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.BranchNotOpened` |
 
 ### Publishers
 
@@ -126,5 +129,11 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchRepository` | repository | `PrismaBranchRepository` |
 | `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
 | `PortfolioRepository` | external | `PrismaPortfolioRepository` |
-| `StaffMemberRepository` | external | `PrismaStaffMemberRepository` |
+| `StaffMemberRepository` | repository | `PrismaStaffMemberRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `BranchNotOpened` | `forBranch` | `BRANCH_NOT_OPENED` | `branchId` |
 <!-- /ddd-ts-kit:reference -->

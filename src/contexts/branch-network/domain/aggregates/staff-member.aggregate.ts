@@ -3,6 +3,13 @@ import { StaffMemberAppointed } from '@/contexts/branch-network/domain/events/st
 
 export interface StaffMemberState {
   readonly registeredAt: Date;
+  readonly branchId: string;
+  readonly name: string;
+  readonly email: string;
+}
+
+export interface StaffMemberAppointment {
+  readonly branchId: string;
   readonly name: string;
   readonly email: string;
 }
@@ -15,8 +22,8 @@ export class StaffMember extends AggregateRoot<string> {
     super(id);
   }
 
-  static create(id: string, name: string, email: string, now: Date): StaffMember {
-    const appointed = new StaffMember(id, { registeredAt: now, name, email });
+  static create(id: string, appointment: StaffMemberAppointment, now: Date): StaffMember {
+    const appointed = new StaffMember(id, { registeredAt: now, ...appointment });
 
     appointed.record(new StaffMemberAppointed(id, now));
 
@@ -29,6 +36,10 @@ export class StaffMember extends AggregateRoot<string> {
 
   get registeredAt(): Date {
     return this.state.registeredAt;
+  }
+
+  get branchId(): string {
+    return this.state.branchId;
   }
 
   get name(): string {
