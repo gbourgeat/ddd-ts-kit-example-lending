@@ -149,7 +149,7 @@ provider is another adapter of the same port.
 | Table | About | Personal data | On erasure | Kept |
 |---|---|---|---|---|
 | `accounts` | `id` | `email`, `display_name` | pseudonymised | until erased |
-| `invitations` | `id` | `email` | row deleted | 30 days after `expires_at` |
+| `invitations` | `id` | `email` | row deleted | until erased |
 <!-- /ddd-ts-kit:personal-data -->
 
 ## Permissions

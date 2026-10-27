@@ -49,6 +49,7 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
 
   return {
     ...founded,
+    retention: options.retention ?? {},
     audit: { ...foundations.audit, reader: new StreamAuditReader(foundations.audit.reader, scope, authorizer) },
     ...platformEvents(persistence, options, foundations),
     // The queue, its worker and the runner of the process managers: a timeout is a command the runner sends on the bus.

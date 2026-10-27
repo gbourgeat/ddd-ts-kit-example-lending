@@ -2,6 +2,7 @@ import type { LogLevel, RateLimit } from '@ddd-ts-kit/kernel';
 import type { ResilienceSettings } from '@/platform/resilience/resilience-settings';
 import type { FilesConfig } from '@/platform/config/read-files';
 import type { TracingConfig } from '@/platform/config/read-tracing';
+import type { RetentionPeriods } from '@/platform/config/read-retention-periods';
 
 /** The validated configuration of the process: `loadConfig` is the only reader of the environment. */
 export interface AppConfig {
@@ -33,6 +34,8 @@ export interface AppConfig {
   readonly errorReporting: ErrorReportingConfig;
   /** Where the content of files lives (`files/open-files.ts`), never in the database. */
   readonly files: FilesConfig;
+  /** How long each copy of personal data is kept (`RETENTION_PERIODS`): the nightly erasure acts on these, owned by data-protection. */
+  readonly retention: RetentionPeriods;
 }
 
 /** `LOG_LEVEL`, `LOG_FORMAT` and `LOG_SCRUB_MESSAGES`. */

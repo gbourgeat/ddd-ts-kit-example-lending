@@ -25,11 +25,15 @@ const elements: SchemaDefinition = {
   },
   portfolio: {
     relations: { branch: ['branch'], advisor: ['user'], member: ['customer'] },
+    derived: {
+      'branch-network:portfolio.search-customers': 'advisor',
+    },
   },
   customer: {
     relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
     derived: {
       'credit-application:application.submit': 'self',
+      'data-protection:data-subject.request-copy': 'self',
       advisor: via('portfolio', 'advisor'),
     },
   },

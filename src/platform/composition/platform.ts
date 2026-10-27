@@ -23,6 +23,7 @@ import type { Audit } from '@/platform/audit/create-audit';
 import type { RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import type { UseCaseProtection } from '@/platform/auth/authorization/use-case-protection';
 import type { Persistence } from '@/platform/database/persistence';
+import type { RetentionPeriods } from '@/platform/config/read-retention-periods';
 import type { EventSourcing } from '@/platform/event-sourcing/create-event-sourcing';
 import type { Files } from '@/platform/files/create-files';
 import type { BackgroundJobs } from '@/platform/jobs/background-jobs';
@@ -48,6 +49,8 @@ export interface Platform {
   /** The provider itself: what the outbox relay delivers to. */
   readonly eventBus: IntegrationEventPublisher;
   readonly persistence: Persistence;
+  /** How long each copy of personal data is kept, by copy: what the nightly erasure acts on. */
+  readonly retention: RetentionPeriods;
   /** The relationships the authorizer reads, written in the transaction of the change they describe. */
   readonly relations: RelationTupleStore;
   /** Asks the policies about one element, then the authorizer: for the rules that need loaded state. */
