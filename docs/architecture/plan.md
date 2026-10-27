@@ -12,6 +12,8 @@ The `Next:` line above is read by tools at the start of every session: keep it o
 
 - Wave 3, US2.04 blocked: `event-sourcing/upcaster-required` on the birth event of Customer (its version 1 stored shape changed to carry the identity facts: a version 2 with an upcaster is needed, and the owner decides what a birth recorded before has), and `privacy/declared-field` on the document number and the address of the birth event (the personal fields to declare). The branch build/customer-due-diligence has the scope staged, not committed (conductor, owner).
 
+- Wave 3, US8.04 blocked: the APR is proven against the worked examples of the directive, and none is in the repository. The owner gives the examples (inputs and expected rate) and the precision the rate states.
+
 ## Needs
 
 Stated by the product owner, verbatim from `docs/architecture/needs.md`:
@@ -223,6 +225,7 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 Customer relationship is established before any credit; an applicant is a customer once identified (conductor, owner brief)
 - 2026-10-27 Identification of a person: an identity document (passport, national identity card or residence permit) with its number, issuing country and expiry date, valid on the day of identification, and a proof of address dated within three months; refused when the document is expired or the proof of address older than three months, the reason named (conductor, owner brief, to confirm)
 - 2026-10-27 Appointment of a member of staff to a branch: the appointment names the branch, which must be opened (an opened branch can take its staff, the glossary); an appointment to a branch not opened is refused with the reason named. The member of staff holds the branch of the appointment. The published StaffMemberAppointed v1 keeps its payload: a field that consumers need is a new version, not a change of v1 (conductor, owner brief, to confirm)
+- 2026-10-27 Net income must be positive for the debt to income ratio; a zero or negative net income is refused with INVALID_NET_INCOME (conductor, owner brief, to confirm)
 - 2026-10-27 Opening an organisation (a bank, a tenant) is reserved to the platform operator: a signed-in person with no relation to it is refused with 403 (conductor, owner brief, to confirm)
 - 2026-10-26 Eleven contexts, two cores (`credit-application`, `credit-scoring`), `financial-crime` restricted to compliance, `identity` as kit preset; access rights, external systems, notifications and audit are not contexts (`contexts.md`) (conductor, owner brief)
 - 2026-10-26 Payout gated in `credit-application` by a synchronous read of due diligence, so that no credit is disbursed at the instant of payout (conductor, owner brief, to confirm)
