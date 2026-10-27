@@ -7,6 +7,8 @@ interface StaffMemberIngredients {
   readonly branchId: string;
   readonly name: string;
   readonly email: string;
+  readonly accountId: string;
+  readonly ownCustomerId: string | undefined;
 }
 
 export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMember> {
@@ -30,6 +32,14 @@ export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMem
     return this.with('email', email);
   }
 
+  signedInAs(accountId: string): this {
+    return this.with('accountId', accountId);
+  }
+
+  ownsCustomerFile(customerId: string): this {
+    return this.with('ownCustomerId', customerId);
+  }
+
   protected defaults(): Defaults<StaffMemberIngredients> {
     return {
       id: sequence('staff-member'),
@@ -37,13 +47,21 @@ export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMem
       branchId: 'branch-1',
       name: 'Ada Lovelace',
       email: 'ada.lovelace@bank.test',
+      accountId: 'account-ada',
+      ownCustomerId: undefined,
     };
   }
 
   protected construct(ingredients: StaffMemberIngredients): StaffMember {
     return StaffMember.create(
       ingredients.id,
-      { branchId: ingredients.branchId, name: ingredients.name, email: ingredients.email },
+      {
+        branchId: ingredients.branchId,
+        name: ingredients.name,
+        email: ingredients.email,
+        accountId: ingredients.accountId,
+        ownCustomerId: ingredients.ownCustomerId,
+      },
       ingredients.bornAt,
     );
   }
