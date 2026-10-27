@@ -15,6 +15,18 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/branch-network.staff-member.appointed.v1'
+  brokerage.broker.registered:
+    address: brokerage.broker.registered
+    description: A broker is registered with the bank and may bring applications.
+    messages:
+      v1:
+        $ref: '#/components/messages/brokerage.broker.registered.v1'
+  brokerage.broker.registration-lapsed:
+    address: brokerage.broker.registration-lapsed
+    description: 'The registration of a broker lapsed: the broker may no longer bring applications until registered again.'
+    messages:
+      v1:
+        $ref: '#/components/messages/brokerage.broker.registration-lapsed.v1'
   credit-application.credit-application.submitted:
     address: credit-application.credit-application.submitted
     description: 'A borrower or a broker has submitted a loan request: the application file is open, with its applicant, amount in cents and duration in months.'
@@ -124,6 +136,18 @@ operations:
       $ref: '#/channels/branch-network.staff-member.appointed'
     messages:
       - $ref: '#/channels/branch-network.staff-member.appointed/messages/v1'
+  send.brokerage.broker.registered:
+    action: send
+    channel:
+      $ref: '#/channels/brokerage.broker.registered'
+    messages:
+      - $ref: '#/channels/brokerage.broker.registered/messages/v1'
+  send.brokerage.broker.registration-lapsed:
+    action: send
+    channel:
+      $ref: '#/channels/brokerage.broker.registration-lapsed'
+    messages:
+      - $ref: '#/channels/brokerage.broker.registration-lapsed/messages/v1'
   send.credit-application.credit-application.submitted:
     action: send
     channel:
@@ -303,6 +327,86 @@ components:
             type: object
             required:
               - staffMemberId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    brokerage.broker.registered.v1:
+      name: brokerage.broker.registered
+      title: brokerage.broker.registered v1
+      summary: A broker is registered with the bank and may bring applications.
+      contentType: application/json
+      tags:
+        - name: brokerage
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: brokerage.broker.registered
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              brokerId:
+                type: string
+            type: object
+            required:
+              - brokerId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    brokerage.broker.registration-lapsed.v1:
+      name: brokerage.broker.registration-lapsed
+      title: brokerage.broker.registration-lapsed v1
+      summary: 'The registration of a broker lapsed: the broker may no longer bring applications until registered again.'
+      contentType: application/json
+      tags:
+        - name: brokerage
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: brokerage.broker.registration-lapsed
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              brokerId:
+                type: string
+            type: object
+            required:
+              - brokerId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
