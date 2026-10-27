@@ -90,7 +90,7 @@ function declarationSpanTree() {
   return [
     {
       name: 'POST /customers/:id/directors-and-owners',
-      kind: 'SERVER',
+      kind: 'SERVER' as const,
       children: [
         {
           name: 'command DeclareDirectorsAndOwnersCommand',
