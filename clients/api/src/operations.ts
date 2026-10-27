@@ -323,6 +323,45 @@ export function registerBusiness(
   return send<RegisterBusinessResult>(connection, operation, { ...input, ...options });
 }
 
+export interface IdentifyCustomerInput {
+  readonly body: {
+    documentKind: 'Passport' | 'NationalIdentityCard' | 'ResidencePermit';
+    documentNumber: string;
+    issuingCountry: string;
+    documentExpiresOn: string;
+    address: string;
+    addressProofDatedOn: string;
+  };
+}
+
+export type IdentifyCustomerResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'IDENTITY_DOCUMENT_EXPIRED' | 'PROOF_OF_ADDRESS_TOO_OLD' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Identify a person with its identity document and its proof of address: `POST /customers`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IDENTITY_DOCUMENT_EXPIRED (422), PROOF_OF_ADDRESS_TOO_OLD (422), VALIDATION_FAILED (422).
+ */
+export function identifyCustomer(
+  connection: Connection,
+  input: IdentifyCustomerInput,
+  options: CallOptions = {},
+): Promise<IdentifyCustomerResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<IdentifyCustomerResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetDelegationTableInput {
   readonly body: {
     effectiveFrom: string;

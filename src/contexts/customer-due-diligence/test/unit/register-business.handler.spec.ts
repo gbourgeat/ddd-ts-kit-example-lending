@@ -8,6 +8,7 @@ import { RegisterBusinessCommand } from '@/contexts/customer-due-diligence/appli
 import { RegisterBusinessHandler } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.handler';
 import { FakeCustomerRepository } from '@/contexts/customer-due-diligence/test/fakes/customer.repository.fake';
 import { Customer } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
+import { aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 
 const holders = authorizationMiddleware({
   authorizer: new RoleBasedAuthorizer({
@@ -116,7 +117,7 @@ async function arrange() {
   const customerRepository = dispatching(new FakeCustomerRepository());
 
   // A customer the bank already knows: its identity was recorded before its business is registered.
-  await customerRepository.save(Customer.create('customer-1', clock.now()));
+  await customerRepository.save(Customer.create('customer-1', aPersonIdentity(), clock.now()));
 
   const handler = new RegisterBusinessHandler(customerRepository, clock);
 

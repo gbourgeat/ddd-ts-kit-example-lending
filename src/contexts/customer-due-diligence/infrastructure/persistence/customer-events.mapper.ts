@@ -1,7 +1,9 @@
-import { defineStoredEvent, type StoredEventTypes } from '@ddd-ts-kit/kernel';
+import type { StoredEventData } from '@ddd-ts-kit/kernel';
+import { defineStoredEvent, personalData, type PersonalValue, type StoredEventTypes } from '@ddd-ts-kit/kernel';
 import type { CustomerEvent } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
+import { IdentityDocumentKind } from '@/contexts/customer-due-diligence/domain/vocabularies/identity-document-kind.vocabulary';
 
 interface CustomerBusinessRegisteredData {
   readonly legalName: string;
@@ -10,15 +12,40 @@ interface CustomerBusinessRegisteredData {
   readonly registeredOn: string;
 }
 
-/** The birth carries no fact beyond its id and instant yet: a field added later is a new stored version with its upcaster. */
-type CustomerIdentifiedData = Record<string, never>;
+/** The identity facts of version 2 of the birth; the document number and the address are personal, sealed by subject. */
+interface PersonIdentityData {
+  readonly documentKind: string;
+  readonly documentNumber: PersonalValue;
+  readonly issuingCountry: string;
+  readonly documentExpiresOn: string;
+  readonly address: PersonalValue;
+  readonly addressProofDatedOn: string;
+}
+
+/** Version 2 of the birth: `identityRecorded` is false for a birth upcast from version 1, which has no identity. */
+interface CustomerIdentifiedData {
+  readonly identityRecorded: boolean;
+  readonly identity: PersonIdentityData | null;
+}
 
 /** How the events of Customer are kept in its stream: one entry per event, read back by `decode`. */
 export const customerEvents: StoredEventTypes<CustomerEvent> = {
   [CustomerIdentified.eventName]: defineStoredEvent(CustomerIdentified, {
-    version: 1,
-    encode: (): CustomerIdentifiedData => ({}),
-    decode: (_data, { aggregateId, occurredAt }) => new CustomerIdentified(aggregateId, occurredAt),
+    version: 2,
+    upcasters: {
+      // A birth of version 1 recorded no identity fact: it is read as not recorded, and identifies no one.
+      1: () => ({ identityRecorded: false, identity: null }),
+    },
+    encode: (event): CustomerIdentifiedData => ({
+      identityRecorded: event.identity !== undefined,
+      identity: event.identity === undefined ? null : identityDataOf(event.aggregateId, event.identity),
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CustomerIdentified(
+        aggregateId,
+        occurredAt,
+        data.flag('identityRecorded') ? identityOf(data.record('identity')) : undefined,
+      ),
   }),
   [CustomerBusinessRegistered.eventName]: defineStoredEvent(CustomerBusinessRegistered, {
     version: 1,
@@ -39,3 +66,38 @@ export const customerEvents: StoredEventTypes<CustomerEvent> = {
       ),
   }),
 };
+
+type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
+
+function identityDataOf(subject: string, identity: PersonIdentity): PersonIdentityData {
+  return {
+    documentKind: identity.documentKind,
+    documentNumber: personalData(subject, identity.documentNumber),
+    issuingCountry: identity.issuingCountry,
+    documentExpiresOn: identity.documentExpiresOn.toISOString(),
+    address: personalData(subject, identity.address),
+    addressProofDatedOn: identity.addressProofDatedOn.toISOString(),
+  };
+}
+
+function identityOf(data: StoredEventData): PersonIdentity {
+  return {
+    documentKind: documentKindOf(data.text('documentKind')),
+    documentNumber: data.text('documentNumber'),
+    issuingCountry: data.text('issuingCountry'),
+    documentExpiresOn: data.instant('documentExpiresOn'),
+    address: data.text('address'),
+    addressProofDatedOn: data.instant('addressProofDatedOn'),
+  };
+}
+
+/** The kinds of identity document the stream may hold: a stored kind outside this list is a corrupted stream. */
+function documentKindOf(raw: string): IdentityDocumentKind {
+  const kind = Object.values(IdentityDocumentKind).find((known) => known === raw);
+
+  if (kind === undefined) {
+    throw new Error(`Unknown identity document kind in the stream: ${raw}`);
+  }
+
+  return kind;
+}

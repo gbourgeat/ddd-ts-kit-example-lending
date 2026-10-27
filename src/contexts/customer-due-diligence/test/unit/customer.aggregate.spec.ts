@@ -3,7 +3,7 @@ import { expectRefusal, givenEvents } from '@ddd-ts-kit/testing';
 import { Customer } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
-import { aCustomer } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
+import { aCustomer, aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
 const registeredOn = new Date('2026-02-14T00:00:00.000Z');
@@ -16,15 +16,38 @@ const business = {
 };
 
 describe('Customer', () => {
-  it('records its birth, and holds the state that event gives', () => {
-    const born = Customer.create('customer-7', bornAt);
+  it('records its birth with the identity it was checked on, and holds the state that event gives', () => {
+    const born = Customer.create('customer-7', aPersonIdentity(), bornAt);
 
     expect(born.registeredAt).toEqual(bornAt);
-    expect(born.pullEvents()).toEqual([new CustomerIdentified('customer-7', bornAt)]);
+    expect(born.pullEvents()).toEqual([new CustomerIdentified('customer-7', bornAt, aPersonIdentity())]);
+  });
+
+  it('refuses to identify a person whose identity document expired before the day', () => {
+    const expired = aPersonIdentity({ documentExpiresOn: new Date('2025-12-31T00:00:00.000Z') });
+
+    expectRefusal(() => Customer.create('customer-8', expired, bornAt), 'IDENTITY_DOCUMENT_EXPIRED');
+  });
+
+  it('refuses to identify a person whose proof of address is dated more than three months before the day', () => {
+    const stale = aPersonIdentity({ addressProofDatedOn: new Date('2025-11-30T23:59:59.000Z') });
+
+    expectRefusal(() => Customer.create('customer-8', stale, bornAt), 'PROOF_OF_ADDRESS_TOO_OLD');
+  });
+
+  it('accepts a proof of address dated exactly three months before the day', () => {
+    const threeMonthsOld = aPersonIdentity({ addressProofDatedOn: new Date('2026-01-01T00:00:00.000Z') });
+
+    const born = Customer.create('customer-8', threeMonthsOld, new Date('2026-04-01T00:00:00.000Z'));
+
+    expect(born.pullEvents()).toHaveLength(1);
   });
 
   it('is rebuilt from its history, recording nothing', () => {
-    givenEvents((id, history) => Customer.rehydrate(id, history), [new CustomerIdentified('customer-7', bornAt)])
+    givenEvents(
+      (id, history) => Customer.rehydrate(id, history),
+      [new CustomerIdentified('customer-7', bornAt, aPersonIdentity())],
+    )
       .when((loaded) => loaded.toState())
       .thenNoEvent()
       .thenState((loaded) => expect(loaded.version).toBe(1));

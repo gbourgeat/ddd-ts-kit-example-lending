@@ -2,6 +2,11 @@ import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@dd
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 import { BusinessAlreadyRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-already-registered.error';
+import { IdentityDocumentExpired } from '@/contexts/customer-due-diligence/domain/errors/identity-document-expired.error';
+import { ProofOfAddressTooOld } from '@/contexts/customer-due-diligence/domain/errors/proof-of-address-too-old.error';
+
+/** A proof of address is accepted for this many months after its date. */
+const PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS = 3;
 
 export type CustomerEvent = CustomerIdentified | CustomerBusinessRegistered;
 
@@ -25,10 +30,23 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     super(id);
   }
 
-  static create(id: string, now: Date): Customer {
+  /** Identifies a person: refused when the document is expired on the day, or the proof of address too old. */
+  static create(id: string, identity: NonNullable<CustomerIdentified['identity']>, now: Date): Customer {
+    if (identity.documentExpiresOn.getTime() < now.getTime()) {
+      throw IdentityDocumentExpired.forCustomer(id);
+    }
+
+    const oldestAcceptedProof = new Date(now.getTime());
+
+    oldestAcceptedProof.setUTCMonth(oldestAcceptedProof.getUTCMonth() - PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS);
+
+    if (identity.addressProofDatedOn.getTime() < oldestAcceptedProof.getTime()) {
+      throw ProofOfAddressTooOld.forCustomer(id);
+    }
+
     const created = new Customer(id);
 
-    created.record(new CustomerIdentified(id, now));
+    created.record(new CustomerIdentified(id, now, identity));
 
     return created;
   }
@@ -77,6 +95,10 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   private applyIdentified(event: CustomerIdentified): void {
+    if (event.identity === undefined) {
+      return;
+    }
+
     this.state = { ...this.state, registeredAt: event.occurredAt };
   }
 
