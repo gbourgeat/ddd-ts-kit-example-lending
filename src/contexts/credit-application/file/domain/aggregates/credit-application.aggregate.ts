@@ -4,8 +4,12 @@ import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/d
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
 import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/file/domain/events/credit-application-guarantor-named.event';
+import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
 import { InvalidAmount } from '@/contexts/credit-application/file/domain/errors/invalid-amount.error';
 import { InvalidDuration } from '@/contexts/credit-application/file/domain/errors/invalid-duration.error';
+import { InvalidCorrectionReason } from '@/contexts/credit-application/file/domain/errors/invalid-correction-reason.error';
+import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/domain/errors/correction-already-recorded.error';
+import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
 import {
   AccountConsent,
   type AccountConsentState,
@@ -15,7 +19,8 @@ export type CreditApplicationEvent =
   | CreditApplicationSubmitted
   | CreditApplicationAccountConsentGiven
   | CreditApplicationCoBorrowerNamed
-  | CreditApplicationGuarantorNamed;
+  | CreditApplicationGuarantorNamed
+  | CreditApplicationEntryCorrected;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -25,6 +30,10 @@ export interface CreditApplicationState {
   readonly accountConsent: AccountConsentState | undefined;
   readonly coBorrowerIds: readonly string[];
   readonly guarantorIds: readonly string[];
+  /** How many entries the file holds: the position of the last one. */
+  readonly entryCount: number;
+  /** The entries that a correction already names: a second correction of one of them is refused. */
+  readonly correctedEntryIds: readonly string[];
 }
 
 /** What the applicant asks for, and the instant the application is registered. */
@@ -43,6 +52,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     accountConsent: undefined,
     coBorrowerIds: [],
     guarantorIds: [],
+    entryCount: 0,
+    correctedEntryIds: [],
   };
 
   private constructor(id: string) {
@@ -93,6 +104,26 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationGuarantorNamed(this.id, namedAt, guarantorId));
   }
 
+  /**
+   * The applicant corrects an earlier entry of the file. The correction is a later entry: it names the entry it
+   * corrects and says why. The corrected entry is never edited, and a second correction of it is refused.
+   */
+  correctEntry(correctedEntryId: string, reason: string, correctedAt: Date): void {
+    if (reason.trim() === '') {
+      throw InvalidCorrectionReason.forReason();
+    }
+
+    if (!this.isEntryOfThisFile(correctedEntryId)) {
+      throw UnknownEntry.forEntry(correctedEntryId);
+    }
+
+    if (this.state.correctedEntryIds.includes(correctedEntryId)) {
+      throw CorrectionAlreadyRecorded.forEntry(correctedEntryId);
+    }
+
+    this.record(new CreditApplicationEntryCorrected(this.id, correctedAt, correctedEntryId, reason));
+  }
+
   /** Whether the applicant's consent to read the accounts is given and not yet expired at `instant`. */
   hasValidAccountConsentAt(instant: Date): boolean {
     if (this.state.accountConsent === undefined) {
@@ -136,11 +167,30 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationAccountConsentGiven.eventName]: (event) => this.applyAccountConsentGiven(event),
       [CreditApplicationCoBorrowerNamed.eventName]: (event) => this.applyCoBorrowerNamed(event),
       [CreditApplicationGuarantorNamed.eventName]: (event) => this.applyGuarantorNamed(event),
+      [CreditApplicationEntryCorrected.eventName]: (event) => this.applyEntryCorrected(event),
     };
   }
 
   private restore(state: CreditApplicationState): void {
     this.state = state;
+  }
+
+  /** An entry is identified by the application it belongs to and its position in the file: `<application>#<position>`. */
+  private isEntryOfThisFile(entryId: string): boolean {
+    const separator = entryId.lastIndexOf('#');
+
+    if (separator <= 0) {
+      return false;
+    }
+
+    const position = Number(entryId.slice(separator + 1));
+
+    return (
+      entryId.slice(0, separator) === this.id &&
+      Number.isSafeInteger(position) &&
+      position >= 1 &&
+      position <= this.state.entryCount
+    );
   }
 
   private applySubmitted(event: CreditApplicationSubmitted): void {
@@ -150,6 +200,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       amount: event.amount,
       durationMonths: event.durationMonths,
       registeredAt: event.occurredAt,
+      entryCount: this.state.entryCount + 1,
     };
   }
 
@@ -157,6 +208,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.state = {
       ...this.state,
       accountConsent: { givenAt: event.occurredAt, expiresAt: event.expiresAt },
+      entryCount: this.state.entryCount + 1,
     };
   }
 
@@ -164,6 +216,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.state = {
       ...this.state,
       coBorrowerIds: [...this.state.coBorrowerIds, event.coBorrowerId],
+      entryCount: this.state.entryCount + 1,
     };
   }
 
@@ -171,6 +224,15 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.state = {
       ...this.state,
       guarantorIds: [...this.state.guarantorIds, event.guarantorId],
+      entryCount: this.state.entryCount + 1,
+    };
+  }
+
+  private applyEntryCorrected(event: CreditApplicationEntryCorrected): void {
+    this.state = {
+      ...this.state,
+      correctedEntryIds: [...this.state.correctedEntryIds, event.correctedEntryId],
+      entryCount: this.state.entryCount + 1,
     };
   }
 }

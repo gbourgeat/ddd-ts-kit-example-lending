@@ -4,6 +4,9 @@ export const CreditApplicationCodes = {
   InvalidNetIncome: 'INVALID_NET_INCOME',
   InvalidAnnualPercentageRate: 'INVALID_ANNUAL_PERCENTAGE_RATE',
   UnknownCreditApplication: 'UNKNOWN_CREDIT_APPLICATION',
+  UnknownEntry: 'UNKNOWN_ENTRY',
+  CorrectionAlreadyRecorded: 'CORRECTION_ALREADY_RECORDED',
+  InvalidCorrectionReason: 'INVALID_CORRECTION_REASON',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

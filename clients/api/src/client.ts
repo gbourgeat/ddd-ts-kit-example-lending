@@ -65,6 +65,12 @@ export interface Client {
    */
   giveAccountConsent(input: operations.GiveAccountConsentInput, options?: CallOptions): Promise<operations.GiveAccountConsentResult>;
   /**
+   * Correct entry: `POST /applications/{id}/corrections`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CORRECTION_ALREADY_RECORDED (422), INVALID_CORRECTION_REASON (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
+   */
+  correctEntry(input: operations.CorrectEntryInput, options?: CallOptions): Promise<operations.CorrectEntryResult>;
+  /**
    * Name guarantor: `POST /applications/{id}/guarantors`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -264,6 +270,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
+    correctEntry: (input, call) => operations.correctEntry(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),

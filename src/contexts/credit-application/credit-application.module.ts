@@ -23,6 +23,8 @@ import { NameCoBorrowerHandler } from '@/contexts/credit-application/file/applic
 import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
 import { NameGuarantorCommand } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.command';
 import { NameGuarantorHandler } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.handler';
+import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
+import { CorrectEntryHandler } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -88,6 +90,12 @@ function registerHandlers(platform: Platform): void {
     new NameGuarantorHandler(creditApplicationRepository, platform.clock),
     { context: 'credit-application' },
   );
+
+  platform.commands.register(
+    CorrectEntryCommand,
+    new CorrectEntryHandler(creditApplicationRepository, platform.clock),
+    { context: 'credit-application' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -146,6 +154,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
     requires(NameGuarantorCommand, creditApplicationPermissions['application.name-party'], {
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
+    requires(CorrectEntryCommand, creditApplicationPermissions['application.correct'], {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
     // /ddd-ts-kit:authorization
