@@ -55,7 +55,7 @@ Who follows which customer, and who may decide on it, is needed for the business
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `branch-network:branch.open`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -98,6 +98,18 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `customer-due-diligence` (published-language), `identity` (conformist); downstreams: `credit-application` (published-language), `reporting` (published-language).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `OpenBranch` | command | `branch.open` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+
 ### Publishers
 
 | Event | Versions | Publisher |
@@ -111,7 +123,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `BranchNetworkPersonalDataErasure` | external | `PrismaBranchNetworkPersonalDataErasure` |
 | `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
-| `BranchRepository` | external | `PrismaBranchRepository` |
+| `BranchRepository` | repository | `PrismaBranchRepository` |
 | `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
 | `PortfolioRepository` | external | `PrismaPortfolioRepository` |
 | `StaffMemberRepository` | external | `PrismaStaffMemberRepository` |

@@ -4,6 +4,11 @@ import { branchNetworkControllers } from '@/contexts/branch-network/branch-netwo
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { PrismaBranchRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-branch.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { branchNetworkPermissions } from '@/contexts/branch-network/branch-network.permissions';
+import { OpenBranchCommand } from '@/contexts/branch-network/application/commands/open-branch/open-branch.command';
+import { OpenBranchHandler } from '@/contexts/branch-network/application/commands/open-branch/open-branch.handler';
 import { ConflictOfInterestDeclaredPublisher } from '@/contexts/branch-network/application/integration/publishers/conflict-of-interest-declared.publisher';
 import { ConflictOfInterestDeclared } from '@/contexts/branch-network/domain/events/conflict-of-interest-declared.event';
 import { StaffMemberAppointedPublisher } from '@/contexts/branch-network/application/integration/publishers/staff-member-appointed.publisher';
@@ -34,6 +39,14 @@ export function branchNetworkModule(platform: Platform): BranchNetworkWiring {
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
+  const branchRepository = platform.adapter(
+    new PrismaBranchRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'branch-network', token: 'BranchRepository' },
+  );
+
+  platform.commands.register(OpenBranchCommand, new OpenBranchHandler(branchRepository, platform.ids, platform.clock), {
+    context: 'branch-network',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -74,6 +87,9 @@ function registerJobs(platform: Platform): void {
 function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
+    requires(OpenBranchCommand, branchNetworkPermissions['branch.open'], {
+      resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }
