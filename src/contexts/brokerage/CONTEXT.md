@@ -20,10 +20,12 @@ Brokers bring applications, and the check of their registration is a supporting 
 | Registration valid on the day | The broker's registration is valid on the day the application is brought | Registration lapsed |
 | Registration lapsed | The registration is no longer valid; the broker can no longer bring applications | Refusal |
 | Bring | A broker's act of submitting an application to the bank | Assignment |
+| Registered | a broker is entered on the intermediaries register with its registration number |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `Broker`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -80,4 +82,10 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe brokerage --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `identity` (conformist); downstreams: `credit-application` (published-language).
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `BrokerRepository` | external | `PrismaBrokerRepository` |
 <!-- /ddd-ts-kit:reference -->

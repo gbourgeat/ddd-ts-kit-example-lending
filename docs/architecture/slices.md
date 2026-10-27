@@ -113,7 +113,7 @@ and the residual income minimums are data of the bank with dates of effect" (eve
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US4.01 | brokerage | skeleton | Broker, with its registration events | `aggregate brokerage Broker`; `domain-event brokerage Broker Registered`; `domain-event brokerage Broker RegistrationLapsed`; `repository brokerage Broker --tenant-scoped` | | conductor | todo |
+| US4.01 | brokerage | skeleton | Broker, with its registration events | `aggregate brokerage Broker`; `domain-event brokerage Broker Registered`; `domain-event brokerage Broker RegistrationLapsed`; `repository brokerage Broker --tenant-scoped` | | conductor | done |
 | US4.02 | brokerage | skeleton | Intermediaries register (port and fake adapter) | `port brokerage IntermediariesRegister`; `adapter brokerage IntermediariesRegister --kind external` | | conductor | todo |
 | US4.03 | brokerage | slice | Register a broker with the intermediaries register | `command brokerage RegisterBroker --permission broker.register --aggregate Broker`; `route brokerage RegisterBroker --method POST --path /brokers --command` | US4.01 | brokerage | todo |
 | US4.04 | brokerage | slice | Check the registrations each day; a lapsed one is marked | `command brokerage CheckRegistration --permission broker.check --aggregate Broker`; `job brokerage CheckRegistration --cron "0 6 * * *" --time-zone Europe/Paris --command CheckRegistration` | US4.02, US4.03 | brokerage | todo |
