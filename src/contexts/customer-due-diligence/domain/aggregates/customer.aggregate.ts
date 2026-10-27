@@ -1,7 +1,8 @@
 import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@ddd-ts-kit/kernel';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
+import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 
-export type CustomerEvent = CustomerIdentified;
+export type CustomerEvent = CustomerIdentified | CustomerBusinessRegistered;
 
 export interface CustomerState {
   readonly registeredAt: Date;
@@ -39,6 +40,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   protected appliers(): Appliers<CustomerEvent> {
     return {
       [CustomerIdentified.eventName]: (event) => this.applyIdentified(event),
+      [CustomerBusinessRegistered.eventName]: (event) => this.applyBusinessRegistered(event),
     };
   }
 
@@ -48,5 +50,9 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
 
   private applyIdentified(event: CustomerIdentified): void {
     this.state = { ...this.state, registeredAt: event.occurredAt };
+  }
+
+  private applyBusinessRegistered(event: CustomerBusinessRegistered): void {
+    // TODO(domain): change `this.state` from what "customer business registered" says, and nothing else.
   }
 }
