@@ -10,6 +10,8 @@ The `Next:` line above is read by tools at the start of every session: keep it o
 - Wave 3, `docs:check` red on wave3: `servicing.loan.paid-out` version 1 is not in `stored-events.lock.json`. Decide that the shape of version 1 is final, then `npx ddd-ts-kit docs --stored-events` (conductor, owner).
 - Wave 3, decisions taken by the conductor under the owner brief, to confirm: identification of a person; appointment to a branch names the opened branch; opening an organisation reserved to the operator (signed-in grant narrowed in `src/platform/auth/authorization/signed-in-grants.ts`, commit 925ae04).
 
+- Wave 3, US2.04 blocked: `event-sourcing/upcaster-required` on the birth event of Customer (its version 1 stored shape changed to carry the identity facts: a version 2 with an upcaster is needed, and the owner decides what a birth recorded before has), and `privacy/declared-field` on the document number and the address of the birth event (the personal fields to declare). The branch build/customer-due-diligence has the scope staged, not committed (conductor, owner).
+
 ## Needs
 
 Stated by the product owner, verbatim from `docs/architecture/needs.md`:
