@@ -25,6 +25,9 @@ import { NameGuarantorCommand } from '@/contexts/credit-application/file/applica
 import { NameGuarantorHandler } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.handler';
 import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
 import { CorrectEntryHandler } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.handler';
+import { consume, subscribeAll } from '@ddd-ts-kit/events';
+import { conflictOfInterestDeclaredV1 as keepDeclaredConflictsDefinition } from '@/contexts/branch-network/published-language';
+import { KeepDeclaredConflictsIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-declared-conflicts.integration-handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -129,6 +132,21 @@ function registerReactions(platform: Platform): void {
       await applicationListOnSubmittedEventHandler.handle(event);
     }
   });
+
+  const keepDeclaredConflictsIntegrationHandler = new KeepDeclaredConflictsIntegrationHandler(platform.commands);
+
+  subscribeAll(platform.subscriberFor('credit-application'), [
+    consume(
+      keepDeclaredConflictsDefinition,
+      {
+        consumer: 'credit-application.keep-declared-conflicts',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      (event) => keepDeclaredConflictsIntegrationHandler.handle(event),
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 

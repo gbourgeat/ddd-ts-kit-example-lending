@@ -66,6 +66,9 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Correction | a later entry of the file that corrects an earlier entry of the same application, and says why |  |
 | Recorded | kept in the file as a fact that happened |  |
 | Reason | the explanation a correction gives for correcting an entry |  |
+| Keep | to record in a projection a fact received from another context, so that a decision reads it later |  |
+| Declared | stated by the staff member themself, as opposed to found by a check |  |
+| Conflicts | the declared conflicts of interest of staff members on a customer, each one barring that staff member from deciding the customer's application |  |
 
 ## Modules
 
@@ -170,6 +173,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+
+### Consumed events
+
+| Event | Version | From | Handler | Consumer |
+|---|---|---|---|---|
+| `branch-network.conflict-of-interest.declared` | 1 | `branch-network` | `KeepDeclaredConflictsIntegrationHandler` | `credit-application.keep-declared-conflicts` |
 
 ### Publishers
 
