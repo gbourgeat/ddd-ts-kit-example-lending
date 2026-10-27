@@ -287,6 +287,7 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 The first migration `initial-schema` (every table of `prisma/schema/`, the relationship tuples and the audit guard included) is generated and applied by the owner outside the sandbox: a sandboxed session cannot open a PostgreSQL connection to the local database, so every later migration is a working migration the owner generates the same way (owner)
 - 2026-10-27 US14.02 is back in progress: the commands of financial-crime still write their entries into the general chain, which the stream readable by compliance only forbids; the row is done when no entry of financial-crime reaches the general chain, proven by a spec (owner)
 - 2026-10-27 The address of a customer is personal data: it is declared as a personal field of its context (`privacy/declared-field`), not only sealed in the event (owner)
+- 2026-10-27 A row is done when it works in the started application, not only when `verify` is green: US1.08 (the handler acts as the system actor, which needs its grant in `relate-system-actors.ts`), US4.03 (`broker.register` granted to no role), US4.04 (the daily job of the check not registered) are back in progress, and so is any row whose permission no role holds (`portfolio.open` of US1.08). Each closes with the started application doing it, as the story verifier checks (owner)
 
 ## For the owner
 
