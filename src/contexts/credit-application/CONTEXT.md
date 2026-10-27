@@ -60,6 +60,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | List | A page of the applications one operator may see, narrowed by the access scope of the caller |  |
 | Read | An operator's right to see an application, granted by its relations (advisor, co-borrower, broker) |  |
 | Search | A read that takes a scope and a page: the applications one caller may see, page by page, never a list of all of them |  |
+| Name | to put a person on the application as its co-borrower or its guarantor, an entry of the application file |  |
+| Party | a person named on an application: its borrower, its co-borrower or its guarantor |  |
 
 ## Modules
 
@@ -95,6 +97,7 @@ No personal data declared.
 - `credit-application:application.submit`
 - `credit-application:application.consent`
 - `credit-application:application.read`
+- `credit-application:application.name-party`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -146,6 +149,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `GiveAccountConsent` | command | `application.consent` |
+| `NameCoBorrower` | command | `application.name-party` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
 
@@ -155,6 +159,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|---|---|---|---|---|---|
 | GET | `/applications` | `searchApplications` | `ApplicationsRoutes` | `Authenticated` | `SearchApplications` | `public` | query | 200: `page of SearchApplicationsLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
+| POST | `/applications/:id/co-borrowers` | `nameCoBorrower` | `ApplicationsRoutes` | `Authenticated` | `NameCoBorrower` | `application.name-party` | params: `NameCoBorrowerParams`, body: `NameCoBorrowerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 
 ### Publishers

@@ -5,5 +5,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.submit': { description: 'Submit application' },
   'application.consent': { description: 'Give account consent' },
   'application.read': { description: 'List applications' },
+  'application.name-party': { description: 'Name co borrower' },
   // /ddd-ts-kit:permissions
 });
