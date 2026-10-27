@@ -34,7 +34,7 @@ describe('Publish rate grid', () => {
     const { commandBus, domainEvents } = arrange();
     const announced: string[] = [];
 
-    domainEvents.on('credit-policy.rate-grid.published', (event) => {
+    domainEvents.on('credit-policy.rate-grid.published', async (event) => {
       announced.push(event.aggregateId);
     });
 
@@ -54,7 +54,7 @@ describe('Publish rate grid', () => {
     const { commandBus, rateGridRepository, domainEvents } = arrange();
     const announced: string[] = [];
 
-    domainEvents.on('credit-policy.rate-grid.published', (event) => {
+    domainEvents.on('credit-policy.rate-grid.published', async (event) => {
       announced.push(event.aggregateId);
     });
 
