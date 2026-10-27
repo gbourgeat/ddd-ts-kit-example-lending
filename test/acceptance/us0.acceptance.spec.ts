@@ -55,27 +55,26 @@ describe('US0, acceptance', () => {
     }),
   );
 
-  it(
-    '#US0.05 AC3 the submission is published once, as an integration event carrying the application identifier, in the same transaction that records it',
-    pending(async () => {
-      const submitted = collectEvents(application.events, ['credit-application.credit-application.submitted']);
-      const customer = await application.as({ id: 'customer-1', tenantId: 'bank-1' });
+  it('#US0.05 AC3 the submission is published once, as an integration event carrying the application identifier, in the same transaction that records it', async () => {
+    const submitted = collectEvents(application.events, ['credit-application.credit-application.submitted']);
 
-      const response = expectStatus(
-        await customer.post('/applications', {
-          productId: 'personal-loan',
-          amount: { cents: 1234567, currency: 'EUR' },
-          durationMonths: 60,
-        }),
-        201,
-      );
+    await application.relate({ object: 'customer:customer-1', relation: 'self', subject: 'user:customer-1' });
+    const customer = await application.as({ id: 'customer-1', tenantId: 'bank-1' });
 
-      await application.settled();
+    const response = expectStatus(
+      await customer.post('/applications', {
+        productId: 'personal-loan',
+        amount: { cents: 1234567, currency: 'EUR' },
+        durationMonths: 60,
+      }),
+      201,
+    );
 
-      const events = submitted.received();
+    await application.settled();
 
-      expect(events).toHaveLength(1);
-      expect(events[0]).toMatchObject({ applicationId: (response.body as { id: string }).id });
-    }),
-  );
+    const events = submitted.received();
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ payload: { creditApplicationId: (response.body as { id: string }).id } });
+  });
 });
