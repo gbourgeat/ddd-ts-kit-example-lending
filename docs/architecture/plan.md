@@ -347,6 +347,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 
 - 2026-10-27 Wave 6 run 3, blocked: US13.05 (customer-due-diligence erasure after retention, five years after the relationship ended): the context records no end of relationship (no event publishes it); the rows that would (US2.08 SanctionsMatchConfirmed, US2.10 the end of the relationship on a confirmed match) are `todo`, and US13.05 does not list them as dependencies. Needed: the owner names the recorded fact that ends a relationship, or US2.10 lands first and US13.05 depends on it (conductor, owner brief: the end of relationship is a fact the erasure must know; the dependency is added) (to confirm)
 
+- 2026-10-27 Wave 6 run 3, US6.16 decisions for the correction of an entry (conductor, owner brief, most protective, to confirm): an entry is identified by its own identifier, and a correction names the entry it corrects and says why; any earlier entry of the file may be corrected, never an entry of another application; the earlier entry is never edited; a second correction of the same entry is refused with the code CORRECTION_ALREADY_RECORDED, not kept as a no-op, so the file shows every decision taken
+
 ## For the owner
 
 - Migrations of the wave 2 rows: no database here; `npm run db:generate working-<what>` for the product, legal maximum rate, delegation table, residual income minimum and alert columns; the schema commits are on the trunk.
