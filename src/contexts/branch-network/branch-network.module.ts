@@ -23,6 +23,9 @@ import { OpenPortfolioHandler } from '@/contexts/branch-network/application/comm
 import { SearchBranchStaffHandler } from '@/contexts/branch-network/application/queries/search-branch-staff/search-branch-staff.handler';
 import { SearchBranchStaffQuery } from '@/contexts/branch-network/application/queries/search-branch-staff/search-branch-staff.query';
 import { InMemorySearchBranchStaffReader } from '@/contexts/branch-network/infrastructure/persistence/in-memory-search-branch-staff.reader';
+import { PrismaConflictOfInterestRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-conflict-of-interest.repository';
+import { DeclareConflictOfInterestCommand } from '@/contexts/branch-network/application/commands/declare-conflict-of-interest/declare-conflict-of-interest.command';
+import { DeclareConflictOfInterestHandler } from '@/contexts/branch-network/application/commands/declare-conflict-of-interest/declare-conflict-of-interest.handler';
 // /ddd-ts-kit:imports
 
 export interface BranchNetworkWiring {
@@ -88,6 +91,22 @@ function registerHandlers(platform: Platform): void {
   platform.queries.register(
     SearchBranchStaffQuery,
     new SearchBranchStaffHandler(searchBranchStaffReader, platform.access),
+    { context: 'branch-network' },
+  );
+
+  const conflictOfInterestRepository = platform.adapter(
+    new PrismaConflictOfInterestRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'branch-network', token: 'ConflictOfInterestRepository' },
+  );
+
+  platform.commands.register(
+    DeclareConflictOfInterestCommand,
+    new DeclareConflictOfInterestHandler(
+      conflictOfInterestRepository,
+      staffMemberRepository,
+      platform.ids,
+      platform.clock,
+    ),
     { context: 'branch-network' },
   );
   // /ddd-ts-kit:handlers
@@ -157,6 +176,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(SearchBranchStaffQuery, branchNetworkPermissions['staff-member.list'], {
       resource: (query) => ({ type: 'branch', id: query.branchId }),
+    }),
+    requires(DeclareConflictOfInterestCommand, branchNetworkPermissions['conflict.declare'], {
+      resource: () => ({ type: 'context', id: 'branch-network' }),
     }),
     // /ddd-ts-kit:authorization
   ];

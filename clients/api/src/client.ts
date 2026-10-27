@@ -77,6 +77,12 @@ export interface Client {
    */
   registerBusiness(input: operations.RegisterBusinessInput, options?: CallOptions): Promise<operations.RegisterBusinessResult>;
   /**
+   * Declare conflict of interest: `POST /conflicts`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CONFLICT_ON_OWN_RECORD (422), UNKNOWN_STAFF_MEMBER (422), VALIDATION_FAILED (422).
+   */
+  declareConflictOfInterest(input: operations.DeclareConflictOfInterestInput, options?: CallOptions): Promise<operations.DeclareConflictOfInterestResult>;
+  /**
    * Get customer file: `GET /customer-files`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
@@ -200,6 +206,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
     registerBroker: (input, call) => operations.registerBroker(connection, input, call),
     registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),
+    declareConflictOfInterest: (input, call) => operations.declareConflictOfInterest(connection, input, call),
     getCustomerFile: (input, call) => operations.getCustomerFile(connection, input, call),
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),

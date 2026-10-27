@@ -22,7 +22,13 @@ export class AppointStaffMemberHandler implements CommandHandler<AppointStaffMem
 
     const staffMember = StaffMember.create(
       this.ids.next(),
-      { branchId: branch.id, name: command.name, email: command.email },
+      {
+        branchId: branch.id,
+        name: command.name,
+        email: command.email,
+        accountId: command.accountId,
+        ownCustomerId: command.ownCustomerId,
+      },
       this.clock.now(),
     );
 

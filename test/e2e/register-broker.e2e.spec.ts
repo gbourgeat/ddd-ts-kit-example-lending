@@ -4,6 +4,7 @@ import { createHttpClient, expectStatus, type HttpClient } from '@ddd-ts-kit/tes
 import { expectSpanTree, installTestTracing } from '@ddd-ts-kit/tracing/testing';
 import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
 import { FakeIntermediariesRegister } from '@/contexts/brokerage/test/fakes/intermediaries-register.fake';
+import { relateSystemActors } from '@/platform/auth/relationships/relate-system-actors';
 import { composeApplication, everyContext } from '@/platform/composition/compose-application';
 import type { Platform } from '@/platform/composition/platform';
 import type { AppConfig } from '@/platform/config/app-config';
@@ -21,6 +22,7 @@ import { storyOf } from '$test/e2e/support/story-of';
 
 const registration = { registrationNumber: 'REG-0001' };
 const tenantId = 'acme-bank';
+const dailyCheck = 'brokerage.check-registration';
 
 describe('Register broker, end to end', () => {
   const tracing = installTestTracing();
@@ -39,13 +41,6 @@ describe('Register broker, end to end', () => {
     await application.reset();
   });
 
-  /** A person who is an operator of the brokerage context, as the administrators of the bank make them. */
-  async function operator(): Promise<HttpClient> {
-    await application.relate({ object: 'context:brokerage', relation: 'operator', subject: 'user:ada' });
-
-    return application.as({ id: 'ada', roles: ['admin'], tenantId });
-  }
-
   it('answers 401 to a caller who presents no credential', async () => {
     const response = await application.client.post('/brokers', registration);
 
@@ -61,7 +56,7 @@ describe('Register broker, end to end', () => {
   });
 
   it('is one trace: the request, the use case and what it saves', async () => {
-    const ada = await operator();
+    const ada = await operatorIn(application, tenantId);
 
     application.register.markValid('REG-0001');
 
@@ -91,7 +86,7 @@ describe('Register broker, end to end', () => {
   });
 
   it('answers 201 with the new broker when the intermediaries register confirms the registration', async () => {
-    const ada = await operator();
+    const ada = await operatorIn(application, tenantId);
 
     application.register.markValid('REG-0001');
 
@@ -102,7 +97,7 @@ describe('Register broker, end to end', () => {
   });
 
   it('asks the intermediaries register about the registration number the client sent', async () => {
-    const ada = await operator();
+    const ada = await operatorIn(application, tenantId);
 
     application.register.markValid('REG-0001');
 
@@ -112,12 +107,72 @@ describe('Register broker, end to end', () => {
   });
 
   it('answers the documented problem when the intermediaries register does not confirm the registration', async () => {
-    const ada = await operator();
+    const ada = await operatorIn(application, tenantId);
 
     const response = await ada.post('/brokers', { registrationNumber: 'REG-0404' });
 
     expectStatus(response, 422);
     expect(response.body).toMatchObject({ code: 'INVALID_BROKER_REGISTRATION' });
+  });
+});
+
+describe('The daily check of the registrations, end to end', () => {
+  let application: BrokerageApplication;
+  /** The bank the identity context opened: the tenant the check runs for, and the one the broker is registered in. */
+  let bank: string;
+
+  beforeAll(async () => {
+    application = await startBrokerageApplication();
+  });
+
+  afterAll(async () => {
+    await application.close();
+  });
+
+  beforeEach(async () => {
+    await application.reset();
+    bank = await openBank(application);
+  });
+
+  /** A broker of the bank, registered while its registration is valid. */
+  async function registeredBroker(): Promise<void> {
+    const ada = await operatorIn(application, bank);
+
+    application.register.markValid('REG-0001');
+    expectStatus(await ada.post('/brokers', registration), 201);
+  }
+
+  it('marks as lapsed the broker whose registration is revoked: the check asks about it, then no longer', async () => {
+    await registeredBroker();
+    application.register.revoke('REG-0001');
+    const askedBefore = application.register.asked.length;
+
+    await application.runDailyCheck();
+    const askedAfterFirstCheck = application.register.asked.length;
+
+    expect(askedAfterFirstCheck).toBeGreaterThan(askedBefore);
+
+    expect(application.register.asked.slice(askedBefore)).toContainEqual(
+      expect.objectContaining({ registrationNumber: 'REG-0001' }),
+    );
+
+    await application.runDailyCheck();
+
+    expect(application.register.asked.length).toBe(askedAfterFirstCheck);
+  });
+
+  it('keeps checking the broker whose registration is still valid, on each day', async () => {
+    await registeredBroker();
+    const askedBefore = application.register.asked.length;
+
+    await application.runDailyCheck();
+    const askedAfterFirstCheck = application.register.asked.length;
+
+    expect(askedAfterFirstCheck).toBeGreaterThan(askedBefore);
+
+    await application.runDailyCheck();
+
+    expect(application.register.asked.length).toBeGreaterThan(askedAfterFirstCheck);
   });
 });
 
@@ -128,6 +183,7 @@ interface BrokerageApplication {
   readonly register: FakeIntermediariesRegister;
   as(actor: TestActor): Promise<HttpClient>;
   relate(tuple: RelationTuple): Promise<void>;
+  runDailyCheck(): Promise<unknown>;
   reset(): Promise<void>;
   close(): Promise<void>;
 }
@@ -142,6 +198,8 @@ interface Wiring {
 interface Running {
   readonly client: HttpClient;
   relate(tuple: RelationTuple): Promise<void>;
+  runJob(name: string): Promise<unknown>;
+  relateSystemActors(): Promise<void>;
   close(): Promise<void>;
 }
 
@@ -158,7 +216,11 @@ async function startBrokerageApplication(): Promise<BrokerageApplication> {
     register,
     as: async (actor) => running.client.withHeaders(await credentials.headersOf(actor)),
     relate: (tuple) => running.relate(tuple),
-    reset: () => database.reset(),
+    runDailyCheck: () => running.runJob(dailyCheck),
+    reset: async () => {
+      await database.reset();
+      await running.relateSystemActors();
+    },
     close: () => running.close(),
   };
 }
@@ -195,8 +257,30 @@ async function start({ database, config, credentials, register }: Wiring): Promi
   return {
     client: createHttpClient('http://127.0.0.1:' + server.port),
     relate: (tuple) => application.platform.relations.write([tuple]),
+    runJob: (name) => application.platform.jobs.runNow(name),
+    relateSystemActors: () => relateSystemActors(application.platform.relations),
     close: () => stop({ server, relay, application, redis, database }),
   };
+}
+
+/** A person who is an operator of the brokerage context, acting in the tenant given. */
+async function operatorIn(app: BrokerageApplication, tenant: string): Promise<HttpClient> {
+  await app.relate({ object: 'context:brokerage', relation: 'operator', subject: 'user:ada' });
+
+  return app.as({ id: 'ada', roles: ['admin'], tenantId: tenant });
+}
+
+/** A bank opened through the identity context, as an administrator opens it: its id is the tenant of the work. */
+async function openBank(app: BrokerageApplication): Promise<string> {
+  await app.relate({ object: 'context:identity', relation: 'operator', subject: 'user:ada' });
+  const ada = await app.as({ id: 'ada', roles: ['admin'] });
+
+  expectStatus(await ada.put('/accounts/me', {}), 200);
+  const opened = await ada.post('/organisations', { slug: tenantId, name: 'Acme Bank' });
+
+  expectStatus(opened, 201);
+
+  return (opened.body as { id: string }).id;
 }
 
 /** The brokerage context as the application wires it, except that its intermediaries register is the fake. */

@@ -289,6 +289,8 @@ export interface AppointStaffMemberInput {
   readonly body: {
     name: string;
     email: string;
+    accountId: string;
+    ownCustomerId?: string;
   };
 }
 
@@ -390,6 +392,40 @@ export function registerBusiness(
   };
 
   return send<RegisterBusinessResult>(connection, operation, { ...input, ...options });
+}
+
+export interface DeclareConflictOfInterestInput {
+  readonly body: {
+    customerId: string;
+  };
+}
+
+export type DeclareConflictOfInterestResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'CONFLICT_ON_OWN_RECORD' | 'UNKNOWN_STAFF_MEMBER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Declare conflict of interest: `POST /conflicts`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CONFLICT_ON_OWN_RECORD (422), UNKNOWN_STAFF_MEMBER (422), VALIDATION_FAILED (422).
+ */
+export function declareConflictOfInterest(
+  connection: Connection,
+  input: DeclareConflictOfInterestInput,
+  options: CallOptions = {},
+): Promise<DeclareConflictOfInterestResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/conflicts',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DeclareConflictOfInterestResult>(connection, operation, { ...input, ...options });
 }
 
 export interface GetCustomerFileInput {
