@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 7 build - the owner decides the open lines of `## For the owner` on branch `wave2-slices` (merge it by pull request, never push from here), then the blocked rows US4.03, US13.04 and US14.06 of `slices.md`
+Next: 7 build - wave 4 is on branch `wave4` and `verify` is green there: the owner decides the blocked rows of `## For the owner` (US1.09, US1.13, US2.06, US2.16, US13.04, US14.06) and the migrations once a database answers, then the rows left in `slices.md`
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
