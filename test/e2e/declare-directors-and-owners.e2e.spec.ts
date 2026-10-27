@@ -82,24 +82,28 @@ describe('Declare directors and owners, end to end', () => {
       );
     });
 
-    expectSpanTree(storyOf(trace), [
-      {
-        name: 'POST /customers/:id/directors-and-owners',
-        kind: 'SERVER',
-        children: [
-          {
-            name: 'command DeclareDirectorsAndOwnersCommand',
-            children: [
-              { name: 'repository CustomerRepository.findById' },
-              { name: 'repository CustomerRepository.save' },
-              {
-                name: 'unit-of-work before-commit',
-                children: [{ name: 'domain-event customer-due-diligence.customer.directors-and-owners-declared' }],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+    expectSpanTree(storyOf(trace), declarationSpanTree());
   });
 });
+
+function declarationSpanTree() {
+  return [
+    {
+      name: 'POST /customers/:id/directors-and-owners',
+      kind: 'SERVER',
+      children: [
+        {
+          name: 'command DeclareDirectorsAndOwnersCommand',
+          children: [
+            { name: 'repository CustomerRepository.findById' },
+            { name: 'repository CustomerRepository.save' },
+            {
+              name: 'unit-of-work before-commit',
+              children: [{ name: 'domain-event customer-due-diligence.customer.directors-and-owners-declared' }],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+}
