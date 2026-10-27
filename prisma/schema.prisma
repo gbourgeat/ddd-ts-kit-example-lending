@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["messaging", "event_store", "audit", "identity", "branch_network", "credit_policy", "brokerage"]
+  schemas  = ["messaging", "event_store", "audit", "identity", "branch_network", "credit_policy", "brokerage", "financial_crime"]
 }
 
 // The outbox and the idempotency table, from @ddd-ts-kit/prisma. Keep the field names: the
@@ -359,6 +359,38 @@ model BrokerageBroker {
   @@index([tenantId, id], map: "brokers_tenant_idx")
   @@map("brokers")
   @@schema("brokerage")
+}
+
+model FinancialCrimeAlert {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  repaymentReference String @map("repayment_reference")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "alerts_tenant_idx")
+  @@map("alerts")
+  @@schema("financial_crime")
+}
+
+model FinancialCrimeSuspiciousActivityReport {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  subjectReference String @map("subject_reference")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "suspicious_activity_reports_tenant_idx")
+  @@map("suspicious_activity_reports")
+  @@schema("financial_crime")
 }
 // /ddd-ts-kit:models
 

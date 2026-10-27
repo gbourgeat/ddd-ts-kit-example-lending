@@ -291,8 +291,8 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US11.01 | financial-crime | skeleton | Alert on a repayment | `aggregate financial-crime Alert`; `domain-event financial-crime Alert Raised`; `repository financial-crime Alert --tenant-scoped` | | conductor | todo |
-| US11.02 | financial-crime | skeleton | Suspicious activity report, restricted to compliance | `aggregate financial-crime SuspiciousActivityReport`; `domain-event financial-crime SuspiciousActivityReport Filed`; `repository financial-crime SuspiciousActivityReport --tenant-scoped` | | conductor | todo |
+| US11.01 | financial-crime | skeleton | Alert on a repayment | `aggregate financial-crime Alert`; `domain-event financial-crime Alert Raised`; `repository financial-crime Alert --tenant-scoped` | | conductor | done |
+| US11.02 | financial-crime | skeleton | Suspicious activity report, restricted to compliance | `aggregate financial-crime SuspiciousActivityReport`; `domain-event financial-crime SuspiciousActivityReport Filed`; `repository financial-crime SuspiciousActivityReport --tenant-scoped` | | conductor | done |
 | US11.03 | financial-crime | skeleton | Financial intelligence unit (port and fake adapter) | `port financial-crime FinancialIntelligenceUnit`; `adapter financial-crime FinancialIntelligenceUnit --kind external` | | conductor | todo |
 | US11.04 | financial-crime | slice | Raise an alert: early repayment above 10,000 within a year of the payout, or a payment from an account not the borrower's | `command financial-crime RaiseAlert --permission alert.raise --aggregate Alert`; `domain-service financial-crime AlertRule` | US11.01 | financial-crime | todo |
 | US11.05 | financial-crime | slice | Watch the repayments of servicing | `integration-handler financial-crime servicing servicing.loan.payment-received --name WatchRepayments` | US9.08, US11.04 | financial-crime | todo |
