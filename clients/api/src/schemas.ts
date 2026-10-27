@@ -12,6 +12,8 @@ export type IdentifyCustomerBody = {
   documentExpiresOn: string;
   address: string;
   addressProofDatedOn: string;
+  name: string;
+  birthDate: string;
 };
 
 export type InvitationToken = {
