@@ -23,6 +23,7 @@ export function jobSettings(environment: Environment, context?: string): Readonl
     'audit.archive': { enabled: environment['JOB_AUDIT_ARCHIVE_ENABLED'] !== 'false' },
     'privacy.purge-expired': { enabled: environment['JOB_PRIVACY_PURGE_EXPIRED_ENABLED'] !== 'false' },
     // ddd-ts-kit:jobs
+    'brokerage.check-registration': { enabled: environment['JOB_BROKERAGE_CHECK_REGISTRATION_ENABLED'] !== 'false' },
     // /ddd-ts-kit:jobs
   };
 
