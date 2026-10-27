@@ -19,24 +19,22 @@ describe('US0, acceptance', () => {
     await application.reset();
   });
 
-  it(
-    '#US0.04 #US0.01 #US0.02 #US0.06 AC1 a customer of the bank submits an application for one loan and gets back its identifier, a Location and the amount in whole cents',
-    pending(async () => {
-      const customer = await application.as({ id: 'customer-1', tenantId: 'bank-1' });
+  it('#US0.04 #US0.01 #US0.02 #US0.06 AC1 a customer of the bank submits an application for one loan and gets back its identifier, a Location and the amount in whole cents', async () => {
+    await application.relate({ object: 'customer:customer-1', relation: 'self', subject: 'user:customer-1' });
+    const customer = await application.as({ id: 'customer-1', tenantId: 'bank-1' });
 
-      const response = expectStatus(
-        await customer.post('/applications', {
-          productId: 'personal-loan',
-          amount: { cents: 1234567, currency: 'EUR' },
-          durationMonths: 60,
-        }),
-        201,
-      );
+    const response = expectStatus(
+      await customer.post('/applications', {
+        productId: 'personal-loan',
+        amount: { cents: 1234567, currency: 'EUR' },
+        durationMonths: 60,
+      }),
+      201,
+    );
 
-      expect(response.headers['location']).toMatch(/^\/applications\/.+/);
-      expect(response.body).toMatchObject({ id: expect.any(String), amount: { cents: 1234567, currency: 'EUR' } });
-    }),
-  );
+    expect(response.headers['location']).toMatch(/^\/applications\/.+/);
+    expect(response.body).toMatchObject({ id: expect.any(String), amount: { cents: 1234567, currency: 'EUR' } });
+  });
 
   it(
     '#US0.04 #US0.02 #US0.03 AC2 a caller without the right to submit an application is refused with the refusal code, and no application is recorded',

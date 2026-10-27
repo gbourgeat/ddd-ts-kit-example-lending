@@ -9,7 +9,7 @@
     {
       "title": "#US0.04 #US0.01 #US0.02 #US0.06 AC1 a customer of the bank submits an application for one loan and gets back its identifier, a Location and the amount in whole cents",
       "criteria": ["AC1"],
-      "fingerprint": "c35ed381719f5d1a"
+      "fingerprint": "0d14ce2b3f4371b3"
     },
     {
       "title": "#US0.04 #US0.02 #US0.03 AC2 a caller without the right to submit an application is refused with the refusal code, and no application is recorded",
@@ -29,6 +29,13 @@
       "criteria": ["AC3"],
       "reason": "AC3 asks for one integration event carrying the application identifier, published once. The locked scenario called `submitted.recorded()`, a method the EventRecorder does not have, so it could not typecheck or run; the current `submitted.received()` is the recorder's method for the events received so far, in order, which is what the scenario meant. The assertions are unchanged (exactly one event, `applicationId` equal to the response identifier), so the new version is not weaker; the transactional part of AC3 is asserted in neither version, which the owner may want to cover later.",
       "verdict": "test/acceptance/verdicts/us0-20339db9ea777d17.md",
+      "on": "2026-10-27"
+    },
+    {
+      "subject": "scenario \"#US0.04 #US0.01 #US0.02 #US0.06 AC1 a customer of the bank submits an application for one loan and gets back its identifier, a Location and the amount in whole cents\"",
+      "criteria": ["AC1"],
+      "reason": "AC1 asks that a customer of the bank submits one application and gets back its identifier, a Location and the amount in whole cents. The locked version posted without the customer being a customer (no `self` relation), so it could not pass, and the new `relate` of `customer:customer-1#self@user:customer-1` only supplies that precondition, as the arrangement the rights decision needs; the body, the 201 status, the Location pattern and the amount assertions are unchanged, so the new version is no weaker.",
+      "verdict": "test/acceptance/verdicts/us0-0d14ce2b3f4371b3.md",
       "on": "2026-10-27"
     }
   ]
