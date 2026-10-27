@@ -268,6 +268,7 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 US0 AC2 stays `pending(...)` until US6.18 builds the list of applications: US0 merges with AC2 pending, and the story closes when US6.18 is done (owner)
 - 2026-10-27 US0 AC2 under Jest: the status of the list is to be checked by Jest's `expect(listed.status).toBe(200)`, because `pending(...)` refuses the node:assert failure of `expectStatus` (kit issue #436). The acceptance-judge refused this change of the locked scenario (`test/acceptance/verdicts/us0-a4fb82d0b747fa98.md`), so the lock keeps `expectStatus` and AC2 stays pending as above; the change is not applied (owner, the judge's verdict)
 - 2026-10-27 US0 trace of the submission (`test/e2e/submit-application.e2e.spec.ts`): the expected tree completes the comment's description, under `unit-of-work before-commit` the domain event, its handler `CreditApplicationSubmittedPublisher` and the outbox append; a spec of the slice, not a locked scenario (owner)
+- 2026-10-27 The amend verdicts of US0 (AC1: the customer related as `self` first; AC3: the recorder method `received()`, then the identifier read in `payload.creditApplicationId`) are validated; "in the same transaction that records it" of AC3 is asserted by no scenario, so row US0.07 proves it (owner)
 
 ## For the owner
 
