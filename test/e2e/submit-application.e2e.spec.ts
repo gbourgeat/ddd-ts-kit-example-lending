@@ -26,6 +26,10 @@ const submissionTree: readonly ExpectedSpan[] = [
                     name: 'handler CreditApplicationSubmittedPublisher',
                     children: [{ name: 'outbox append credit-application.credit-application.submitted' }],
                   },
+                  {
+                    name: 'handler ApplicationListOnSubmittedEventHandler',
+                    children: [{ name: 'repository ApplicationListProjection.recordSubmitted' }],
+                  },
                 ],
               },
             ],

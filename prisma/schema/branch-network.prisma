@@ -20,6 +20,8 @@ model BranchNetworkStaffMember {
   branchId     String   @map("branch_id")
   name String @map("name")
   email String @map("email")
+  accountId String @map("account_id")
+  ownCustomerId String? @map("own_customer_id")
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)

@@ -49,6 +49,7 @@ No personal data declared.
 <!-- ddd-ts-kit:permissions -->
 - `financial-crime:alert.raise`
 - `financial-crime:alert.close`
+- `financial-crime:report.file`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -94,6 +95,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `CloseAlert` | command | `alert.close` |
+| `FileSuspiciousActivityReport` | command | `report.file` |
 | `RaiseAlert` | command | `alert.raise` |
 
 ### Routes
@@ -101,14 +103,15 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/alerts/:id/closure` | `closeAlert` | `AlertsRoutes` | `Authenticated` | `CloseAlert` | `alert.close` | params: `CloseAlertParams`, body: `CloseAlertBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `FinancialCrimeCodes.AlertAlreadyClosed`, `FinancialCrimeCodes.UnknownAlert`, `FinancialCrimeCodes.ClosureReasonMissing` |
+| POST | `/alerts/:id/reports` | `fileSuspiciousActivityReport` | `AlertsRoutes` | `Authenticated` | `FileSuspiciousActivityReport` | `report.file` | params: `FileSuspiciousActivityReportParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
 | `AlertRepository` | repository | `PrismaAlertRepository` |
-| `FinancialIntelligenceUnit` | external | `SimulatedFinancialIntelligenceUnit` |
-| `SuspiciousActivityReportRepository` | external | `PrismaSuspiciousActivityReportRepository` |
+| `FinancialIntelligenceUnit` | external | `RemoteFinancialIntelligenceUnit`, `SimulatedFinancialIntelligenceUnit` |
+| `SuspiciousActivityReportRepository` | repository | `PrismaSuspiciousActivityReportRepository` |
 
 ### Errors
 

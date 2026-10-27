@@ -51,6 +51,12 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/credit-policy.residual-income-minimum.published.v1'
+  customer-due-diligence.customer.advisor-assigned:
+    address: customer-due-diligence.customer.advisor-assigned
+    description: A customer was given its advisor of the branch network, who looks after it.
+    messages:
+      v1:
+        $ref: '#/components/messages/customer-due-diligence.customer.advisor-assigned.v1'
   customer-due-diligence.customer.identified:
     address: customer-due-diligence.customer.identified
     description: A customer, a person or a business, has been identified before any credit.
@@ -154,6 +160,12 @@ operations:
       $ref: '#/channels/credit-policy.residual-income-minimum.published'
     messages:
       - $ref: '#/channels/credit-policy.residual-income-minimum.published/messages/v1'
+  send.customer-due-diligence.customer.advisor-assigned:
+    action: send
+    channel:
+      $ref: '#/channels/customer-due-diligence.customer.advisor-assigned'
+    messages:
+      - $ref: '#/channels/customer-due-diligence.customer.advisor-assigned/messages/v1'
   send.customer-due-diligence.customer.identified:
     action: send
     channel:
@@ -540,6 +552,49 @@ components:
             type: object
             required:
               - residualIncomeMinimumId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    customer-due-diligence.customer.advisor-assigned.v1:
+      name: customer-due-diligence.customer.advisor-assigned
+      title: customer-due-diligence.customer.advisor-assigned v1
+      summary: A customer was given its advisor of the branch network, who looks after it.
+      contentType: application/json
+      tags:
+        - name: customer-due-diligence
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: customer-due-diligence.customer.advisor-assigned
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              customerId:
+                type: string
+              advisorId:
+                type: string
+            type: object
+            required:
+              - customerId
+              - advisorId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

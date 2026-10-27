@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["messaging", "event_store", "audit", "identity", "branch_network", "credit_policy", "brokerage", "financial_crime", "data_protection", "authorization", "credit_scoring", "credit_application"]
+  schemas  = ["messaging", "event_store", "audit", "identity", "branch_network", "credit_policy", "brokerage", "financial_crime", "data_protection", "authorization", "credit_scoring", "credit_application", "customer_due_diligence"]
 }
 
 // The outbox and the idempotency table, from @ddd-ts-kit/prisma. Keep the field names: the

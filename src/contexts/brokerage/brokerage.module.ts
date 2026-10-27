@@ -12,6 +12,7 @@ import { RegisterBrokerCommand } from '@/contexts/brokerage/application/commands
 import { RegisterBrokerHandler } from '@/contexts/brokerage/application/commands/register-broker/register-broker.handler';
 import { CheckRegistrationCommand } from '@/contexts/brokerage/application/commands/check-registration/check-registration.command';
 import { CheckRegistrationHandler } from '@/contexts/brokerage/application/commands/check-registration/check-registration.handler';
+import { CheckRegistrationJob } from '@/contexts/brokerage/application/scheduling/check-registration.job';
 // /ddd-ts-kit:imports
 
 export interface BrokerageWiring {
@@ -55,11 +56,9 @@ function registerHandlers(platform: Platform): void {
     { context: 'brokerage' },
   );
 
-  platform.commands.register(
-    CheckRegistrationCommand,
-    new CheckRegistrationHandler(brokerRepository, intermediaries, platform.clock),
-    { context: 'brokerage' },
-  );
+  platform.commands.register(CheckRegistrationCommand, new CheckRegistrationHandler(brokerRepository, intermediaries), {
+    context: 'brokerage',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -72,6 +71,14 @@ function registerReactions(platform: Platform): void {
 /** The jobs of the context, scheduled and in the background. */
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
+  const checkRegistrationJob = new CheckRegistrationJob(platform.commands);
+
+  platform.jobs.register({
+    name: 'brokerage.check-registration',
+    schedule: { cron: '0 6 * * *', timeZone: 'Europe/Paris' },
+    tenancy: 'per-tenant',
+    run: (execution) => checkRegistrationJob.run(execution),
+  });
   // /ddd-ts-kit:jobs
 }
 

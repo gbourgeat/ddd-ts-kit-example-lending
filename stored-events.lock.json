@@ -5,12 +5,21 @@
   "credit-application.credit-application.submitted": {
     "1": "sha256:9fc1a08288528135"
   },
+  "customer-due-diligence.customer.advisor-assigned": {
+    "1": "sha256:bfc471f16ecf58e3"
+  },
   "customer-due-diligence.customer.business-registered": {
     "1": "sha256:25b7e8efe3401359"
+  },
+  "customer-due-diligence.customer.directors-and-owners-declared": {
+    "1": "sha256:cb0ab1df6df4a11c"
   },
   "customer-due-diligence.customer.identified": {
     "1": "sha256:733dac3b56fba725",
     "2": "sha256:8ccff80e0d86ce8f"
+  },
+  "customer-due-diligence.customer.possible-match-found": {
+    "1": "sha256:733dac3b56fba725"
   },
   "servicing.loan.paid-out": {
     "1": "sha256:733dac3b56fba725"

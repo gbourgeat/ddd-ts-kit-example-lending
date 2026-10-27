@@ -11,6 +11,8 @@ export const StaffMemberMapper = {
       branchId: row.branchId,
       name: row.name,
       email: row.email,
+      accountId: row.accountId,
+      ownCustomerId: row.ownCustomerId ?? undefined,
     });
 
     loaded.version = row.version;
@@ -19,6 +21,8 @@ export const StaffMemberMapper = {
   },
 
   toRow(saved: StaffMember): StaffMemberColumns {
-    return { id: saved.id, ...saved.toState() };
+    const { ownCustomerId, ...state } = saved.toState();
+
+    return { id: saved.id, ...state, ownCustomerId: ownCustomerId ?? null };
   },
 };

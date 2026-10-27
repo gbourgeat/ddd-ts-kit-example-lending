@@ -6,12 +6,16 @@ export interface StaffMemberState {
   readonly branchId: string;
   readonly name: string;
   readonly email: string;
+  readonly accountId: string;
+  readonly ownCustomerId: string | undefined;
 }
 
 export interface StaffMemberAppointment {
   readonly branchId: string;
   readonly name: string;
   readonly email: string;
+  readonly accountId: string;
+  readonly ownCustomerId: string | undefined;
 }
 
 export class StaffMember extends AggregateRoot<string> {
@@ -44,6 +48,16 @@ export class StaffMember extends AggregateRoot<string> {
 
   get name(): string {
     return this.state.name;
+  }
+
+  /** The identity account the member of staff signs in with: the actor of their own commands. */
+  get accountId(): string {
+    return this.state.accountId;
+  }
+
+  /** The customer file that is the member of staff's own, when they are also a customer. */
+  get ownCustomerId(): string | undefined {
+    return this.state.ownCustomerId;
   }
 
   get email(): string {

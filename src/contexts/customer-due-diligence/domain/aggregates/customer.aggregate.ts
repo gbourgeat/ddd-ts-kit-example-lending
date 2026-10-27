@@ -2,13 +2,25 @@ import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@dd
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 import { BusinessAlreadyRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-already-registered.error';
+import { BusinessNotRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-not-registered.error';
 import { IdentityDocumentExpired } from '@/contexts/customer-due-diligence/domain/errors/identity-document-expired.error';
 import { ProofOfAddressTooOld } from '@/contexts/customer-due-diligence/domain/errors/proof-of-address-too-old.error';
+import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
+import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
+import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
+
+/** The facts the bank checked to know a person. */
+type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
 
 /** A proof of address is accepted for this many months after its date. */
 const PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS = 3;
 
-export type CustomerEvent = CustomerIdentified | CustomerBusinessRegistered;
+export type CustomerEvent =
+  | CustomerIdentified
+  | CustomerBusinessRegistered
+  | CustomerDirectorsAndOwnersDeclared
+  | CustomerAdvisorAssigned
+  | CustomerPossibleMatchFound;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -18,9 +30,18 @@ export interface BusinessRegistration {
   readonly registeredOn: Date;
 }
 
+/** The directors and the beneficial owners of a business, each one identified as a person. */
+export interface DeclaredOwners {
+  readonly directors: readonly PersonIdentity[];
+  readonly beneficialOwners: readonly PersonIdentity[];
+}
+
 export interface CustomerState {
   readonly registeredAt: Date;
   readonly business?: BusinessRegistration;
+  readonly ownersDeclaredAt?: Date;
+  readonly advisorId?: string;
+  readonly possibleMatchFoundAt?: Date;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -31,18 +52,8 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   /** Identifies a person: refused when the document is expired on the day, or the proof of address too old. */
-  static create(id: string, identity: NonNullable<CustomerIdentified['identity']>, now: Date): Customer {
-    if (identity.documentExpiresOn.getTime() < now.getTime()) {
-      throw IdentityDocumentExpired.forCustomer(id);
-    }
-
-    const oldestAcceptedProof = new Date(now.getTime());
-
-    oldestAcceptedProof.setUTCMonth(oldestAcceptedProof.getUTCMonth() - PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS);
-
-    if (identity.addressProofDatedOn.getTime() < oldestAcceptedProof.getTime()) {
-      throw ProofOfAddressTooOld.forCustomer(id);
-    }
+  static create(id: string, identity: PersonIdentity, now: Date): Customer {
+    Customer.checkIdentity(id, identity, now);
 
     const created = new Customer(id);
 
@@ -79,6 +90,29 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     );
   }
 
+  /** Records the directors and beneficial owners, each identified as a person; refused before the registration of the business. */
+  declareDirectorsAndOwners(owners: DeclaredOwners, now: Date): void {
+    if (this.state.business === undefined) {
+      throw BusinessNotRegistered.forCustomer(this.id);
+    }
+
+    for (const person of [...owners.directors, ...owners.beneficialOwners]) {
+      Customer.checkIdentity(this.id, person, now);
+    }
+
+    this.record(new CustomerDirectorsAndOwnersDeclared(this.id, now, owners.directors, owners.beneficialOwners));
+  }
+
+  /** Gives the customer its advisor; a later assignment replaces the advisor, the earlier one is kept in the events. */
+  assignAdvisor(advisorId: string, now: Date): void {
+    this.record(new CustomerAdvisorAssigned(this.id, now, advisorId));
+  }
+
+  /** Records that the screening found a person on a list: a possible match, which waits for compliance review and is never decided here. */
+  recordPossibleMatch(now: Date): void {
+    this.record(new CustomerPossibleMatchFound(this.id, now));
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
@@ -87,7 +121,24 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     return {
       [CustomerIdentified.eventName]: (event) => this.applyIdentified(event),
       [CustomerBusinessRegistered.eventName]: (event) => this.applyBusinessRegistered(event),
+      [CustomerDirectorsAndOwnersDeclared.eventName]: (event) => this.applyDirectorsAndOwnersDeclared(event),
+      [CustomerAdvisorAssigned.eventName]: (event) => this.applyAdvisorAssigned(event),
+      [CustomerPossibleMatchFound.eventName]: (event) => this.applyPossibleMatchFound(event),
     };
+  }
+
+  private static checkIdentity(id: string, identity: PersonIdentity, now: Date): void {
+    if (identity.documentExpiresOn.getTime() < now.getTime()) {
+      throw IdentityDocumentExpired.forCustomer(id);
+    }
+
+    const oldestAcceptedProof = new Date(now.getTime());
+
+    oldestAcceptedProof.setUTCMonth(oldestAcceptedProof.getUTCMonth() - PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS);
+
+    if (identity.addressProofDatedOn.getTime() < oldestAcceptedProof.getTime()) {
+      throw ProofOfAddressTooOld.forCustomer(id);
+    }
   }
 
   private restore(state: CustomerState): void {
@@ -112,5 +163,17 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
         registeredOn: event.registeredOn,
       },
     };
+  }
+
+  private applyDirectorsAndOwnersDeclared(event: CustomerDirectorsAndOwnersDeclared): void {
+    this.state = { ...this.state, ownersDeclaredAt: event.occurredAt };
+  }
+
+  private applyAdvisorAssigned(event: CustomerAdvisorAssigned): void {
+    this.state = { ...this.state, advisorId: event.advisorId };
+  }
+
+  private applyPossibleMatchFound(event: CustomerPossibleMatchFound): void {
+    this.state = { ...this.state, possibleMatchFoundAt: event.occurredAt };
   }
 }

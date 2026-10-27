@@ -4,6 +4,7 @@ import { customerDueDiligenceControllers } from '@/contexts/customer-due-diligen
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/infrastructure/external/simulated-screening-provider.adapter';
 import { CustomerIdentifiedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-identified.publisher';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
@@ -13,6 +14,19 @@ import { RegisterBusinessCommand } from '@/contexts/customer-due-diligence/appli
 import { RegisterBusinessHandler } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.handler';
 import { IdentifyCustomerCommand } from '@/contexts/customer-due-diligence/application/commands/identify-customer/identify-customer.command';
 import { IdentifyCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/identify-customer/identify-customer.handler';
+import { DeclareDirectorsAndOwnersCommand } from '@/contexts/customer-due-diligence/application/commands/declare-directors-and-owners/declare-directors-and-owners.command';
+import { DeclareDirectorsAndOwnersHandler } from '@/contexts/customer-due-diligence/application/commands/declare-directors-and-owners/declare-directors-and-owners.handler';
+import { GetCustomerFileHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-file/get-customer-file.handler';
+import { GetCustomerFileQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-file/get-customer-file.query';
+import { PrismaGetCustomerFileReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/prisma-get-customer-file.reader';
+import { PrismaCustomerFileProjectionRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/prisma-customer-file-projection.repository';
+import { CustomerFileOnIdentifiedEventHandler } from '@/contexts/customer-due-diligence/application/event-handlers/customer-file-on-identified.event-handler';
+import { AssignAdvisorCommand } from '@/contexts/customer-due-diligence/application/commands/assign-advisor/assign-advisor.command';
+import { AssignAdvisorHandler } from '@/contexts/customer-due-diligence/application/commands/assign-advisor/assign-advisor.handler';
+import { ScreenCustomerCommand } from '@/contexts/customer-due-diligence/application/commands/screen-customer/screen-customer.command';
+import { ScreenCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/screen-customer/screen-customer.handler';
+import { CustomerAdvisorAssignedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-advisor-assigned.publisher';
+import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -53,6 +67,42 @@ function registerHandlers(platform: Platform): void {
     new IdentifyCustomerHandler(customerRepository, platform.ids, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    DeclareDirectorsAndOwnersCommand,
+    new DeclareDirectorsAndOwnersHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
+
+  const getCustomerFileReader = platform.adapter(
+    new PrismaGetCustomerFileReader(platform.persistence.database, platform.scope),
+    {
+      kind: 'repository',
+      context: 'customer-due-diligence',
+    },
+  );
+
+  platform.queries.register(GetCustomerFileQuery, new GetCustomerFileHandler(getCustomerFileReader, platform.access), {
+    context: 'customer-due-diligence',
+  });
+
+  platform.commands.register(AssignAdvisorCommand, new AssignAdvisorHandler(customerRepository, platform.clock), {
+    context: 'customer-due-diligence',
+  });
+
+  platform.commands.register(
+    ScreenCustomerCommand,
+    new ScreenCustomerHandler(
+      customerRepository,
+      platform.adapter(new SimulatedScreeningProvider(), {
+        kind: 'external',
+        context: 'customer-due-diligence',
+        token: 'ScreeningProvider',
+      }),
+      platform.clock,
+    ),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -67,6 +117,37 @@ function registerReactions(platform: Platform): void {
   platform.domainEvents.on(CustomerIdentified.eventName, async (event) => {
     if (event instanceof CustomerIdentified) {
       await customerIdentifiedPublisher.handle(event);
+    }
+  });
+
+  const customerFileOnIdentifiedEventHandler = platform.adapter(
+    new CustomerFileOnIdentifiedEventHandler(
+      platform.adapter(new PrismaCustomerFileProjectionRepository(platform.persistence.database, platform.scope), {
+        kind: 'repository',
+        context: 'customer-due-diligence',
+        token: 'CustomerFileProjection',
+      }),
+    ),
+    {
+      kind: 'domain-event-handler',
+      context: 'customer-due-diligence',
+    },
+  );
+
+  platform.domainEvents.on(CustomerIdentified.eventName, async (event) => {
+    if (event instanceof CustomerIdentified) {
+      await customerFileOnIdentifiedEventHandler.handle(event);
+    }
+  });
+
+  const customerAdvisorAssignedPublisher = platform.adapter(
+    new CustomerAdvisorAssignedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'customer-due-diligence' },
+  );
+
+  platform.domainEvents.on(CustomerAdvisorAssigned.eventName, async (event) => {
+    if (event instanceof CustomerAdvisorAssigned) {
+      await customerAdvisorAssignedPublisher.handle(event);
     }
   });
   // /ddd-ts-kit:reactions
@@ -86,6 +167,18 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(IdentifyCustomerCommand, customerDueDiligencePermissions['customer.identify'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(DeclareDirectorsAndOwnersCommand, customerDueDiligencePermissions['business.declare-owners'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(GetCustomerFileQuery, customerDueDiligencePermissions['customer.read'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(AssignAdvisorCommand, customerDueDiligencePermissions['customer.assign-advisor'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(ScreenCustomerCommand, customerDueDiligencePermissions['customer.screen'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

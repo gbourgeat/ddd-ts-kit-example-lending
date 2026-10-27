@@ -9,6 +9,10 @@ export class FakeIntermediariesRegister implements IntermediariesRegister {
     this.valid.add(registrationNumber);
   }
 
+  revoke(registrationNumber: string): void {
+    this.valid.delete(registrationNumber);
+  }
+
   async isValidOn(registrationNumber: string, day: Date): Promise<boolean> {
     this.asked.push({ registrationNumber, day });
 

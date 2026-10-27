@@ -4,6 +4,9 @@ import type { CustomerEvent } from '@/contexts/customer-due-diligence/domain/agg
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 import { IdentityDocumentKind } from '@/contexts/customer-due-diligence/domain/vocabularies/identity-document-kind.vocabulary';
+import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
+import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
+import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 
 interface CustomerBusinessRegisteredData {
   readonly legalName: string;
@@ -11,6 +14,17 @@ interface CustomerBusinessRegisteredData {
   readonly countryOfRegistration: string;
   readonly registeredOn: string;
 }
+
+interface CustomerDirectorsAndOwnersDeclaredData {
+  readonly directors: PersonIdentityData[];
+  readonly beneficialOwners: PersonIdentityData[];
+}
+
+interface CustomerAdvisorAssignedData {
+  readonly advisorId: string;
+}
+
+type CustomerPossibleMatchFoundData = Record<string, never>;
 
 /** The identity facts of version 2 of the birth; the document number and the address are personal, sealed by subject. */
 interface PersonIdentityData {
@@ -64,6 +78,31 @@ export const customerEvents: StoredEventTypes<CustomerEvent> = {
         data.text('countryOfRegistration'),
         data.instant('registeredOn'),
       ),
+  }),
+  [CustomerDirectorsAndOwnersDeclared.eventName]: defineStoredEvent(CustomerDirectorsAndOwnersDeclared, {
+    version: 1,
+    encode: (event): CustomerDirectorsAndOwnersDeclaredData => ({
+      directors: event.directors.map((person) => identityDataOf(event.aggregateId, person)),
+      beneficialOwners: event.beneficialOwners.map((person) => identityDataOf(event.aggregateId, person)),
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CustomerDirectorsAndOwnersDeclared(
+        aggregateId,
+        occurredAt,
+        data.records('directors').map((person) => identityOf(person)),
+        data.records('beneficialOwners').map((person) => identityOf(person)),
+      ),
+  }),
+  [CustomerAdvisorAssigned.eventName]: defineStoredEvent(CustomerAdvisorAssigned, {
+    version: 1,
+    encode: (event): CustomerAdvisorAssignedData => ({ advisorId: event.advisorId }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CustomerAdvisorAssigned(aggregateId, occurredAt, data.text('advisorId')),
+  }),
+  [CustomerPossibleMatchFound.eventName]: defineStoredEvent(CustomerPossibleMatchFound, {
+    version: 1,
+    encode: (): CustomerPossibleMatchFoundData => ({}),
+    decode: (_data, { aggregateId, occurredAt }) => new CustomerPossibleMatchFound(aggregateId, occurredAt),
   }),
 };
 

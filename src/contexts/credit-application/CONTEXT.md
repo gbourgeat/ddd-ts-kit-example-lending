@@ -57,6 +57,9 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Formula | the equation of Annex I of the Consumer Credit Directive that gives the annual percentage rate |  |
 | Account | A bank account of the applicant, read through an account information provider for the income and expenses of the application |  |
 | Given | Past participle of give: the fact that a permission was handed over at an instant, recorded in the file |  |
+| List | A page of the applications one operator may see, narrowed by the access scope of the caller |  |
+| Read | An operator's right to see an application, granted by its relations (advisor, co-borrower, broker) |  |
+| Search | A read that takes a scope and a page: the applications one caller may see, page by page, never a list of all of them |  |
 
 ## Modules
 
@@ -91,6 +94,7 @@ No personal data declared.
 <!-- ddd-ts-kit:permissions -->
 - `credit-application:application.submit`
 - `credit-application:application.consent`
+- `credit-application:application.read`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -142,12 +146,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `GiveAccountConsent` | command | `application.consent` |
+| `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
+| GET | `/applications` | `searchApplications` | `ApplicationsRoutes` | `Authenticated` | `SearchApplications` | `public` | query | 200: `page of SearchApplicationsLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 
@@ -162,10 +168,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
+| `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `OfferRepository` | external | `PrismaOfferRepository` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
+| `SearchApplicationsReader` | repository | `PrismaSearchApplicationsReader` |
 
 ### Errors
 
