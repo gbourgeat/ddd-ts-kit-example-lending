@@ -22,7 +22,7 @@ describe('Erase personal data past retention, end to end', () => {
   });
 
   it('answers 401 to a caller who presents no credential', async () => {
-    const response = await application.client.post('/personal-data/erasures', {});
+    const response = await application.client.post('/personal-data/erasures', { asOf: '2026-01-01T07:00:00.000Z' });
 
     expectStatus(response, 401);
   });
@@ -30,7 +30,7 @@ describe('Erase personal data past retention, end to end', () => {
   it('answers 403 to an actor who does not hold the permission', async () => {
     const stranger = await application.as({ id: 'stranger' });
 
-    const response = await stranger.post('/personal-data/erasures', {});
+    const response = await stranger.post('/personal-data/erasures', { asOf: '2026-01-01T07:00:00.000Z' });
 
     expectStatus(response, 403);
   });
@@ -40,7 +40,7 @@ describe('Erase personal data past retention, end to end', () => {
     const ada = await application.as({ id: 'ada', roles: ['admin'] });
 
     const trace = await tracing.traceOf(async () => {
-      expectStatus(await ada.post('/personal-data/erasures', {}), 204);
+      expectStatus(await ada.post('/personal-data/erasures', { asOf: '2026-01-01T07:00:00.000Z' }), 204);
     });
 
     // Exact on names and structure, and kept before the tests whose request leaves work behind (a relay still publishing would add its spans here). Once "erase personal data past retention" announces a fact, its spans come after the save, under `unit-of-work before-commit`: `domain-event <name>`, `handler <Class>`, `outbox append <type>`, then, once `application.settled()` has resolved inside `traceOf`, `publish <type>` and `process <consumer>` with the command it sends.
@@ -65,7 +65,7 @@ describe('Erase personal data past retention, end to end', () => {
     await application.relate({ object: 'context:data-protection', relation: 'operator', subject: 'user:ada' });
     const ada = await application.as({ id: 'ada', roles: ['admin'] });
 
-    const response = await ada.post('/personal-data/erasures', {});
+    const response = await ada.post('/personal-data/erasures', { asOf: '2026-01-01T07:00:00.000Z' });
 
     expectStatus(response, 204);
   });
@@ -74,7 +74,7 @@ describe('Erase personal data past retention, end to end', () => {
     await application.relate({ object: 'context:data-protection', relation: 'operator', subject: 'user:ada' });
     const ada = await application.as({ id: 'ada', roles: ['admin'], tenantId: 'acme-bank' });
 
-    expectStatus(await ada.post('/personal-data/erasures', {}), 204);
+    expectStatus(await ada.post('/personal-data/erasures', { asOf: '2026-01-01T07:00:00.000Z' }), 204);
     await application.relate({ object: 'context:audit', relation: 'operator', subject: 'user:ada' });
 
     const trail = await ada.get('/audit/entries?action=ErasePersonalDataPastRetentionCommand');
@@ -94,7 +94,7 @@ describe('Erase personal data past retention, end to end', () => {
   it('answers the FORBIDDEN code to an actor without the permission', async () => {
     const stranger = await application.as({ id: 'stranger' });
 
-    const response = await stranger.post('/personal-data/erasures', {});
+    const response = await stranger.post('/personal-data/erasures', { asOf: '2026-01-01T07:00:00.000Z' });
 
     expectStatus(response, 403);
     expect(response.body).toMatchObject({ code: 'FORBIDDEN' });
