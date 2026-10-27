@@ -1375,6 +1375,12 @@ paths:
                 addressProofDatedOn:
                   pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
                   type: string
+                name:
+                  minLength: 1
+                  type: string
+                birthDate:
+                  pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                  type: string
               type: object
               required:
                 - documentKind
@@ -1383,6 +1389,8 @@ paths:
                 - documentExpiresOn
                 - address
                 - addressProofDatedOn
+                - name
+                - birthDate
       responses:
         '201':
           description: The answer.
@@ -3076,6 +3084,12 @@ components:
         addressProofDatedOn:
           pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
           type: string
+        name:
+          minLength: 1
+          type: string
+        birthDate:
+          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+          type: string
       type: object
       required:
         - documentKind
@@ -3084,6 +3098,8 @@ components:
         - documentExpiresOn
         - address
         - addressProofDatedOn
+        - name
+        - birthDate
     InvitationToken:
       properties:
         token:

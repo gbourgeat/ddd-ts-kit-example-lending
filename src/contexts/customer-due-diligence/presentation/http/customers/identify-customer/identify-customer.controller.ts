@@ -27,6 +27,8 @@ export class IdentifyCustomerController {
         new Date(body.documentExpiresOn),
         body.address,
         new Date(body.addressProofDatedOn),
+        body.name,
+        new Date(body.birthDate),
       ),
     );
 

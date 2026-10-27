@@ -606,6 +606,8 @@ export interface IdentifyCustomerInput {
     documentExpiresOn: string;
     address: string;
     addressProofDatedOn: string;
+    name: string;
+    birthDate: string;
   };
 }
 
