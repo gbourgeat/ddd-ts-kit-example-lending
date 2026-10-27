@@ -30,6 +30,7 @@ const elements: SchemaDefinition = {
     relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
     derived: {
       'credit-application:application.submit': 'self',
+      'data-protection:data-subject.request-copy': 'self',
       advisor: via('portfolio', 'advisor'),
     },
   },
