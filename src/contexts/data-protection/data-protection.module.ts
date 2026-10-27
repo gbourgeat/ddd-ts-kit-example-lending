@@ -4,6 +4,7 @@ import { dataProtectionControllers } from '@/contexts/data-protection/data-prote
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { CopyOfDataTimeoutBackgroundJob } from '@/contexts/data-protection/application/background/copy-of-data-timeout.background-job';
 // /ddd-ts-kit:imports
 
 export interface DataProtectionWiring {
@@ -42,6 +43,7 @@ function registerReactions(platform: Platform): void {
 /** The jobs of the context, scheduled and in the background. */
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
+  platform.backgroundJobs.register(CopyOfDataTimeoutBackgroundJob, [platform.processes]);
   // /ddd-ts-kit:jobs
 }
 
