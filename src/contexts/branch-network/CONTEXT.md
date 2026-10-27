@@ -31,6 +31,7 @@ Who follows which customer, and who may decide on it, is needed for the business
 
 <!-- ddd-ts-kit:aggregates -->
 - `Branch`
+- `Portfolio`
 - `StaffMember`
 <!-- /ddd-ts-kit:aggregates -->
 
@@ -100,5 +101,6 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchNetworkPersonalDataErasure` | external | `PrismaBranchNetworkPersonalDataErasure` |
 | `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
 | `BranchRepository` | external | `PrismaBranchRepository` |
+| `PortfolioRepository` | external | `PrismaPortfolioRepository` |
 | `StaffMemberRepository` | external | `PrismaStaffMemberRepository` |
 <!-- /ddd-ts-kit:reference -->
