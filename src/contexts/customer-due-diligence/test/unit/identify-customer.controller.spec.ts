@@ -16,6 +16,8 @@ const identityBody = {
   documentExpiresOn: '2030-01-01T00:00:00.000Z',
   address: '1 rue de la Paix, 75002 Paris',
   addressProofDatedOn: '2026-05-01T00:00:00.000Z',
+  name: 'Ada Lovelace',
+  birthDate: '1980-05-01T00:00:00.000Z',
 };
 
 describe('POST /customers', () => {

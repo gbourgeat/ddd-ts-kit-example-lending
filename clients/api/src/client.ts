@@ -131,6 +131,12 @@ export interface Client {
    */
   screenCustomer(input: operations.ScreenCustomerInput, options?: CallOptions): Promise<operations.ScreenCustomerResult>;
   /**
+   * Request personal data copy: `POST /data-subjects/me/copies`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  requestPersonalDataCopy(input: operations.RequestPersonalDataCopyInput, options?: CallOptions): Promise<operations.RequestPersonalDataCopyResult>;
+  /**
    * Set delegation table: `PUT /delegation-table`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
@@ -251,6 +257,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
+    requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),

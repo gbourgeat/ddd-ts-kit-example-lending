@@ -606,6 +606,8 @@ export interface IdentifyCustomerInput {
     documentExpiresOn: string;
     address: string;
     addressProofDatedOn: string;
+    name: string;
+    birthDate: string;
   };
 }
 
@@ -748,6 +750,37 @@ export function screenCustomer(
   };
 
   return send<ScreenCustomerResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RequestPersonalDataCopyInput {
+  readonly body: Record<string, unknown>;
+}
+
+export type RequestPersonalDataCopyResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Request personal data copy: `POST /data-subjects/me/copies`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function requestPersonalDataCopy(
+  connection: Connection,
+  input: RequestPersonalDataCopyInput,
+  options: CallOptions = {},
+): Promise<RequestPersonalDataCopyResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/data-subjects/me/copies',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RequestPersonalDataCopyResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SetDelegationTableInput {

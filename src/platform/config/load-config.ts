@@ -3,6 +3,7 @@ import type { AppConfig } from '@/platform/config/app-config';
 import { Environment, type Variables } from '@/platform/config/environment';
 import { readFiles } from '@/platform/config/read-files';
 import { readTracing } from '@/platform/config/read-tracing';
+import { readRetentionPeriods } from '@/platform/config/read-retention-periods';
 
 const environments = ['development', 'test', 'production'] as const;
 
@@ -39,6 +40,7 @@ export function loadConfig(variables: Variables): AppConfig {
     rateLimit: readRateLimit(env),
     errorReporting: readErrorReporting(env, environment),
     files: readFiles(env),
+    retention: readRetentionPeriods(env),
   };
 
   env.assertValid();

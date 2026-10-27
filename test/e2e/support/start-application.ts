@@ -1,7 +1,9 @@
 import type { RelationTuple } from '@ddd-ts-kit/auth/rebac';
 import type { IntegrationEvent, IntegrationEventSubscriber } from '@ddd-ts-kit/kernel';
 import { createHttpClient, settled, type HttpClient, type SettledOptions } from '@ddd-ts-kit/testing/e2e';
-import { composeApplication } from '@/platform/composition/compose-application';
+import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/infrastructure/external/simulated-screening-provider.adapter';
+import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
+import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
 import type { AppConfig } from '@/platform/config/app-config';
 import { loadConfig } from '@/platform/config/load-config';
 import { openTestDatabase, type TestDatabase } from '@/platform/database/open-test-database';
@@ -19,6 +21,8 @@ export interface RunningApplication {
   readonly client: HttpClient;
   /** Subscribe here (`collectEvents`) to assert the integration events the application publishes. */
   readonly events: IntegrationEventSubscriber;
+  /** The screening provider of the application: a spec lists the people the screening matches with `screening.record(name, birthDate)`. */
+  readonly screening: SimulatedScreeningProvider;
 
   /** A client presenting the credential of `actor`; `client` itself presents none. */
   as(actor: TestActor): Promise<HttpClient>;
@@ -62,11 +66,13 @@ export async function startApplication(): Promise<RunningApplication> {
   const database = await openTestDatabase(url);
   const config = loadConfig(testEnvironment({ DATABASE_URL: url ?? 'postgres://in-process/tests' }));
   const credentials = await createCredentials();
-  const started = await start(database, config, credentials);
+  const screening = new SimulatedScreeningProvider();
+  const started = await start({ database, config, credentials, screening });
 
   return {
     client: started.client,
     events: started.events,
+    screening,
     as: async (actor) => started.client.withHeaders(await credentials.headersOf(actor)),
     publish: (events) => started.publish(events),
     relate: (tuple) => started.relate(tuple),
@@ -89,15 +95,23 @@ interface Started {
   close(): Promise<void>;
 }
 
-/** The application on the test database, listening on a free port; closing it closes the database last. */
-async function start(database: TestDatabase, config: AppConfig, credentials: Credentials): Promise<Started> {
-  const redis = config.redisUrl === noRedis ? undefined : openRedis(config);
+interface StartProps {
+  readonly database: TestDatabase;
+  readonly config: AppConfig;
+  readonly credentials: Credentials;
+  readonly screening: SimulatedScreeningProvider;
+}
 
-  const application = composeApplication(database.persistence, {
-    events: eventsOf(config),
-    authenticator: credentials.authenticator,
-    ...(redis === undefined ? {} : { redis }),
-  });
+/** The application on the test database, listening on a free port; closing it closes the database last. */
+async function start({ database, config, credentials, screening }: StartProps): Promise<Started> {
+  const redis = config.redisUrl === noRedis ? undefined : openRedis(config);
+  const selection = contextsWith(screening);
+
+  const application = composeApplication(
+    database.persistence,
+    applicationOptions(config, credentials, redis),
+    selection,
+  );
 
   await application.start();
 
@@ -124,6 +138,26 @@ async function start(database: TestDatabase, config: AppConfig, credentials: Cre
       await database.close();
     },
   };
+}
+
+function applicationOptions(
+  config: AppConfig,
+  credentials: Credentials,
+  redis: ReturnType<typeof openRedis> | undefined,
+): ApplicationOptions {
+  return {
+    events: eventsOf(config),
+    authenticator: credentials.authenticator,
+    retention: config.retention,
+    ...(redis === undefined ? {} : { redis }),
+  };
+}
+
+/** Every context of the application, with customer-due-diligence screening against the records the spec lists. */
+function contextsWith(screening: SimulatedScreeningProvider): typeof everyContext {
+  return everyContext.map((context) =>
+    context === customerDueDiligenceModule ? (platform) => customerDueDiligenceModule(platform, screening) : context,
+  );
 }
 
 function eventsOf(config: AppConfig): EventProvider {

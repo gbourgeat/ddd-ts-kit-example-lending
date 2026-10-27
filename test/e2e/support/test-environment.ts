@@ -13,6 +13,9 @@ export const noObjectStore = {
 /** Without REDIS_URL (`npm run infra:up` gives one) what lives on the Redis protocol server stays in the memory of the process: the same ports, no server. */
 export const noRedis = 'redis://in-process/tests';
 
+/** The periods of the test application: the same as `.env.example`, which a deployment copies. */
+export const defaultRetentionPeriods = '{"identity.invitation":{"days":30}}';
+
 type Variables = Readonly<Record<string, string | undefined>>;
 
 /** The environment of an application under test: a free port, the settings of the test credentials, and what stands for an absent server. */
@@ -28,6 +31,7 @@ export function testEnvironment(overrides: Variables = {}): Variables {
     S3_BUCKET: (process.env['S3_BUCKET'] ?? '') || noObjectStore.S3_BUCKET,
     S3_ACCESS_KEY_ID: (process.env['S3_ACCESS_KEY_ID'] ?? '') || noObjectStore.S3_ACCESS_KEY_ID,
     S3_SECRET_ACCESS_KEY: (process.env['S3_SECRET_ACCESS_KEY'] ?? '') || noObjectStore.S3_SECRET_ACCESS_KEY,
+    RETENTION_PERIODS: process.env['RETENTION_PERIODS'] ?? defaultRetentionPeriods,
     ...overrides,
   };
 }
