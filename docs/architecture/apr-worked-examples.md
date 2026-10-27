@@ -1,36 +1,36 @@
 # Worked examples of the annual percentage rate
 
-Given by the product owner for step 7 (row US8.04). The annual percentage rate (APR) is the rate of the
-actuarial formula of Annex I of the Consumer Credit Directive 2008/48/EC, kept by Directive 2023/2225.
+The annual percentage rate (APR) is the rate X of the equation of Annex I of the Consumer Credit Directive
+2008/48/EC (kept by Directive 2023/2225, and the same equation as Annex I of the Mortgage Credit Directive
+2014/17/EU): the drawdowns, discounted at X, equal the repayments and the charges, discounted at X, the
+times in years from the first drawdown.
+
+## Source
+
+The examples are taken, figures unchanged, from *Examples for the calculation of the annual percentage
+rate of charge for credit agreements for consumers relating to residential immovable property*, a report
+prepared by Dr. Gloria M. Soto (Universidad de Murcia) for the European Commission, DG FISMA, January 2015
+(Markt/2014/107/H3/TA/LV), published on commission.europa.eu. The report applies the equation of the
+directives; it states that it does not engage the Commission. The examples are mortgage credits, chosen
+because the report states X to six decimals, which proves a formula far more tightly than the rate
+rounded to one decimal.
 
 ## Reading rules
 
-- Amounts are in euros, to the cent. The rate is stated to one decimal, rounded half up.
-- Times are in years from the drawdown. The instalments fall at k/12 years, k = 1 to the number of months.
-- The instalment is the constant capital-and-interest payment at the nominal rate (monthly rate nominal / 12).
-  It does not include the monthly fee.
-- The monthly fee is a charge of every repayment: it is part of the repayment stream of the APR.
-- The upfront fee reduces the amount received by the borrower: the credit net of charges is the amount less it.
-- The APR is the rate X that equates the credit net of charges with the discounted repayments:
-  `amount - upfront fee = sum over k of (instalment + monthly fee) x (1 + X)^(-k/12)`.
+- Amounts in euros, to the cent. The fee is paid at the drawdown and reduces what the borrower receives.
+- A month is 1/12 of a year. Where a date does not fall a whole number of months from the drawdown, the
+  interval is a number of months plus a number of days over 365 (remark (c) of Annex I).
+- The instalment is the one the report states: the capital and interest payment at the nominal rate, plus
+  the compulsory insurance spread over the instalments where the example has one.
+- The spec proves X to six decimals (as a rate, within 0.0000005) and the APR rounded to one decimal.
 
 ## Examples
 
-| Credit | Upfront fee | Months | Nominal rate | Monthly fee | Instalment | APR |
-|---|---|---|---|---|---|---|
-| 10,000.00 | 0.00 | 36 | 5.0 % | 0.00 | 299.71 | 5.1 % |
-| 10,000.00 | 200.00 | 36 | 5.0 % | 0.00 | 299.71 | 6.5 % |
-| 5,000.00 | 150.00 | 24 | 6.9 % | 0.00 | 223.64 | 10.4 % |
-| 20,000.00 | 0.00 | 60 | 3.9 % | 5.00 | 367.43 | 4.5 % |
-| 1,500.00 | 50.00 | 12 | 0.0 % | 0.00 | 125.00 | 6.5 % |
+| Report example | Credit | Fee at drawdown | Instalments | Instalment | First instalment at | X | APR |
+|---|---|---|---|---|---|---|---|
+| 1 | 200,000.00 | 4,000.00 | 240 monthly | 1,432.86 | 1/12 year | 6.434412 % | 6.4 % |
+| 2, case 1 | 200,000.00 | 4,000.00 | 240 monthly | 1,433.57 | 3/365 + 1/12 year (signed 12 January 2012, paid on the 15th) | 6.434185 % | 6.4 % |
+| 3 (home insurance 200.00 a year) | 200,000.00 | 4,000.00 | 240 monthly | 1,449.53 | 1/12 year | 6.588554 % | 6.6 % |
+| 4 (payment protection, 1 % of the credit a year) | 200,000.00 | 4,000.00 | 240 monthly | 1,599.53 | 1/12 year | 7.946625 % | 7.9 % |
 
-The instalment of each row is the one the formula gives at the nominal rate, rounded to the cent. A zero
-nominal rate gives the credit divided by the number of months.
-
-## Checks of the conductor
-
-The rows were checked with an independent bisection on the formula above before commit. The unrounded
-APRs are 5.1164, 6.5425, 10.3916, 4.5447 and 6.4909 per cent: each rounds to the stated rate at one decimal.
-The fourth row needs the monthly fee in the repayment stream: without it the APR is 3.9706 per cent.
-
-The test of US8.04 proves the formula against each row in cents (`docs/architecture/slices.md`).
+The k-th instalment falls at the time of the first plus (k - 1)/12 year.
