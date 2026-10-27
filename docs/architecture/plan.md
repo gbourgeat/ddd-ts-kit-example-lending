@@ -349,6 +349,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 
 - 2026-10-27 Wave 6 run 3, US6.16 decisions for the correction of an entry (conductor, owner brief, most protective, to confirm): an entry is identified by its own identifier, and a correction names the entry it corrects and says why; any earlier entry of the file may be corrected, never an entry of another application; the earlier entry is never edited; a second correction of the same entry is refused with the code CORRECTION_ALREADY_RECORDED, not kept as a no-op, so the file shows every decision taken
 
+- 2026-10-27 Wave 6 run 3, US6.16: an entry of the file is identified by its application and its position in the file (the file is append-only), since the entries carry no identifier of their own; a stored identifier would need a new version with its upcaster: to confirm (conductor, owner brief, to confirm). The correction is granted to the applicant (`application.correct`, the customer's self), in the relationship schema (conductor, owner brief)
+
 ## For the owner
 
 - Migrations of the wave 2 rows: no database here; `npm run db:generate working-<what>` for the product, legal maximum rate, delegation table, residual income minimum and alert columns; the schema commits are on the trunk.
