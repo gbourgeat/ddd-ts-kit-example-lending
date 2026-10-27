@@ -24,7 +24,7 @@ describe('Erase personal data past retention', () => {
     const purged = await commandBus.execute(new ErasePersonalDataPastRetentionCommand(holder, asOf));
 
     expect(purged).toBe(7);
-    expect(purge.purges).toBe(1);
+    expect(purge.asOfs).toEqual([asOf]);
   });
 
   it('is refused to an actor who does not hold the permission data.erase, and asks no context', async () => {
@@ -32,7 +32,7 @@ describe('Erase personal data past retention', () => {
     const command = new ErasePersonalDataPastRetentionCommand(anActor().build(), asOf);
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'FORBIDDEN' });
-    expect(purge.purges).toBe(0);
+    expect(purge.asOfs).toEqual([]);
   });
 });
 

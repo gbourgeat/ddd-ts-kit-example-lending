@@ -45,7 +45,7 @@ function registerHandlers(platform: Platform): void {
     token: 'RetentionPeriodRepository',
   });
 
-  const personalDataPurge = new PlatformPersonalDataPurge(() => runPurge(platform));
+  const personalDataPurge = new PlatformPersonalDataPurge((asOf) => runPurge(platform, asOf));
 
   platform.commands.register(
     ErasePersonalDataPastRetentionCommand,
