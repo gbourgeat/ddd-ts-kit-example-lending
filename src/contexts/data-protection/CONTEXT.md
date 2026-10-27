@@ -52,7 +52,9 @@ No personal data declared.
 ## Scheduled jobs
 
 <!-- ddd-ts-kit:jobs -->
-No scheduled job.
+| Job | Schedule | Command |
+|---|---|---|
+| `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs
