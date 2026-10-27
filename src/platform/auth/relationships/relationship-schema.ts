@@ -65,13 +65,16 @@ export const relationshipSchema = defineSchema({
   user: {},
   system: {},
   context: {
-    relations: { operator: ['user', 'system'] },
-    derived: Object.fromEntries(
-      permissions
-        .all()
-        .filter((permission) => !modelledOnAnElement.has(permission.id))
-        .map((permission) => [permission.id, 'operator']),
-    ),
+    relations: { operator: ['user', 'system'], eraser: ['system'] },
+    derived: {
+      ...Object.fromEntries(
+        permissions
+          .all()
+          .filter((permission) => !modelledOnAnElement.has(permission.id))
+          .map((permission) => [permission.id, 'operator']),
+      ),
+      'data-protection:data.erase': { anyOf: ['operator', 'eraser'] },
+    },
   },
   ...elements,
 });

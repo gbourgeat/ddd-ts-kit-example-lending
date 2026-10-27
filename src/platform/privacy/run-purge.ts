@@ -17,12 +17,12 @@ import { dataSubjectCopies } from '@/platform/privacy/data-subject-copies';
  * `npm run privacy:purge`, each in an execution context of its own. A copy that fails does not stop
  * the others; the next run completes it.
  */
-export function runPurge(platform: Platform): Promise<PersonalDataPurgeReport> {
+export function runPurge(platform: Platform, asOf: Date = platform.clock.now()): Promise<PersonalDataPurgeReport> {
   const retentions = dataSubjectCopies.map((copy) => copy(platform)).filter(isPersonalDataRetention);
   const source = { scope: platform.scope, clock: platform.clock, ids: platform.ids };
 
   const audited = (port: PersonalDataRetention): PersonalDataRetention =>
     auditedPersonalDataRetention(port, platform.audit.trail, source);
 
-  return purgeExpiredPersonalData(platform.clock.now(), retentions.map(audited));
+  return purgeExpiredPersonalData(asOf, retentions.map(audited));
 }
