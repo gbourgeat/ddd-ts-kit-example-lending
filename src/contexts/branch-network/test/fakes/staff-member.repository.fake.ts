@@ -11,4 +11,8 @@ export class FakeStaffMemberRepository extends InMemoryRepository<StaffMember> i
       }),
     );
   }
+
+  async findByAccountId(accountId: string): Promise<StaffMember | undefined> {
+    return this.all().find((member) => member.accountId === accountId);
+  }
 }

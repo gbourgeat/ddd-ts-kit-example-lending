@@ -25,7 +25,7 @@ describe('Appoint staff member', () => {
     await branchRepository.save(aBranch().identifiedBy('branch-1').build());
 
     const id = await commandBus.execute(
-      new AppointStaffMemberCommand(holder, 'branch-1', 'Ada Lovelace', 'ada.lovelace@bank.test'),
+      new AppointStaffMemberCommand(holder, 'branch-1', 'Ada Lovelace', 'ada.lovelace@bank.test', 'account-ada'),
     );
 
     expect(id).toBe('staff-member-1');
@@ -38,7 +38,7 @@ describe('Appoint staff member', () => {
     await branchRepository.save(aBranch().identifiedBy('branch-1').build());
 
     const id = await commandBus.execute(
-      new AppointStaffMemberCommand(holder, 'branch-1', 'Ada Lovelace', 'ada.lovelace@bank.test'),
+      new AppointStaffMemberCommand(holder, 'branch-1', 'Ada Lovelace', 'ada.lovelace@bank.test', 'account-ada'),
     );
 
     expect((await staffMemberRepository.findById(id))?.branchId).toBe('branch-1');
@@ -55,7 +55,7 @@ describe('Appoint staff member', () => {
     });
 
     const id = await commandBus.execute(
-      new AppointStaffMemberCommand(holder, 'branch-1', 'Ada Lovelace', 'ada.lovelace@bank.test'),
+      new AppointStaffMemberCommand(holder, 'branch-1', 'Ada Lovelace', 'ada.lovelace@bank.test', 'account-ada'),
     );
 
     expect(announced).toEqual([id]);
@@ -63,14 +63,21 @@ describe('Appoint staff member', () => {
 
   it('is refused to an actor who does not hold the permission staff-member.appoint', async () => {
     const { commandBus } = arrange();
-    const command = new AppointStaffMemberCommand(anActor().build(), 'branch-1', 'Ada Lovelace', 'ada@bank.test');
+
+    const command = new AppointStaffMemberCommand(
+      anActor().build(),
+      'branch-1',
+      'Ada Lovelace',
+      'ada@bank.test',
+      'account-ada',
+    );
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
 
   it('refuses an appointment to a branch that is not opened with BRANCH_NOT_OPENED', async () => {
     const { commandBus } = arrange();
-    const command = new AppointStaffMemberCommand(holder, 'branch-9', 'Ada Lovelace', 'ada@bank.test');
+    const command = new AppointStaffMemberCommand(holder, 'branch-9', 'Ada Lovelace', 'ada@bank.test', 'account-ada');
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'BRANCH_NOT_OPENED' });
   });
@@ -83,7 +90,7 @@ describe('Appoint staff member', () => {
       announced.push(event.aggregateId);
     });
 
-    const command = new AppointStaffMemberCommand(holder, 'branch-9', 'Ada Lovelace', 'ada@bank.test');
+    const command = new AppointStaffMemberCommand(holder, 'branch-9', 'Ada Lovelace', 'ada@bank.test', 'account-ada');
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'BRANCH_NOT_OPENED' });
 

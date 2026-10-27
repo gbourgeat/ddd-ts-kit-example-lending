@@ -26,6 +26,14 @@ export class PrismaStaffMemberRepository implements StaffMemberRepository {
     return row === null ? undefined : StaffMemberMapper.toDomain(row);
   }
 
+  async findByAccountId(accountId: string): Promise<StaffMember | undefined> {
+    const row = await this.database.client().branchNetworkStaffMember.findFirst({
+      where: { accountId, ...tenantWhere(this.scope) },
+    });
+
+    return row === null ? undefined : StaffMemberMapper.toDomain(row);
+  }
+
   async save(saved: StaffMember): Promise<void> {
     await optimisticUpdate(saved, async ({ expected, next }) => {
       const state = { ...StaffMemberMapper.toRow(saved), version: next };

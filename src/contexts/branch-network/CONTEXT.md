@@ -29,6 +29,8 @@ Who follows which customer, and who may decide on it, is needed for the business
 | Declared | a staff member puts a conflict of interest on record |  |
 | Search | Read a page of the staff of a branch, for a branch manager of that branch |  |
 | List | The staff of a branch, as one page of the search |  |
+| Own | the customer file that is the staff member's own, when they are also a customer |  |
+| Record | a customer file, as the branch network knows it by its customer id |  |
 
 ## Aggregates
 
@@ -61,6 +63,7 @@ Who follows which customer, and who may decide on it, is needed for the business
 - `branch-network:staff-member.appoint`
 - `branch-network:portfolio.open`
 - `branch-network:staff-member.list`
+- `branch-network:conflict.declare`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -108,6 +111,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `AppointStaffMember` | command | `staff-member.appoint` |
+| `DeclareConflictOfInterest` | command | `conflict.declare` |
 | `OpenBranch` | command | `branch.open` |
 | `OpenPortfolio` | command | `portfolio.open` |
 | `SearchBranchStaff` | query | `staff-member.list` |
@@ -118,6 +122,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/branches/:id/staff` | `appointStaffMember` | `BranchesRoutes` | `Authenticated` | `AppointStaffMember` | `staff-member.appoint` | params: `AppointStaffMemberParams`, body: `AppointStaffMemberBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.BranchNotOpened` |
+| POST | `/conflicts` | `declareConflictOfInterest` | `ConflictsRoutes` | `Authenticated` | `DeclareConflictOfInterest` | `conflict.declare` | body: `DeclareConflictOfInterestBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.UnknownStaffMember`, `BranchNetworkCodes.ConflictOnOwnRecord` |
 
 ### Publishers
 
@@ -133,7 +138,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchNetworkPersonalDataErasure` | external | `PrismaBranchNetworkPersonalDataErasure` |
 | `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
 | `BranchRepository` | repository | `PrismaBranchRepository` |
-| `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
+| `ConflictOfInterestRepository` | repository | `PrismaConflictOfInterestRepository` |
 | `PortfolioRepository` | repository | `PrismaPortfolioRepository` |
 | `SearchBranchStaffReader` | repository | `InMemorySearchBranchStaffReader` |
 | `StaffMemberRepository` | repository | `PrismaStaffMemberRepository` |
@@ -143,5 +148,6 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
 | `BranchNotOpened` | `forBranch` | `BRANCH_NOT_OPENED` | `branchId` |
+| `ConflictOnOwnRecord` | `forCustomer` | `CONFLICT_ON_OWN_RECORD` | none |
 | `UnknownStaffMember` | `forStaffMember` | `UNKNOWN_STAFF_MEMBER` | none |
 <!-- /ddd-ts-kit:reference -->

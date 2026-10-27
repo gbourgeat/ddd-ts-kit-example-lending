@@ -23,7 +23,9 @@ export class AppointStaffMemberController {
     @Body() body: AppointStaffMemberBody,
     @CurrentActor() actor: Actor,
   ): Promise<Accepted> {
-    const id = await this.commands.execute(new AppointStaffMemberCommand(actor, params.id, body.name, body.email));
+    const id = await this.commands.execute(
+      new AppointStaffMemberCommand(actor, params.id, body.name, body.email, body.accountId, body.ownCustomerId),
+    );
 
     return { id };
   }
