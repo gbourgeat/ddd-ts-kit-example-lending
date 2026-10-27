@@ -40,6 +40,8 @@ Who follows which customer, and who may decide on it, is needed for the business
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `branch-network.conflict-of-interest.declared` (version 1)
+- `branch-network.staff-member.appointed` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -107,6 +109,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `branch-network.conflict-of-interest.declared` | 1 | `ConflictOfInterestDeclaredPublisher` |
+| `branch-network.staff-member.appointed` | 1 | `StaffMemberAppointedPublisher` |
 
 ### Ports
 

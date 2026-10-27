@@ -4,6 +4,8 @@ import { customerDueDiligenceControllers } from '@/contexts/customer-due-diligen
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { CustomerIdentifiedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-identified.publisher';
+import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -36,6 +38,16 @@ function registerHandlers(platform: Platform): void {
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
+  const customerIdentifiedPublisher = platform.adapter(
+    new CustomerIdentifiedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'customer-due-diligence' },
+  );
+
+  platform.domainEvents.on(CustomerIdentified.eventName, async (event) => {
+    if (event instanceof CustomerIdentified) {
+      await customerIdentifiedPublisher.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 
