@@ -12,7 +12,7 @@ export class RequestPersonalDataCopyController {
   constructor(@Inject(CommandBus) private readonly commands: CommandBus) {}
 
   @Post(':customerId/copies')
-  @HttpCode(200)
+  @HttpCode(201)
   @KitRoute({
     // The command raises no refusal of its own: a caller who is neither the customer nor an operator is refused FORBIDDEN by the route group.
     errors: [],
@@ -21,8 +21,8 @@ export class RequestPersonalDataCopyController {
     @Param('customerId') customerId: string,
     @CurrentActor() actor: Actor,
   ): Promise<PersonalDataCopyLink> {
-    const link = await this.commands.execute(new RequestPersonalDataCopyCommand(actor, customerId));
+    const issued = await this.commands.execute(new RequestPersonalDataCopyCommand(actor, customerId));
 
-    return { url: link.url, expiresAt: link.expiresAt.toISOString() };
+    return { copyId: issued.copyId, url: issued.link.url, expiresAt: issued.link.expiresAt.toISOString() };
   }
 }

@@ -45,6 +45,10 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Assign | The bank gives a customer its advisor |  |
 | Screen | The bank checks a person against the sanctions and politically exposed lists, with the name and birth date it gives |  |
 | Found | The screening found a person on a list: a possible match, waiting for compliance review |  |
+| Confirmed | Said of a possible match that compliance has confirmed: it becomes a sanctions match |  |
+| Confirm | Compliance decides that a possible match is a sanctions match |  |
+| Ended | Said of a business relationship the bank has ended: a confirmed sanctions match ends it |  |
+| End | The bank ends its business relationship with a customer |  |
 
 ## Aggregates
 
@@ -74,6 +78,8 @@ No personal data declared.
 - `customer-due-diligence:customer.read`
 - `customer-due-diligence:customer.assign-advisor`
 - `customer-due-diligence:customer.screen`
+- `customer-due-diligence:match.confirm`
+- `customer-due-diligence:relationship.end`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -121,7 +127,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `AssignAdvisor` | command | `customer.assign-advisor` |
+| `ConfirmSanctionsMatch` | command | `match.confirm` |
 | `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
+| `EndRelationship` | command | `relationship.end` |
 | `GetCustomerFile` | query | `customer.read` |
 | `IdentifyCustomer` | command | `customer.identify` |
 | `RegisterBusiness` | command | `business.register` |
@@ -136,6 +144,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/customers` | `identifyCustomer` | `CustomersRoutes` | `Authenticated` | `IdentifyCustomer` | `customer.identify` | body: `IdentifyCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
 | PUT | `/customers/:id/advisor` | `assignAdvisor` | `CustomersRoutes` | `Authenticated` | `AssignAdvisor` | `customer.assign-advisor` | params: `AssignAdvisorParams`, body: `AssignAdvisorBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/customers/:id/directors-and-owners` | `declareDirectorsAndOwners` | `CustomersRoutes` | `Authenticated` | `DeclareDirectorsAndOwners` | `business.declare-owners` | params: `DeclareDirectorsAndOwnersParams`, body: `DeclareDirectorsAndOwnersBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BUSINESS_NOT_REGISTERED`, `UNKNOWN_CUSTOMER`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
+| POST | `/customers/:id/matches/confirm` | `confirmSanctionsMatch` | `CustomersRoutes` | `Authenticated` | `ConfirmSanctionsMatch` | `match.confirm` | params: `ConfirmSanctionsMatchParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `NO_POSSIBLE_MATCH` |
 | POST | `/customers/:id/screening` | `screenCustomer` | `CustomersRoutes` | `Authenticated` | `ScreenCustomer` | `customer.screen` | params: `ScreenCustomerParams`, body: `ScreenCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 
 ### Publishers
@@ -161,6 +170,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BusinessAlreadyRegistered` | `forCustomer` | `BUSINESS_ALREADY_REGISTERED` | none |
 | `BusinessNotRegistered` | `forCustomer` | `BUSINESS_NOT_REGISTERED` | none |
 | `IdentityDocumentExpired` | `forCustomer` | `IDENTITY_DOCUMENT_EXPIRED` | none |
+| `NoPossibleMatch` | `forCustomer` | `NO_POSSIBLE_MATCH` | none |
 | `ProofOfAddressTooOld` | `forCustomer` | `PROOF_OF_ADDRESS_TOO_OLD` | none |
 | `UnknownCustomer` | `forCustomer` | `UNKNOWN_CUSTOMER` | none |
 <!-- /ddd-ts-kit:reference -->

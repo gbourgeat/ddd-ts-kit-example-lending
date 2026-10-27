@@ -49,6 +49,7 @@ Who follows which customer, and who may decide on it, is needed for the business
 <!-- ddd-ts-kit:events -->
 - `branch-network.conflict-of-interest.declared` (version 1)
 - `branch-network.staff-member.appointed` (version 1)
+- `branch-network.staff-member.appointed` (version 2)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -145,7 +146,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Event | Versions | Publisher |
 |---|---|---|
 | `branch-network.conflict-of-interest.declared` | 1 | `ConflictOfInterestDeclaredPublisher` |
-| `branch-network.staff-member.appointed` | 1 | `StaffMemberAppointedPublisher` |
+| `branch-network.staff-member.appointed` | 1, 2 | `StaffMemberAppointedPublisher` |
 
 ### Ports
 

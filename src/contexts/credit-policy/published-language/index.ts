@@ -8,3 +8,9 @@ export * from '@/contexts/credit-policy/published-language/delegation-table-publ
 export * from '@/contexts/credit-policy/published-language/delegation-table-published.v1.integration-event';
 export * from '@/contexts/credit-policy/published-language/residual-income-minimum-published.v1.payload';
 export * from '@/contexts/credit-policy/published-language/residual-income-minimum-published.v1.integration-event';
+export * from '@/contexts/credit-policy/published-language/legal-maximum-rate-published.v2.payload';
+export * from '@/contexts/credit-policy/published-language/legal-maximum-rate-published.v2.integration-event';
+export * from '@/contexts/credit-policy/published-language/delegation-table-published.v2.payload';
+export * from '@/contexts/credit-policy/published-language/delegation-table-published.v2.integration-event';
+export * from '@/contexts/credit-policy/published-language/rate-grid-published.v2.payload';
+export * from '@/contexts/credit-policy/published-language/rate-grid-published.v2.integration-event';

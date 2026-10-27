@@ -30,20 +30,21 @@ const operator = anActor().named('ada').build();
 const stranger = anActor().named('stranger').build();
 
 describe('Request personal data copy', () => {
-  it('answers the link that downloads the copy the store signed, to the customer', async () => {
+  it('answers the identifier of the copy stored, with the link that downloads it, to the customer', async () => {
     const { commandBus } = await arrange();
 
-    const link = await commandBus.execute(new RequestPersonalDataCopyCommand(self, 'customer-1'));
+    const issued = await commandBus.execute(new RequestPersonalDataCopyCommand(self, 'customer-1'));
 
-    expect(link.url).toBe('https://files.example.test/copies/1');
+    expect(issued.copyId).toBe('copy-1');
+    expect(issued.link.url).toBe('https://files.example.test/customer-1/copy-1?token=t');
   });
 
-  it('answers the link to an operator of data-protection asking for the customer', async () => {
+  it('answers the copy to an operator of data-protection asking for the customer', async () => {
     const { commandBus } = await arrange();
 
-    const link = await commandBus.execute(new RequestPersonalDataCopyCommand(operator, 'customer-1'));
+    const issued = await commandBus.execute(new RequestPersonalDataCopyCommand(operator, 'customer-1'));
 
-    expect(link.url).toBe('https://files.example.test/copies/1');
+    expect(issued.copyId).toBe('copy-1');
   });
 
   it('gathers what the contexts keep of the customer, for the actor who asks', async () => {

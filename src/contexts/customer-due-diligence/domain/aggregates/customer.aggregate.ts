@@ -4,10 +4,13 @@ import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/do
 import { BusinessAlreadyRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-already-registered.error';
 import { BusinessNotRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-not-registered.error';
 import { IdentityDocumentExpired } from '@/contexts/customer-due-diligence/domain/errors/identity-document-expired.error';
+import { NoPossibleMatch } from '@/contexts/customer-due-diligence/domain/errors/no-possible-match.error';
 import { ProofOfAddressTooOld } from '@/contexts/customer-due-diligence/domain/errors/proof-of-address-too-old.error';
 import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
 import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
+import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
+import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
@@ -20,7 +23,9 @@ export type CustomerEvent =
   | CustomerBusinessRegistered
   | CustomerDirectorsAndOwnersDeclared
   | CustomerAdvisorAssigned
-  | CustomerPossibleMatchFound;
+  | CustomerPossibleMatchFound
+  | CustomerSanctionsMatchConfirmed
+  | CustomerRelationshipEnded;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -42,6 +47,8 @@ export interface CustomerState {
   readonly ownersDeclaredAt?: Date;
   readonly advisorId?: string;
   readonly possibleMatchFoundAt?: Date;
+  readonly sanctionsMatchConfirmedAt?: Date;
+  readonly relationshipEndedAt?: Date;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -113,6 +120,24 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerPossibleMatchFound(this.id, now));
   }
 
+  /** Compliance confirms the possible match waiting for review: it becomes a sanctions match. Only a pending possible match can be confirmed. */
+  confirmSanctionsMatch(now: Date): void {
+    if (!this.hasPendingPossibleMatch()) {
+      throw NoPossibleMatch.forCustomer(this.id);
+    }
+
+    this.record(new CustomerSanctionsMatchConfirmed(this.id, now));
+  }
+
+  /** Ends the business relationship with the customer; ending one already ended records nothing, so a repeated reaction is safe. */
+  endRelationship(now: Date): void {
+    if (this.state.relationshipEndedAt !== undefined) {
+      return;
+    }
+
+    this.record(new CustomerRelationshipEnded(this.id, now));
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
@@ -124,6 +149,8 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerDirectorsAndOwnersDeclared.eventName]: (event) => this.applyDirectorsAndOwnersDeclared(event),
       [CustomerAdvisorAssigned.eventName]: (event) => this.applyAdvisorAssigned(event),
       [CustomerPossibleMatchFound.eventName]: (event) => this.applyPossibleMatchFound(event),
+      [CustomerSanctionsMatchConfirmed.eventName]: (event) => this.applySanctionsMatchConfirmed(event),
+      [CustomerRelationshipEnded.eventName]: (event) => this.applyRelationshipEnded(event),
     };
   }
 
@@ -175,5 +202,17 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
 
   private applyPossibleMatchFound(event: CustomerPossibleMatchFound): void {
     this.state = { ...this.state, possibleMatchFoundAt: event.occurredAt };
+  }
+
+  private applySanctionsMatchConfirmed(event: CustomerSanctionsMatchConfirmed): void {
+    this.state = { ...this.state, sanctionsMatchConfirmedAt: event.occurredAt };
+  }
+
+  private hasPendingPossibleMatch(): boolean {
+    return this.state.possibleMatchFoundAt !== undefined && this.state.sanctionsMatchConfirmedAt === undefined;
+  }
+
+  private applyRelationshipEnded(event: CustomerRelationshipEnded): void {
+    this.state = { ...this.state, relationshipEndedAt: event.occurredAt };
   }
 }

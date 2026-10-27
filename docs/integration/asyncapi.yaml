@@ -11,10 +11,12 @@ channels:
         $ref: '#/components/messages/branch-network.conflict-of-interest.declared.v1'
   branch-network.staff-member.appointed:
     address: branch-network.staff-member.appointed
-    description: A member of staff of a bank has been appointed.
+    description: A member of staff was appointed to a branch, with the level of the appointment.
     messages:
       v1:
         $ref: '#/components/messages/branch-network.staff-member.appointed.v1'
+      v2:
+        $ref: '#/components/messages/branch-network.staff-member.appointed.v2'
   brokerage.broker.registered:
     address: brokerage.broker.registered
     description: A broker is registered with the bank and may bring applications.
@@ -29,22 +31,28 @@ channels:
         $ref: '#/components/messages/brokerage.broker.registration-lapsed.v1'
   credit-application.credit-application.submitted:
     address: credit-application.credit-application.submitted
-    description: 'A borrower or a broker has submitted a loan request: the application file is open, with its applicant, amount in cents and duration in months.'
+    description: A credit application was submitted, for an amount and a duration, on a branch.
     messages:
       v1:
         $ref: '#/components/messages/credit-application.credit-application.submitted.v1'
+      v2:
+        $ref: '#/components/messages/credit-application.credit-application.submitted.v2'
   credit-policy.delegation-table.published:
     address: credit-policy.delegation-table.published
-    description: A delegation table of the bank has been published, by its identifier.
+    description: 'A delegation table took effect: the amount each level of decider may approve, from its date of effect.'
     messages:
       v1:
         $ref: '#/components/messages/credit-policy.delegation-table.published.v1'
+      v2:
+        $ref: '#/components/messages/credit-policy.delegation-table.published.v2'
   credit-policy.legal-maximum-rate.published:
     address: credit-policy.legal-maximum-rate.published
-    description: A legal maximum rate of a category of loan has been published, by its identifier, from its date of effect.
+    description: 'A legal maximum rate of a category took effect: its rate in basis points, from its date of effect.'
     messages:
       v1:
         $ref: '#/components/messages/credit-policy.legal-maximum-rate.published.v1'
+      v2:
+        $ref: '#/components/messages/credit-policy.legal-maximum-rate.published.v2'
   credit-policy.product.defined:
     address: credit-policy.product.defined
     description: A product of the bank catalogue has been defined; the other contexts read its terms from credit-policy by its identifier.
@@ -53,10 +61,12 @@ channels:
         $ref: '#/components/messages/credit-policy.product.defined.v1'
   credit-policy.rate-grid.published:
     address: credit-policy.rate-grid.published
-    description: A rate grid of a product has been published, by its identifier.
+    description: A rate grid of a product took effect, from its date of effect.
     messages:
       v1:
         $ref: '#/components/messages/credit-policy.rate-grid.published.v1'
+      v2:
+        $ref: '#/components/messages/credit-policy.rate-grid.published.v2'
   credit-policy.residual-income-minimum.published:
     address: credit-policy.residual-income-minimum.published
     description: A residual income minimum of the bank has been published, by its identifier.
@@ -136,6 +146,7 @@ operations:
       $ref: '#/channels/branch-network.staff-member.appointed'
     messages:
       - $ref: '#/channels/branch-network.staff-member.appointed/messages/v1'
+      - $ref: '#/channels/branch-network.staff-member.appointed/messages/v2'
   send.brokerage.broker.registered:
     action: send
     channel:
@@ -154,18 +165,21 @@ operations:
       $ref: '#/channels/credit-application.credit-application.submitted'
     messages:
       - $ref: '#/channels/credit-application.credit-application.submitted/messages/v1'
+      - $ref: '#/channels/credit-application.credit-application.submitted/messages/v2'
   send.credit-policy.delegation-table.published:
     action: send
     channel:
       $ref: '#/channels/credit-policy.delegation-table.published'
     messages:
       - $ref: '#/channels/credit-policy.delegation-table.published/messages/v1'
+      - $ref: '#/channels/credit-policy.delegation-table.published/messages/v2'
   send.credit-policy.legal-maximum-rate.published:
     action: send
     channel:
       $ref: '#/channels/credit-policy.legal-maximum-rate.published'
     messages:
       - $ref: '#/channels/credit-policy.legal-maximum-rate.published/messages/v1'
+      - $ref: '#/channels/credit-policy.legal-maximum-rate.published/messages/v2'
   send.credit-policy.product.defined:
     action: send
     channel:
@@ -178,6 +192,7 @@ operations:
       $ref: '#/channels/credit-policy.rate-grid.published'
     messages:
       - $ref: '#/channels/credit-policy.rate-grid.published/messages/v1'
+      - $ref: '#/channels/credit-policy.rate-grid.published/messages/v2'
   send.credit-policy.residual-income-minimum.published:
     action: send
     channel:
@@ -332,6 +347,52 @@ components:
             description: W3C traceparent captured at publication.
           correlationId:
             type: string
+    branch-network.staff-member.appointed.v2:
+      name: branch-network.staff-member.appointed
+      title: branch-network.staff-member.appointed v2
+      summary: A member of staff was appointed to a branch, with the level of the appointment.
+      contentType: application/json
+      tags:
+        - name: branch-network
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: branch-network.staff-member.appointed
+          version:
+            type: integer
+            const: 2
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              staffMemberId:
+                type: string
+              branchId:
+                type: string
+              level:
+                type: string
+            type: object
+            required:
+              - staffMemberId
+              - branchId
+              - level
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
     brokerage.broker.registered.v1:
       name: brokerage.broker.registered
       title: brokerage.broker.registered v1
@@ -461,6 +522,58 @@ components:
             description: W3C traceparent captured at publication.
           correlationId:
             type: string
+    credit-application.credit-application.submitted.v2:
+      name: credit-application.credit-application.submitted
+      title: credit-application.credit-application.submitted v2
+      summary: A credit application was submitted, for an amount and a duration, on a branch.
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.submitted
+          version:
+            type: integer
+            const: 2
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+              applicantId:
+                type: string
+              requestedAmountCents:
+                type: integer
+              durationMonths:
+                type: integer
+              branchId:
+                type: string
+            type: object
+            required:
+              - creditApplicationId
+              - applicantId
+              - requestedAmountCents
+              - durationMonths
+              - branchId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
     credit-policy.delegation-table.published.v1:
       name: credit-policy.delegation-table.published
       title: credit-policy.delegation-table.published v1
@@ -501,6 +614,58 @@ components:
             description: W3C traceparent captured at publication.
           correlationId:
             type: string
+    credit-policy.delegation-table.published.v2:
+      name: credit-policy.delegation-table.published
+      title: credit-policy.delegation-table.published v2
+      summary: 'A delegation table took effect: the amount each level of decider may approve, from its date of effect.'
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.delegation-table.published
+          version:
+            type: integer
+            const: 2
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              delegationTableId:
+                type: string
+              effectiveFrom:
+                oneOf:
+                  - format: date
+                    type: string
+                  - format: date-time
+                    type: string
+              levels:
+                items:
+                  $ref: '#/components/schemas/credit-policy.delegation-table.published.v2.DelegationTablePublishedV2LevelPayload'
+                type: array
+            type: object
+            required:
+              - delegationTableId
+              - effectiveFrom
+              - levels
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
     credit-policy.legal-maximum-rate.published.v1:
       name: credit-policy.legal-maximum-rate.published
       title: credit-policy.legal-maximum-rate.published v1
@@ -536,6 +701,59 @@ components:
             type: object
             required:
               - legalMaximumRateId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.legal-maximum-rate.published.v2:
+      name: credit-policy.legal-maximum-rate.published
+      title: credit-policy.legal-maximum-rate.published v2
+      summary: 'A legal maximum rate of a category took effect: its rate in basis points, from its date of effect.'
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.legal-maximum-rate.published
+          version:
+            type: integer
+            const: 2
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              legalMaximumRateId:
+                type: string
+              category:
+                type: string
+              rateBasisPoints:
+                type: integer
+              effectiveFrom:
+                oneOf:
+                  - format: date
+                    type: string
+                  - format: date-time
+                    type: string
+            type: object
+            required:
+              - legalMaximumRateId
+              - category
+              - rateBasisPoints
+              - effectiveFrom
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -616,6 +834,56 @@ components:
             type: object
             required:
               - rateGridId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.rate-grid.published.v2:
+      name: credit-policy.rate-grid.published
+      title: credit-policy.rate-grid.published v2
+      summary: A rate grid of a product took effect, from its date of effect.
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.rate-grid.published
+          version:
+            type: integer
+            const: 2
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              rateGridId:
+                type: string
+              productId:
+                type: string
+              effectiveFrom:
+                oneOf:
+                  - format: date
+                    type: string
+                  - format: date-time
+                    type: string
+            type: object
+            required:
+              - rateGridId
+              - productId
+              - effectiveFrom
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -1145,3 +1413,14 @@ components:
             description: W3C traceparent captured at publication.
           correlationId:
             type: string
+  schemas:
+    credit-policy.delegation-table.published.v2.DelegationTablePublishedV2LevelPayload:
+      properties:
+        level:
+          type: string
+        amountCents:
+          type: integer
+      type: object
+      required:
+        - level
+        - amountCents

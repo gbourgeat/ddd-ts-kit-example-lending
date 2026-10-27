@@ -336,6 +336,41 @@ export function correctEntry(
   return send<CorrectEntryResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadDeclaredConflictsInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ReadDeclaredConflictsResult =
+  | Success<200, {
+    conflicts: Array<Schemas.DeclaredConflictLine>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read declared conflicts: `GET /applications/{id}/declared-conflicts`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function readDeclaredConflicts(
+  connection: Connection,
+  input: ReadDeclaredConflictsInput,
+  options: CallOptions = {},
+): Promise<ReadDeclaredConflictsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/declared-conflicts',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDeclaredConflictsResult>(connection, operation, { ...input, ...options });
+}
+
 export interface NameGuarantorInput {
   readonly path: {
     readonly id: string;
@@ -789,6 +824,39 @@ export function declareDirectorsAndOwners(
   return send<DeclareDirectorsAndOwnersResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ConfirmSanctionsMatchInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ConfirmSanctionsMatchResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'NO_POSSIBLE_MATCH' | 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Confirm the possible match of a customer as a sanctions match, which ends the relationship: `POST /customers/{id}/matches/confirm`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), NO_POSSIBLE_MATCH (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function confirmSanctionsMatch(
+  connection: Connection,
+  input: ConfirmSanctionsMatchInput,
+  options: CallOptions = {},
+): Promise<ConfirmSanctionsMatchResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{id}/matches/confirm',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ConfirmSanctionsMatchResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ScreenCustomerInput {
   readonly path: {
     readonly id: string;
@@ -834,7 +902,8 @@ export interface RequestPersonalDataCopyInput {
 }
 
 export type RequestPersonalDataCopyResult =
-  | Success<200, {
+  | Success<201, {
+    copyId: string;
     url: string;
     expiresAt: string;
   }>
@@ -857,10 +926,49 @@ export function requestPersonalDataCopy(
     method: 'POST',
     path: '/data-subjects/{customerId}/copies',
     security: [['bearer']],
-    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
   };
 
   return send<RequestPersonalDataCopyResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RequestPersonalDataCopyLinkInput {
+  readonly path: {
+    readonly customerId: string;
+    readonly copyId: string;
+  };
+}
+
+export type RequestPersonalDataCopyLinkResult =
+  | Success<200, {
+    copyId: string;
+    url: string;
+    expiresAt: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<404, 'FILE_NOT_FOUND', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Request personal data copy link: `GET /data-subjects/{customerId}/copies/{copyId}/link`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), FILE_NOT_FOUND (404), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function requestPersonalDataCopyLink(
+  connection: Connection,
+  input: RequestPersonalDataCopyLinkInput,
+  options: CallOptions = {},
+): Promise<RequestPersonalDataCopyLinkResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/data-subjects/{customerId}/copies/{copyId}/link',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 404: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<RequestPersonalDataCopyLinkResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SetDelegationTableInput {

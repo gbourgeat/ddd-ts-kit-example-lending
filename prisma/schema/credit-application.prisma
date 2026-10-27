@@ -30,4 +30,17 @@ model CreditApplicationListedApplication {
   @@map("listed_applications")
   @@schema("credit_application")
 }
+
+/// The declared conflicts read model: one row per conflict of interest branch-network announced, kept in the order of its events.
+model CreditApplicationDeclaredConflict {
+  id            String   @id
+  staffMemberId String   @map("staff_member_id")
+  customerId    String   @map("customer_id")
+  occurredAt    DateTime @map("occurred_at") @db.Timestamptz(3)
+  tenantId      String   @map("tenant_id")
+
+  @@index([tenantId, customerId], map: "declared_conflicts_tenant_idx")
+  @@map("declared_conflicts")
+  @@schema("credit_application")
+}
 // /ddd-ts-kit:models

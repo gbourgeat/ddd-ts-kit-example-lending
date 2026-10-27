@@ -23,6 +23,11 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'eraser',
     subject: 'system:system:data-protection.erase-personal-data-past-retention',
   },
+  {
+    object: 'context:customer-due-diligence',
+    relation: 'operator',
+    subject: 'system:system:EndRelationshipOnSanctionsMatchEventHandler',
+  },
   // /ddd-ts-kit:system-grants
 ];
 

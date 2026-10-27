@@ -5,12 +5,14 @@ import type { Type } from '@nestjs/common';
 import { RegisterBusinessController } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.controller';
 import { GetCustomerFileController } from '@/contexts/customer-due-diligence/presentation/http/customer-files/get-customer-file/get-customer-file.controller';
 import { AssignAdvisorController } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.controller';
+import { ConfirmSanctionsMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.controller';
 import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
 import { ScreenCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
 import { AssignAdvisorParams } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.params';
 import { AssignAdvisorBody } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.body';
+import { ConfirmSanctionsMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.params';
 import { DeclareDirectorsAndOwnersParams } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.params';
 import { DeclareDirectorsAndOwnersBody } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.body';
 import { IdentifyCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.body';
@@ -25,6 +27,9 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   withSignatures(GetCustomerFileController, {}),
   withSignatures(AssignAdvisorController, {
     assignAdvisor: { params: AssignAdvisorParams, body: AssignAdvisorBody, answer: acceptedSchema },
+  }),
+  withSignatures(ConfirmSanctionsMatchController, {
+    confirmSanctionsMatch: { params: ConfirmSanctionsMatchParams, answer: acceptedSchema },
   }),
   withSignatures(DeclareDirectorsAndOwnersController, {
     declareDirectorsAndOwners: {

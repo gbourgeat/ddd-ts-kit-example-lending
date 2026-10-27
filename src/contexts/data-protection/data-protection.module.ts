@@ -19,6 +19,9 @@ import { PlatformPersonalDataGathering } from '@/contexts/data-protection/infras
 import { FileCopyOfDataStore } from '@/contexts/data-protection/infrastructure/external/file-copy-of-data-store';
 import { runExport } from '@/platform/privacy/run-export';
 import { tenantDirectory } from '@/platform/composition/tenant-directory';
+
+import { RequestPersonalDataCopyLinkCommand } from '@/contexts/data-protection/application/commands/request-personal-data-copy-link/request-personal-data-copy-link.command';
+import { RequestPersonalDataCopyLinkHandler } from '@/contexts/data-protection/application/commands/request-personal-data-copy-link/request-personal-data-copy-link.handler';
 // /ddd-ts-kit:imports
 
 export interface DataProtectionWiring {
@@ -63,11 +66,17 @@ function registerHandlers(platform: Platform): void {
     gatherPersonalData(platform, subject, operator),
   );
 
-  const copies = new FileCopyOfDataStore(platform.files.storage, platform.files.keys);
+  const copies = new FileCopyOfDataStore(platform.files.storage, platform.ids);
 
   platform.commands.register(
     RequestPersonalDataCopyCommand,
     new RequestPersonalDataCopyHandler(platform.access, gathering, copies),
+    { context: 'data-protection' },
+  );
+
+  platform.commands.register(
+    RequestPersonalDataCopyLinkCommand,
+    new RequestPersonalDataCopyLinkHandler(platform.access, copies, platform.clock),
     { context: 'data-protection' },
   );
   // /ddd-ts-kit:handlers
@@ -115,6 +124,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     // The handler asks the customer's self, then the operator of the context: the guard admits every signed-in caller.
     publicUseCase(RequestPersonalDataCopyCommand),
+    publicUseCase(RequestPersonalDataCopyLinkCommand),
     // /ddd-ts-kit:authorization
   ];
 }

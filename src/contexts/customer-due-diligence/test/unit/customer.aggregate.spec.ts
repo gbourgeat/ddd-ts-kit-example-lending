@@ -3,6 +3,9 @@ import { expectRefusal, givenEvents } from '@ddd-ts-kit/testing';
 import { Customer } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
+import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
+import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
+import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 import { aCustomer, aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
@@ -96,5 +99,62 @@ describe('Customer', () => {
     );
 
     expect(identified.toState().business).toEqual(business);
+  });
+});
+
+describe('Customer, once its screening found a possible match, and when its relationship ends', () => {
+  it('ends the relationship with a customer, recording the instant it ends', () => {
+    const customer = aCustomer().identifiedBy('customer-16').bornAt(bornAt).build();
+
+    customer.endRelationship(registeredOn);
+
+    expect(customer.pullEvents()).toEqual([new CustomerRelationshipEnded('customer-16', registeredOn)]);
+    expect(customer.toState().relationshipEndedAt).toEqual(registeredOn);
+  });
+
+  it('records no second end of a relationship already ended', () => {
+    const ended = aCustomer()
+      .identifiedBy('customer-17')
+      .bornAt(bornAt)
+      .withEvents([new CustomerRelationshipEnded('customer-17', registeredOn)])
+      .build();
+
+    ended.endRelationship(bornAt);
+
+    expect(ended.pullEvents()).toEqual([]);
+    expect(ended.toState().relationshipEndedAt).toEqual(registeredOn);
+  });
+
+  it('confirms a possible match as a sanctions match, recording the instant of the confirmation', () => {
+    const screened = aCustomer()
+      .identifiedBy('customer-13')
+      .bornAt(bornAt)
+      .withEvents([new CustomerPossibleMatchFound('customer-13', bornAt)])
+      .build();
+
+    screened.confirmSanctionsMatch(registeredOn);
+
+    expect(screened.pullEvents()).toEqual([new CustomerSanctionsMatchConfirmed('customer-13', registeredOn)]);
+    expect(screened.toState().sanctionsMatchConfirmedAt).toEqual(registeredOn);
+  });
+
+  it('refuses to confirm a customer with no possible match waiting for compliance review', () => {
+    const identified = aCustomer().identifiedBy('customer-14').bornAt(bornAt).build();
+
+    expectRefusal(() => identified.confirmSanctionsMatch(registeredOn), 'NO_POSSIBLE_MATCH');
+  });
+
+  it('refuses to confirm a match twice, the second confirmation records nothing', () => {
+    const confirmed = aCustomer()
+      .identifiedBy('customer-15')
+      .bornAt(bornAt)
+      .withEvents([
+        new CustomerPossibleMatchFound('customer-15', bornAt),
+        new CustomerSanctionsMatchConfirmed('customer-15', registeredOn),
+      ])
+      .build();
+
+    expectRefusal(() => confirmed.confirmSanctionsMatch(registeredOn), 'NO_POSSIBLE_MATCH');
+    expect(confirmed.pullEvents()).toEqual([]);
   });
 });
