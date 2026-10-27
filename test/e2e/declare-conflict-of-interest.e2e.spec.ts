@@ -10,7 +10,7 @@ const tenantId = 'acme-bank';
 const declaringSpans = [
   {
     name: 'POST /conflicts',
-    kind: 'SERVER',
+    kind: 'SERVER' as const,
     children: [
       {
         name: 'command DeclareConflictOfInterestCommand',
