@@ -5,6 +5,13 @@ import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { CopyOfDataTimeoutBackgroundJob } from '@/contexts/data-protection/application/background/copy-of-data-timeout.background-job';
+import { PrismaRetentionPeriodRepository } from '@/contexts/data-protection/infrastructure/persistence/prisma-retention-period.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { dataProtectionPermissions } from '@/contexts/data-protection/data-protection.permissions';
+import { PlatformPersonalDataPurge } from '@/contexts/data-protection/infrastructure/platform/platform-personal-data-purge';
+import { runPurge } from '@/platform/privacy/run-purge';
+import { ErasePersonalDataPastRetentionCommand } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
+import { ErasePersonalDataPastRetentionHandler } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
 // /ddd-ts-kit:imports
 
 export interface DataProtectionWiring {
@@ -31,6 +38,19 @@ export function dataProtectionModule(platform: Platform): DataProtectionWiring {
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
+  platform.adapter(new PrismaRetentionPeriodRepository(platform.persistence.database, platform.scope, platform.clock), {
+    kind: 'repository',
+    context: 'data-protection',
+    token: 'RetentionPeriodRepository',
+  });
+
+  const personalDataPurge = new PlatformPersonalDataPurge(() => runPurge(platform));
+
+  platform.commands.register(
+    ErasePersonalDataPastRetentionCommand,
+    new ErasePersonalDataPastRetentionHandler(personalDataPurge),
+    { context: 'data-protection' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -51,6 +71,9 @@ function registerJobs(platform: Platform): void {
 function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
+    requires(ErasePersonalDataPastRetentionCommand, dataProtectionPermissions['data.erase'], {
+      resource: () => ({ type: 'context', id: 'data-protection' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }
