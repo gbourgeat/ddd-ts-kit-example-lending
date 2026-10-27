@@ -351,6 +351,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 
 - 2026-10-27 Wave 6 run 3, US6.16: an entry of the file is identified by its application and its position in the file (the file is append-only), since the entries carry no identifier of their own; a stored identifier would need a new version with its upcaster: to confirm (conductor, owner brief, to confirm). The correction is granted to the applicant (`application.correct`, the customer's self), in the relationship schema (conductor, owner brief)
 
+- 2026-10-27 Wave 6 run 3, blocked: US6.08 (register consult) has no route in its row and the file holds no names or birth dates of the borrower and co-borrower; the register's simulated adapter is not exposed to the started application. Needed: a route row for the consult, and the source of the party data (a projection of customer-due-diligence identities into the file, a migration). US8.05 (pre-contractual sheet) has no route in its row, and Offer is a skeleton (no creation path, no link to its application): needed, the owner decides Offer's identity and state, and whether the sheet is part of IssueOffer (US8.08)
+
 ## For the owner
 
 - Migrations of the wave 2 rows: no database here; `npm run db:generate working-<what>` for the product, legal maximum rate, delegation table, residual income minimum and alert columns; the schema commits are on the trunk.
