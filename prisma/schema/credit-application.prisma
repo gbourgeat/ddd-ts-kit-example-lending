@@ -16,4 +16,18 @@ model CreditApplicationOffer {
   @@map("offers")
   @@schema("credit_application")
 }
+
+/// The application list read model: one row per submitted application, written by the reaction to its submission.
+model CreditApplicationListedApplication {
+  id                  String   @id
+  applicantId         String   @map("applicant_id")
+  requestedAmountCents Int     @map("requested_amount_cents")
+  durationMonths      Int      @map("duration_months")
+  submittedAt         DateTime @map("submitted_at") @db.Timestamptz(3)
+  tenantId            String   @map("tenant_id")
+
+  @@index([tenantId, id], map: "listed_applications_tenant_idx")
+  @@map("listed_applications")
+  @@schema("credit_application")
+}
 // /ddd-ts-kit:models

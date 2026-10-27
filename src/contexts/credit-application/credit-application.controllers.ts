@@ -3,6 +3,7 @@ import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
+import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
 import { GiveAccountConsentParams } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.params';
 import { GiveAccountConsentBody } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.body';
@@ -13,5 +14,6 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(GiveAccountConsentController, {
     giveAccountConsent: { params: GiveAccountConsentParams, body: GiveAccountConsentBody, answer: acceptedSchema },
   }),
+  withSignatures(SearchApplicationsController, {}),
   withSignatures(SubmitApplicationController, { submitApplication: { body: SubmitApplicationBody } }),
 ];
