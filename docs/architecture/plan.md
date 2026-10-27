@@ -214,6 +214,7 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 Decision amount is the amount of the loan requested, co-borrower total not added (conductor, owner brief, to confirm)
 - 2026-10-26 Consent to read accounts is per application, not per bank (conductor, owner brief, to confirm)
 - 2026-10-26 Customer relationship is established before any credit; an applicant is a customer once identified (conductor, owner brief)
+- 2026-10-27 Identification of a person: an identity document (passport, national identity card or residence permit) with its number, issuing country and expiry date, valid on the day of identification, and a proof of address dated within three months; refused when the document is expired or the proof of address older than three months, the reason named (conductor, owner brief, to confirm)
 - 2026-10-26 Eleven contexts, two cores (`credit-application`, `credit-scoring`), `financial-crime` restricted to compliance, `identity` as kit preset; access rights, external systems, notifications and audit are not contexts (`contexts.md`) (conductor, owner brief)
 - 2026-10-26 Payout gated in `credit-application` by a synchronous read of due diligence, so that no credit is disbursed at the instant of payout (conductor, owner brief, to confirm)
 - 2026-10-26 Audit entries of `financial-crime` go to a stream readable by compliance only (conductor, owner brief, to confirm)
