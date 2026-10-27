@@ -1,9 +1,11 @@
 import { AggregateRoot } from '@ddd-ts-kit/kernel';
 import { LegalMaximumRatePublished } from '@/contexts/credit-policy/domain/events/legal-maximum-rate-published.event';
+import type { LegalMaximumRateTerms } from '@/contexts/credit-policy/domain/value-objects/legal-maximum-rate-terms.vo';
 
 export interface LegalMaximumRateState {
   readonly registeredAt: Date;
   readonly category: string;
+  readonly rateBasisPoints: number;
   readonly effectiveFrom: Date;
 }
 
@@ -15,8 +17,13 @@ export class LegalMaximumRate extends AggregateRoot<string> {
     super(id);
   }
 
-  static create(id: string, category: string, effectiveFrom: Date, now: Date): LegalMaximumRate {
-    const created = new LegalMaximumRate(id, { registeredAt: now, category, effectiveFrom });
+  static create(id: string, terms: LegalMaximumRateTerms, now: Date): LegalMaximumRate {
+    const created = new LegalMaximumRate(id, {
+      registeredAt: now,
+      category: terms.category,
+      rateBasisPoints: terms.rateBasisPoints,
+      effectiveFrom: terms.effectiveFrom,
+    });
 
     created.record(new LegalMaximumRatePublished(id, now));
 
@@ -33,6 +40,10 @@ export class LegalMaximumRate extends AggregateRoot<string> {
 
   get category(): string {
     return this.state.category;
+  }
+
+  get rateBasisPoints(): number {
+    return this.state.rateBasisPoints;
   }
 
   get effectiveFrom(): Date {

@@ -59,6 +59,12 @@ export interface Client {
    */
   declineInvitation(input: operations.DeclineInvitationInput, options?: CallOptions): Promise<operations.DeclineInvitationResult>;
   /**
+   * Publish legal maximum rate: `POST /legal-maximum-rates`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+   */
+  publishLegalMaximumRate(input: operations.PublishLegalMaximumRateInput, options?: CallOptions): Promise<operations.PublishLegalMaximumRateResult>;
+  /**
    * Open an organisation: `POST /organisations`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), INVALID_ORGANISATION_NAME (422), INVALID_ORGANISATION_SLUG (422), ORGANISATION_SLUG_TAKEN (422), VALIDATION_FAILED (422).
@@ -131,6 +137,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
+    publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
     grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),
     revokeDelegation: (input, call) => operations.revokeDelegation(connection, input, call),

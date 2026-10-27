@@ -14,4 +14,10 @@ export class FakeLegalMaximumRateRepository
       }),
     );
   }
+
+  async findLatestOf(category: string): Promise<LegalMaximumRate | undefined> {
+    const ofCategory = this.all().filter((rate) => rate.category === category);
+
+    return ofCategory.sort((a, b) => b.effectiveFrom.getTime() - a.effectiveFrom.getTime())[0];
+  }
 }

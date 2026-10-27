@@ -273,6 +273,42 @@ export function declineInvitation(
   return send<DeclineInvitationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface PublishLegalMaximumRateInput {
+  readonly body: {
+    category: string;
+    rateBasisPoints: number;
+    effectiveFrom: string;
+  };
+}
+
+export type PublishLegalMaximumRateResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_LEGAL_MAXIMUM_RATE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Publish legal maximum rate: `POST /legal-maximum-rates`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+ */
+export function publishLegalMaximumRate(
+  connection: Connection,
+  input: PublishLegalMaximumRateInput,
+  options: CallOptions = {},
+): Promise<PublishLegalMaximumRateResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/legal-maximum-rates',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<PublishLegalMaximumRateResult>(connection, operation, { ...input, ...options });
+}
+
 export interface OpenOrganisationInput {
   readonly body: {
     slug: string;

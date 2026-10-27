@@ -636,6 +636,87 @@ paths:
             - INVITATION_NOT_FOUND
             - INVITATION_NOT_PENDING
             - VALIDATION_FAILED
+  /legal-maximum-rates:
+    post:
+      operationId: publishLegalMaximumRate
+      summary: Publish legal maximum rate
+      tags:
+        - credit-policy
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                category:
+                  minLength: 1
+                  type: string
+                rateBasisPoints:
+                  type: integer
+                effectiveFrom:
+                  pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                  type: string
+              type: object
+              required:
+                - category
+                - rateBasisPoints
+                - effectiveFrom
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: INVALID_LEGAL_MAXIMUM_RATE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - INVALID_LEGAL_MAXIMUM_RATE
+            - VALIDATION_FAILED
   /organisations:
     post:
       operationId: openOrganisation

@@ -26,6 +26,15 @@ export class PrismaLegalMaximumRateRepository implements LegalMaximumRateReposit
     return row === null ? undefined : LegalMaximumRateMapper.toDomain(row);
   }
 
+  async findLatestOf(category: string): Promise<LegalMaximumRate | undefined> {
+    const row = await this.database.client().creditPolicyLegalMaximumRate.findFirst({
+      where: { category, ...tenantWhere(this.scope) },
+      orderBy: { effectiveFrom: 'desc' },
+    });
+
+    return row === null ? undefined : LegalMaximumRateMapper.toDomain(row);
+  }
+
   async save(saved: LegalMaximumRate): Promise<void> {
     await optimisticUpdate(saved, async ({ expected, next }) => {
       const state = { ...LegalMaximumRateMapper.toRow(saved), version: next };

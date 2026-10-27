@@ -9,6 +9,7 @@ export const LegalMaximumRateMapper = {
     const loaded = LegalMaximumRate.rehydrate(row.id, {
       registeredAt: row.registeredAt,
       category: row.category,
+      rateBasisPoints: row.rateBasisPoints,
       effectiveFrom: row.effectiveFrom,
     });
 

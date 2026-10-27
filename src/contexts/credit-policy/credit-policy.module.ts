@@ -12,6 +12,9 @@ import { PublishRateGridHandler } from '@/contexts/credit-policy/application/com
 import { PrismaProductRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-product.repository';
 import { DefineProductCommand } from '@/contexts/credit-policy/application/commands/define-product/define-product.command';
 import { DefineProductHandler } from '@/contexts/credit-policy/application/commands/define-product/define-product.handler';
+import { PrismaLegalMaximumRateRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-legal-maximum-rate.repository';
+import { PublishLegalMaximumRateCommand } from '@/contexts/credit-policy/application/commands/publish-legal-maximum-rate/publish-legal-maximum-rate.command';
+import { PublishLegalMaximumRateHandler } from '@/contexts/credit-policy/application/commands/publish-legal-maximum-rate/publish-legal-maximum-rate.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditPolicyWiring {
@@ -59,6 +62,17 @@ function registerHandlers(platform: Platform): void {
     new DefineProductHandler(productRepository, platform.ids, platform.clock),
     { context: 'credit-policy' },
   );
+
+  const legalMaximumRateRepository = platform.adapter(
+    new PrismaLegalMaximumRateRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'credit-policy', token: 'LegalMaximumRateRepository' },
+  );
+
+  platform.commands.register(
+    PublishLegalMaximumRateCommand,
+    new PublishLegalMaximumRateHandler(legalMaximumRateRepository, platform.ids, platform.clock),
+    { context: 'credit-policy' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -82,6 +96,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
     requires(DefineProductCommand, creditPolicyPermissions['product.define'], {
+      resource: () => ({ type: 'context', id: 'credit-policy' }),
+    }),
+    requires(PublishLegalMaximumRateCommand, creditPolicyPermissions['legal-maximum-rate.publish'], {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
     // /ddd-ts-kit:authorization
