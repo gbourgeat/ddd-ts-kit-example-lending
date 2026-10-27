@@ -76,7 +76,17 @@ describe('Register broker, end to end', () => {
               { name: 'repository BrokerRepository.save' },
               {
                 name: 'unit-of-work before-commit',
-                children: [{ name: 'domain-event brokerage.broker.registered' }],
+                children: [
+                  {
+                    name: 'domain-event brokerage.broker.registered',
+                    children: [
+                      {
+                        name: 'handler BrokerRegisteredPublisher',
+                        children: [{ name: 'outbox append brokerage.broker.registered' }],
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },

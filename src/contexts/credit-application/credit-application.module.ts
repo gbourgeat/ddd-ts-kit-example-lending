@@ -18,6 +18,8 @@ import { SearchApplicationsQuery } from '@/contexts/credit-application/file/appl
 import { PrismaSearchApplicationsReader } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-search-applications.reader';
 import { PrismaApplicationListProjection } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-application-list-projection.repository';
 import { ApplicationListOnSubmittedEventHandler } from '@/contexts/credit-application/file/application/event-handlers/application-list-on-submitted.event-handler';
+import { NameCoBorrowerCommand } from '@/contexts/credit-application/file/application/commands/name-co-borrower/name-co-borrower.command';
+import { NameCoBorrowerHandler } from '@/contexts/credit-application/file/application/commands/name-co-borrower/name-co-borrower.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -69,6 +71,12 @@ function registerHandlers(platform: Platform): void {
   platform.queries.register(
     SearchApplicationsQuery,
     new SearchApplicationsHandler(searchApplicationsReader, platform.access),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    NameCoBorrowerCommand,
+    new NameCoBorrowerHandler(creditApplicationRepository, platform.clock),
     { context: 'credit-application' },
   );
   // /ddd-ts-kit:handlers
@@ -125,6 +133,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     // A search is narrowed by the access scope of the caller, which is its authorization: a permission on the context would refuse every caller.
     publicUseCase(SearchApplicationsQuery),
+    requires(NameCoBorrowerCommand, creditApplicationPermissions['application.name-party'], {
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }
