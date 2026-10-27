@@ -41,6 +41,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `customer-due-diligence.customer.identified` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -95,9 +96,16 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `identity` (conformist), `data-protection` (customer-supplier); downstreams: `branch-network` (published-language), `credit-application` (customer-supplier).
 
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `customer-due-diligence.customer.identified` | 1 | `CustomerIdentifiedPublisher` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
+| `CustomerRepository` | external | `EventStoreCustomerRepository` |
 | `ScreeningProvider` | external | `RemoteScreeningProvider` |
 <!-- /ddd-ts-kit:reference -->

@@ -35,6 +35,12 @@ export interface Client {
    */
   searchAuditEntries(input?: operations.SearchAuditEntriesInput, options?: CallOptions): Promise<operations.SearchAuditEntriesResult>;
   /**
+   * Open branch: `POST /branches`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  openBranch(input: operations.OpenBranchInput, options?: CallOptions): Promise<operations.OpenBranchResult>;
+  /**
    * Accept an invitation: `POST /invitations/acceptance`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), ALREADY_MEMBER (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
@@ -103,6 +109,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     provisionAccount: (input, call) => operations.provisionAccount(connection, input, call),
     deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
+    openBranch: (input, call) => operations.openBranch(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),

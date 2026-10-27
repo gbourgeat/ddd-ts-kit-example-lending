@@ -18,7 +18,7 @@ export class ConflictOfInterest extends AggregateRoot<string> {
   static create(id: string, staffMemberId: string, customerId: string, now: Date): ConflictOfInterest {
     const declared = new ConflictOfInterest(id, { registeredAt: now, staffMemberId, customerId });
 
-    declared.record(new ConflictOfInterestDeclared(id, now));
+    declared.record(new ConflictOfInterestDeclared(id, staffMemberId, customerId, now));
 
     return declared;
   }

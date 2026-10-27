@@ -25,7 +25,9 @@ describe('ConflictOfInterest', () => {
 
     const declared = aConflictOfInterest().identifiedBy('conflict-7').bornAt(bornAt).build();
 
-    expect(declared.pullEvents()).toEqual([new ConflictOfInterestDeclared('conflict-7', bornAt)]);
+    expect(declared.pullEvents()).toEqual([
+      new ConflictOfInterestDeclared('conflict-7', declared.staffMemberId, declared.customerId, bornAt),
+    ]);
   });
 
   it('is rehydrated in its stored state without recording a new fact', () => {
