@@ -19,6 +19,4 @@ export class FakeCustomerRepository implements CustomerRepository {
   save(saved: Customer): Promise<void> {
     return this.adapter.save(saved);
   }
-
-  // TODO(domain): implement each lookup of CustomerRepository over the events of `this.store`, so that handlers are tested against a working repository.
 }

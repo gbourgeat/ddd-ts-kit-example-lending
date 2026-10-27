@@ -3,7 +3,12 @@ import type { CustomerEvent } from '@/contexts/customer-due-diligence/domain/agg
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 
-interface CustomerBusinessRegisteredData {}
+interface CustomerBusinessRegisteredData {
+  readonly legalName: string;
+  readonly registrationNumber: string;
+  readonly countryOfRegistration: string;
+  readonly registeredOn: string;
+}
 
 /** The birth carries no fact beyond its id and instant yet: a field added later is a new stored version with its upcaster. */
 type CustomerIdentifiedData = Record<string, never>;
@@ -17,7 +22,20 @@ export const customerEvents: StoredEventTypes<CustomerEvent> = {
   }),
   [CustomerBusinessRegistered.eventName]: defineStoredEvent(CustomerBusinessRegistered, {
     version: 1,
-    encode: (): CustomerBusinessRegisteredData => ({}),
-    decode: (_data, { aggregateId, occurredAt }) => new CustomerBusinessRegistered(aggregateId, occurredAt),
+    encode: (event): CustomerBusinessRegisteredData => ({
+      legalName: event.legalName,
+      registrationNumber: event.registrationNumber,
+      countryOfRegistration: event.countryOfRegistration,
+      registeredOn: event.registeredOn.toISOString(),
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CustomerBusinessRegistered(
+        aggregateId,
+        occurredAt,
+        data.text('legalName'),
+        data.text('registrationNumber'),
+        data.text('countryOfRegistration'),
+        data.instant('registeredOn'),
+      ),
   }),
 };

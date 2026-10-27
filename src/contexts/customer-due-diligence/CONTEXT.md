@@ -53,7 +53,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `customer-due-diligence:business.register`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -96,6 +96,18 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `identity` (conformist), `data-protection` (customer-supplier); downstreams: `branch-network` (published-language), `credit-application` (customer-supplier).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `RegisterBusiness` | command | `business.register` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/businesses` | `registerBusiness` | `BusinessesRoutes` | `Authenticated` | `RegisterBusiness` | `business.register` | body: `RegisterBusinessBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `BUSINESS_ALREADY_REGISTERED` |
+
 ### Publishers
 
 | Event | Versions | Publisher |
@@ -106,6 +118,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `CustomerRepository` | external | `EventStoreCustomerRepository` |
+| `CustomerRepository` | repository | `EventStoreCustomerRepository` |
 | `ScreeningProvider` | external | `RemoteScreeningProvider` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `BusinessAlreadyRegistered` | `forCustomer` | `BUSINESS_ALREADY_REGISTERED` | none |
+| `UnknownCustomer` | `forCustomer` | `UNKNOWN_CUSTOMER` | none |
 <!-- /ddd-ts-kit:reference -->

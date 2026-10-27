@@ -6,7 +6,10 @@ export class CustomerBusinessRegistered extends NamedDomainEvent(
   constructor(
     readonly aggregateId: string,
     readonly occurredAt: Date,
-    // TODO(domain): add as readonly parameters the facts a reaction needs to know about "customer business registered" (value objects or primitives, never the aggregate itself).
+    readonly legalName: string,
+    readonly registrationNumber: string,
+    readonly countryOfRegistration: string,
+    readonly registeredOn: Date,
   ) {
     super();
   }
