@@ -5,6 +5,7 @@ import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/in
 import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
 import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
 import type { AppConfig } from '@/platform/config/app-config';
+import type { Persistence } from '@/platform/database/persistence';
 import { loadConfig } from '@/platform/config/load-config';
 import { openTestDatabase, type TestDatabase } from '@/platform/database/open-test-database';
 import { createEventProvider } from '@/platform/events/create-event-provider';
@@ -23,6 +24,8 @@ export interface RunningApplication {
   readonly events: IntegrationEventSubscriber;
   /** The screening provider of the application: a spec lists the people the screening matches with `screening.record(name, birthDate)`. */
   readonly screening: SimulatedScreeningProvider;
+  /** The persistence of the application's database: a spec reads what a use case stored through it, never by a route. */
+  readonly persistence: Persistence;
 
   /** A client presenting the credential of `actor`; `client` itself presents none. */
   as(actor: TestActor): Promise<HttpClient>;
@@ -73,6 +76,7 @@ export async function startApplication(): Promise<RunningApplication> {
     client: started.client,
     events: started.events,
     screening,
+    persistence: database.persistence,
     as: async (actor) => started.client.withHeaders(await credentials.headersOf(actor)),
     publish: (events) => started.publish(events),
     relate: (tuple) => started.relate(tuple),
