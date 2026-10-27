@@ -79,7 +79,7 @@ function registerHandlers(platform: Platform): void {
 
   platform.commands.register(
     OpenPortfolioCommand,
-    new OpenPortfolioHandler(portfolioRepository, platform.ids, platform.clock),
+    new OpenPortfolioHandler(portfolioRepository, platform.ids, platform.clock, platform.relations),
     { context: 'branch-network' },
   );
 
