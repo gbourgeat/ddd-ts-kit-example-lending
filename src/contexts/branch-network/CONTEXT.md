@@ -31,6 +31,9 @@ Who follows which customer, and who may decide on it, is needed for the business
 | List | The staff of a branch, as one page of the search |  |
 | Own | the customer file that is the staff member's own, when they are also a customer |  |
 | Record | a customer file, as the branch network knows it by its customer id |  |
+| Assign | the portfolio takes a customer on, under the advisor who holds the file |  |
+| Identified | a customer whose identity the bank has established |  |
+| Customer | a person the bank has identified and whose file an advisor holds |  |
 
 ## Aggregates
 
@@ -64,6 +67,8 @@ Who follows which customer, and who may decide on it, is needed for the business
 - `branch-network:portfolio.open`
 - `branch-network:staff-member.list`
 - `branch-network:conflict.declare`
+- `branch-network:portfolio.assign-customer`
+- `branch-network:portfolio.search-customers`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -111,10 +116,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `AppointStaffMember` | command | `staff-member.appoint` |
+| `AssignCustomer` | command | `portfolio.assign-customer` |
 | `DeclareConflictOfInterest` | command | `conflict.declare` |
 | `OpenBranch` | command | `branch.open` |
 | `OpenPortfolio` | command | `portfolio.open` |
+| `SearchAdvisorPortfolios` | query | `public` |
 | `SearchBranchStaff` | query | `staff-member.list` |
+| `SearchPortfolioCustomers` | query | `portfolio.search-customers` |
 
 ### Routes
 
@@ -123,6 +131,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/branches/:id/staff` | `appointStaffMember` | `BranchesRoutes` | `Authenticated` | `AppointStaffMember` | `staff-member.appoint` | params: `AppointStaffMemberParams`, body: `AppointStaffMemberBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.BranchNotOpened` |
 | POST | `/conflicts` | `declareConflictOfInterest` | `ConflictsRoutes` | `Authenticated` | `DeclareConflictOfInterest` | `conflict.declare` | body: `DeclareConflictOfInterestBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.UnknownStaffMember`, `BranchNetworkCodes.ConflictOnOwnRecord` |
+| GET | `/portfolios` | `searchAdvisorPortfolios` | `PortfoliosRoutes` | `Authenticated` | `SearchAdvisorPortfolios` | `public` | query | 200: `page of IdentifierLine` | `UNAUTHORIZED`, `FORBIDDEN` |
+| GET | `/portfolios/:id/customers` | `searchPortfolioCustomers` | `PortfoliosRoutes` | `Authenticated` | `SearchPortfolioCustomers` | `portfolio.search-customers` | params: `SearchPortfolioCustomersParams`, query | 200: `page of IdentifierLine` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.UnknownPortfolio` |
+
+### Consumed events
+
+| Event | Version | From | Handler | Consumer |
+|---|---|---|---|---|
+| `customer-due-diligence.customer.advisor-assigned` | 1 | `customer-due-diligence` | `AssignIdentifiedCustomerIntegrationHandler` | `branch-network.assign-identified-customer` |
 
 ### Publishers
 
@@ -140,7 +156,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchRepository` | repository | `PrismaBranchRepository` |
 | `ConflictOfInterestRepository` | repository | `PrismaConflictOfInterestRepository` |
 | `PortfolioRepository` | repository | `PrismaPortfolioRepository` |
+| `SearchAdvisorPortfoliosReader` | repository | `RelationAdvisorPortfoliosReader` |
 | `SearchBranchStaffReader` | repository | `InMemorySearchBranchStaffReader` |
+| `SearchPortfolioCustomersReader` | repository | `RelationPortfolioCustomersReader` |
 | `StaffMemberRepository` | repository | `PrismaStaffMemberRepository` |
 
 ### Errors
@@ -149,5 +167,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|
 | `BranchNotOpened` | `forBranch` | `BRANCH_NOT_OPENED` | `branchId` |
 | `ConflictOnOwnRecord` | `forCustomer` | `CONFLICT_ON_OWN_RECORD` | none |
+| `UnknownPortfolio` | `forAdvisor` | `UNKNOWN_PORTFOLIO` | none |
+| `UnknownPortfolio` | `forPortfolio` | `UNKNOWN_PORTFOLIO` | none |
 | `UnknownStaffMember` | `forStaffMember` | `UNKNOWN_STAFF_MEMBER` | none |
 <!-- /ddd-ts-kit:reference -->

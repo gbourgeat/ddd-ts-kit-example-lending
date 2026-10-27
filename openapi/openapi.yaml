@@ -2804,6 +2804,186 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - VALIDATION_FAILED
+  /portfolios:
+    get:
+      operationId: searchAdvisorPortfolios
+      summary: Search advisor portfolios
+      tags:
+        - branch-network
+      security:
+        - bearer: []
+      parameters:
+        - name: limit
+          in: query
+          description: Size of the page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            description: Size of the page.
+        - name: offset
+          in: query
+          description: Items to skip. Not with `cursor`.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Items to skip. Not with `cursor`.
+        - name: cursor
+          in: query
+          description: The `nextCursor` of the previous page. Not with `offset`.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            description: The `nextCursor` of the previous page. Not with `offset`.
+        - name: sort
+          in: query
+          description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+          required: false
+          schema:
+            type: string
+            description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+      responses:
+        '200':
+          description: One page of the portfolios the signed-in advisor holds.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentifierLinePage'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
+  /portfolios/{id}/customers:
+    get:
+      operationId: searchPortfolioCustomers
+      summary: Search portfolio customers
+      tags:
+        - branch-network
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: limit
+          in: query
+          description: Size of the page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            description: Size of the page.
+        - name: offset
+          in: query
+          description: Items to skip. Not with `cursor`.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Items to skip. Not with `cursor`.
+        - name: cursor
+          in: query
+          description: The `nextCursor` of the previous page. Not with `offset`.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            description: The `nextCursor` of the previous page. Not with `offset`.
+        - name: sort
+          in: query
+          description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+          required: false
+          schema:
+            type: string
+            description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+      responses:
+        '200':
+          description: One page of the customers of the portfolio.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentifierLinePage'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_PORTFOLIO, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_PORTFOLIO
+            - VALIDATION_FAILED
   /products:
     post:
       operationId: defineProduct
@@ -3061,6 +3241,29 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    IdentifierLine:
+      properties:
+        id:
+          type: string
+      type: object
+      required:
+        - id
+    IdentifierLinePage:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifierLine'
+        total:
+          type: integer
+          minimum: 0
+          description: Present when it is cheap to count.
+        nextCursor:
+          type: string
+          description: Present when more items follow.
     IdentifyCustomerBody:
       properties:
         documentKind:

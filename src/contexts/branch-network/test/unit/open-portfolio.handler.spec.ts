@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
 import { anActor } from '@ddd-ts-kit/auth/testing';
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { createTestBuses } from '@ddd-ts-kit/testing';
 import { branchNetworkPermissions } from '@/contexts/branch-network/branch-network.permissions';
 import { OpenPortfolioCommand } from '@/contexts/branch-network/application/commands/open-portfolio/open-portfolio.command';
@@ -34,6 +35,20 @@ describe('Open portfolio', () => {
 
     expect(portfolio?.advisorId).toBe('staff-member-1');
     expect(portfolio?.branchId).toBe('branch-1');
+  });
+
+  it('relates the portfolio to its advisor and to its branch in the same change', async () => {
+    const { commandBus, relations } = arrange();
+
+    const id = await commandBus.execute(new OpenPortfolioCommand(holder, 'branch-1', 'staff-member-1'));
+
+    expect(await relations.readByObject(`portfolio:${id}`, 'advisor')).toEqual([
+      { object: `portfolio:${id}`, relation: 'advisor', subject: 'user:staff-member-1' },
+    ]);
+
+    expect(await relations.readByObject(`portfolio:${id}`, 'branch')).toEqual([
+      { object: `portfolio:${id}`, relation: 'branch', subject: 'branch:branch-1' },
+    ]);
   });
 
   it('announces the opening of the portfolio once it is saved', async () => {
@@ -70,9 +85,10 @@ function arrange() {
   // As the application hands it to the handler: the save announces the events of the portfolio to `domainEvents`.
   const portfolioRepository = dispatching(new FakePortfolioRepository());
 
-  const handler = new OpenPortfolioHandler(portfolioRepository, ids, clock);
+  const relations = new InMemoryRelationTupleStore();
+  const handler = new OpenPortfolioHandler(portfolioRepository, ids, clock, relations);
 
   commandBus.use(holders).register(OpenPortfolioCommand, handler);
 
-  return { commandBus, portfolioRepository, domainEvents };
+  return { commandBus, portfolioRepository, domainEvents, relations };
 }
