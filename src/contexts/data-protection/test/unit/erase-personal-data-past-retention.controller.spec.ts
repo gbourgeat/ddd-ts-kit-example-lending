@@ -12,7 +12,7 @@ const caller: Actor = { id: 'user-1', type: 'user', roles: [], attributes: {} };
 describe('POST /personal-data/erasures', () => {
   it('answers 204 when the use case succeeds', async () => {
     const commands = new InMemoryCommandBus().register(ErasePersonalDataPastRetentionCommand, {
-      execute: async () => undefined,
+      execute: async () => 0,
     });
 
     const route = nestControllerRoute(ErasePersonalDataPastRetentionController, {
@@ -23,7 +23,7 @@ describe('POST /personal-data/erasures', () => {
 
     const response = await executeRoute(
       route,
-      { params: {}, query: {}, headers: {}, body: {}, raw: undefined },
+      { params: {}, query: {}, headers: {}, body: { asOf: '2026-01-01T07:00:00.000Z' }, raw: undefined },
       { validateResponses: true, resolvePrincipal: () => caller },
     );
 
@@ -32,12 +32,14 @@ describe('POST /personal-data/erasures', () => {
     expect(dataProtectionControllers).toContain(ErasePersonalDataPastRetentionController);
   });
 
-  it('runs the command as the caller of the request, with no input of its own', async () => {
+  it('runs the command as the caller of the request, for the instant the body names', async () => {
     const received: unknown[] = [];
 
     const commands = new InMemoryCommandBus().register(ErasePersonalDataPastRetentionCommand, {
       execute: async (command: unknown) => {
         received.push(command);
+
+        return 0;
       },
     });
 
@@ -48,7 +50,7 @@ describe('POST /personal-data/erasures', () => {
 
     await executeRoute(
       route,
-      { params: {}, query: {}, headers: {}, body: {}, raw: undefined },
+      { params: {}, query: {}, headers: {}, body: { asOf: '2026-01-01T07:00:00.000Z' }, raw: undefined },
       { validateResponses: true, resolvePrincipal: () => caller },
     );
 

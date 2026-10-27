@@ -15,12 +15,13 @@ const holders = authorizationMiddleware({
 });
 
 const holder = anActor().withRole('holder').build();
+const asOf = new Date('2026-01-01T07:00:00.000Z');
 
 describe('Erase personal data past retention', () => {
   it('asks the purge of every context to run and answers the rows it reached', async () => {
     const { commandBus, purge } = arrange(7);
 
-    const purged = await commandBus.execute(new ErasePersonalDataPastRetentionCommand(holder));
+    const purged = await commandBus.execute(new ErasePersonalDataPastRetentionCommand(holder, asOf));
 
     expect(purged).toBe(7);
     expect(purge.purges).toBe(1);
@@ -28,7 +29,7 @@ describe('Erase personal data past retention', () => {
 
   it('is refused to an actor who does not hold the permission data.erase, and asks no context', async () => {
     const { commandBus, purge } = arrange(7);
-    const command = new ErasePersonalDataPastRetentionCommand(anActor().build());
+    const command = new ErasePersonalDataPastRetentionCommand(anActor().build(), asOf);
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'FORBIDDEN' });
     expect(purge.purges).toBe(0);

@@ -2666,7 +2666,16 @@ paths:
         content:
           application/json:
             schema:
+              properties:
+                asOf:
+                  oneOf:
+                    - format: date
+                      type: string
+                    - format: date-time
+                      type: string
               type: object
+              required:
+                - asOf
       responses:
         '204':
           description: Done.

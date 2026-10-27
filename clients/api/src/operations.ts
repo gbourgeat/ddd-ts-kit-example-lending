@@ -1164,7 +1164,9 @@ export function changeMemberRole(
 }
 
 export interface ErasePersonalDataPastRetentionInput {
-  readonly body: Record<string, unknown>;
+  readonly body: {
+    asOf: string;
+  };
 }
 
 export type ErasePersonalDataPastRetentionResult =
