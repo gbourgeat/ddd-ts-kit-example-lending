@@ -44,38 +44,7 @@ describe('Identify customer, end to end', () => {
     });
 
     // Exact on names and structure, and kept before the tests whose request leaves work behind (a relay still publishing would add its spans here). Once "identify customer" announces a fact, its spans come after the save, under `unit-of-work before-commit`: `domain-event <name>`, `handler <Class>`, `outbox append <type>`, then, once `application.settled()` has resolved inside `traceOf`, `publish <type>` and `process <consumer>` with the command it sends.
-    expectSpanTree(storyOf(trace), [
-      {
-        name: 'POST /customers',
-        kind: 'SERVER',
-        children: [
-          {
-            name: 'command IdentifyCustomerCommand',
-            children: [
-              { name: 'external ScreeningProvider.screen' },
-              {
-                name: 'unit-of-work before-commit',
-                children: [
-                  {
-                    name: 'domain-event customer-due-diligence.customer.identified',
-                    children: [
-                      {
-                        name: 'handler CustomerIdentifiedPublisher',
-                        children: [{ name: 'outbox append customer-due-diligence.customer.identified' }],
-                      },
-                      {
-                        name: 'handler CustomerFileOnIdentifiedEventHandler',
-                        children: [{ name: 'repository CustomerFileProjection.recordIdentified' }],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+    expectSpanTree(storyOf(trace), identificationTree());
   });
 
   it('identifies a person the screening holds no match for, and answers its identifier', async () => {
@@ -102,3 +71,41 @@ describe('Identify customer, end to end', () => {
   it.todo('publishes the integration events other contexts rely on');
   it.todo('lets a possible match be observed through the started application');
 });
+
+/** The spans of a request that identifies a person: the screening first, then the save and what it announces. */
+function identificationTree() {
+  return [
+    {
+      name: 'POST /customers',
+      kind: 'SERVER' as const,
+      children: [
+        {
+          name: 'command IdentifyCustomerCommand',
+          children: [
+            { name: 'external ScreeningProvider.screen' },
+            { name: 'unit-of-work before-commit', children: announcedSpans() },
+          ],
+        },
+      ],
+    },
+  ];
+}
+
+/** What the save announces: the identified event, its publication and the projection of the customer file. */
+function announcedSpans() {
+  return [
+    {
+      name: 'domain-event customer-due-diligence.customer.identified',
+      children: [
+        {
+          name: 'handler CustomerIdentifiedPublisher',
+          children: [{ name: 'outbox append customer-due-diligence.customer.identified' }],
+        },
+        {
+          name: 'handler CustomerFileOnIdentifiedEventHandler',
+          children: [{ name: 'repository CustomerFileProjection.recordIdentified' }],
+        },
+      ],
+    },
+  ];
+}
