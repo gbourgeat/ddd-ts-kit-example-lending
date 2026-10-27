@@ -1,7 +1,6 @@
 import type { RelationTuple } from '@ddd-ts-kit/auth/rebac';
 import type { IntegrationEvent, IntegrationEventSubscriber } from '@ddd-ts-kit/kernel';
 import { createHttpClient, settled, type HttpClient, type SettledOptions } from '@ddd-ts-kit/testing/e2e';
-import { relationTuples } from '@/platform/auth/relationships/relation-tuples';
 import { composeApplication } from '@/platform/composition/compose-application';
 import type { AppConfig } from '@/platform/config/app-config';
 import { loadConfig } from '@/platform/config/load-config';
@@ -70,7 +69,7 @@ export async function startApplication(): Promise<RunningApplication> {
     events: started.events,
     as: async (actor) => started.client.withHeaders(await credentials.headersOf(actor)),
     publish: (events) => started.publish(events),
-    relate: (tuple) => relationTuples.write([tuple]),
+    relate: (tuple) => started.relate(tuple),
     settled: (options) => started.settled(options),
     reset: () => database.reset(),
     close: () => started.close(),
@@ -82,6 +81,8 @@ interface Started {
   readonly events: IntegrationEventSubscriber;
 
   publish(events: readonly IntegrationEvent[]): Promise<void>;
+
+  relate(tuple: RelationTuple): Promise<void>;
 
   settled(options?: SettledOptions): Promise<void>;
 
@@ -113,6 +114,7 @@ async function start(database: TestDatabase, config: AppConfig, credentials: Cre
     client: createHttpClient('http://127.0.0.1:' + server.port),
     events: application.eventSubscriber,
     publish: (events) => application.eventBus.publish(events),
+    relate: (tuple) => application.platform.relations.write([tuple]),
     settled: (options) => settled({ outbox: () => database.persistence.outbox.stats() }, options),
     close: async () => {
       await server.close();

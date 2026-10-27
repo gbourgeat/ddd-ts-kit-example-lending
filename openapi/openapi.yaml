@@ -5,6 +5,7 @@ info:
 tags:
   - name: audit
   - name: branch-network
+  - name: credit-application
   - name: credit-policy
   - name: customer-due-diligence
   - name: identity
@@ -140,6 +141,100 @@ paths:
             - ACCOUNT_NOT_FOUND
             - LAST_OWNER
             - ORGANISATION_NOT_FOUND
+  /applications:
+    post:
+      operationId: submitApplication
+      summary: Submit application
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                productId:
+                  type: string
+                amount:
+                  $ref: '#/components/schemas/RequestedAmountBody'
+                  not:
+                    type: 'null'
+                durationMonths:
+                  type: number
+              type: object
+              required:
+                - productId
+                - amount
+                - durationMonths
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Location:
+              description: The URL of the application.
+              schema:
+                type: string
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  amount:
+                    $ref: '#/components/schemas/RequestedAmountBody'
+                type: object
+                required:
+                  - id
+                  - amount
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: INVALID_AMOUNT, INVALID_DURATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - INVALID_AMOUNT
+            - INVALID_DURATION
+            - VALIDATION_FAILED
   /audit/entries:
     get:
       operationId: searchAuditEntries
@@ -1841,6 +1936,18 @@ components:
           additionalProperties: true
         requestId:
           type: string
+    RequestedAmountBody:
+      properties:
+        cents:
+          type: number
+        currency:
+          type: string
+          enum:
+            - EUR
+      type: object
+      required:
+        - cents
+        - currency
   securitySchemes:
     bearer:
       type: http

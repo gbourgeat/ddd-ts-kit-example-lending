@@ -9,6 +9,7 @@ import {
   delegationGrantedV1,
   delegationRevokedV1,
 } from '@/contexts/identity/published-language';
+import { creditApplicationSubmittedV1 } from '@/contexts/credit-application/published-language';
 import { conflictOfInterestDeclaredV1, staffMemberAppointedV1 } from '@/contexts/branch-network/published-language';
 import { customerIdentifiedV1 } from '@/contexts/customer-due-diligence/published-language';
 // /ddd-ts-kit:imports
@@ -23,6 +24,7 @@ export const auditedEvents = createEventRegistry([
   memberRemovedV1,
   delegationGrantedV1,
   delegationRevokedV1,
+  creditApplicationSubmittedV1,
   conflictOfInterestDeclaredV1,
   staffMemberAppointedV1,
   customerIdentifiedV1,

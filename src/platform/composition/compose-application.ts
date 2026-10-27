@@ -167,7 +167,7 @@ function boundaryOf(platform: Platform, options: ApplicationOptions, presentatio
  * The worker of the background jobs runs in the process that runs the jobs.
  */
 async function start(platform: Platform, options: ApplicationOptions): Promise<void> {
-  await relateSystemActors();
+  await relateSystemActors(platform.relations);
 
   // The audit trail listens to every declared integration event, under a name of its own.
   subscribeAll(platform.subscriberFor(platform.audit.consumer), platform.audit.subscriptions);

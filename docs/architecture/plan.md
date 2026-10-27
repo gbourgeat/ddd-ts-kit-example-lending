@@ -265,6 +265,10 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 US13.04 left todo: the kit refuses the command name EraseExpiredPersonalData (technical word "data"); the worker work stays uncommitted in its worktree (conductor)
 - 2026-10-27 Moved to ddd-ts-kit 0.95.0: Prisma schema one file per context; identity declared the control plane of the tenants (`contexts.identity.tenancy`, deviation on ADR-0001), its seven suppressions removed, `check` prints `0 suppressions`; `--module` dropped from the `e2e` of US0.04, the one planned command of a kind that now refuses it (owner)
 
+- 2026-10-27 US0 AC2 stays `pending(...)` until US6.18 builds the list of applications: US0 merges with AC2 pending, and the story closes when US6.18 is done (owner)
+- 2026-10-27 US0 AC2 under Jest: the status of the list is to be checked by Jest's `expect(listed.status).toBe(200)`, because `pending(...)` refuses the node:assert failure of `expectStatus` (kit issue #436). The acceptance-judge refused this change of the locked scenario (`test/acceptance/verdicts/us0-a4fb82d0b747fa98.md`), so the lock keeps `expectStatus` and AC2 stays pending as above; the change is not applied (owner, the judge's verdict)
+- 2026-10-27 US0 trace of the submission (`test/e2e/submit-application.e2e.spec.ts`): the expected tree completes the comment's description, under `unit-of-work before-commit` the domain event, its handler `CreditApplicationSubmittedPublisher` and the outbox append; a spec of the slice, not a locked scenario (owner)
+
 ## For the owner
 
 - Migrations of the wave 2 rows: no database here; `npm run db:generate working-<what>` for the product, legal maximum rate, delegation table, residual income minimum and alert columns; the schema commits are on the trunk.
@@ -285,6 +289,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - The StaffMember commit is over the commit-size advisory (26 files): the generator wrote its personal-data wiring in the same run. Accepted, not split.
 - Push: not done; the branch `wave1-skeletons` is local (`git push` yours).
 - Kit issues to file, with the rows marked `to file` of `docs/tooling/frictions.md`: the contracts and hooks refused by the sandbox, the seven suppressions, the blank "Not to be confused with" cells that `--term` cannot carry.
+- The migration writing the table of the relationships, `authorization.relation_tuples` (model `RelationTuple`, the new schema `authorization`): none is in the repo, to be written and applied by the owner (US0.03).
+- Build the native Kafka binding of `@confluentinc/kafka-javascript` before running the acceptance suite: it cannot load in this sandbox (US0.03).
 - Simulated adapters (0.95.0, `generate adapter <context> <Port> --kind simulated`): deferred as the upgrade asked. The remote adapters that only throw are replaced in a later step.
 
 ## Open questions

@@ -29,6 +29,12 @@ export interface Client {
    */
   deactivateAccount(input?: operations.DeactivateAccountInput, options?: CallOptions): Promise<operations.DeactivateAccountResult>;
   /**
+   * Submit application: `POST /applications`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_AMOUNT (422), INVALID_DURATION (422), VALIDATION_FAILED (422).
+   */
+  submitApplication(input: operations.SubmitApplicationInput, options?: CallOptions): Promise<operations.SubmitApplicationResult>;
+  /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
@@ -144,6 +150,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
   return {
     provisionAccount: (input, call) => operations.provisionAccount(connection, input, call),
     deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
+    submitApplication: (input, call) => operations.submitApplication(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),

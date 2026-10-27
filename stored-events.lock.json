@@ -1,4 +1,7 @@
 {
+  "credit-application.credit-application.submitted": {
+    "1": "sha256:9fc1a08288528135"
+  },
   "customer-due-diligence.customer.business-registered": {
     "1": "sha256:25b7e8efe3401359"
   },

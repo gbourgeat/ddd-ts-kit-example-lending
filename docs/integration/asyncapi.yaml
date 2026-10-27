@@ -15,6 +15,12 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/branch-network.staff-member.appointed.v1'
+  credit-application.credit-application.submitted:
+    address: credit-application.credit-application.submitted
+    description: 'A borrower or a broker has submitted a loan request: the application file is open, with its applicant, amount in cents and duration in months.'
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-application.credit-application.submitted.v1'
   customer-due-diligence.customer.identified:
     address: customer-due-diligence.customer.identified
     description: A customer, a person or a business, has been identified before any credit.
@@ -82,6 +88,12 @@ operations:
       $ref: '#/channels/branch-network.staff-member.appointed'
     messages:
       - $ref: '#/channels/branch-network.staff-member.appointed/messages/v1'
+  send.credit-application.credit-application.submitted:
+    action: send
+    channel:
+      $ref: '#/channels/credit-application.credit-application.submitted'
+    messages:
+      - $ref: '#/channels/credit-application.credit-application.submitted/messages/v1'
   send.customer-due-diligence.customer.identified:
     action: send
     channel:
@@ -219,6 +231,55 @@ components:
             type: object
             required:
               - staffMemberId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-application.credit-application.submitted.v1:
+      name: credit-application.credit-application.submitted
+      title: credit-application.credit-application.submitted v1
+      summary: 'A borrower or a broker has submitted a loan request: the application file is open, with its applicant, amount in cents and duration in months.'
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.submitted
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+              applicantId:
+                type: string
+              requestedAmountCents:
+                type: integer
+              durationMonths:
+                type: integer
+            type: object
+            required:
+              - creditApplicationId
+              - applicantId
+              - requestedAmountCents
+              - durationMonths
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

@@ -1,6 +1,8 @@
-import { InMemoryRelationTupleStore, type RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
+import type { RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
+import { PrismaRelationTupleStore } from '@/platform/auth/relationships/prisma-relation-tuple-store';
+import type { Database } from '@/platform/database/database';
 
-// TODO(platform): answer a persistent store (a table written in the transaction of the change it describes) and hold it to relationTupleStoreContract, as create-tuple-store.contract.spec.ts does for this one.
-export function createTupleStore(): RelationTupleStore {
-  return new InMemoryRelationTupleStore();
+/** The relation tuples, in the table of the database, written in the transaction of the change they describe. */
+export function createTupleStore(database: Database): RelationTupleStore {
+  return new PrismaRelationTupleStore(database);
 }

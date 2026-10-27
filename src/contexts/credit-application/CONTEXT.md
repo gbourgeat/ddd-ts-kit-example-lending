@@ -46,6 +46,9 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Requested amount | The amount the applicant asks for, the basis of the decision table | Approved amount |
 | Approved amount | The amount of the decision, after conditions | Requested amount |
 | File | The application file, the documents and the account consent. |  |
+| Credit application | the application file of one loan request, from submission to payout |  |
+| Submitted | the application was received from an applicant or a broker, and its file opened |  |
+| Duration | The number of whole months over which the requested amount is repaid |  |
 
 ## Modules
 
@@ -59,11 +62,13 @@ It is the bank's core business: every credit the bank grants is decided here, an
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `CreditApplication` (event-sourced)
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `credit-application.credit-application.submitted` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -75,7 +80,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `credit-application:application.submit`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -122,11 +127,37 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `credit-policy` (published-language), `credit-scoring` (customer-supplier), `customer-due-diligence` (customer-supplier), `brokerage` (published-language), `branch-network` (published-language), `identity` (conformist); downstreams: `servicing` (published-language), `reporting` (published-language).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `SubmitApplication` | command | `application.submit` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `credit-application.credit-application.submitted` | 1 | `CreditApplicationSubmittedPublisher` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
 | `AccountInformationProvider` | external | `RemoteAccountInformationProvider` |
+| `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
 | `ElectronicSignature` | external | `RemoteElectronicSignature` |
 | `RepaymentIncidentRegister` | external | `RemoteRepaymentIncidentRegister` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
+| `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
 <!-- /ddd-ts-kit:reference -->

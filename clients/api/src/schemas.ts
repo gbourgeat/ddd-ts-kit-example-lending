@@ -29,3 +29,8 @@ export type Problem = {
   facts?: Record<string, unknown>;
   requestId: string;
 };
+
+export type RequestedAmountBody = {
+  cents: number;
+  currency: 'EUR';
+};

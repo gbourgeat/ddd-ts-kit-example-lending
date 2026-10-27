@@ -1,5 +1,4 @@
-import type { RelationTuple } from '@ddd-ts-kit/auth/rebac';
-import { relationTuples } from '@/platform/auth/relationships/relation-tuples';
+import type { RelationTuple, RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 
 /**
  * What the application does on its own behalf: the relationships of its system actors, one per
@@ -12,6 +11,6 @@ const systemRelationships: readonly RelationTuple[] = [
 ];
 
 /** Written when the application starts, before any job runs; writing a tuple that exists changes nothing. */
-export function relateSystemActors(): Promise<void> {
-  return relationTuples.write(systemRelationships);
+export function relateSystemActors(relations: RelationTupleStore): Promise<void> {
+  return relations.write(systemRelationships);
 }

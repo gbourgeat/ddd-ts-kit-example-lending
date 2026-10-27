@@ -1,4 +1,4 @@
-import { defineSchema, type SchemaDefinition } from '@ddd-ts-kit/auth/rebac';
+import { defineSchema, via, type SchemaDefinition } from '@ddd-ts-kit/auth/rebac';
 import { permissions } from '@/platform/auth/authorization/permissions';
 
 /**
@@ -7,9 +7,45 @@ import { permissions } from '@/platform/auth/authorization/permissions';
  * after a permission id grants it on that type). A permission derived on an element leaves the
  * context below: the operators of the context no longer hold it, so name that element in the
  * `resource` of the requirement, never the context.
+ *
+ * The bank > branch > portfolio > customer > application > loan chain: a bank has branches, a
+ * branch portfolios, a portfolio customers (through the advisor who holds it), a customer
+ * applications, an application loans. A derived relation reaches the element it is about through
+ * the chain, never through a copy of the facts.
  */
-// TODO(platform): model the elements rights are shared on (documents, folders, teams), name them in the `resource` of each requirement and derive each permission on its type.
-const elements: SchemaDefinition = {};
+const elements: SchemaDefinition = {
+  bank: {
+    relations: { member: ['user'] },
+  },
+  branch: {
+    relations: { bank: ['bank'], manager: ['user'] },
+  },
+  portfolio: {
+    relations: { branch: ['branch'], advisor: ['user'] },
+  },
+  customer: {
+    relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
+    derived: {
+      'credit-application:application.submit': 'self',
+      advisor: via('portfolio', 'advisor'),
+    },
+  },
+  application: {
+    relations: { customer: ['customer'], 'co-borrower': ['user'], broker: ['user'] },
+    derived: {
+      'credit-application:application.read': {
+        anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
+        butNot: [via('customer', 'conflicted')],
+      },
+    },
+  },
+  loan: {
+    relations: { application: ['application'] },
+    derived: {
+      'servicing:loan.read': via('application', 'credit-application:application.read'),
+    },
+  },
+};
 
 const modelledOnAnElement = new Set(Object.values(elements).flatMap((element) => Object.keys(element.derived ?? {})));
 
