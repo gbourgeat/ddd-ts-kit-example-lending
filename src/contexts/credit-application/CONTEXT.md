@@ -127,5 +127,6 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `AccountInformationProvider` | external | `RemoteAccountInformationProvider` |
+| `ElectronicSignature` | external | `RemoteElectronicSignature` |
 | `RepaymentIncidentRegister` | external | `RemoteRepaymentIncidentRegister` |
 <!-- /ddd-ts-kit:reference -->
