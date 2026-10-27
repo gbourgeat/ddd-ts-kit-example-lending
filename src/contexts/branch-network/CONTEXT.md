@@ -40,6 +40,8 @@ Who follows which customer, and who may decide on it, is needed for the business
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `branch-network.conflict-of-interest.declared` (version 1)
+- `branch-network.staff-member.appointed` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -95,6 +97,13 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe branch-network --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `customer-due-diligence` (published-language), `identity` (conformist); downstreams: `credit-application` (published-language), `reporting` (published-language).
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `branch-network.conflict-of-interest.declared` | 1 | `ConflictOfInterestDeclaredPublisher` |
+| `branch-network.staff-member.appointed` | 1 | `StaffMemberAppointedPublisher` |
 
 ### Ports
 

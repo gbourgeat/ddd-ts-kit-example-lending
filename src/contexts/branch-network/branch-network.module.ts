@@ -4,6 +4,10 @@ import { branchNetworkControllers } from '@/contexts/branch-network/branch-netwo
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { ConflictOfInterestDeclaredPublisher } from '@/contexts/branch-network/application/integration/publishers/conflict-of-interest-declared.publisher';
+import { ConflictOfInterestDeclared } from '@/contexts/branch-network/domain/events/conflict-of-interest-declared.event';
+import { StaffMemberAppointedPublisher } from '@/contexts/branch-network/application/integration/publishers/staff-member-appointed.publisher';
+import { StaffMemberAppointed } from '@/contexts/branch-network/domain/events/staff-member-appointed.event';
 // /ddd-ts-kit:imports
 
 export interface BranchNetworkWiring {
@@ -36,6 +40,27 @@ function registerHandlers(platform: Platform): void {
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
+  const conflictOfInterestDeclaredPublisher = platform.adapter(
+    new ConflictOfInterestDeclaredPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'branch-network' },
+  );
+
+  platform.domainEvents.on(ConflictOfInterestDeclared.eventName, async (event) => {
+    if (event instanceof ConflictOfInterestDeclared) {
+      await conflictOfInterestDeclaredPublisher.handle(event);
+    }
+  });
+
+  const staffMemberAppointedPublisher = platform.adapter(
+    new StaffMemberAppointedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'branch-network' },
+  );
+
+  platform.domainEvents.on(StaffMemberAppointed.eventName, async (event) => {
+    if (event instanceof StaffMemberAppointed) {
+      await staffMemberAppointedPublisher.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 
