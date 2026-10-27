@@ -39,11 +39,7 @@
       "Read(./.env.*.local)",
       "Read(./.env.production)",
       "Read(./.env.development)",
-      "Read(./.env.test)",
-      "Edit(./openapi/**)",
-      "Edit(./docs/integration/asyncapi.*)",
-      "Edit(./docs/integration/event-catalog.md)",
-      "Edit(./test/acceptance/*.acceptance.lock.json)"
+      "Read(./.env.test)"
     ],
     "ask": [
       "Bash(git push *)",
@@ -64,15 +60,27 @@
       "Edit(./prisma/migrations/**)",
       "Edit(./Dockerfile)",
       "Edit(./docker-compose.yml)",
-      "Edit(./docker/**)"
+      "Edit(./docker/**)",
+      "Edit(./openapi/**)",
+      "Edit(./docs/integration/asyncapi.*)",
+      "Edit(./docs/integration/event-catalog.md)",
+      "Edit(./test/acceptance/*.acceptance.lock.json)"
     ]
   },
   "sandbox": {
     "enabled": true,
     "failIfUnavailable": true,
     "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "allowWrite": ["~/.npm", "~/.cache/prisma"]
+    },
     "network": {
-      "allowedDomains": ["registry.npmjs.org", "github.com"]
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "github.com",
+        "binaries.prisma.sh",
+        "release-assets.githubusercontent.com"
+      ]
     },
     "credentials": {
       "files": [
