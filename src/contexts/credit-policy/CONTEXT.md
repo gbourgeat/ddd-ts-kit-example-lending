@@ -35,6 +35,8 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 | Terms | The conditions a product is sold with: its amounts, durations, arrangement fee, insurance and score threshold |  |
 | Schedule | the order of the legal maximum rates of one category by their dates of effect |  |
 | Set | a delegation table is set when it is recorded with the day it takes effect |  |
+| List | the read of the products of the catalogue, by an applicant |  |
+| Search | a read of the products of the catalogue, one page at a time, asked by an applicant |  |
 
 ## Aggregates
 
@@ -112,6 +114,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DefineProduct` | command | `product.define` |
 | `PublishLegalMaximumRate` | command | `legal-maximum-rate.publish` |
 | `PublishRateGrid` | command | `rate-grid.publish` |
+| `SearchProductCatalogue` | query | `public` |
 | `SetDelegationTable` | command | `delegation-table.set` |
 | `SetResidualIncomeMinimum` | command | `residual-income-minimum.set` |
 
@@ -134,6 +137,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ProductRepository` | repository | `PrismaProductRepository` |
 | `RateGridRepository` | repository | `PrismaRateGridRepository` |
 | `ResidualIncomeMinimumRepository` | repository | `PrismaResidualIncomeMinimumRepository` |
+| `SearchProductCatalogueReader` | repository | `PrismaSearchProductCatalogueReader` |
 
 ### Errors
 

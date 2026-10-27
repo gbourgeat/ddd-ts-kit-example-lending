@@ -5,7 +5,7 @@ import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { PrismaRateGridRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-rate-grid.repository';
-import { requires } from '@ddd-ts-kit/auth';
+import { requires, publicUseCase } from '@ddd-ts-kit/auth';
 import { creditPolicyPermissions } from '@/contexts/credit-policy/credit-policy.permissions';
 import { PublishRateGridCommand } from '@/contexts/credit-policy/application/commands/publish-rate-grid/publish-rate-grid.command';
 import { PublishRateGridHandler } from '@/contexts/credit-policy/application/commands/publish-rate-grid/publish-rate-grid.handler';
@@ -21,6 +21,10 @@ import { SetDelegationTableHandler } from '@/contexts/credit-policy/application/
 import { PrismaResidualIncomeMinimumRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-residual-income-minimum.repository';
 import { SetResidualIncomeMinimumCommand } from '@/contexts/credit-policy/application/commands/set-residual-income-minimum/set-residual-income-minimum.command';
 import { SetResidualIncomeMinimumHandler } from '@/contexts/credit-policy/application/commands/set-residual-income-minimum/set-residual-income-minimum.handler';
+
+import { SearchProductCatalogueHandler } from '@/contexts/credit-policy/application/queries/search-product-catalogue/search-product-catalogue.handler';
+import { SearchProductCatalogueQuery } from '@/contexts/credit-policy/application/queries/search-product-catalogue/search-product-catalogue.query';
+import { PrismaSearchProductCatalogueReader } from '@/contexts/credit-policy/infrastructure/persistence/prisma-search-product-catalogue.reader';
 // /ddd-ts-kit:imports
 
 export interface CreditPolicyWiring {
@@ -101,6 +105,17 @@ function registerHandlers(platform: Platform): void {
     new SetResidualIncomeMinimumHandler(residualIncomeMinimumRepository, platform.ids, platform.clock),
     { context: 'credit-policy' },
   );
+
+  const searchProductCatalogueReader = platform.adapter(
+    new PrismaSearchProductCatalogueReader(platform.persistence.database, platform.scope),
+    { kind: 'repository', context: 'credit-policy' },
+  );
+
+  platform.queries.register(
+    SearchProductCatalogueQuery,
+    new SearchProductCatalogueHandler(searchProductCatalogueReader),
+    { context: 'credit-policy' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -135,6 +150,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(SetResidualIncomeMinimumCommand, creditPolicyPermissions['residual-income-minimum.set'], {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
+    publicUseCase(SearchProductCatalogueQuery),
     // /ddd-ts-kit:authorization
   ];
 }
