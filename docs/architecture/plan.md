@@ -341,6 +341,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 
 - 2026-10-27 Wave 6 run 3, blocked: US8.06 and US8.07 (rate grid, legal maximum rate projections) and US7.01 (delegation table): the credit-policy events `rate-grid.published`, `legal-maximum-rate.published` and `delegation-table.published` (v1) carry only an identifier, so a projection holds nothing usable and the date of effect the plan promises is not on the contract. US7.02 (staff level): `staff-member.appointed` v1 carries no level. Needed: the producer (credit-policy, branch-network) adds the content and the date of effect as a v2 of each event, the consumers move to v2; the owner of each context decides (conductor, owner brief: a v2 rather than a change of v1, the most protective reading; to confirm)
 
+- 2026-10-27 Wave 6 run 3, blocked: US12.01 (applications per branch): `credit-application.credit-application.submitted` v1 carries the amount in cents but no branch, so a count per branch cannot be computed. Needed: credit-application adds the branch of the submission, a v2 of the event (the convention of the other projections; to confirm) with the producer changed by a credit-application row. US7.03 (declared conflicts): built as a projector with the table `declared_conflicts`, but `generate e2e` builds no spec for a projector and the rules refuse a hand-written one: the proof needs a route that reads the conflicts (the decision's view, US7.04 or a read route) (conductor, owner brief, to confirm)
+
 ## For the owner
 
 - Migrations of the wave 2 rows: no database here; `npm run db:generate working-<what>` for the product, legal maximum rate, delegation table, residual income minimum and alert columns; the schema commits are on the trunk.
