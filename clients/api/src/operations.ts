@@ -514,3 +514,38 @@ export function changeMemberRole(
 
   return send<ChangeMemberRoleResult>(connection, operation, { ...input, ...options });
 }
+
+export interface PublishRateGridInput {
+  readonly body: {
+    productId: string;
+    effectiveFrom: string;
+  };
+}
+
+export type PublishRateGridResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Publish rate grid: `POST /rate-grids`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function publishRateGrid(
+  connection: Connection,
+  input: PublishRateGridInput,
+  options: CallOptions = {},
+): Promise<PublishRateGridResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/rate-grids',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<PublishRateGridResult>(connection, operation, { ...input, ...options });
+}

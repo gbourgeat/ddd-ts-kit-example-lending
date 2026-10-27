@@ -36,6 +36,7 @@ A credential is given per security scheme of the contract, as a value or as a fu
 | `searchMembers` | `GET /organisations/{organisationId}/members` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, VALIDATION_FAILED |
 | `removeMember` | `DELETE /organisations/{organisationId}/members/{accountId}` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, ABOVE_OWN_ROLE, LAST_OWNER, MEMBER_NOT_FOUND, ORGANISATION_NOT_FOUND, OWNERS_ONLY, VALIDATION_FAILED |
 | `changeMemberRole` | `PUT /organisations/{organisationId}/members/{accountId}/role` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, ABOVE_OWN_ROLE, LAST_OWNER, MEMBER_NOT_FOUND, ORGANISATION_NOT_FOUND, OWNERS_ONLY, OWN_ROLE, VALIDATION_FAILED |
+| `publishRateGrid` | `POST /rate-grids` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, VALIDATION_FAILED |
 
 ## Error codes
 

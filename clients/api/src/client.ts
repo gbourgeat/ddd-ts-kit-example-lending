@@ -94,6 +94,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ABOVE_OWN_ROLE (422), LAST_OWNER (422), MEMBER_NOT_FOUND (422), ORGANISATION_NOT_FOUND (422), OWNERS_ONLY (422), OWN_ROLE (422), VALIDATION_FAILED (422).
    */
   changeMemberRole(input: operations.ChangeMemberRoleInput, options?: CallOptions): Promise<operations.ChangeMemberRoleResult>;
+  /**
+   * Publish rate grid: `POST /rate-grids`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  publishRateGrid(input: operations.PublishRateGridInput, options?: CallOptions): Promise<operations.PublishRateGridResult>;
 }
 
 export function createClient(options: ClientOptions<SchemeName>): Client {
@@ -113,5 +119,6 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchMembers: (input, call) => operations.searchMembers(connection, input, call),
     removeMember: (input, call) => operations.removeMember(connection, input, call),
     changeMemberRole: (input, call) => operations.changeMemberRole(connection, input, call),
+    publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
   };
 }

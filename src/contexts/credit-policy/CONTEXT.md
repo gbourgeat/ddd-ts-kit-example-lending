@@ -51,7 +51,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `credit-policy:rate-grid.publish`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -92,6 +92,18 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: none; downstreams: `credit-application` (published-language), `servicing` (published-language).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `PublishRateGrid` | command | `rate-grid.publish` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/rate-grids` | `publishRateGrid` | `RateGridsRoutes` | `Authenticated` | `PublishRateGrid` | `rate-grid.publish` | body: `PublishRateGridBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+
 ### Ports
 
 | Port | Kind | Adapters |
@@ -99,6 +111,6 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DelegationTableRepository` | external | `PrismaDelegationTableRepository` |
 | `LegalMaximumRateRepository` | external | `PrismaLegalMaximumRateRepository` |
 | `ProductRepository` | external | `PrismaProductRepository` |
-| `RateGridRepository` | external | `PrismaRateGridRepository` |
+| `RateGridRepository` | repository | `PrismaRateGridRepository` |
 | `ResidualIncomeMinimumRepository` | external | `PrismaResidualIncomeMinimumRepository` |
 <!-- /ddd-ts-kit:reference -->
