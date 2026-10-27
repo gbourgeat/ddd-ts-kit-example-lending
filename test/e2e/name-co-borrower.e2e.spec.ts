@@ -111,11 +111,17 @@ describe('Name co borrower, end to end', () => {
     ]);
   });
 
-  it('answers 403 to the applicant of an application that does not exist, as to a stranger', async () => {
+  it('refuses to name a co-borrower on an application that does not exist, with its code', async () => {
     const { applicant } = await submitApplication();
+
+    await application.relate({
+      object: 'application:unknown-application',
+      relation: 'customer',
+      subject: 'customer:customer-1',
+    });
 
     const response = await applicant.post('/applications/unknown-application/co-borrowers', coBorrower);
 
-    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: 'UNKNOWN_CREDIT_APPLICATION' });
   });
 });
