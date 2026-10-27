@@ -41,6 +41,12 @@ export interface Client {
    */
   submitApplication(input: operations.SubmitApplicationInput, options?: CallOptions): Promise<operations.SubmitApplicationResult>;
   /**
+   * Give account consent: `POST /applications/{id}/consent`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  giveAccountConsent(input: operations.GiveAccountConsentInput, options?: CallOptions): Promise<operations.GiveAccountConsentResult>;
+  /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
@@ -176,6 +182,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
     closeAlert: (input, call) => operations.closeAlert(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
+    giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),

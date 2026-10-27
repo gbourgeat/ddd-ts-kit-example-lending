@@ -11,6 +11,8 @@ import { SubmitApplicationCommand } from '@/contexts/credit-application/file/app
 import { SubmitApplicationHandler } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.handler';
 import { CreditApplicationSubmittedPublisher } from '@/contexts/credit-application/file/application/integration/publishers/credit-application-submitted.publisher';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
+import { GiveAccountConsentCommand } from '@/contexts/credit-application/file/application/commands/give-account-consent/give-account-consent.command';
+import { GiveAccountConsentHandler } from '@/contexts/credit-application/file/application/commands/give-account-consent/give-account-consent.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -47,6 +49,12 @@ function registerHandlers(platform: Platform): void {
     new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock),
     { context: 'credit-application' },
   );
+
+  platform.commands.register(
+    GiveAccountConsentCommand,
+    new GiveAccountConsentHandler(creditApplicationRepository, platform.clock),
+    { context: 'credit-application' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -78,6 +86,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     // ddd-ts-kit:authorization
     requires(SubmitApplicationCommand, creditApplicationPermissions['application.submit'], {
       resource: (command) => ({ type: 'customer', id: command.actor.id }),
+    }),
+    requires(GiveAccountConsentCommand, creditApplicationPermissions['application.consent'], {
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
     // /ddd-ts-kit:authorization
   ];

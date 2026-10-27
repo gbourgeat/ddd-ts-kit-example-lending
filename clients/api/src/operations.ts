@@ -142,6 +142,41 @@ export function submitApplication(
   return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface GiveAccountConsentInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type GiveAccountConsentResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Give account consent: `POST /applications/{id}/consent`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function giveAccountConsent(
+  connection: Connection,
+  input: GiveAccountConsentInput,
+  options: CallOptions = {},
+): Promise<GiveAccountConsentResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/consent',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<GiveAccountConsentResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SearchAuditEntriesInput {
   readonly query?: {
     /** Size of the page. */
