@@ -20,7 +20,7 @@ otherwise. Acceptance specs of a story are written and locked before its first r
 | US0.03 | platform | skeleton | Tuple store kept in the transaction of the change | edit `src/platform/auth/relationships/create-tuple-store.ts` (TODO(platform) line 3), held to `create-tuple-store.contract.spec.ts` | US0.02 | conductor | todo |
 | US0.04 | credit-application | slice | Submit an application (walking skeleton: one command, one route, one e2e) | `command credit-application SubmitApplication --permission application.submit --aggregate CreditApplication --module file`; `route credit-application SubmitApplication --method POST --path /applications --command --module file`; `e2e credit-application SubmitApplication --module file` | US0.01, US0.02 | credit-application | todo |
 | US0.05 | credit-application | contract | Application submitted, published | `integration-event credit-application CreditApplication Submitted --version 1 --module file` | US0.04 | conductor | todo |
-| US0.06 | platform | skeleton | Money in whole cents, shared by the contexts that hold amounts | `value-object shared-kernel Money --term "Money=an amount in whole cents"` (if the kernel refuses, a friction) | | conductor | todo |
+| US0.06 | platform | skeleton | Money in whole cents, shared by the contexts that hold amounts | `value-object shared-kernel Money --term "Money=an amount in whole cents"` (if the kernel refuses, a friction) | | conductor | done |
 
 Serves: "Applications" (submission); the walking skeleton of the plan; close 2 (relationship schema, rows
 US0.02 and US0.03); close 4 (CreditApplication event-sourced, row US0.01); "no floating point in the
