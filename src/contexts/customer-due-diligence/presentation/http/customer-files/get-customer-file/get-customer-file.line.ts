@@ -1,8 +1,10 @@
-import { IsString } from 'class-validator';
+import { IsDateString, IsString } from 'class-validator';
 
 export class GetCustomerFileLine {
   @IsString()
   id = '';
 
-  // TODO(domain): declare the fields of GetCustomerFileItem that are part of the public contract, each with its class-validator decorators.
+  /** The day the customer was identified, as an ISO date. */
+  @IsDateString()
+  identifiedAt = '';
 }

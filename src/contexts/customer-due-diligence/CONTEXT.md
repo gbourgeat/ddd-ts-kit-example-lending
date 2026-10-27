@@ -137,8 +137,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Port | Kind | Adapters |
 |---|---|---|
+| `CustomerFileProjection` | repository | `PrismaCustomerFileProjectionRepository` |
 | `CustomerRepository` | repository | `EventStoreCustomerRepository` |
-| `GetCustomerFileReader` | repository | `InMemoryGetCustomerFileReader` |
+| `GetCustomerFileReader` | repository | `PrismaGetCustomerFileReader` |
 | `ScreeningProvider` | external | `SimulatedScreeningProvider` |
 
 ### Errors

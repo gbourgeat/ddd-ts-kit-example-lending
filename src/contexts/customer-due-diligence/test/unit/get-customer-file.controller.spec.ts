@@ -12,13 +12,15 @@ const caller: Actor = { id: 'user-1', type: 'user', roles: [], attributes: {} };
 describe('GET /customer-files', () => {
   it('answers 200 when the use case succeeds', async () => {
     const queries = new InMemoryQueryBus().register(GetCustomerFileQuery, {
-      execute: async () => ({ items: [{ id: 'get-customer-file-1' }], total: 1 }),
+      execute: async () => ({
+        items: [{ id: 'customer-1', identifiedAt: new Date('2026-01-01T00:00:00.000Z') }],
+        total: 1,
+      }),
     });
 
     const route = nestControllerRoute(GetCustomerFileController, {
       instanceOf: () => new GetCustomerFileController(queries),
-      // A DTO without a decorated field yet accepts the empty object alone: whitelist and forbidNonWhitelisted refuse any field.
-      schemaOfClass: (dto) => classSchema(dto, { validator: { forbidUnknownValues: false } }),
+      schemaOfClass: (dto) => classSchema(dto),
     });
 
     const response = await executeRoute(
@@ -33,6 +35,44 @@ describe('GET /customer-files', () => {
   });
 
   // TODO(domain): replace each entry below by a test of the contract a client relies on.
-  it.todo('refuses an input that does not have the expected shape with 422');
-  it.todo('answers the documented status for each error code of the use case');
+  it('answers each file with the day its customer was identified, as an ISO date', async () => {
+    const queries = new InMemoryQueryBus().register(GetCustomerFileQuery, {
+      execute: async () => ({
+        items: [{ id: 'customer-1', identifiedAt: new Date('2026-01-01T00:00:00.000Z') }],
+        total: 1,
+      }),
+    });
+
+    const route = nestControllerRoute(GetCustomerFileController, {
+      instanceOf: () => new GetCustomerFileController(queries),
+      schemaOfClass: (dto) => classSchema(dto),
+    });
+
+    const response = await executeRoute(
+      route,
+      { params: {}, query: {}, headers: {}, body: {}, raw: undefined },
+      { validateResponses: true, resolvePrincipal: () => caller },
+    );
+
+    expect(response.body).toMatchObject({ items: [{ id: 'customer-1', identifiedAt: '2026-01-01T00:00:00.000Z' }] });
+  });
+
+  it('refuses a page of more than 100 lines with 422', async () => {
+    const queries = new InMemoryQueryBus().register(GetCustomerFileQuery, {
+      execute: async () => ({ items: [], total: 0 }),
+    });
+
+    const route = nestControllerRoute(GetCustomerFileController, {
+      instanceOf: () => new GetCustomerFileController(queries),
+      schemaOfClass: (dto) => classSchema(dto),
+    });
+
+    const response = await executeRoute(
+      route,
+      { params: {}, query: { limit: '500' }, headers: {}, body: {}, raw: undefined },
+      { validateResponses: true, resolvePrincipal: () => caller },
+    );
+
+    expect(response.status).toBe(422);
+  });
 });

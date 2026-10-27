@@ -70,6 +70,8 @@ describe('Declare directors and owners, end to end', () => {
     const operator = await operatorOf(application, 'ada');
     const customerId = await registeredCustomer(operator);
 
+    await application.settled();
+
     const trace = await tracing.traceOf(async () => {
       expectStatus(
         await operator.post(`/customers/${customerId}/directors-and-owners`, {
@@ -90,6 +92,10 @@ describe('Declare directors and owners, end to end', () => {
             children: [
               { name: 'repository CustomerRepository.findById' },
               { name: 'repository CustomerRepository.save' },
+              {
+                name: 'unit-of-work before-commit',
+                children: [{ name: 'domain-event customer-due-diligence.customer.directors-and-owners-declared' }],
+              },
             ],
           },
         ],

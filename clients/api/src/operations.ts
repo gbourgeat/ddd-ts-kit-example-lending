@@ -409,6 +409,7 @@ export type GetCustomerFileResult =
   | Success<200, {
     items: Array<{
       id: string;
+      identifiedAt: string;
     }>;
     /** Present when it is cheap to count. */
     total?: number;

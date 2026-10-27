@@ -1,0 +1,11 @@
+// ddd-ts-kit:models
+/// The customer file as the search reads it: one row per identified customer, kept from its events.
+model CustomerDueDiligenceCustomerFile {
+  id           String   @id
+  identifiedAt DateTime @map("identified_at") @db.Timestamptz(3)
+  tenantId     String   @map("tenant_id")
+
+  @@index([tenantId, id], map: "customer_files_tenant_idx")
+  @@map("customer_files")
+  @@schema("customer_due_diligence")
+}

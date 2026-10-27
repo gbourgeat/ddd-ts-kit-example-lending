@@ -962,9 +962,13 @@ paths:
                       properties:
                         id:
                           type: string
+                        identifiedAt:
+                          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                          type: string
                       type: object
                       required:
                         - id
+                        - identifiedAt
                   total:
                     type: integer
                     minimum: 0

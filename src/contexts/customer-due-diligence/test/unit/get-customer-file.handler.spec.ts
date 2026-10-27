@@ -26,7 +26,8 @@ const holders = authorizationMiddleware({
 
 const holder = anActor().withRole('holder').build();
 const SEARCHED = ['customer-1', 'customer-2', 'customer-3'];
-const LINES: readonly GetCustomerFileItem[] = SEARCHED.map((id) => ({ id }));
+const identifiedOn = new Date('2026-01-01T00:00:00.000Z');
+const LINES: readonly GetCustomerFileItem[] = SEARCHED.map((id) => ({ id, identifiedAt: identifiedOn }));
 
 describe('Get customer file', () => {
   it('answers one page of what the actor may see, with the total', async () => {
@@ -45,15 +46,33 @@ describe('Get customer file', () => {
     await expect(queryBus.execute(query)).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
 
-  // TODO(domain): replace each entry below by a test named after what "get customer file" shows and to whom.
-  it.todo('lists only what the access scope of the actor covers');
-  it.todo('applies each criterion of the query');
+  it('asks the reader for the access scope of the actor, and shows the files that scope covers', async () => {
+    const reader = new FakeGetCustomerFileReader(LINES);
+    const queryBus = arrangeWith(reader);
+
+    const page = await queryBus.execute(new GetCustomerFileQuery(holder, offsetPage()));
+
+    expect(reader.lastScope?.kind).toBe('all');
+    expect(page.items).toHaveLength(3);
+  });
+
+  it('shows each file with the day its customer was identified', async () => {
+    const queryBus = arrange(LINES);
+
+    const page = await queryBus.execute(new GetCustomerFileQuery(holder, offsetPage({ limit: 1 })));
+
+    expect(page.items).toEqual([{ id: 'customer-1', identifiedAt: identifiedOn }]);
+  });
 });
 
 function arrange(lines: readonly GetCustomerFileItem[]) {
+  return arrangeWith(new FakeGetCustomerFileReader(lines));
+}
+
+function arrangeWith(reader: FakeGetCustomerFileReader) {
   const { queryBus } = createTestBuses();
   const access = new PolicyAccess({ authorizer, clock: new FixedClock(new Date('2026-01-01T00:00:00.000Z')) });
-  const handler = new GetCustomerFileHandler(new FakeGetCustomerFileReader(lines), access);
+  const handler = new GetCustomerFileHandler(reader, access);
 
   return queryBus.use(holders).register(GetCustomerFileQuery, handler);
 }

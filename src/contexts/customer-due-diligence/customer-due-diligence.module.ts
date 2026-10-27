@@ -17,7 +17,8 @@ import { DeclareDirectorsAndOwnersCommand } from '@/contexts/customer-due-dilige
 import { DeclareDirectorsAndOwnersHandler } from '@/contexts/customer-due-diligence/application/commands/declare-directors-and-owners/declare-directors-and-owners.handler';
 import { GetCustomerFileHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-file/get-customer-file.handler';
 import { GetCustomerFileQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-file/get-customer-file.query';
-import { InMemoryGetCustomerFileReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/in-memory-get-customer-file.reader';
+import { PrismaGetCustomerFileReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/prisma-get-customer-file.reader';
+import { PrismaCustomerFileProjectionRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/prisma-customer-file-projection.repository';
 import { CustomerFileOnIdentifiedEventHandler } from '@/contexts/customer-due-diligence/application/event-handlers/customer-file-on-identified.event-handler';
 // /ddd-ts-kit:imports
 
@@ -66,10 +67,13 @@ function registerHandlers(platform: Platform): void {
     { context: 'customer-due-diligence' },
   );
 
-  const getCustomerFileReader = platform.adapter(new InMemoryGetCustomerFileReader(), {
-    kind: 'repository',
-    context: 'customer-due-diligence',
-  });
+  const getCustomerFileReader = platform.adapter(
+    new PrismaGetCustomerFileReader(platform.persistence.database, platform.scope),
+    {
+      kind: 'repository',
+      context: 'customer-due-diligence',
+    },
+  );
 
   platform.queries.register(GetCustomerFileQuery, new GetCustomerFileHandler(getCustomerFileReader, platform.access), {
     context: 'customer-due-diligence',
@@ -91,10 +95,19 @@ function registerReactions(platform: Platform): void {
     }
   });
 
-  const customerFileOnIdentifiedEventHandler = platform.adapter(new CustomerFileOnIdentifiedEventHandler(), {
-    kind: 'domain-event-handler',
-    context: 'customer-due-diligence',
-  });
+  const customerFileOnIdentifiedEventHandler = platform.adapter(
+    new CustomerFileOnIdentifiedEventHandler(
+      platform.adapter(new PrismaCustomerFileProjectionRepository(platform.persistence.database, platform.scope), {
+        kind: 'repository',
+        context: 'customer-due-diligence',
+        token: 'CustomerFileProjection',
+      }),
+    ),
+    {
+      kind: 'domain-event-handler',
+      context: 'customer-due-diligence',
+    },
+  );
 
   platform.domainEvents.on(CustomerIdentified.eventName, async (event) => {
     if (event instanceof CustomerIdentified) {

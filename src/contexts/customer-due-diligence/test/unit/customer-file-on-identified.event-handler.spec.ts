@@ -7,11 +7,15 @@ import {
 } from '@ddd-ts-kit/kernel';
 import { CustomerFileOnIdentifiedEventHandler } from '@/contexts/customer-due-diligence/application/event-handlers/customer-file-on-identified.event-handler';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
+import { FakeCustomerFileProjection } from '@/contexts/customer-due-diligence/test/fakes/customer-file-projection.fake';
+
+const identifiedOn = new Date('2026-01-01T00:00:00.000Z');
 
 describe('When customer identified', () => {
   it('reacts at the end of the unit of work, before the commit, without failing', async () => {
-    const handler = new CustomerFileOnIdentifiedEventHandler();
-    const event = new CustomerIdentified('customer-1', new Date('2026-01-01T00:00:00.000Z'));
+    const projection = new FakeCustomerFileProjection();
+    const handler = new CustomerFileOnIdentifiedEventHandler(projection);
+    const event = new CustomerIdentified('customer-1', identifiedOn);
     const domainEvents = new InMemoryDomainEventDispatcher();
     const reactedAt: string[] = [];
 
@@ -27,7 +31,22 @@ describe('When customer identified', () => {
     expect(domainEvents.afterCommitFailures).toEqual([]);
   });
 
-  // TODO(domain): replace each entry below by a test named after the policy this reaction implements.
-  it.todo('carries out the policy that follows the fact');
-  it.todo('does nothing when the policy does not apply');
+  it('records the file of the identified customer with the day it was identified', async () => {
+    const projection = new FakeCustomerFileProjection();
+    const handler = new CustomerFileOnIdentifiedEventHandler(projection);
+
+    await handler.handle(new CustomerIdentified('customer-1', identifiedOn));
+
+    expect(projection.recorded).toEqual([{ customerId: 'customer-1', identifiedOn }]);
+  });
+
+  it('records the file of each identified customer apart', async () => {
+    const projection = new FakeCustomerFileProjection();
+    const handler = new CustomerFileOnIdentifiedEventHandler(projection);
+
+    await handler.handle(new CustomerIdentified('customer-1', identifiedOn));
+    await handler.handle(new CustomerIdentified('customer-2', identifiedOn));
+
+    expect(projection.recorded.map((entry) => entry.customerId)).toEqual(['customer-1', 'customer-2']);
+  });
 });
