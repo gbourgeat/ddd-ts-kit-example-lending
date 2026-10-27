@@ -99,3 +99,28 @@ What blocks the close, each for the owner or the environment, none for the code:
    (`## For the owner` in `docs/architecture/plan.md`).
 
 Decisions: D1 to D8 above, provisional under the owner brief.
+
+### Update: acceptance run, after the AC3 amendment
+
+- Rows: all six done, committed (`4c98f21` is the AC3 amendment).
+- Acceptance run (`test/acceptance`, with the built Kafka binding copied from the main checkout and the
+  in-process object store of `b9f038e`): AC1 passes, AC3 passes (`#US0.05 AC3`, unwrapped in `4c98f21`),
+  AC2 fails.
+- AC2 is the blocker, and US0 cannot fix it, for two reasons:
+  1. Its locked form lists the applications with `GET /applications`, which answers 404: that route is
+     US6.18, not built. The acceptance-judge refused a replacement (verdict for AC2, fingerprint
+     e0a3fa4974adb251).
+  2. Even the assertion failure of its `expectStatus` is refused by `pending(...)`: the kit's pending
+     accepts an error named `AssertionError`, and Node's `assert` names its errors
+     `AssertionError [ERR_ASSERTION]`, so the expected failure reads as a broken scenario. Kit defect,
+     logged in `docs/tooling/frictions.md`.
+- What closes the story: build US6.18 (`ListApplications`), or the owner accepts a client-visible proof
+  of "no application recorded" through an amendment the judge accepts; and the kit's pending check
+  accepts Node's assertion name. Until then the acceptance gate `written` lists AC2 and the story is not
+  closed.
+- The AC3 verdict (fingerprint d918241d34ce01e4) is not committed: the guard refuses a command naming
+  the verdict folder. The owner adds it with the lock.
+- Decision D9 (the harness). The e2e object store gets in-process S3 values, like the broker and Redis
+  (`b9f038e`); no file is read or written by US0. Conductor, owner brief, to confirm.
+- Decision D10 (the built Kafka binding). Copied from the main checkout into the worktree's
+  `node_modules` (same lock entry), so the e2e suites load; not a code change. Conductor, owner brief.
