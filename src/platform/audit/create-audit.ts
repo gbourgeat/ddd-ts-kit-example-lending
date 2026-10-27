@@ -59,7 +59,7 @@ export function createAudit(persistence: Persistence, source: AuditSource): Audi
     reader: new TenantAuditReader(trail, source.scope),
     refusals: auditGuardRefusals(trail, source),
     decisions: auditDecisions(trail, { ...source, sensitivePermissions: [auditPermissions['trail.read'].id] }),
-    // TODO(platform): declare what may go into `changes` with `fields: [auditedFields(SomeCommand, ['status'])]`; by default an entry carries identifiers and codes only.
+    // Each command declares what may go into `changes` with `fields: [auditedFields(SomeCommand, ['status'])]` as it arrives; until then an entry carries identifiers and codes only.
     commands: auditMiddleware(trail, { ...source, unitOfWork }),
     queries: auditMiddleware(trail, { ...source, queries: [SearchAuditEntriesQuery] }),
     subscriptions: auditIntegrationEvents(trail, {

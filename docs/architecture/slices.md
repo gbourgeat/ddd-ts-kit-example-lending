@@ -353,7 +353,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US14.01 | platform | skeleton | Audit: what goes into the entries of changes (fields declared), every command audited by default | edit `src/platform/audit/create-audit.ts` (TODO(platform) line 62): `fields: [auditedFields(...)]` per command (no generator) | | conductor | todo |
+| US14.01 | platform | skeleton | Audit: what goes into the entries of changes (fields declared), every command audited by default | edit `src/platform/audit/create-audit.ts` (TODO(platform) line 62): `fields: [auditedFields(...)]` per command (no generator) | | conductor | done |
 | US14.02 | platform | skeleton | Audit stream of financial crime, readable by compliance only | edit the audit streams of the platform (no generator): the stream of `financial-crime` with its readers = compliance | US14.01, US11.01 | conductor | todo |
 | US14.03 | platform | slice | The audit search returns the reads of customer files and the grants | route of the audit search in `src/platform/audit` (no generator), covered by an e2e per read of customer files | US14.01, US2.16 | conductor | todo |
 | US14.04 | credit-application | slice | Explain a refusal to a broker or a conflicted advisor without disclosing the hidden content | `error credit-application ApplicationNotVisible forApplicationNotVisible --code APPLICATION_NOT_VISIBLE --module file`; `query credit-application ExplainRefusal --permission application.read --module file` | US6.18, US7.06 | credit-application | todo |
