@@ -31,7 +31,13 @@ const declaringSpans = [
                         children: [
                           {
                             name: 'publish branch-network.conflict-of-interest.declared',
-                            children: [{ name: 'process branch-network.conflict-of-interest.declared' }],
+                            children: [
+                              {
+                                name: 'process branch-network.conflict-of-interest.declared',
+                                children: [{ name: 'repository DeclaredConflictsStore.keep' }],
+                              },
+                              { name: 'process branch-network.conflict-of-interest.declared' },
+                            ],
                           },
                         ],
                       },
