@@ -243,6 +243,23 @@ model BranchNetworkPortfolio {
   @@map("portfolios")
   @@schema("branch_network")
 }
+
+model BranchNetworkConflictOfInterest {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  staffMemberId String  @map("staff_member_id")
+  customerId   String   @map("customer_id")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "conflict_of_interests_tenant_idx")
+  @@map("conflict_of_interests")
+  @@schema("branch_network")
+}
 // /ddd-ts-kit:models
 
 // The event store of @ddd-ts-kit/prisma: the events, the snapshots, the checkpoints and the

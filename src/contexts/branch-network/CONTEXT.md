@@ -26,11 +26,13 @@ Who follows which customer, and who may decide on it, is needed for the business
 | Declared conflict | A conflict of interest put on record by the staff member themselves | Conflict of interest, undeclared |
 | Opened | the branch is open: it has a place, it can take its staff and its portfolios |  |
 | Appointed | a person becomes a staff member of a bank |  |
+| Declared | a staff member puts a conflict of interest on record |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
 - `Branch`
+- `ConflictOfInterest`
 - `Portfolio`
 - `StaffMember`
 <!-- /ddd-ts-kit:aggregates -->
@@ -101,6 +103,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchNetworkPersonalDataErasure` | external | `PrismaBranchNetworkPersonalDataErasure` |
 | `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
 | `BranchRepository` | external | `PrismaBranchRepository` |
+| `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
 | `PortfolioRepository` | external | `PrismaPortfolioRepository` |
 | `StaffMemberRepository` | external | `PrismaStaffMemberRepository` |
 <!-- /ddd-ts-kit:reference -->
