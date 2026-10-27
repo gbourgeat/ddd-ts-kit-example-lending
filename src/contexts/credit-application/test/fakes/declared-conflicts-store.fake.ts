@@ -1,5 +1,5 @@
 import type { EventStamp } from '@ddd-ts-kit/kernel';
-import type { DeclaredConflictRow } from '@/contexts/credit-application/decision/application/read-model/declared-conflict-row';
+import type { DeclaredConflictRow } from '@/contexts/credit-application/decision/application/projections/declared-conflict-row.projection';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 
 interface KeptLine {
@@ -22,5 +22,9 @@ export class FakeDeclaredConflictsStore implements DeclaredConflictsStore {
 
   async find(conflictOfInterestId: string): Promise<DeclaredConflictRow | undefined> {
     return this.lines.get(conflictOfInterestId)?.row;
+  }
+
+  async searchOfCustomer(customerId: string): Promise<readonly DeclaredConflictRow[]> {
+    return [...this.lines.values()].map((line) => line.row).filter((row) => row.customerId === customerId);
   }
 }

@@ -27,8 +27,11 @@ import { CorrectEntryCommand } from '@/contexts/credit-application/file/applicat
 import { CorrectEntryHandler } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.handler';
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
 import { conflictOfInterestDeclaredV1 as declaredConflictsDefinition } from '@/contexts/branch-network/published-language';
+import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { DeclaredConflictsProjection } from '@/contexts/credit-application/decision/application/projections/declared-conflicts.projection';
 import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-declared-conflicts-store.repository';
+import { ReadDeclaredConflictsHandler } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.handler';
+import { ReadDeclaredConflictsQuery } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.query';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -40,8 +43,17 @@ export interface CreditApplicationWiring {
 }
 
 export function creditApplicationModule(platform: Platform): CreditApplicationWiring {
-  registerHandlers(platform);
-  registerReactions(platform);
+  const declaredConflicts = platform.adapter(
+    new PrismaDeclaredConflictsStore(platform.persistence.database, platform.scope),
+    {
+      kind: 'repository',
+      context: 'credit-application',
+      token: 'DeclaredConflictsStore',
+    },
+  );
+
+  registerHandlers(platform, declaredConflicts);
+  registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 
   return {
@@ -53,7 +65,7 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
 }
 
 /** The command and query handlers of the context, with the repositories and readers they are given. */
-function registerHandlers(platform: Platform): void {
+function registerHandlers(platform: Platform, declaredConflicts: DeclaredConflictsStore): void {
   // ddd-ts-kit:handlers
   const creditApplicationRepository = platform.adapter(
     new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
@@ -100,11 +112,19 @@ function registerHandlers(platform: Platform): void {
     new CorrectEntryHandler(creditApplicationRepository, platform.clock),
     { context: 'credit-application' },
   );
+
+  platform.queries.register(
+    ReadDeclaredConflictsQuery,
+    new ReadDeclaredConflictsHandler(declaredConflicts, creditApplicationRepository),
+    {
+      context: 'credit-application',
+    },
+  );
   // /ddd-ts-kit:handlers
 }
 
 /** What the context does when an event happens: its own events and those of the other contexts. */
-function registerReactions(platform: Platform): void {
+function registerReactions(platform: Platform, declaredConflicts: DeclaredConflictsStore): void {
   // ddd-ts-kit:reactions
   const creditApplicationSubmittedPublisher = platform.adapter(
     new CreditApplicationSubmittedPublisher(platform.publisher, platform.ids),
@@ -134,13 +154,7 @@ function registerReactions(platform: Platform): void {
     }
   });
 
-  const declaredConflictsProjection = new DeclaredConflictsProjection(
-    platform.adapter(new PrismaDeclaredConflictsStore(platform.persistence.database, platform.scope), {
-      kind: 'repository',
-      context: 'credit-application',
-      token: 'DeclaredConflictsStore',
-    }),
-  );
+  const declaredConflictsProjection = new DeclaredConflictsProjection(declaredConflicts);
 
   subscribeAll(platform.subscriberFor('credit-application'), [
     consume(
@@ -183,6 +197,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(CorrectEntryCommand, creditApplicationPermissions['application.correct'], {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
+    requires(ReadDeclaredConflictsQuery, creditApplicationPermissions['application.decide'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     // /ddd-ts-kit:authorization
   ];

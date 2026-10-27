@@ -7,5 +7,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.read': { description: 'List applications' },
   'application.name-party': { description: 'Name co borrower' },
   'application.correct': { description: 'Correct entry' },
+  'application.decide': { description: 'Decide an application: read its declared conflicts first' },
   // /ddd-ts-kit:permissions
 });

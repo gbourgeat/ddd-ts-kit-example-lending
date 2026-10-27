@@ -336,6 +336,41 @@ export function correctEntry(
   return send<CorrectEntryResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadDeclaredConflictsInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ReadDeclaredConflictsResult =
+  | Success<200, {
+    conflicts: Array<Schemas.DeclaredConflictLine>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read declared conflicts: `GET /applications/{id}/declared-conflicts`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function readDeclaredConflicts(
+  connection: Connection,
+  input: ReadDeclaredConflictsInput,
+  options: CallOptions = {},
+): Promise<ReadDeclaredConflictsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/declared-conflicts',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDeclaredConflictsResult>(connection, operation, { ...input, ...options });
+}
+
 export interface NameGuarantorInput {
   readonly path: {
     readonly id: string;
