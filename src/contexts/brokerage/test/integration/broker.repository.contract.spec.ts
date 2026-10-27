@@ -50,6 +50,23 @@ repositoryContract<Broker>(runner, {
   },
 });
 
+describe('PrismaBrokerRepository, lapsed registrations', () => {
+  it('finds the brokers of the tenant whose registration is not lapsed, once a lapse is saved', async () => {
+    await database.reset();
+
+    const scope = new FixedExecutionScope(workOf('acme'));
+    const repository = new PrismaBrokerRepository(database.persistence.database, scope, clock);
+    const lapsed = aBroker().identifiedBy('broker-lapsed').build();
+    const valid = aBroker().identifiedBy('broker-valid').build();
+
+    lapsed.markLapsed(clock.now());
+    await repository.save(lapsed);
+    await repository.save(valid);
+
+    expect((await repository.findNotLapsed()).map((broker) => broker.id)).toEqual(['broker-valid']);
+  });
+});
+
 describe('PrismaBrokerRepository, tenant by tenant', () => {
   it('hides from a tenant what another tenant saved', async () => {
     await database.reset();

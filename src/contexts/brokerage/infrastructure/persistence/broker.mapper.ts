@@ -9,6 +9,7 @@ export const BrokerMapper = {
     const loaded = Broker.rehydrate(row.id, {
       registeredAt: row.registeredAt,
       registrationNumber: row.registrationNumber,
+      lapsedOn: row.lapsedOn ?? undefined,
     });
 
     loaded.version = row.version;
@@ -17,6 +18,11 @@ export const BrokerMapper = {
   },
 
   toRow(saved: Broker): BrokerColumns {
-    return { id: saved.id, ...saved.toState() };
+    return {
+      id: saved.id,
+      registeredAt: saved.registeredAt,
+      registrationNumber: saved.registrationNumber,
+      lapsedOn: saved.lapsedOn ?? null,
+    };
   },
 };

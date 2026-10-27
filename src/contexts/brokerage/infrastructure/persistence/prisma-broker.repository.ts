@@ -23,6 +23,14 @@ export class PrismaBrokerRepository implements BrokerRepository {
     return row === null ? undefined : BrokerMapper.toDomain(row);
   }
 
+  async findNotLapsed(): Promise<Broker[]> {
+    const rows = await this.database.client().brokerageBroker.findMany({
+      where: { lapsedOn: null, ...tenantWhere(this.scope) },
+    });
+
+    return rows.map((row) => BrokerMapper.toDomain(row));
+  }
+
   async save(saved: Broker): Promise<void> {
     await optimisticUpdate(saved, async ({ expected, next }) => {
       const state = { ...BrokerMapper.toRow(saved), version: next };
