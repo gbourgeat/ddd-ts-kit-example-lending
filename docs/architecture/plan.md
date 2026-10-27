@@ -272,6 +272,11 @@ the code later becomes a record in `docs/adr/` once the project exists.
 
 - 2026-10-27 US0 AC2 stays `pending(...)` until US6.18 builds the list of applications: US0 merges with AC2 pending, and the story closes when US6.18 is done (owner)
 - 2026-10-27 US0 AC2 under Jest: the status of the list is to be checked by Jest's `expect(listed.status).toBe(200)`, because `pending(...)` refuses the node:assert failure of `expectStatus` (kit issue #436). The acceptance-judge refused this change of the locked scenario (`test/acceptance/verdicts/us0-a4fb82d0b747fa98.md`), so the lock keeps `expectStatus` and AC2 stays pending as above; the change is not applied (owner, the judge's verdict)
+- 2026-10-27 Owner, run of wave 4: the PostgreSQL 18 of the project at 127.0.0.1:55440 is the database of `DATABASE_URL`; the first migration `initial-schema` is generated once it answers (owner)
+- 2026-10-27 Owner, run of wave 4: US2.04 writes version 2 of the birth event of Customer with its upcaster, recorded by `docs --stored-events`, and declares the personal fields of the birth (owner)
+- 2026-10-27 Owner, run of wave 4: the birth recorded at version 1 has no identity facts; its upcast gives them as not recorded, so that event alone does not identify the customer (conductor, owner brief, to confirm: most protective reading of the open choice)
+- 2026-10-27 Owner, run of wave 4: the APR worked examples of `docs/architecture/apr-worked-examples.md` are the reference of US8.04; the monthly fee joins the repayment stream of the APR, the instalment does not include it (owner, the examples; checked by the conductor, all five round to the stated rate)
+- 2026-10-27 Owner, run of wave 4: the decisions marked "to confirm" of this plan are confirmed as written (owner)
 - 2026-10-27 US0 trace of the submission (`test/e2e/submit-application.e2e.spec.ts`): the expected tree completes the comment's description, under `unit-of-work before-commit` the domain event, its handler `CreditApplicationSubmittedPublisher` and the outbox append; a spec of the slice, not a locked scenario (owner)
 - 2026-10-27 The amend verdicts of US0 (AC1: the customer related as `self` first; AC3: the recorder method `received()`, then the identifier read in `payload.creditApplicationId`) are validated; "in the same transaction that records it" of AC3 is asserted by no scenario, so row US0.07 proves it (owner)
 
@@ -298,11 +303,9 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - The migration writing the table of the relationships, `authorization.relation_tuples` (model `RelationTuple`, the new schema `authorization`): none is in the repo, to be written and applied by the owner (US0.03).
 - Build the native Kafka binding of `@confluentinc/kafka-javascript` before running the acceptance suite: it cannot load in this sandbox (US0.03).
 - Simulated adapters (0.95.0, `generate adapter <context> <Port> --kind simulated`): deferred as the upgrade asked. The remote adapters that only throw are replaced in a later step.
-- Wave 3, blocked on the environment: no PostgreSQL is reachable from the sandbox, so the e2e specs and the working migrations of the rows that store a field (US1.01, US1.07, US2.04 if stored) wait for a reachable database. Give the sandbox a `DATABASE_URL` to a PostgreSQL (the example is `postgres://app:app@localhost:5432/app`).
+- Wave 4, database: 127.0.0.1:55440 refuses connections from this session (nothing listens, Docker not reachable), so `npm run db:generate -- initial-schema` cannot run and no working migration can be generated. The e2e specs run in process (PGlite) and do not need it. The owner starts the PostgreSQL, then the conductor generates `initial-schema` on its own branch, and the owed working migrations follow (see the run report).
 - Wave 3, `docs:check`: recorded by the conductor (see Decisions, the loan paid-out shape); nothing left open on it.
 - Wave 3, decisions taken by the conductor under the owner brief, to confirm: identification of a person; appointment to a branch names the opened branch; opening an organisation reserved to the operator (signed-in grant narrowed in `src/platform/auth/authorization/signed-in-grants.ts`, commit 925ae04).
-- Wave 3, US2.04 blocked: `event-sourcing/upcaster-required` on the birth event of Customer (its version 1 stored shape changed to carry the identity facts: a version 2 with an upcaster is needed, and the owner decides what a birth recorded before has), and `privacy/declared-field` on the document number and the address of the birth event (the personal fields to declare). The branch build/customer-due-diligence has the scope staged, not committed (conductor, owner).
-- Wave 3, US8.04 blocked: the APR is proven against the worked examples of the directive, and none is in the repository. The owner gives the examples (inputs and expected rate) and the precision the rate states.
 
 ## Open questions
 
