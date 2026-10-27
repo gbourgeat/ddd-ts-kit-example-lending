@@ -3,6 +3,7 @@ import type { Type } from '@nestjs/common';
 import { customerDueDiligenceControllers } from '@/contexts/customer-due-diligence/customer-due-diligence.controllers';
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
+import type { ScreeningProvider } from '@/contexts/customer-due-diligence/application/ports/screening-provider.port';
 // ddd-ts-kit:imports
 import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/infrastructure/external/simulated-screening-provider.adapter';
 import { CustomerIdentifiedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-identified.publisher';
@@ -37,8 +38,12 @@ export interface CustomerDueDiligenceWiring {
   readonly controllers: readonly Type<unknown>[];
 }
 
-export function customerDueDiligenceModule(platform: Platform): CustomerDueDiligenceWiring {
-  registerHandlers(platform);
+/** The screening provider is the simulated one unless the composition gives another (the tests feed the records they arrange). */
+export function customerDueDiligenceModule(
+  platform: Platform,
+  screening: ScreeningProvider = new SimulatedScreeningProvider(),
+): CustomerDueDiligenceWiring {
+  registerHandlers(platform, screening);
   registerReactions(platform);
   registerJobs(platform);
 
@@ -51,7 +56,7 @@ export function customerDueDiligenceModule(platform: Platform): CustomerDueDilig
 }
 
 /** The command and query handlers of the context, with the repositories and readers they are given. */
-function registerHandlers(platform: Platform): void {
+function registerHandlers(platform: Platform, screening: ScreeningProvider): void {
   // ddd-ts-kit:handlers
   const customerRepository = platform.adapter(
     new EventStoreCustomerRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
@@ -62,7 +67,7 @@ function registerHandlers(platform: Platform): void {
     context: 'customer-due-diligence',
   });
 
-  const screeningProvider = platform.adapter(new SimulatedScreeningProvider(), {
+  const screeningProvider = platform.adapter(screening, {
     kind: 'external',
     context: 'customer-due-diligence',
     token: 'ScreeningProvider',
