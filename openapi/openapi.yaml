@@ -4,6 +4,7 @@ info:
   version: '0.1.0'
 tags:
   - name: audit
+  - name: branch-network
   - name: credit-policy
   - name: identity
 paths:
@@ -322,6 +323,73 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
+  /branches:
+    post:
+      operationId: openBranch
+      summary: Open branch
+      tags:
+        - branch-network
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
         '422':
           description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
           content:
@@ -1203,6 +1271,99 @@ paths:
             - ORGANISATION_NOT_FOUND
             - OWNERS_ONLY
             - OWN_ROLE
+            - VALIDATION_FAILED
+  /products:
+    post:
+      operationId: defineProduct
+      summary: Define product
+      tags:
+        - credit-policy
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                amountMinimumCents:
+                  type: integer
+                amountMaximumCents:
+                  type: integer
+                durationMinimumMonths:
+                  type: integer
+                durationMaximumMonths:
+                  type: integer
+                arrangementFeeCents:
+                  type: integer
+                insuranceMandatory:
+                  type: boolean
+                scoreThreshold:
+                  type: integer
+              type: object
+              required:
+                - amountMinimumCents
+                - amountMaximumCents
+                - durationMinimumMonths
+                - durationMaximumMonths
+                - arrangementFeeCents
+                - insuranceMandatory
+                - scoreThreshold
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: INVALID_ARRANGEMENT_FEE, INVALID_SCORE_THRESHOLD, PRODUCT_BOUNDS_INVERTED, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - INVALID_ARRANGEMENT_FEE
+            - INVALID_SCORE_THRESHOLD
+            - PRODUCT_BOUNDS_INVERTED
             - VALIDATION_FAILED
   /rate-grids:
     post:
