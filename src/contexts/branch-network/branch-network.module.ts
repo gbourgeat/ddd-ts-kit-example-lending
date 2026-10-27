@@ -26,6 +26,14 @@ import { InMemorySearchBranchStaffReader } from '@/contexts/branch-network/infra
 import { PrismaConflictOfInterestRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-conflict-of-interest.repository';
 import { DeclareConflictOfInterestCommand } from '@/contexts/branch-network/application/commands/declare-conflict-of-interest/declare-conflict-of-interest.command';
 import { DeclareConflictOfInterestHandler } from '@/contexts/branch-network/application/commands/declare-conflict-of-interest/declare-conflict-of-interest.handler';
+import { consume, subscribeAll } from '@ddd-ts-kit/events';
+import { customerAdvisorAssignedV1 as assignIdentifiedCustomerDefinition } from '@/contexts/customer-due-diligence/published-language';
+import { AssignIdentifiedCustomerIntegrationHandler } from '@/contexts/branch-network/application/integration/handlers/assign-identified-customer.integration-handler';
+import { AssignCustomerCommand } from '@/contexts/branch-network/application/commands/assign-customer/assign-customer.command';
+import { AssignCustomerHandler } from '@/contexts/branch-network/application/commands/assign-customer/assign-customer.handler';
+import { SearchPortfolioCustomersHandler } from '@/contexts/branch-network/application/queries/search-portfolio-customers/search-portfolio-customers.handler';
+import { SearchPortfolioCustomersQuery } from '@/contexts/branch-network/application/queries/search-portfolio-customers/search-portfolio-customers.query';
+import { RelationPortfolioCustomersReader } from '@/contexts/branch-network/infrastructure/persistence/relation-portfolio-customers.reader';
 // /ddd-ts-kit:imports
 
 export interface BranchNetworkWiring {
@@ -109,6 +117,23 @@ function registerHandlers(platform: Platform): void {
     ),
     { context: 'branch-network' },
   );
+
+  platform.commands.register(
+    AssignCustomerCommand,
+    new AssignCustomerHandler(portfolioRepository, platform.relations),
+    { context: 'branch-network' },
+  );
+
+  const searchPortfolioCustomersReader = platform.adapter(new RelationPortfolioCustomersReader(platform.relations), {
+    kind: 'repository',
+    context: 'branch-network',
+  });
+
+  platform.queries.register(
+    SearchPortfolioCustomersQuery,
+    new SearchPortfolioCustomersHandler(portfolioRepository, searchPortfolioCustomersReader, platform.access),
+    { context: 'branch-network' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -152,6 +177,21 @@ function registerReactions(platform: Platform): void {
       await openPortfolioForAdvisorEventHandler.handle(event);
     }
   });
+
+  const assignIdentifiedCustomerIntegrationHandler = new AssignIdentifiedCustomerIntegrationHandler(platform.commands);
+
+  subscribeAll(platform.subscriberFor('branch-network'), [
+    consume(
+      assignIdentifiedCustomerDefinition,
+      {
+        consumer: 'branch-network.assign-identified-customer',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      (event) => assignIdentifiedCustomerIntegrationHandler.handle(event),
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 
@@ -178,6 +218,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: (query) => ({ type: 'branch', id: query.branchId }),
     }),
     requires(DeclareConflictOfInterestCommand, branchNetworkPermissions['conflict.declare'], {
+      resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
+    requires(AssignCustomerCommand, branchNetworkPermissions['portfolio.assign-customer'], {
+      resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
+    requires(SearchPortfolioCustomersQuery, branchNetworkPermissions['portfolio.search-customers'], {
       resource: () => ({ type: 'context', id: 'branch-network' }),
     }),
     // /ddd-ts-kit:authorization
