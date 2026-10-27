@@ -27,4 +27,13 @@ export class IdentifyCustomerBody {
   /** The day the proof of address is dated, as an ISO date. */
   @IsDateString()
   addressProofDatedOn = '';
+
+  /** The name of the person, as the screening checks it against the lists. */
+  @IsString()
+  @IsNotEmpty()
+  name = '';
+
+  /** The birth date of the person, as an ISO date: the screening checks it with the name. */
+  @IsDateString()
+  birthDate = '';
 }

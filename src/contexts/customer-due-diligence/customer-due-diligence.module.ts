@@ -62,9 +62,15 @@ function registerHandlers(platform: Platform): void {
     context: 'customer-due-diligence',
   });
 
+  const screeningProvider = platform.adapter(new SimulatedScreeningProvider(), {
+    kind: 'external',
+    context: 'customer-due-diligence',
+    token: 'ScreeningProvider',
+  });
+
   platform.commands.register(
     IdentifyCustomerCommand,
-    new IdentifyCustomerHandler(customerRepository, platform.ids, platform.clock),
+    new IdentifyCustomerHandler(customerRepository, platform.ids, platform.clock, screeningProvider),
     { context: 'customer-due-diligence' },
   );
 
@@ -92,15 +98,7 @@ function registerHandlers(platform: Platform): void {
 
   platform.commands.register(
     ScreenCustomerCommand,
-    new ScreenCustomerHandler(
-      customerRepository,
-      platform.adapter(new SimulatedScreeningProvider(), {
-        kind: 'external',
-        context: 'customer-due-diligence',
-        token: 'ScreeningProvider',
-      }),
-      platform.clock,
-    ),
+    new ScreenCustomerHandler(customerRepository, screeningProvider, platform.clock),
     { context: 'customer-due-diligence' },
   );
   // /ddd-ts-kit:handlers
