@@ -53,6 +53,12 @@ export interface Client {
    */
   submitApplication(input: operations.SubmitApplicationInput, options?: CallOptions): Promise<operations.SubmitApplicationResult>;
   /**
+   * Name co borrower: `POST /applications/{id}/co-borrowers`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  nameCoBorrower(input: operations.NameCoBorrowerInput, options?: CallOptions): Promise<operations.NameCoBorrowerResult>;
+  /**
    * Give account consent: `POST /applications/{id}/consent`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -226,6 +232,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     fileSuspiciousActivityReport: (input, call) => operations.fileSuspiciousActivityReport(connection, input, call),
     searchApplications: (input, call) => operations.searchApplications(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
+    nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
