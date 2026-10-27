@@ -15,6 +15,9 @@ import { DefineProductHandler } from '@/contexts/credit-policy/application/comma
 import { PrismaLegalMaximumRateRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-legal-maximum-rate.repository';
 import { PublishLegalMaximumRateCommand } from '@/contexts/credit-policy/application/commands/publish-legal-maximum-rate/publish-legal-maximum-rate.command';
 import { PublishLegalMaximumRateHandler } from '@/contexts/credit-policy/application/commands/publish-legal-maximum-rate/publish-legal-maximum-rate.handler';
+import { PrismaDelegationTableRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-delegation-table.repository';
+import { SetDelegationTableCommand } from '@/contexts/credit-policy/application/commands/set-delegation-table/set-delegation-table.command';
+import { SetDelegationTableHandler } from '@/contexts/credit-policy/application/commands/set-delegation-table/set-delegation-table.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditPolicyWiring {
@@ -73,6 +76,17 @@ function registerHandlers(platform: Platform): void {
     new PublishLegalMaximumRateHandler(legalMaximumRateRepository, platform.ids, platform.clock),
     { context: 'credit-policy' },
   );
+
+  const delegationTableRepository = platform.adapter(
+    new PrismaDelegationTableRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'credit-policy', token: 'DelegationTableRepository' },
+  );
+
+  platform.commands.register(
+    SetDelegationTableCommand,
+    new SetDelegationTableHandler(delegationTableRepository, platform.ids, platform.clock),
+    { context: 'credit-policy' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -99,6 +113,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
     requires(PublishLegalMaximumRateCommand, creditPolicyPermissions['legal-maximum-rate.publish'], {
+      resource: () => ({ type: 'context', id: 'credit-policy' }),
+    }),
+    requires(SetDelegationTableCommand, creditPolicyPermissions['delegation-table.set'], {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
     // /ddd-ts-kit:authorization

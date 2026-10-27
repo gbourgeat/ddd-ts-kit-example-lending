@@ -209,6 +209,44 @@ export function registerBusiness(
   return send<RegisterBusinessResult>(connection, operation, { ...input, ...options });
 }
 
+export interface SetDelegationTableInput {
+  readonly body: {
+    effectiveFrom: string;
+    advisorLimitCents: number;
+    creditAnalystLimitCents: number;
+    riskManagerLimitCents: number;
+    creditCommitteeLimitCents: number;
+  };
+}
+
+export type SetDelegationTableResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Set delegation table: `PUT /delegation-table`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+ */
+export function setDelegationTable(
+  connection: Connection,
+  input: SetDelegationTableInput,
+  options: CallOptions = {},
+): Promise<SetDelegationTableResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/delegation-table',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<SetDelegationTableResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AcceptInvitationInput {
   readonly body: Schemas.InvitationToken;
 }

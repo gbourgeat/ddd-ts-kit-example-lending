@@ -5,5 +5,6 @@ export const creditPolicyPermissions = definePermissions('credit-policy', {
   'rate-grid.publish': { description: 'Publish rate grid' },
   'product.define': { description: 'Define product' },
   'legal-maximum-rate.publish': { description: 'Publish legal maximum rate' },
+  'delegation-table.set': { description: 'Set delegation table' },
   // /ddd-ts-kit:permissions
 });

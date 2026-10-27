@@ -34,6 +34,7 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 | Inverted | A minimum set above its maximum |  |
 | Terms | The conditions a product is sold with: its amounts, durations, arrangement fee, insurance and score threshold |  |
 | Schedule | the order of the legal maximum rates of one category by their dates of effect |  |
+| Set | a delegation table is set when it is recorded with the day it takes effect |  |
 
 ## Aggregates
 
@@ -62,6 +63,7 @@ No personal data declared.
 - `credit-policy:rate-grid.publish`
 - `credit-policy:product.define`
 - `credit-policy:legal-maximum-rate.publish`
+- `credit-policy:delegation-table.set`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -109,11 +111,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DefineProduct` | command | `product.define` |
 | `PublishLegalMaximumRate` | command | `legal-maximum-rate.publish` |
 | `PublishRateGrid` | command | `rate-grid.publish` |
+| `SetDelegationTable` | command | `delegation-table.set` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
+| PUT | `/delegation-table` | `setDelegationTable` | `DelegationTableRoutes` | `Authenticated` | `SetDelegationTable` | `delegation-table.set` | body: `SetDelegationTableBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidDelegationTable` |
 | POST | `/legal-maximum-rates` | `publishLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `PublishLegalMaximumRate` | `legal-maximum-rate.publish` | body: `PublishLegalMaximumRateBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidLegalMaximumRate` |
 | POST | `/products` | `defineProduct` | `ProductsRoutes` | `Authenticated` | `DefineProduct` | `product.define` | body: `DefineProductBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.ProductBoundsInverted`, `CreditPolicyCodes.InvalidArrangementFee`, `CreditPolicyCodes.InvalidScoreThreshold` |
 | POST | `/rate-grids` | `publishRateGrid` | `RateGridsRoutes` | `Authenticated` | `PublishRateGrid` | `rate-grid.publish` | body: `PublishRateGridBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
@@ -122,7 +126,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `DelegationTableRepository` | external | `PrismaDelegationTableRepository` |
+| `DelegationTableRepository` | repository | `PrismaDelegationTableRepository` |
 | `LegalMaximumRateRepository` | repository | `PrismaLegalMaximumRateRepository` |
 | `ProductRepository` | repository | `PrismaProductRepository` |
 | `RateGridRepository` | repository | `PrismaRateGridRepository` |
