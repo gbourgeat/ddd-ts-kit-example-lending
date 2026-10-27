@@ -10,6 +10,7 @@ import {
 import type { TracedApplication } from '@ddd-ts-kit/tracing';
 import { accessPolicies } from '@/platform/auth/authorization/access-policies';
 import { createAuthorizer } from '@/platform/auth/authorization/create-authorizer';
+import { createRelationTuples } from '@/platform/auth/relationships/create-relation-tuples';
 import { UseCaseProtection } from '@/platform/auth/authorization/use-case-protection';
 import { createCommandBus } from '@/platform/buses/create-command-bus';
 import { createQueryBus } from '@/platform/buses/create-query-bus';
@@ -38,7 +39,8 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
   // A handler of the after-commit phase that fails is logged and reported: the command it follows is committed, and answers.
   const afterCommitFailed = reportAfterCommitFailures({ reporter: foundations.errors, logger, scope });
   const domainEvents = traced.domainEvents(new InMemoryDomainEventDispatcher(afterCommitFailed));
-  const authorizer = createAuthorizer();
+  const relations = createRelationTuples(persistence.database);
+  const authorizer = createAuthorizer(relations);
   const protection = new UseCaseProtection(authorizer, onDecision);
   const adapter = adapterOf(options.resilience ?? defaultResilienceSettings, { traced, domainEvents });
   const files = filesOf(options, foundations);
@@ -53,6 +55,7 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
     queries: createQueryBus(foundations, protection.guard),
     domainEvents,
     persistence,
+    relations,
     access: new PolicyAccess({ authorizer, clock, policies: accessPolicies, onDecision }),
     actors: new ScopedActorContext(scope, foundations.ids),
     adapter,

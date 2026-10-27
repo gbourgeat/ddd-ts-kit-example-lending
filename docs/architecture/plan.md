@@ -255,6 +255,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - A line to decide: `ddd-ts-kit check` prints `0 errors, 0 warnings, 7 suppressions`. The seven are the identity preset's directives on its repositories, each citing ADR-0001. `AGENTS.md` names the line with `0 suppressions`: accept the preset's decision and change the expected line, or ask the kit to count them apart.
 - Not run, yours when you want to see it run: `npm run infra:up`, then `npm run dev`; the API documentation is on `/docs`.
 - Kit issues to file, with the rows marked `to file` of `docs/tooling/frictions.md`: the contracts and hooks refused by the sandbox, the seven suppressions, the blank "Not to be confused with" cells that `--term` cannot carry.
+- The migration writing the table of the relationships, `authorization.relation_tuples` (model `RelationTuple`, the new schema `authorization`): none is in the repo, to be written and applied by the owner (US0.03).
+- Build the native Kafka binding of `@confluentinc/kafka-javascript` before running the acceptance suite: it cannot load in this sandbox (US0.03).
 
 ## Open questions
 

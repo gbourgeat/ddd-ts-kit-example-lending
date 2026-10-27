@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["messaging", "event_store", "audit", "identity"]
+  schemas  = ["messaging", "event_store", "audit", "identity", "authorization"]
 }
 
 // The outbox and the idempotency table, from @ddd-ts-kit/prisma. Keep the field names: the
@@ -62,6 +62,19 @@ model ProcessInstance {
   @@id([tenantId, name, id])
   @@map("process_instances")
   @@schema("messaging")
+}
+
+// The relation tuples of the rebac schema, written in the transaction of the change they describe.
+// Platform-wide, not a context: the tuples name the elements of every context.
+model RelationTuple {
+  object   String
+  relation String
+  subject  String
+
+  @@id([object, relation, subject])
+  @@index([subject], map: "relation_tuples_subject_idx")
+  @@map("relation_tuples")
+  @@schema("authorization")
 }
 
 // One schema per bounded context, no relation across contexts.
