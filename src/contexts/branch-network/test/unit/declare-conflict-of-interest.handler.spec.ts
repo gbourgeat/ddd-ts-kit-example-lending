@@ -1,7 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
 import { anActor } from '@ddd-ts-kit/auth/testing';
-import { createTestBuses, type Actor } from '@ddd-ts-kit/testing';
+import { type Actor } from '@ddd-ts-kit/kernel';
+import { createTestBuses } from '@ddd-ts-kit/testing';
 import { branchNetworkPermissions } from '@/contexts/branch-network/branch-network.permissions';
 import { ConflictOfInterestDeclared } from '@/contexts/branch-network/domain/events/conflict-of-interest-declared.event';
 import { DeclareConflictOfInterestCommand } from '@/contexts/branch-network/application/commands/declare-conflict-of-interest/declare-conflict-of-interest.command';
