@@ -9,6 +9,7 @@ import {
   delegationGrantedV1,
   delegationRevokedV1,
 } from '@/contexts/identity/published-language';
+import { creditApplicationSubmittedV1 } from '@/contexts/credit-application/published-language';
 // /ddd-ts-kit:imports
 
 /** Every integration event the contexts declare: the audit trail records that each one occurred. `generate integration-event` adds to it. */
@@ -21,5 +22,6 @@ export const auditedEvents = createEventRegistry([
   memberRemovedV1,
   delegationGrantedV1,
   delegationRevokedV1,
+  creditApplicationSubmittedV1,
   // /ddd-ts-kit:events
 ]);

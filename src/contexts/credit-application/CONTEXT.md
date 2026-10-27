@@ -68,6 +68,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `credit-application.credit-application.submitted` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -137,6 +138,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `credit-application.credit-application.submitted` | 1 | `CreditApplicationSubmittedPublisher` |
 
 ### Ports
 

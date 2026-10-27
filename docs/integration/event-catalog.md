@@ -2,6 +2,23 @@
 
 Generated from the integration event declarations. Do not edit by hand: regenerate.
 
+## credit-application
+
+### credit-application.credit-application.submitted
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.submitted` | 1 | A borrower or a broker has submitted a loan request: the application file is open, with its applicant, amount in cents and duration in months. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
+| `applicantId` | string | yes |  |
+| `requestedAmountCents` | integer | yes |  |
+| `durationMonths` | integer | yes |  |
+
 ## identity
 
 ### identity.account.deactivated

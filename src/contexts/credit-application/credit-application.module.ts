@@ -9,6 +9,8 @@ import { requires } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { SubmitApplicationCommand } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.command';
 import { SubmitApplicationHandler } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.handler';
+import { CreditApplicationSubmittedPublisher } from '@/contexts/credit-application/file/application/integration/publishers/credit-application-submitted.publisher';
+import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -51,6 +53,16 @@ function registerHandlers(platform: Platform): void {
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
+  const creditApplicationSubmittedPublisher = platform.adapter(
+    new CreditApplicationSubmittedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'credit-application' },
+  );
+
+  platform.domainEvents.on(CreditApplicationSubmitted.eventName, async (event) => {
+    if (event instanceof CreditApplicationSubmitted) {
+      await creditApplicationSubmittedPublisher.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 
