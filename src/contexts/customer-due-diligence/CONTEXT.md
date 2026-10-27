@@ -93,4 +93,10 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe customer-due-diligence --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `identity` (conformist), `data-protection` (customer-supplier); downstreams: `branch-network` (published-language), `credit-application` (customer-supplier).
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `ScreeningProvider` | external | `RemoteScreeningProvider` |
 <!-- /ddd-ts-kit:reference -->
