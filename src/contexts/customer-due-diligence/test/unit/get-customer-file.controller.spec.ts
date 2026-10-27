@@ -34,7 +34,6 @@ describe('GET /customer-files', () => {
     expect(customerDueDiligenceControllers).toContain(GetCustomerFileController);
   });
 
-  // TODO(domain): replace each entry below by a test of the contract a client relies on.
   it('answers each file with the day its customer was identified, as an ISO date', async () => {
     const queries = new InMemoryQueryBus().register(GetCustomerFileQuery, {
       execute: async () => ({

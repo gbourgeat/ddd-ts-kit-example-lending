@@ -113,6 +113,12 @@ export interface Client {
    */
   declareDirectorsAndOwners(input: operations.DeclareDirectorsAndOwnersInput, options?: CallOptions): Promise<operations.DeclareDirectorsAndOwnersResult>;
   /**
+   * Screen a customer against the sanctions and politically exposed lists: `POST /customers/{id}/screening`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  screenCustomer(input: operations.ScreenCustomerInput, options?: CallOptions): Promise<operations.ScreenCustomerResult>;
+  /**
    * Set delegation table: `PUT /delegation-table`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
@@ -224,6 +230,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
     assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
+    screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),

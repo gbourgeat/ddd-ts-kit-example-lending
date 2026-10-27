@@ -43,6 +43,8 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | File | The file of a customer: its identity, business, directors and owners, as the bank holds them, read by compliance and read audited |  |
 | Advisor | The branch-network advisor who looks after a customer, assigned by the bank |  |
 | Assign | The bank gives a customer its advisor |  |
+| Screen | The bank checks a person against the sanctions and politically exposed lists, with the name and birth date it gives |  |
+| Found | The screening found a person on a list: a possible match, waiting for compliance review |  |
 
 ## Aggregates
 
@@ -70,6 +72,7 @@ No personal data declared.
 - `customer-due-diligence:business.declare-owners`
 - `customer-due-diligence:customer.read`
 - `customer-due-diligence:customer.assign-advisor`
+- `customer-due-diligence:customer.screen`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -121,6 +124,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `GetCustomerFile` | query | `customer.read` |
 | `IdentifyCustomer` | command | `customer.identify` |
 | `RegisterBusiness` | command | `business.register` |
+| `ScreenCustomer` | command | `customer.screen` |
 
 ### Routes
 
@@ -131,6 +135,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/customers` | `identifyCustomer` | `CustomersRoutes` | `Authenticated` | `IdentifyCustomer` | `customer.identify` | body: `IdentifyCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
 | PUT | `/customers/:id/advisor` | `assignAdvisor` | `CustomersRoutes` | `Authenticated` | `AssignAdvisor` | `customer.assign-advisor` | params: `AssignAdvisorParams`, body: `AssignAdvisorBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/customers/:id/directors-and-owners` | `declareDirectorsAndOwners` | `CustomersRoutes` | `Authenticated` | `DeclareDirectorsAndOwners` | `business.declare-owners` | params: `DeclareDirectorsAndOwnersParams`, body: `DeclareDirectorsAndOwnersBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BUSINESS_NOT_REGISTERED`, `UNKNOWN_CUSTOMER`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
+| POST | `/customers/:id/screening` | `screenCustomer` | `CustomersRoutes` | `Authenticated` | `ScreenCustomer` | `customer.screen` | params: `ScreenCustomerParams`, body: `ScreenCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 
 ### Publishers
 
