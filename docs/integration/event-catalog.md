@@ -111,6 +111,18 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 
 ## customer-due-diligence
 
+### customer-due-diligence.customer.advisor-assigned
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `customer-due-diligence.customer.advisor-assigned` | 1 | Customer advisor assigned. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `customerId` | string | yes |  |
+
 ### customer-due-diligence.customer.identified
 
 | Type | Version | Description | Deprecated |
