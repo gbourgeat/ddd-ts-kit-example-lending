@@ -59,11 +59,11 @@ function periodOf(value: unknown): RetentionPeriod | undefined {
     return undefined;
   }
 
-  const given = units.filter((unit) => value[unit] !== undefined);
-  const [unit] = given;
+  const given = units.filter((name) => value[name] !== undefined);
+  const unit = given.length === 1 ? given[0] : undefined;
   const amount = unit === undefined ? undefined : value[unit];
 
-  if (given.length !== 1 || typeof amount !== 'number' || !Number.isInteger(amount) || amount <= 0) {
+  if (unit === undefined || typeof amount !== 'number' || !Number.isInteger(amount) || amount <= 0) {
     return undefined;
   }
 

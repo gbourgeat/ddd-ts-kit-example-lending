@@ -15,7 +15,6 @@ const declaration: PersonalFieldsOptions<Record<string, unknown>> = {
   subject: 'id',
   fields: ['email'],
   erasure: 'row',
-  retention: { after: 'expires_at' },
 };
 
 export const InvitationPersonalFields = personalFields(TABLE, declaration);
