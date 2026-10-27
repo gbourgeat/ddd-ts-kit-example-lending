@@ -49,6 +49,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Credit application | the application file of one loan request, from submission to payout |  |
 | Submitted | the application was received from an applicant or a broker, and its file opened |  |
 | Duration | The number of whole months over which the requested amount is repaid |  |
+| Net income | The household's monthly income net of tax, the base of the debt to income ratio |  |
 
 ## Modules
 
@@ -162,4 +163,5 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
+| `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
 <!-- /ddd-ts-kit:reference -->
