@@ -3,6 +3,7 @@ export const CustomerDueDiligenceCodes = {
   UnknownCustomer: 'UNKNOWN_CUSTOMER',
   IdentityDocumentExpired: 'IDENTITY_DOCUMENT_EXPIRED',
   ProofOfAddressTooOld: 'PROOF_OF_ADDRESS_TOO_OLD',
+  BusinessNotRegistered: 'BUSINESS_NOT_REGISTERED',
 } as const;
 
 export type CustomerDueDiligenceCode = (typeof CustomerDueDiligenceCodes)[keyof typeof CustomerDueDiligenceCodes];

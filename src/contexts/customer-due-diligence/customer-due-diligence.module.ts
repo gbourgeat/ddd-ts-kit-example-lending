@@ -13,6 +13,8 @@ import { RegisterBusinessCommand } from '@/contexts/customer-due-diligence/appli
 import { RegisterBusinessHandler } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.handler';
 import { IdentifyCustomerCommand } from '@/contexts/customer-due-diligence/application/commands/identify-customer/identify-customer.command';
 import { IdentifyCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/identify-customer/identify-customer.handler';
+import { DeclareDirectorsAndOwnersCommand } from '@/contexts/customer-due-diligence/application/commands/declare-directors-and-owners/declare-directors-and-owners.command';
+import { DeclareDirectorsAndOwnersHandler } from '@/contexts/customer-due-diligence/application/commands/declare-directors-and-owners/declare-directors-and-owners.handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -53,6 +55,12 @@ function registerHandlers(platform: Platform): void {
     new IdentifyCustomerHandler(customerRepository, platform.ids, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    DeclareDirectorsAndOwnersCommand,
+    new DeclareDirectorsAndOwnersHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -86,6 +94,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(IdentifyCustomerCommand, customerDueDiligencePermissions['customer.identify'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(DeclareDirectorsAndOwnersCommand, customerDueDiligencePermissions['business.declare-owners'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

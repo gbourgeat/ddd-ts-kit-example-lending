@@ -996,6 +996,95 @@ paths:
             - IDENTITY_DOCUMENT_EXPIRED
             - PROOF_OF_ADDRESS_TOO_OLD
             - VALIDATION_FAILED
+  /customers/{id}/directors-and-owners:
+    post:
+      operationId: declareDirectorsAndOwners
+      summary: Identify each director and beneficial owner of a registered business as a person
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                directors:
+                  items:
+                    $ref: '#/components/schemas/IdentifyCustomerBody'
+                  type: array
+                beneficialOwners:
+                  items:
+                    $ref: '#/components/schemas/IdentifyCustomerBody'
+                  type: array
+              type: object
+              required:
+                - directors
+                - beneficialOwners
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: BUSINESS_NOT_REGISTERED, IDENTITY_DOCUMENT_EXPIRED, PROOF_OF_ADDRESS_TOO_OLD, UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - BUSINESS_NOT_REGISTERED
+            - IDENTITY_DOCUMENT_EXPIRED
+            - PROOF_OF_ADDRESS_TOO_OLD
+            - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
   /delegation-table:
     put:
       operationId: setDelegationTable
@@ -2294,6 +2383,37 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    IdentifyCustomerBody:
+      properties:
+        documentKind:
+          type: string
+          enum:
+            - Passport
+            - NationalIdentityCard
+            - ResidencePermit
+        documentNumber:
+          minLength: 1
+          type: string
+        issuingCountry:
+          minLength: 1
+          type: string
+        documentExpiresOn:
+          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+          type: string
+        address:
+          minLength: 1
+          type: string
+        addressProofDatedOn:
+          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+          type: string
+      type: object
+      required:
+        - documentKind
+        - documentNumber
+        - issuingCountry
+        - documentExpiresOn
+        - address
+        - addressProofDatedOn
     InvitationToken:
       properties:
         token:

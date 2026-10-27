@@ -37,6 +37,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Proof | A document showing the address of a person |  |
 | Address | Where a person lives, as stated on its proof of address |  |
 | Old | Dated more than three months before the day of identification |  |
+| Declare | The bank records the directors and beneficial owners of a registered business, each identified as a person |  |
 
 ## Aggregates
 
@@ -61,6 +62,7 @@ No personal data declared.
 <!-- ddd-ts-kit:permissions -->
 - `customer-due-diligence:business.register`
 - `customer-due-diligence:customer.identify`
+- `customer-due-diligence:business.declare-owners`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -107,6 +109,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
 | `IdentifyCustomer` | command | `customer.identify` |
 | `RegisterBusiness` | command | `business.register` |
 
@@ -116,6 +119,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/businesses` | `registerBusiness` | `BusinessesRoutes` | `Authenticated` | `RegisterBusiness` | `business.register` | body: `RegisterBusinessBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `BUSINESS_ALREADY_REGISTERED` |
 | POST | `/customers` | `identifyCustomer` | `CustomersRoutes` | `Authenticated` | `IdentifyCustomer` | `customer.identify` | body: `IdentifyCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
+| POST | `/customers/:id/directors-and-owners` | `declareDirectorsAndOwners` | `CustomersRoutes` | `Authenticated` | `DeclareDirectorsAndOwners` | `business.declare-owners` | params: `DeclareDirectorsAndOwnersParams`, body: `DeclareDirectorsAndOwnersBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BUSINESS_NOT_REGISTERED`, `UNKNOWN_CUSTOMER`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
 
 ### Publishers
 
@@ -135,6 +139,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
 | `BusinessAlreadyRegistered` | `forCustomer` | `BUSINESS_ALREADY_REGISTERED` | none |
+| `BusinessNotRegistered` | `forCustomer` | `BUSINESS_NOT_REGISTERED` | none |
 | `IdentityDocumentExpired` | `forCustomer` | `IDENTITY_DOCUMENT_EXPIRED` | none |
 | `ProofOfAddressTooOld` | `forCustomer` | `PROOF_OF_ADDRESS_TOO_OLD` | none |
 | `UnknownCustomer` | `forCustomer` | `UNKNOWN_CUSTOMER` | none |

@@ -431,6 +431,44 @@ export function identifyCustomer(
   return send<IdentifyCustomerResult>(connection, operation, { ...input, ...options });
 }
 
+export interface DeclareDirectorsAndOwnersInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    directors: Array<Schemas.IdentifyCustomerBody>;
+    beneficialOwners: Array<Schemas.IdentifyCustomerBody>;
+  };
+}
+
+export type DeclareDirectorsAndOwnersResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'BUSINESS_NOT_REGISTERED' | 'IDENTITY_DOCUMENT_EXPIRED' | 'PROOF_OF_ADDRESS_TOO_OLD' | 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Identify each director and beneficial owner of a registered business as a person: `POST /customers/{id}/directors-and-owners`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BUSINESS_NOT_REGISTERED (422), IDENTITY_DOCUMENT_EXPIRED (422), PROOF_OF_ADDRESS_TOO_OLD (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function declareDirectorsAndOwners(
+  connection: Connection,
+  input: DeclareDirectorsAndOwnersInput,
+  options: CallOptions = {},
+): Promise<DeclareDirectorsAndOwnersResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{id}/directors-and-owners',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DeclareDirectorsAndOwnersResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetDelegationTableInput {
   readonly body: {
     effectiveFrom: string;
