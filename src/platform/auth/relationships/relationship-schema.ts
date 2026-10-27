@@ -37,6 +37,7 @@ const elements: SchemaDefinition = {
     relations: { customer: ['customer'], 'co-borrower': ['user'], broker: ['user'] },
     derived: {
       'credit-application:application.consent': via('customer', 'self'),
+      'credit-application:application.name-party': via('customer', 'self'),
       'credit-application:application.read': {
         anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
         butNot: [via('customer', 'conflicted')],
