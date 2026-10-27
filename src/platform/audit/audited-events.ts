@@ -11,7 +11,7 @@ import {
 } from '@/contexts/identity/published-language';
 import { creditApplicationSubmittedV1 } from '@/contexts/credit-application/published-language';
 import { conflictOfInterestDeclaredV1, staffMemberAppointedV1 } from '@/contexts/branch-network/published-language';
-import { customerIdentifiedV1 } from '@/contexts/customer-due-diligence/published-language';
+import { customerIdentifiedV1, customerAdvisorAssignedV1 } from '@/contexts/customer-due-diligence/published-language';
 import {
   productDefinedV1,
   legalMaximumRatePublishedV1,
@@ -40,5 +40,6 @@ export const auditedEvents = createEventRegistry([
   rateGridPublishedV1,
   delegationTablePublishedV1,
   residualIncomeMinimumPublishedV1,
+  customerAdvisorAssignedV1,
   // /ddd-ts-kit:events
 ]);

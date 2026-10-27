@@ -25,6 +25,8 @@ import { AssignAdvisorCommand } from '@/contexts/customer-due-diligence/applicat
 import { AssignAdvisorHandler } from '@/contexts/customer-due-diligence/application/commands/assign-advisor/assign-advisor.handler';
 import { ScreenCustomerCommand } from '@/contexts/customer-due-diligence/application/commands/screen-customer/screen-customer.command';
 import { ScreenCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/screen-customer/screen-customer.handler';
+import { CustomerAdvisorAssignedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-advisor-assigned.publisher';
+import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -135,6 +137,17 @@ function registerReactions(platform: Platform): void {
   platform.domainEvents.on(CustomerIdentified.eventName, async (event) => {
     if (event instanceof CustomerIdentified) {
       await customerFileOnIdentifiedEventHandler.handle(event);
+    }
+  });
+
+  const customerAdvisorAssignedPublisher = platform.adapter(
+    new CustomerAdvisorAssignedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'customer-due-diligence' },
+  );
+
+  platform.domainEvents.on(CustomerAdvisorAssigned.eventName, async (event) => {
+    if (event instanceof CustomerAdvisorAssigned) {
+      await customerAdvisorAssignedPublisher.handle(event);
     }
   });
   // /ddd-ts-kit:reactions

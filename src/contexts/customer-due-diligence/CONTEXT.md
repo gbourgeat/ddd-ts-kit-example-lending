@@ -55,6 +55,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `customer-due-diligence.customer.advisor-assigned` (version 1)
 - `customer-due-diligence.customer.identified` (version 1)
 <!-- /ddd-ts-kit:events -->
 
@@ -141,6 +142,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Versions | Publisher |
 |---|---|---|
+| `customer-due-diligence.customer.advisor-assigned` | 1 | `CustomerAdvisorAssignedPublisher` |
 | `customer-due-diligence.customer.identified` | 1 | `CustomerIdentifiedPublisher` |
 
 ### Ports
