@@ -24,6 +24,35 @@ const registration = { registrationNumber: 'REG-0001' };
 const tenantId = 'acme-bank';
 const dailyCheck = 'brokerage.check-registration';
 
+const registrationSpanTree = [
+  {
+    name: 'POST /brokers',
+    kind: 'SERVER',
+    children: [
+      {
+        name: 'command RegisterBrokerCommand',
+        children: [
+          { name: 'repository BrokerRepository.save' },
+          {
+            name: 'unit-of-work before-commit',
+            children: [
+              {
+                name: 'domain-event brokerage.broker.registered',
+                children: [
+                  {
+                    name: 'handler BrokerRegisteredPublisher',
+                    children: [{ name: 'outbox append brokerage.broker.registered' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
 describe('Register broker, end to end', () => {
   const tracing = installTestTracing();
   let application: BrokerageApplication;
@@ -65,34 +94,7 @@ describe('Register broker, end to end', () => {
     });
 
     // Exact on names and structure, and kept before the tests whose request leaves work behind (a relay still publishing would add its spans here).
-    expectSpanTree(storyOf(trace), [
-      {
-        name: 'POST /brokers',
-        kind: 'SERVER',
-        children: [
-          {
-            name: 'command RegisterBrokerCommand',
-            children: [
-              { name: 'repository BrokerRepository.save' },
-              {
-                name: 'unit-of-work before-commit',
-                children: [
-                  {
-                    name: 'domain-event brokerage.broker.registered',
-                    children: [
-                      {
-                        name: 'handler BrokerRegisteredPublisher',
-                        children: [{ name: 'outbox append brokerage.broker.registered' }],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+    expectSpanTree(storyOf(trace), registrationSpanTree);
   });
 
   it('answers 201 with the new broker when the intermediaries register confirms the registration', async () => {
