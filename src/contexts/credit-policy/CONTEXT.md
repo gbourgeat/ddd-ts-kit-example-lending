@@ -26,6 +26,13 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 | Risk rating | Low, medium or high: the customer's class, which the rate grid is organised by | Score |
 | Defined | a product is put in the catalogue with its threshold |  |
 | Published | a value of the bank is published with the day from which it applies |  |
+| Arrangement | The one-off fee charged to the borrower when a loan is granted, held as a whole amount in cents |  |
+| Fee | The amount a product charges the borrower beyond the interest |  |
+| Bounds | The minimum and the maximum a product accepts, on the amount or on the duration |  |
+| Amount | The sum lent to the borrower, held as a whole amount in cents |  |
+| Duration | The length of a loan, held as a whole number of months |  |
+| Inverted | A minimum set above its maximum |  |
+| Terms | The conditions a product is sold with: its amounts, durations, arrangement fee, insurance and score threshold |  |
 
 ## Aggregates
 
@@ -52,6 +59,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `credit-policy:rate-grid.publish`
+- `credit-policy:product.define`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -96,12 +104,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `DefineProduct` | command | `product.define` |
 | `PublishRateGrid` | command | `rate-grid.publish` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
+| POST | `/products` | `defineProduct` | `ProductsRoutes` | `Authenticated` | `DefineProduct` | `product.define` | body: `DefineProductBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.ProductBoundsInverted`, `CreditPolicyCodes.InvalidArrangementFee`, `CreditPolicyCodes.InvalidScoreThreshold` |
 | POST | `/rate-grids` | `publishRateGrid` | `RateGridsRoutes` | `Authenticated` | `PublishRateGrid` | `rate-grid.publish` | body: `PublishRateGridBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Ports
@@ -110,7 +120,16 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `DelegationTableRepository` | external | `PrismaDelegationTableRepository` |
 | `LegalMaximumRateRepository` | external | `PrismaLegalMaximumRateRepository` |
-| `ProductRepository` | external | `PrismaProductRepository` |
+| `ProductRepository` | repository | `PrismaProductRepository` |
 | `RateGridRepository` | repository | `PrismaRateGridRepository` |
 | `ResidualIncomeMinimumRepository` | external | `PrismaResidualIncomeMinimumRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `InvalidArrangementFee` | `forCents` | `INVALID_ARRANGEMENT_FEE` | `cents` |
+| `InvalidScoreThreshold` | `forScore` | `INVALID_SCORE_THRESHOLD` | `score` |
+| `ProductBoundsInverted` | `onAmount` | `PRODUCT_BOUNDS_INVERTED` | `minimum`, `maximum` |
+| `ProductBoundsInverted` | `onDuration` | `PRODUCT_BOUNDS_INVERTED` | `minimum`, `maximum` |
 <!-- /ddd-ts-kit:reference -->

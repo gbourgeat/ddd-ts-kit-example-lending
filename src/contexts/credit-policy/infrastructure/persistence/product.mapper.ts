@@ -8,6 +8,12 @@ export const ProductMapper = {
   toDomain(row: ProductRow): Product {
     const loaded = Product.rehydrate(row.id, {
       registeredAt: row.registeredAt,
+      amountMinimumCents: row.amountMinimumCents,
+      amountMaximumCents: row.amountMaximumCents,
+      durationMinimumMonths: row.durationMinimumMonths,
+      durationMaximumMonths: row.durationMaximumMonths,
+      arrangementFeeCents: row.arrangementFeeCents,
+      insuranceMandatory: row.insuranceMandatory,
       scoreThreshold: row.scoreThreshold,
     });
 

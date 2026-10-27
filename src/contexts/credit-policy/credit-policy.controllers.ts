@@ -2,10 +2,13 @@
 import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
+import { DefineProductController } from '@/contexts/credit-policy/presentation/http/products/define-product/define-product.controller';
 import { PublishRateGridController } from '@/contexts/credit-policy/presentation/http/rate-grids/publish-rate-grid/publish-rate-grid.controller';
+import { DefineProductBody } from '@/contexts/credit-policy/presentation/http/products/define-product/define-product.body';
 import { PublishRateGridBody } from '@/contexts/credit-policy/presentation/http/rate-grids/publish-rate-grid/publish-rate-grid.body';
 
 /** The Nest controllers of credit-policy, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const creditPolicyControllers: readonly Type<unknown>[] = [
+  withSignatures(DefineProductController, { defineProduct: { body: DefineProductBody, answer: acceptedSchema } }),
   withSignatures(PublishRateGridController, { publishRateGrid: { body: PublishRateGridBody, answer: acceptedSchema } }),
 ];

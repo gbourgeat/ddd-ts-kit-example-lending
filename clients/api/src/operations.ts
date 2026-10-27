@@ -585,6 +585,46 @@ export function changeMemberRole(
   return send<ChangeMemberRoleResult>(connection, operation, { ...input, ...options });
 }
 
+export interface DefineProductInput {
+  readonly body: {
+    amountMinimumCents: number;
+    amountMaximumCents: number;
+    durationMinimumMonths: number;
+    durationMaximumMonths: number;
+    arrangementFeeCents: number;
+    insuranceMandatory: boolean;
+    scoreThreshold: number;
+  };
+}
+
+export type DefineProductResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_ARRANGEMENT_FEE' | 'INVALID_SCORE_THRESHOLD' | 'PRODUCT_BOUNDS_INVERTED' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Define product: `POST /products`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
+ */
+export function defineProduct(
+  connection: Connection,
+  input: DefineProductInput,
+  options: CallOptions = {},
+): Promise<DefineProductResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/products',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DefineProductResult>(connection, operation, { ...input, ...options });
+}
+
 export interface PublishRateGridInput {
   readonly body: {
     productId: string;

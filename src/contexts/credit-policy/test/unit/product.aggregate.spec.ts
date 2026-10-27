@@ -13,6 +13,17 @@ describe('Product', () => {
     expect(born.registeredAt).toEqual(bornAt);
   });
 
+  it('is born holding the amounts, durations, arrangement fee and insurance it is defined with', () => {
+    const born = aProduct().insuranceMandatory(true).build();
+
+    expect(born.amountMinimumCents).toBe(100_000);
+    expect(born.amountMaximumCents).toBe(2_500_000);
+    expect(born.durationMinimumMonths).toBe(12);
+    expect(born.durationMaximumMonths).toBe(84);
+    expect(born.arrangementFeeCents).toBe(4_500);
+    expect(born.insuranceMandatory).toBe(true);
+  });
+
   it('records the fact that it is defined', () => {
     const bornAt = new Date('2026-03-01T00:00:00.000Z');
 

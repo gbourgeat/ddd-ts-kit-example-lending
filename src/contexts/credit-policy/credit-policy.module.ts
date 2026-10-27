@@ -9,6 +9,9 @@ import { requires } from '@ddd-ts-kit/auth';
 import { creditPolicyPermissions } from '@/contexts/credit-policy/credit-policy.permissions';
 import { PublishRateGridCommand } from '@/contexts/credit-policy/application/commands/publish-rate-grid/publish-rate-grid.command';
 import { PublishRateGridHandler } from '@/contexts/credit-policy/application/commands/publish-rate-grid/publish-rate-grid.handler';
+import { PrismaProductRepository } from '@/contexts/credit-policy/infrastructure/persistence/prisma-product.repository';
+import { DefineProductCommand } from '@/contexts/credit-policy/application/commands/define-product/define-product.command';
+import { DefineProductHandler } from '@/contexts/credit-policy/application/commands/define-product/define-product.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditPolicyWiring {
@@ -45,6 +48,17 @@ function registerHandlers(platform: Platform): void {
     new PublishRateGridHandler(rateGridRepository, platform.ids, platform.clock),
     { context: 'credit-policy' },
   );
+
+  const productRepository = platform.adapter(
+    new PrismaProductRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'credit-policy', token: 'ProductRepository' },
+  );
+
+  platform.commands.register(
+    DefineProductCommand,
+    new DefineProductHandler(productRepository, platform.ids, platform.clock),
+    { context: 'credit-policy' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -65,6 +79,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(PublishRateGridCommand, creditPolicyPermissions['rate-grid.publish'], {
+      resource: () => ({ type: 'context', id: 'credit-policy' }),
+    }),
+    requires(DefineProductCommand, creditPolicyPermissions['product.define'], {
       resource: () => ({ type: 'context', id: 'credit-policy' }),
     }),
     // /ddd-ts-kit:authorization
