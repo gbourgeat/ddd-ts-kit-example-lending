@@ -1,4 +1,4 @@
-import type { Clock, CommandHandler } from '@ddd-ts-kit/kernel';
+import type { CommandHandler } from '@ddd-ts-kit/kernel';
 import type { Broker } from '@/contexts/brokerage/domain/aggregates/broker.aggregate';
 import type { BrokerRepository } from '@/contexts/brokerage/domain/repositories/broker.repository';
 import type { IntermediariesRegister } from '@/contexts/brokerage/application/ports/intermediaries-register.port';
@@ -8,15 +8,13 @@ export class CheckRegistrationHandler implements CommandHandler<CheckRegistratio
   constructor(
     private readonly brokerRepository: BrokerRepository,
     private readonly intermediaries: IntermediariesRegister,
-    private readonly clock: Clock,
   ) {}
 
-  async execute(_command: CheckRegistrationCommand): Promise<number> {
-    const today = this.clock.now();
+  async execute(command: CheckRegistrationCommand): Promise<number> {
     let lapsed = 0;
 
     for (const broker of await this.brokerRepository.findNotLapsed()) {
-      if (await this.lapseIfInvalid(broker, today)) {
+      if (await this.lapseIfInvalid(broker, command.day)) {
         lapsed += 1;
       }
     }
