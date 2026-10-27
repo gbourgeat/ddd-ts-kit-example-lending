@@ -19,9 +19,17 @@
     {
       "title": "#US0.05 AC3 the submission is published once, as an integration event carrying the application identifier, in the same transaction that records it",
       "criteria": ["AC3"],
-      "fingerprint": "ca8fccace5962668"
+      "fingerprint": "20339db9ea777d17"
     }
   ],
   "regression": [],
-  "amendments": []
+  "amendments": [
+    {
+      "subject": "scenario \"#US0.05 AC3 the submission is published once, as an integration event carrying the application identifier, in the same transaction that records it\"",
+      "criteria": ["AC3"],
+      "reason": "AC3 asks for one integration event carrying the application identifier, published once. The locked scenario called `submitted.recorded()`, a method the EventRecorder does not have, so it could not typecheck or run; the current `submitted.received()` is the recorder's method for the events received so far, in order, which is what the scenario meant. The assertions are unchanged (exactly one event, `applicationId` equal to the response identifier), so the new version is not weaker; the transactional part of AC3 is asserted in neither version, which the owner may want to cover later.",
+      "verdict": "test/acceptance/verdicts/us0-20339db9ea777d17.md",
+      "on": "2026-10-27"
+    }
+  ]
 }

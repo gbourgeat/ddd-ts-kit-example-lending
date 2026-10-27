@@ -46,6 +46,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Requested amount | The amount the applicant asks for, the basis of the decision table | Approved amount |
 | Approved amount | The amount of the decision, after conditions | Requested amount |
 | File | The application file, the documents and the account consent. |  |
+| Credit application | the application file of one loan request, from submission to payout |  |
+| Submitted | the application was received from an applicant or a broker, and its file opened |  |
 
 ## Modules
 
@@ -59,6 +61,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `CreditApplication` (event-sourced)
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events

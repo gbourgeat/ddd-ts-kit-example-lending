@@ -15,7 +15,7 @@ otherwise. Acceptance specs of a story are written and locked before its first r
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US0.01 | credit-application | skeleton | Credit application, event-sourced | `aggregate credit-application CreditApplication --event-sourced --birth Submitted --term "Credit application=the application file of one loan request, from submission to payout" --module file` | | conductor | todo |
+| US0.01 | credit-application | skeleton | Credit application, event-sourced | `aggregate credit-application CreditApplication --event-sourced --birth Submitted --term "Credit application=the application file of one loan request, from submission to payout" --module file` | | conductor | done |
 | US0.02 | platform | skeleton | Relationship schema: bank, branch, portfolio, customer, application, loan | edit `src/platform/auth/relationships/relationship-schema.ts` (TODO(platform) line 11): elements, derived relations, one spec per derived relation (no generator) | | conductor | todo |
 | US0.03 | platform | skeleton | Tuple store kept in the transaction of the change | edit `src/platform/auth/relationships/create-tuple-store.ts` (TODO(platform) line 3), held to `create-tuple-store.contract.spec.ts` | US0.02 | conductor | todo |
 | US0.04 | credit-application | slice | Submit an application (walking skeleton: one command, one route, one e2e) | `command credit-application SubmitApplication --permission application.submit --aggregate CreditApplication --module file`; `route credit-application SubmitApplication --method POST --path /applications --command --module file`; `e2e credit-application SubmitApplication --module file` | US0.01, US0.02 | credit-application | todo |

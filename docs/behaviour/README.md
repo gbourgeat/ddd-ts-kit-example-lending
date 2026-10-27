@@ -8,7 +8,7 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 |---|---|---|---|
 | [branch-network](branch-network.md) | 1 | 0 | 1 |
 | [brokerage](brokerage.md) | 1 | 0 | 1 |
-| [credit-application](credit-application.md) | 1 | 0 | 1 |
+| [credit-application](credit-application.md) | 4 | 0 | 3 |
 | [credit-policy](credit-policy.md) | 1 | 0 | 1 |
 | [credit-scoring](credit-scoring.md) | 1 | 0 | 1 |
 | [customer-due-diligence](customer-due-diligence.md) | 1 | 0 | 1 |

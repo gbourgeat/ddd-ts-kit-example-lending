@@ -74,7 +74,7 @@ describe('US0, acceptance', () => {
 
       await application.settled();
 
-      const events = submitted.recorded();
+      const events = submitted.received();
 
       expect(events).toHaveLength(1);
       expect(events[0]).toMatchObject({ applicationId: (response.body as { id: string }).id });
