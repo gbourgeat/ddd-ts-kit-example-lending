@@ -5,6 +5,11 @@ Next: 7 build - the owner decides the open lines of `## For the owner` on branch
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
 
+
+- Wave 3, blocked on the environment: no PostgreSQL is reachable from the sandbox, so the e2e specs and the working migrations of the rows that store a field (US1.01, US1.07, US2.04 if stored) wait for a reachable database. Give the sandbox a `DATABASE_URL` to a PostgreSQL (the example is `postgres://app:app@localhost:5432/app`).
+- Wave 3, `docs:check` red on wave3: `servicing.loan.paid-out` version 1 is not in `stored-events.lock.json`. Decide that the shape of version 1 is final, then `npx ddd-ts-kit docs --stored-events` (conductor, owner).
+- Wave 3, decisions taken by the conductor under the owner brief, to confirm: identification of a person; appointment to a branch names the opened branch; opening an organisation reserved to the operator (signed-in grant narrowed in `src/platform/auth/authorization/signed-in-grants.ts`, commit 925ae04).
+
 ## Needs
 
 Stated by the product owner, verbatim from `docs/architecture/needs.md`:
