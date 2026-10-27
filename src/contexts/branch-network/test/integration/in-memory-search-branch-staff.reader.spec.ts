@@ -5,13 +5,11 @@ import { FakeSearchBranchStaffReader } from '@/contexts/branch-network/test/fake
 
 const BRANCH = 'branch-1';
 
-const LINES = [
-  { id: 'staff-member-1', branchId: BRANCH, name: 'Ada' },
-  { id: 'staff-member-2', branchId: BRANCH, name: 'Brice' },
-  { id: 'staff-member-3', branchId: BRANCH, name: 'Chloe' },
-];
+const first = { id: 'staff-member-1', branchId: BRANCH, name: 'Ada' };
+const second = { id: 'staff-member-2', branchId: BRANCH, name: 'Brice' };
+const third = { id: 'staff-member-3', branchId: BRANCH, name: 'Chloe' };
+const LINES = [first, second, third];
 
-const [first, second, third] = LINES;
 const OTHER_BRANCH = { id: 'staff-member-4', branchId: 'branch-2', name: 'Dan' };
 
 describe('InMemorySearchBranchStaffReader', () => {
