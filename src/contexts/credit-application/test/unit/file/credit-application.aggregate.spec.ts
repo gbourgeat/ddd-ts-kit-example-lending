@@ -3,6 +3,7 @@ import { expectRefusal, givenEvents } from '@ddd-ts-kit/testing';
 import { Money } from '@/shared-kernel/money.vo';
 import { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
+import { aCreditApplication } from '@/contexts/credit-application/test/builders/credit-application.builder';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
 const request = { amount: Money.ofCents(1234567), durationMonths: 60, registeredAt: bornAt };
@@ -43,5 +44,11 @@ describe('CreditApplication', () => {
       .when((loaded) => loaded.toState())
       .thenNoEvent()
       .thenState((loaded) => expect(loaded.version).toBe(1));
+  });
+
+  it('is built by the builder with the applicant it was submitted by', () => {
+    const built = aCreditApplication().submittedBy('customer-2').build();
+
+    expect(built.applicantId).toBe('customer-2');
   });
 });
