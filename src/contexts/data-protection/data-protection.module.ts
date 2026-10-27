@@ -6,7 +6,7 @@ import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { CopyOfDataTimeoutBackgroundJob } from '@/contexts/data-protection/application/background/copy-of-data-timeout.background-job';
 import { PrismaRetentionPeriodRepository } from '@/contexts/data-protection/infrastructure/persistence/prisma-retention-period.repository';
-import { requires } from '@ddd-ts-kit/auth';
+import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { dataProtectionPermissions } from '@/contexts/data-protection/data-protection.permissions';
 import { PlatformPersonalDataPurge } from '@/contexts/data-protection/infrastructure/external/platform-personal-data-purge';
 import { runPurge } from '@/platform/privacy/run-purge';
@@ -65,9 +65,11 @@ function registerHandlers(platform: Platform): void {
 
   const copies = new FileCopyOfDataStore(platform.files.storage, platform.files.keys);
 
-  platform.commands.register(RequestPersonalDataCopyCommand, new RequestPersonalDataCopyHandler(gathering, copies), {
-    context: 'data-protection',
-  });
+  platform.commands.register(
+    RequestPersonalDataCopyCommand,
+    new RequestPersonalDataCopyHandler(platform.access, gathering, copies),
+    { context: 'data-protection' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -111,9 +113,8 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(ErasePersonalDataPastRetentionCommand, dataProtectionPermissions['data.erase'], {
       resource: () => ({ type: 'context', id: 'data-protection' }),
     }),
-    requires(RequestPersonalDataCopyCommand, dataProtectionPermissions['data-subject.request-copy'], {
-      resource: (command) => ({ type: 'customer', id: command.customerId }),
-    }),
+    // The handler asks the customer's self, then the operator of the context: the guard admits every signed-in caller.
+    publicUseCase(RequestPersonalDataCopyCommand),
     // /ddd-ts-kit:authorization
   ];
 }

@@ -101,13 +101,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `ErasePersonalDataPastRetention` | command | `data.erase` |
-| `RequestPersonalDataCopy` | command | `data-subject.request-copy` |
+| `RequestPersonalDataCopy` | command | `public` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
-| POST | `/data-subjects/:customerId/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `data-subject.request-copy` |  | 200: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN` |
+| POST | `/data-subjects/:customerId/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `public` |  | 200: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/personal-data/erasures` | `erasePersonalDataPastRetention` | `PersonalDataRoutes` | `Authenticated` | `ErasePersonalDataPastRetention` | `data.erase` | body: `ErasePersonalDataPastRetentionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Ports

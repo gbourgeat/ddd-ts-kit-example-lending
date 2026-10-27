@@ -32,14 +32,25 @@ describe('Request personal data copy, end to end', () => {
     expectStatus(response, 403);
   });
 
+  it('does not refuse an operator of data-protection asking for the copy of a customer', async () => {
+    await application.relate({ object: 'context:data-protection', relation: 'operator', subject: 'user:ada' });
+    const ada = await application.as({ id: 'ada' });
+
+    const response = await ada.post('/data-subjects/customer-1/copies', {});
+
+    // The link comes from the object store, which the in-process test application does not reach (MinIO,
+    // `npm run infra:up`): the operator's permission passes, the gathering runs, the answer is the store's failure.
+    expect(response.status).not.toBe(401);
+    expect(response.status).not.toBe(403);
+  });
+
   it('does not refuse the customer asking for a copy of their own data', async () => {
     await application.relate({ object: 'customer:customer-1', relation: 'self', subject: 'user:customer-1' });
     const customer = await application.as({ id: 'customer-1' });
 
     const response = await customer.post('/data-subjects/customer-1/copies', {});
 
-    // The link comes from the object store, which the in-process test application does not reach: the
-    // authorization of the self passes, the gathering runs, and the answer is then the store's failure.
+    // The same store limit as the operator's case above: the authorization of the self passes.
     expect(response.status).not.toBe(401);
     expect(response.status).not.toBe(403);
   });
