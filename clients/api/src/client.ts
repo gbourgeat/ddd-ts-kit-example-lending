@@ -41,6 +41,12 @@ export interface Client {
    */
   fileSuspiciousActivityReport(input: operations.FileSuspiciousActivityReportInput, options?: CallOptions): Promise<operations.FileSuspiciousActivityReportResult>;
   /**
+   * Search applications: `GET /applications`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  searchApplications(input?: operations.SearchApplicationsInput, options?: CallOptions): Promise<operations.SearchApplicationsResult>;
+  /**
    * Submit application: `POST /applications`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_AMOUNT (422), INVALID_DURATION (422), VALIDATION_FAILED (422).
@@ -218,6 +224,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
     closeAlert: (input, call) => operations.closeAlert(connection, input, call),
     fileSuspiciousActivityReport: (input, call) => operations.fileSuspiciousActivityReport(connection, input, call),
+    searchApplications: (input, call) => operations.searchApplications(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),

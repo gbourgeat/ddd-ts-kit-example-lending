@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
-import { collectEvents, expectStatus, pending } from '@ddd-ts-kit/testing/e2e';
+import { collectEvents, expectStatus } from '@ddd-ts-kit/testing/e2e';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 
 // The acceptance of US0, written before its code: one scenario per acceptance criterion, as a client sees it through the API (routes, answers, integration events), never through a class of src/ nor the database. A scenario's title starts with the rows that make it pass, then the criterion it proves (`#US0.01 AC1 ...`); its body stays wrapped in `pending(...)` of `@ddd-ts-kit/testing/e2e` until they are built, and the commit of the last one removes the wrapper. Once written, `npx ddd-ts-kit acceptance US0 --lock`: a locked scenario then changes only with its criterion. `npx ddd-ts-kit acceptance US0 --gate written` says when the code may start.
@@ -36,24 +36,21 @@ describe('US0, acceptance', () => {
     expect(response.body).toMatchObject({ id: expect.any(String), amount: { cents: 1234567, currency: 'EUR' } });
   });
 
-  it(
-    '#US0.04 #US0.02 #US0.03 AC2 a caller without the right to submit an application is refused with the refusal code, and no application is recorded',
-    pending(async () => {
-      const stranger = await application.as({ id: 'stranger-1', tenantId: 'bank-1' });
+  it('#US0.04 #US0.02 #US0.03 AC2 a caller without the right to submit an application is refused with the refusal code, and no application is recorded', async () => {
+    const stranger = await application.as({ id: 'stranger-1', tenantId: 'bank-1' });
 
-      const response = await stranger.post('/applications', {
-        productId: 'personal-loan',
-        amount: { cents: 500000, currency: 'EUR' },
-        durationMonths: 36,
-      });
+    const response = await stranger.post('/applications', {
+      productId: 'personal-loan',
+      amount: { cents: 500000, currency: 'EUR' },
+      durationMonths: 36,
+    });
 
-      expect(response.status).toBe(403);
-      expect(response.body).toMatchObject({ code: expect.any(String) });
-      const listed = expectStatus(await stranger.get('/applications'), 200);
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: expect.any(String) });
+    const listed = expectStatus(await stranger.get('/applications'), 200);
 
-      expect(listed.body).toMatchObject({ items: [] });
-    }),
-  );
+    expect(listed.body).toMatchObject({ items: [] });
+  });
 
   it('#US0.05 AC3 the submission is published once, as an integration event carrying the application identifier, in the same transaction that records it', async () => {
     const submitted = collectEvents(application.events, ['credit-application.credit-application.submitted']);
