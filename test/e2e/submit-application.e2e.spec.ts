@@ -1,13 +1,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { expectStatus } from '@ddd-ts-kit/testing/e2e';
-import { expectSpanTree, installTestTracing } from '@ddd-ts-kit/tracing/testing';
+import { expectSpanTree, installTestTracing, type ExpectedSpan } from '@ddd-ts-kit/tracing/testing';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { storyOf } from '$test/e2e/support/story-of';
 
 const request = { productId: 'personal-loan', amount: { cents: 1234567, currency: 'EUR' }, durationMonths: 60 };
 
 // Exact on names and structure. Once "submit application" announces a fact, its spans come after the save, under `unit-of-work before-commit`: `domain-event <name>`, `handler <Class>`, `outbox append <type>` (US0.05).
-const submissionTree = [
+const submissionTree: readonly ExpectedSpan[] = [
   {
     name: 'POST /applications',
     kind: 'SERVER',
