@@ -158,3 +158,17 @@ What blocks the close:
 Decisions taken so far, all in this file and in `plan.md` `## Decisions`: D1 to D10 above (conductor, owner brief,
 to confirm where marked); owner decisions 1 to 3 (AC2 pending until US6.18; the AC2 change to Jest's `expect`, refused
 by the judge and not applied; the trace tree of the submission, done, `ea3ce0c`).
+
+### Update: resumed at the stop hook, blocked again
+
+- The "Next" of the hook (write the acceptance, then `--lock`) is already done: `npx ddd-ts-kit acceptance US0 --gate written`
+  answers `gate written: 1 left`, the one row being AC2 (pending until US6.18). The lock is not run again: a second lock
+  would only restate the same file, and AC2 is not re-locked (see above).
+- Blocked, not closed: the story closes when US6.18 (`GET /applications`) is built, which is another story. Building it
+  here would be a new story's code, not US0's; the owner's decision 1 keeps AC2 pending until then. Conductor, owner brief,
+  to confirm.
+- The merge of main that the same session was asked for is blocked in the sandbox (`openapi/` and `.claude/settings.json`
+  are read-only mounts; a failed `merge-trunk` left a half-merged tree, reset to HEAD). The blocker is recorded in
+  `docs/tooling/frictions.md` (step 8) and `plan.md` `## For the owner`. Nothing of the story changed in this session.
+- Stopped here. Next, for the owner: run `npx ddd-ts-kit merge-trunk --trunk origin/main` outside the sandbox, then resolve the
+  conflicts; the story closes after US6.18 and an e2e run where AC2 passes.
