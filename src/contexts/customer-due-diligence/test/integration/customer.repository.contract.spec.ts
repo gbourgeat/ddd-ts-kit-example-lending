@@ -17,7 +17,17 @@ const expectations = {
 
     return Customer.create(`customer-${born}`, bornAt);
   },
-  // TODO(domain): add `mutate: (changed: Customer) => changed.<a business method that records an event>(...)`, so that the suite proves an update is stored and a stale save is refused; the case stays pending until then.
+  // The business of the customer is registered: an update the store must keep, and refuse stale once saved.
+  mutate: (changed: Customer) =>
+    changed.registerBusiness(
+      {
+        legalName: 'Boulangerie Dupont SARL',
+        registrationNumber: 'RC-75-123',
+        countryOfRegistration: 'FR',
+        registeredOn: bornAt,
+      },
+      bornAt,
+    ),
   idOf: (subject: Customer) => subject.id,
   stateOf: (subject: Customer) => subject.toState(),
 };

@@ -1,10 +1,21 @@
 import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@ddd-ts-kit/kernel';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
+import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
+import { BusinessAlreadyRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-already-registered.error';
 
-export type CustomerEvent = CustomerIdentified;
+export type CustomerEvent = CustomerIdentified | CustomerBusinessRegistered;
+
+/** The facts of the registration of a business, as the bank records them. */
+export interface BusinessRegistration {
+  readonly legalName: string;
+  readonly registrationNumber: string;
+  readonly countryOfRegistration: string;
+  readonly registeredOn: Date;
+}
 
 export interface CustomerState {
   readonly registeredAt: Date;
+  readonly business?: BusinessRegistration;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -32,6 +43,24 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     return this.state.registeredAt;
   }
 
+  /** Records the registration of the business of this customer; a second one is refused, never an overwrite. */
+  registerBusiness(business: BusinessRegistration, now: Date): void {
+    if (this.state.business !== undefined) {
+      throw BusinessAlreadyRegistered.forCustomer(this.id);
+    }
+
+    this.record(
+      new CustomerBusinessRegistered(
+        this.id,
+        now,
+        business.legalName,
+        business.registrationNumber,
+        business.countryOfRegistration,
+        business.registeredOn,
+      ),
+    );
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
@@ -39,6 +68,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   protected appliers(): Appliers<CustomerEvent> {
     return {
       [CustomerIdentified.eventName]: (event) => this.applyIdentified(event),
+      [CustomerBusinessRegistered.eventName]: (event) => this.applyBusinessRegistered(event),
     };
   }
 
@@ -48,5 +78,17 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
 
   private applyIdentified(event: CustomerIdentified): void {
     this.state = { ...this.state, registeredAt: event.occurredAt };
+  }
+
+  private applyBusinessRegistered(event: CustomerBusinessRegistered): void {
+    this.state = {
+      ...this.state,
+      business: {
+        legalName: event.legalName,
+        registrationNumber: event.registrationNumber,
+        countryOfRegistration: event.countryOfRegistration,
+        registeredOn: event.registeredOn,
+      },
+    };
   }
 }
