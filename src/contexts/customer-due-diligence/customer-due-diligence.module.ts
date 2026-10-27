@@ -20,6 +20,8 @@ import { GetCustomerFileQuery } from '@/contexts/customer-due-diligence/applicat
 import { PrismaGetCustomerFileReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/prisma-get-customer-file.reader';
 import { PrismaCustomerFileProjectionRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/prisma-customer-file-projection.repository';
 import { CustomerFileOnIdentifiedEventHandler } from '@/contexts/customer-due-diligence/application/event-handlers/customer-file-on-identified.event-handler';
+import { AssignAdvisorCommand } from '@/contexts/customer-due-diligence/application/commands/assign-advisor/assign-advisor.command';
+import { AssignAdvisorHandler } from '@/contexts/customer-due-diligence/application/commands/assign-advisor/assign-advisor.handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -76,6 +78,10 @@ function registerHandlers(platform: Platform): void {
   );
 
   platform.queries.register(GetCustomerFileQuery, new GetCustomerFileHandler(getCustomerFileReader, platform.access), {
+    context: 'customer-due-diligence',
+  });
+
+  platform.commands.register(AssignAdvisorCommand, new AssignAdvisorHandler(customerRepository, platform.clock), {
     context: 'customer-due-diligence',
   });
   // /ddd-ts-kit:handlers
@@ -137,6 +143,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(GetCustomerFileQuery, customerDueDiligencePermissions['customer.read'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(AssignAdvisorCommand, customerDueDiligencePermissions['customer.assign-advisor'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

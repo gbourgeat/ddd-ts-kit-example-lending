@@ -101,6 +101,12 @@ export interface Client {
    */
   identifyCustomer(input: operations.IdentifyCustomerInput, options?: CallOptions): Promise<operations.IdentifyCustomerResult>;
   /**
+   * Give a customer its advisor: `PUT /customers/{id}/advisor`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  assignAdvisor(input: operations.AssignAdvisorInput, options?: CallOptions): Promise<operations.AssignAdvisorResult>;
+  /**
    * Identify each director and beneficial owner of a registered business as a person: `POST /customers/{id}/directors-and-owners`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BUSINESS_NOT_REGISTERED (422), IDENTITY_DOCUMENT_EXPIRED (422), PROOF_OF_ADDRESS_TOO_OLD (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
@@ -216,6 +222,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declareConflictOfInterest: (input, call) => operations.declareConflictOfInterest(connection, input, call),
     getCustomerFile: (input, call) => operations.getCustomerFile(connection, input, call),
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
+    assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),

@@ -549,6 +549,43 @@ export function identifyCustomer(
   return send<IdentifyCustomerResult>(connection, operation, { ...input, ...options });
 }
 
+export interface AssignAdvisorInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    advisorId: string;
+  };
+}
+
+export type AssignAdvisorResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Give a customer its advisor: `PUT /customers/{id}/advisor`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function assignAdvisor(
+  connection: Connection,
+  input: AssignAdvisorInput,
+  options: CallOptions = {},
+): Promise<AssignAdvisorResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/customers/{id}/advisor',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<AssignAdvisorResult>(connection, operation, { ...input, ...options });
+}
+
 export interface DeclareDirectorsAndOwnersInput {
   readonly path: {
     readonly id: string;

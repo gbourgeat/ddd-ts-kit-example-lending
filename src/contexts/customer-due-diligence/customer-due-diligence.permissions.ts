@@ -6,5 +6,6 @@ export const customerDueDiligencePermissions = definePermissions('customer-due-d
   'customer.identify': { description: 'Identify customer' },
   'business.declare-owners': { description: 'Declare directors and owners' },
   'customer.read': { description: 'Get customer file' },
+  'customer.assign-advisor': { description: 'Assign advisor' },
   // /ddd-ts-kit:permissions
 });
