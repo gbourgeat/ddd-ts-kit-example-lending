@@ -65,6 +65,5 @@ export class PrismaMemberRepository implements MemberRepository {
 
 /** The members on the client of the unit of work, which every statement of this file goes through. */
 function membersOf(database: Database): ReturnType<Database['client']>['identityMember'] {
-  // ddd-ts-kit-disable-next-line tenancy/scoped-statement -- ADR-0001: the identity context is the control plane of the tenants, and its rows belong to none of them.
   return database.client().identityMember;
 }

@@ -18,6 +18,5 @@ export class PrismaOrganisationTenantDirectory implements TenantDirectory {
 
 /** The organisations on the client of the unit of work, which every statement of this file goes through. */
 function organisationsOf(database: Database): ReturnType<Database['client']>['identityOrganisation'] {
-  // ddd-ts-kit-disable-next-line tenancy/scoped-statement -- ADR-0001: the identity context is the control plane of the tenants, and its rows belong to none of them.
   return database.client().identityOrganisation;
 }
