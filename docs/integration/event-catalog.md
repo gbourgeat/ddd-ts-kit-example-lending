@@ -47,6 +47,68 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `requestedAmountCents` | integer | yes |  |
 | `durationMonths` | integer | yes |  |
 
+## credit-policy
+
+### credit-policy.delegation-table.published
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-policy.delegation-table.published` | 1 | A delegation table of the bank has been published, by its identifier. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `delegationTableId` | string | yes |  |
+
+### credit-policy.legal-maximum-rate.published
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-policy.legal-maximum-rate.published` | 1 | A legal maximum rate of a category of loan has been published, by its identifier, from its date of effect. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `legalMaximumRateId` | string | yes |  |
+
+### credit-policy.product.defined
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-policy.product.defined` | 1 | A product of the bank catalogue has been defined; the other contexts read its terms from credit-policy by its identifier. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `productId` | string | yes |  |
+
+### credit-policy.rate-grid.published
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-policy.rate-grid.published` | 1 | A rate grid of a product has been published, by its identifier. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `rateGridId` | string | yes |  |
+
+### credit-policy.residual-income-minimum.published
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-policy.residual-income-minimum.published` | 1 | A residual income minimum of the bank has been published, by its identifier. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `residualIncomeMinimumId` | string | yes |  |
+
 ## customer-due-diligence
 
 ### customer-due-diligence.customer.identified

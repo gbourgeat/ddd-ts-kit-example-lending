@@ -53,7 +53,9 @@ No scheduled job.
 ## Background jobs
 
 <!-- ddd-ts-kit:background-jobs -->
-No background job.
+| Job | Class |
+|---|---|
+| `data-protection.copy-of-data-timeout` | `CopyOfDataTimeoutBackgroundJob` |
 <!-- /ddd-ts-kit:background-jobs -->
 
 ## State machines
@@ -65,7 +67,9 @@ No state machine.
 ## Process managers
 
 <!-- ddd-ts-kit:processes -->
-No process manager.
+| Process | Class | Timeouts delivered by |
+|---|---|---|
+| `data-protection.copy-of-data` | `CopyOfDataProcess` | `data-protection.copy-of-data-timeout` |
 <!-- /ddd-ts-kit:processes -->
 
 ## Relationships

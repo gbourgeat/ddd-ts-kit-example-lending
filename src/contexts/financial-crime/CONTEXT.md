@@ -98,6 +98,6 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `AlertRepository` | repository | `PrismaAlertRepository` |
-| `FinancialIntelligenceUnit` | external | `RemoteFinancialIntelligenceUnit` |
+| `FinancialIntelligenceUnit` | external | `SimulatedFinancialIntelligenceUnit` |
 | `SuspiciousActivityReportRepository` | external | `PrismaSuspiciousActivityReportRepository` |
 <!-- /ddd-ts-kit:reference -->

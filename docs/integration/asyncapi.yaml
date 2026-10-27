@@ -21,6 +21,36 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/credit-application.credit-application.submitted.v1'
+  credit-policy.delegation-table.published:
+    address: credit-policy.delegation-table.published
+    description: A delegation table of the bank has been published, by its identifier.
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-policy.delegation-table.published.v1'
+  credit-policy.legal-maximum-rate.published:
+    address: credit-policy.legal-maximum-rate.published
+    description: A legal maximum rate of a category of loan has been published, by its identifier, from its date of effect.
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-policy.legal-maximum-rate.published.v1'
+  credit-policy.product.defined:
+    address: credit-policy.product.defined
+    description: A product of the bank catalogue has been defined; the other contexts read its terms from credit-policy by its identifier.
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-policy.product.defined.v1'
+  credit-policy.rate-grid.published:
+    address: credit-policy.rate-grid.published
+    description: A rate grid of a product has been published, by its identifier.
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-policy.rate-grid.published.v1'
+  credit-policy.residual-income-minimum.published:
+    address: credit-policy.residual-income-minimum.published
+    description: A residual income minimum of the bank has been published, by its identifier.
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-policy.residual-income-minimum.published.v1'
   customer-due-diligence.customer.identified:
     address: customer-due-diligence.customer.identified
     description: A customer, a person or a business, has been identified before any credit.
@@ -94,6 +124,36 @@ operations:
       $ref: '#/channels/credit-application.credit-application.submitted'
     messages:
       - $ref: '#/channels/credit-application.credit-application.submitted/messages/v1'
+  send.credit-policy.delegation-table.published:
+    action: send
+    channel:
+      $ref: '#/channels/credit-policy.delegation-table.published'
+    messages:
+      - $ref: '#/channels/credit-policy.delegation-table.published/messages/v1'
+  send.credit-policy.legal-maximum-rate.published:
+    action: send
+    channel:
+      $ref: '#/channels/credit-policy.legal-maximum-rate.published'
+    messages:
+      - $ref: '#/channels/credit-policy.legal-maximum-rate.published/messages/v1'
+  send.credit-policy.product.defined:
+    action: send
+    channel:
+      $ref: '#/channels/credit-policy.product.defined'
+    messages:
+      - $ref: '#/channels/credit-policy.product.defined/messages/v1'
+  send.credit-policy.rate-grid.published:
+    action: send
+    channel:
+      $ref: '#/channels/credit-policy.rate-grid.published'
+    messages:
+      - $ref: '#/channels/credit-policy.rate-grid.published/messages/v1'
+  send.credit-policy.residual-income-minimum.published:
+    action: send
+    channel:
+      $ref: '#/channels/credit-policy.residual-income-minimum.published'
+    messages:
+      - $ref: '#/channels/credit-policy.residual-income-minimum.published/messages/v1'
   send.customer-due-diligence.customer.identified:
     action: send
     channel:
@@ -280,6 +340,206 @@ components:
               - applicantId
               - requestedAmountCents
               - durationMonths
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.delegation-table.published.v1:
+      name: credit-policy.delegation-table.published
+      title: credit-policy.delegation-table.published v1
+      summary: A delegation table of the bank has been published, by its identifier.
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.delegation-table.published
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              delegationTableId:
+                type: string
+            type: object
+            required:
+              - delegationTableId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.legal-maximum-rate.published.v1:
+      name: credit-policy.legal-maximum-rate.published
+      title: credit-policy.legal-maximum-rate.published v1
+      summary: A legal maximum rate of a category of loan has been published, by its identifier, from its date of effect.
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.legal-maximum-rate.published
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              legalMaximumRateId:
+                type: string
+            type: object
+            required:
+              - legalMaximumRateId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.product.defined.v1:
+      name: credit-policy.product.defined
+      title: credit-policy.product.defined v1
+      summary: A product of the bank catalogue has been defined; the other contexts read its terms from credit-policy by its identifier.
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.product.defined
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              productId:
+                type: string
+            type: object
+            required:
+              - productId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.rate-grid.published.v1:
+      name: credit-policy.rate-grid.published
+      title: credit-policy.rate-grid.published v1
+      summary: A rate grid of a product has been published, by its identifier.
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.rate-grid.published
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              rateGridId:
+                type: string
+            type: object
+            required:
+              - rateGridId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.residual-income-minimum.published.v1:
+      name: credit-policy.residual-income-minimum.published
+      title: credit-policy.residual-income-minimum.published v1
+      summary: A residual income minimum of the bank has been published, by its identifier.
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.residual-income-minimum.published
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              residualIncomeMinimumId:
+                type: string
+            type: object
+            required:
+              - residualIncomeMinimumId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

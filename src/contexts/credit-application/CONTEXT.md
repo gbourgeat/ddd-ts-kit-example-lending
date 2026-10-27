@@ -63,6 +63,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 
 <!-- ddd-ts-kit:aggregates -->
 - `CreditApplication` (event-sourced)
+- `Offer`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -149,10 +150,11 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `AccountInformationProvider` | external | `RemoteAccountInformationProvider` |
+| `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
-| `ElectronicSignature` | external | `RemoteElectronicSignature` |
-| `RepaymentIncidentRegister` | external | `RemoteRepaymentIncidentRegister` |
+| `ElectronicSignature` | external | `SimulatedElectronicSignature` |
+| `OfferRepository` | external | `PrismaOfferRepository` |
+| `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 
 ### Errors
 
