@@ -295,6 +295,9 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Owner, wave 5, US2.16: built; its projection's table goes in the schema of its context (`prisma/schema/customer-due-diligence.prisma`) (owner)
 - 2026-10-27 Owner, wave 5, US13.04: the command is `ErasePersonalDataPastRetention`; the glossary terms it needs are added to data-protection ("Personal data", "Retention", and the verb if the generator asks) (owner)
 - 2026-10-27 Owner, wave 5, US14.06: last of the wave, for the commands built so far; the commands not built yet stay todo with that reason (owner)
+- 2026-10-27 Wave 5, US2.06 and US1.13 rows amended to the owner's decisions: directors and owners declared by `DeclareDirectorsAndOwners`; the advisor by the new row US2.17 (`AssignAdvisor`, `AdvisorAssigned`, integration event v1 of customer-due-diligence), which US1.13 consumes (conductor, owner brief, to confirm)
+- 2026-10-27 Wave 5, the database: no `db:generate` in a worker; the schema engine is passed as `PRISMA_SCHEMA_ENGINE_BINARY` (`~/.cache/prisma/master/0edf323e…/debian-openssl-3.0.x/schema-engine`) for each command that runs `db:client` (conductor)
+- 2026-10-27 Wave 5, workers are cut from `wave5` in `.worktrees/<context>-w5`, with the main checkout's `node_modules` linked, never installed (conductor)
 
 ## For the owner
 
