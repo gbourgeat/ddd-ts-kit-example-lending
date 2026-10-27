@@ -339,6 +339,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Wave 6 run 3, US8.04: the APR spec proves each example to 5e-9 as a rate (tighter than the 0.0000005 asked, which was read as six decimals of the percentage), and the APR to one decimal; the formula is the one on the trunk since wave 4 (test/unit/offer/actuarial-formula.service.spec.ts) (conductor, owner brief, to confirm)
 - 2026-10-27 Wave 6 run 3, US6.14: the co-borrower e2e passes on wave6 (test/e2e/name-co-borrower.e2e.spec.ts); the 500 does not reproduce in the in-process run, its cause is not read from a log (the commit of the trunk that named the party, 133dc83, precedes the proof) (conductor, owner brief, to confirm: a 500 against a real DATABASE_URL is not tested here)
 
+- 2026-10-27 Wave 6 run 3, blocked: US8.06 and US8.07 (rate grid, legal maximum rate projections) and US7.01 (delegation table): the credit-policy events `rate-grid.published`, `legal-maximum-rate.published` and `delegation-table.published` (v1) carry only an identifier, so a projection holds nothing usable and the date of effect the plan promises is not on the contract. US7.02 (staff level): `staff-member.appointed` v1 carries no level. Needed: the producer (credit-policy, branch-network) adds the content and the date of effect as a v2 of each event, the consumers move to v2; the owner of each context decides (conductor, owner brief: a v2 rather than a change of v1, the most protective reading; to confirm)
+
 ## For the owner
 
 - Migrations of the wave 2 rows: no database here; `npm run db:generate working-<what>` for the product, legal maximum rate, delegation table, residual income minimum and alert columns; the schema commits are on the trunk.
