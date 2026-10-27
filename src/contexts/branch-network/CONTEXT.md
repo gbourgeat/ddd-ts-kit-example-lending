@@ -27,6 +27,8 @@ Who follows which customer, and who may decide on it, is needed for the business
 | Opened | the branch is open: it has a place, it can take its staff and its portfolios |  |
 | Appointed | a person becomes a staff member of a bank |  |
 | Declared | a staff member puts a conflict of interest on record |  |
+| Search | Read a page of the staff of a branch, for a branch manager of that branch |  |
+| List | The staff of a branch, as one page of the search |  |
 
 ## Aggregates
 
@@ -58,6 +60,7 @@ Who follows which customer, and who may decide on it, is needed for the business
 - `branch-network:branch.open`
 - `branch-network:staff-member.appoint`
 - `branch-network:portfolio.open`
+- `branch-network:staff-member.list`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -107,6 +110,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AppointStaffMember` | command | `staff-member.appoint` |
 | `OpenBranch` | command | `branch.open` |
 | `OpenPortfolio` | command | `portfolio.open` |
+| `SearchBranchStaff` | query | `staff-member.list` |
 
 ### Routes
 
@@ -131,6 +135,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchRepository` | repository | `PrismaBranchRepository` |
 | `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
 | `PortfolioRepository` | repository | `PrismaPortfolioRepository` |
+| `SearchBranchStaffReader` | repository | `InMemorySearchBranchStaffReader` |
 | `StaffMemberRepository` | repository | `PrismaStaffMemberRepository` |
 
 ### Errors

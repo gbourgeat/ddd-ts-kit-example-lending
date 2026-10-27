@@ -20,6 +20,9 @@ import { OpenPortfolioForAdvisorEventHandler } from '@/contexts/branch-network/a
 import { PrismaPortfolioRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-portfolio.repository';
 import { OpenPortfolioCommand } from '@/contexts/branch-network/application/commands/open-portfolio/open-portfolio.command';
 import { OpenPortfolioHandler } from '@/contexts/branch-network/application/commands/open-portfolio/open-portfolio.handler';
+import { SearchBranchStaffHandler } from '@/contexts/branch-network/application/queries/search-branch-staff/search-branch-staff.handler';
+import { SearchBranchStaffQuery } from '@/contexts/branch-network/application/queries/search-branch-staff/search-branch-staff.query';
+import { InMemorySearchBranchStaffReader } from '@/contexts/branch-network/infrastructure/persistence/in-memory-search-branch-staff.reader';
 // /ddd-ts-kit:imports
 
 export interface BranchNetworkWiring {
@@ -74,6 +77,17 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(
     OpenPortfolioCommand,
     new OpenPortfolioHandler(portfolioRepository, platform.ids, platform.clock),
+    { context: 'branch-network' },
+  );
+
+  const searchBranchStaffReader = platform.adapter(new InMemorySearchBranchStaffReader(), {
+    kind: 'repository',
+    context: 'branch-network',
+  });
+
+  platform.queries.register(
+    SearchBranchStaffQuery,
+    new SearchBranchStaffHandler(searchBranchStaffReader, platform.access),
     { context: 'branch-network' },
   );
   // /ddd-ts-kit:handlers
@@ -140,6 +154,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(OpenPortfolioCommand, branchNetworkPermissions['portfolio.open'], {
       resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
+    requires(SearchBranchStaffQuery, branchNetworkPermissions['staff-member.list'], {
+      resource: (query) => ({ type: 'branch', id: query.branchId }),
     }),
     // /ddd-ts-kit:authorization
   ];
