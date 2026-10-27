@@ -150,6 +150,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `GiveAccountConsent` | command | `application.consent` |
 | `NameCoBorrower` | command | `application.name-party` |
+| `NameGuarantor` | command | `application.name-party` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
 
@@ -161,6 +162,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
 | POST | `/applications/:id/co-borrowers` | `nameCoBorrower` | `ApplicationsRoutes` | `Authenticated` | `NameCoBorrower` | `application.name-party` | params: `NameCoBorrowerParams`, body: `NameCoBorrowerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 
 ### Publishers
 

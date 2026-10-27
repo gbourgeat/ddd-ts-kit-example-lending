@@ -3,6 +3,7 @@ import { Money } from '@/shared-kernel/money.vo';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
+import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/file/domain/events/credit-application-guarantor-named.event';
 import { InvalidAmount } from '@/contexts/credit-application/file/domain/errors/invalid-amount.error';
 import { InvalidDuration } from '@/contexts/credit-application/file/domain/errors/invalid-duration.error';
 import {
@@ -13,7 +14,8 @@ import {
 export type CreditApplicationEvent =
   | CreditApplicationSubmitted
   | CreditApplicationAccountConsentGiven
-  | CreditApplicationCoBorrowerNamed;
+  | CreditApplicationCoBorrowerNamed
+  | CreditApplicationGuarantorNamed;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -22,6 +24,7 @@ export interface CreditApplicationState {
   readonly registeredAt: Date;
   readonly accountConsent: AccountConsentState | undefined;
   readonly coBorrowerIds: readonly string[];
+  readonly guarantorIds: readonly string[];
 }
 
 /** What the applicant asks for, and the instant the application is registered. */
@@ -39,6 +42,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     registeredAt: new Date(0),
     accountConsent: undefined,
     coBorrowerIds: [],
+    guarantorIds: [],
   };
 
   private constructor(id: string) {
@@ -84,6 +88,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationCoBorrowerNamed(this.id, namedAt, coBorrowerId));
   }
 
+  /** The applicant names a person as the guarantor of the application, who backs the debt if the borrower does not pay. */
+  nameGuarantor(guarantorId: string, namedAt: Date): void {
+    this.record(new CreditApplicationGuarantorNamed(this.id, namedAt, guarantorId));
+  }
+
   /** Whether the applicant's consent to read the accounts is given and not yet expired at `instant`. */
   hasValidAccountConsentAt(instant: Date): boolean {
     if (this.state.accountConsent === undefined) {
@@ -113,6 +122,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     return this.state.coBorrowerIds;
   }
 
+  get guarantorIds(): readonly string[] {
+    return this.state.guarantorIds;
+  }
+
   toState(): CreditApplicationState {
     return { ...this.state };
   }
@@ -122,6 +135,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationSubmitted.eventName]: (event) => this.applySubmitted(event),
       [CreditApplicationAccountConsentGiven.eventName]: (event) => this.applyAccountConsentGiven(event),
       [CreditApplicationCoBorrowerNamed.eventName]: (event) => this.applyCoBorrowerNamed(event),
+      [CreditApplicationGuarantorNamed.eventName]: (event) => this.applyGuarantorNamed(event),
     };
   }
 
@@ -150,6 +164,13 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.state = {
       ...this.state,
       coBorrowerIds: [...this.state.coBorrowerIds, event.coBorrowerId],
+    };
+  }
+
+  private applyGuarantorNamed(event: CreditApplicationGuarantorNamed): void {
+    this.state = {
+      ...this.state,
+      guarantorIds: [...this.state.guarantorIds, event.guarantorId],
     };
   }
 }

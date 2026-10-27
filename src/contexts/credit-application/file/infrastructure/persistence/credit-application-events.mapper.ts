@@ -4,6 +4,7 @@ import type { CreditApplicationEvent } from '@/contexts/credit-application/file/
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
+import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/file/domain/events/credit-application-guarantor-named.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -17,6 +18,10 @@ interface CreditApplicationAccountConsentGivenData {
 
 interface CreditApplicationCoBorrowerNamedData {
   readonly coBorrowerId: string;
+}
+
+interface CreditApplicationGuarantorNamedData {
+  readonly guarantorId: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -48,5 +53,11 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     encode: (event): CreditApplicationCoBorrowerNamedData => ({ coBorrowerId: event.coBorrowerId }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationCoBorrowerNamed(aggregateId, occurredAt, data.text('coBorrowerId')),
+  }),
+  [CreditApplicationGuarantorNamed.eventName]: defineStoredEvent(CreditApplicationGuarantorNamed, {
+    version: 1,
+    encode: (event): CreditApplicationGuarantorNamedData => ({ guarantorId: event.guarantorId }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationGuarantorNamed(aggregateId, occurredAt, data.text('guarantorId')),
   }),
 };
