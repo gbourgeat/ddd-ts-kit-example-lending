@@ -66,6 +66,43 @@ export function deactivateAccount(
   return send<DeactivateAccountResult>(connection, operation, { ...input, ...options });
 }
 
+export interface CloseAlertInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    reason: string;
+  };
+}
+
+export type CloseAlertResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ALERT_ALREADY_CLOSED' | 'CLOSURE_REASON_MISSING' | 'UNKNOWN_ALERT' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Close alert: `POST /alerts/{id}/closure`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ALERT_ALREADY_CLOSED (422), CLOSURE_REASON_MISSING (422), UNKNOWN_ALERT (422), VALIDATION_FAILED (422).
+ */
+export function closeAlert(
+  connection: Connection,
+  input: CloseAlertInput,
+  options: CallOptions = {},
+): Promise<CloseAlertResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/alerts/{id}/closure',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<CloseAlertResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SubmitApplicationInput {
   readonly body: {
     productId: string;
