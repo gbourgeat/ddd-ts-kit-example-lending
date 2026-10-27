@@ -21,6 +21,6 @@ export class ErasePersonalDataPastRetentionController {
     @Body() body: ErasePersonalDataPastRetentionBody,
     @CurrentActor() actor: Actor,
   ): Promise<void> {
-    await this.commands.execute(new ErasePersonalDataPastRetentionCommand(actor));
+    await this.commands.execute(new ErasePersonalDataPastRetentionCommand(actor, new Date(body.asOf)));
   }
 }
