@@ -9,6 +9,7 @@ tags:
   - name: credit-application
   - name: credit-policy
   - name: customer-due-diligence
+  - name: data-protection
   - name: financial-crime
   - name: identity
 paths:
@@ -491,6 +492,85 @@ paths:
             - INVALID_AMOUNT
             - INVALID_DURATION
             - VALIDATION_FAILED
+  /applications/{id}/co-borrowers:
+    post:
+      operationId: nameCoBorrower
+      summary: Name co borrower
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                coBorrowerId:
+                  type: string
+              type: object
+              required:
+                - coBorrowerId
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /applications/{id}/consent:
     post:
       operationId: giveAccountConsent
@@ -511,6 +591,170 @@ paths:
           application/json:
             schema:
               type: object
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/corrections:
+    post:
+      operationId: correctEntry
+      summary: Correct entry
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                entryId:
+                  type: string
+                reason:
+                  type: string
+              type: object
+              required:
+                - entryId
+                - reason
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: CORRECTION_ALREADY_RECORDED, INVALID_CORRECTION_REASON, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_ENTRY, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - CORRECTION_ALREADY_RECORDED
+            - INVALID_CORRECTION_REASON
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_ENTRY
+            - VALIDATION_FAILED
+  /applications/{id}/guarantors:
+    post:
+      operationId: nameGuarantor
+      summary: Name guarantor
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                guarantorId:
+                  type: string
+              type: object
+              required:
+                - guarantorId
       responses:
         '201':
           description: The answer.
@@ -1295,6 +1539,12 @@ paths:
                 addressProofDatedOn:
                   pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
                   type: string
+                name:
+                  minLength: 1
+                  type: string
+                birthDate:
+                  pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                  type: string
               type: object
               required:
                 - documentKind
@@ -1303,6 +1553,8 @@ paths:
                 - documentExpiresOn
                 - address
                 - addressProofDatedOn
+                - name
+                - birthDate
       responses:
         '201':
           description: The answer.
@@ -1610,6 +1862,77 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
+  /data-subjects/{customerId}/copies:
+    post:
+      operationId: requestPersonalDataCopy
+      summary: Request personal data copy
+      tags:
+        - data-protection
+      security:
+        - bearer: []
+      parameters:
+        - name: customerId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  url:
+                    type: string
+                  expiresAt:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                type: object
+                required:
+                  - url
+                  - expiresAt
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
             - VALIDATION_FAILED
   /delegation-table:
     put:
@@ -2652,6 +2975,250 @@ paths:
             - OWNERS_ONLY
             - OWN_ROLE
             - VALIDATION_FAILED
+  /personal-data/erasures:
+    post:
+      operationId: erasePersonalDataPastRetention
+      summary: Erase personal data past retention
+      tags:
+        - data-protection
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                asOf:
+                  oneOf:
+                    - format: date
+                      type: string
+                    - format: date-time
+                      type: string
+              type: object
+              required:
+                - asOf
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
+  /portfolios:
+    get:
+      operationId: searchAdvisorPortfolios
+      summary: Search advisor portfolios
+      tags:
+        - branch-network
+      security:
+        - bearer: []
+      parameters:
+        - name: limit
+          in: query
+          description: Size of the page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            description: Size of the page.
+        - name: offset
+          in: query
+          description: Items to skip. Not with `cursor`.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Items to skip. Not with `cursor`.
+        - name: cursor
+          in: query
+          description: The `nextCursor` of the previous page. Not with `offset`.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            description: The `nextCursor` of the previous page. Not with `offset`.
+        - name: sort
+          in: query
+          description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+          required: false
+          schema:
+            type: string
+            description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+      responses:
+        '200':
+          description: One page of the portfolios the signed-in advisor holds.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentifierLinePage'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
+  /portfolios/{id}/customers:
+    get:
+      operationId: searchPortfolioCustomers
+      summary: Search portfolio customers
+      tags:
+        - branch-network
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: limit
+          in: query
+          description: Size of the page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            description: Size of the page.
+        - name: offset
+          in: query
+          description: Items to skip. Not with `cursor`.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Items to skip. Not with `cursor`.
+        - name: cursor
+          in: query
+          description: The `nextCursor` of the previous page. Not with `offset`.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            description: The `nextCursor` of the previous page. Not with `offset`.
+        - name: sort
+          in: query
+          description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+          required: false
+          schema:
+            type: string
+            description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+      responses:
+        '200':
+          description: One page of the customers of the portfolio.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentifierLinePage'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_PORTFOLIO, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_PORTFOLIO
+            - VALIDATION_FAILED
   /products:
     post:
       operationId: defineProduct
@@ -2909,6 +3476,29 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    IdentifierLine:
+      properties:
+        id:
+          type: string
+      type: object
+      required:
+        - id
+    IdentifierLinePage:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifierLine'
+        total:
+          type: integer
+          minimum: 0
+          description: Present when it is cheap to count.
+        nextCursor:
+          type: string
+          description: Present when more items follow.
     IdentifyCustomerBody:
       properties:
         documentKind:
@@ -2932,6 +3522,12 @@ components:
         addressProofDatedOn:
           pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
           type: string
+        name:
+          minLength: 1
+          type: string
+        birthDate:
+          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+          type: string
       type: object
       required:
         - documentKind
@@ -2940,6 +3536,8 @@ components:
         - documentExpiresOn
         - address
         - addressProofDatedOn
+        - name
+        - birthDate
     InvitationToken:
       properties:
         token:

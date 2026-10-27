@@ -4,7 +4,7 @@ import { creditApplicationControllers } from '@/contexts/credit-application/cred
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
-import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+
 import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { SubmitApplicationCommand } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.command';
@@ -18,6 +18,13 @@ import { SearchApplicationsQuery } from '@/contexts/credit-application/file/appl
 import { PrismaSearchApplicationsReader } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-search-applications.reader';
 import { PrismaApplicationListProjection } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-application-list-projection.repository';
 import { ApplicationListOnSubmittedEventHandler } from '@/contexts/credit-application/file/application/event-handlers/application-list-on-submitted.event-handler';
+import { NameCoBorrowerCommand } from '@/contexts/credit-application/file/application/commands/name-co-borrower/name-co-borrower.command';
+import { NameCoBorrowerHandler } from '@/contexts/credit-application/file/application/commands/name-co-borrower/name-co-borrower.handler';
+import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+import { NameGuarantorCommand } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.command';
+import { NameGuarantorHandler } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.handler';
+import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
+import { CorrectEntryHandler } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -69,6 +76,24 @@ function registerHandlers(platform: Platform): void {
   platform.queries.register(
     SearchApplicationsQuery,
     new SearchApplicationsHandler(searchApplicationsReader, platform.access),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    NameCoBorrowerCommand,
+    new NameCoBorrowerHandler(creditApplicationRepository, platform.clock),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    NameGuarantorCommand,
+    new NameGuarantorHandler(creditApplicationRepository, platform.clock),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    CorrectEntryCommand,
+    new CorrectEntryHandler(creditApplicationRepository, platform.clock),
     { context: 'credit-application' },
   );
   // /ddd-ts-kit:handlers
@@ -125,6 +150,15 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     // A search is narrowed by the access scope of the caller, which is its authorization: a permission on the context would refuse every caller.
     publicUseCase(SearchApplicationsQuery),
+    requires(NameCoBorrowerCommand, creditApplicationPermissions['application.name-party'], {
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
+    requires(NameGuarantorCommand, creditApplicationPermissions['application.name-party'], {
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
+    requires(CorrectEntryCommand, creditApplicationPermissions['application.correct'], {
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }

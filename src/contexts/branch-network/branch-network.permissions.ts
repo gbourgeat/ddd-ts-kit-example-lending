@@ -7,5 +7,7 @@ export const branchNetworkPermissions = definePermissions('branch-network', {
   'portfolio.open': { description: 'Open portfolio' },
   'staff-member.list': { description: 'Search branch staff' },
   'conflict.declare': { description: 'Declare conflict of interest' },
+  'portfolio.assign-customer': { description: 'Assign customer' },
+  'portfolio.search-customers': { description: 'Search portfolio customers' },
   // /ddd-ts-kit:permissions
 });

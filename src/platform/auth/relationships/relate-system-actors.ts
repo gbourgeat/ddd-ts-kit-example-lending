@@ -13,6 +13,16 @@ const systemRelationships: readonly RelationTuple[] = [
     subject: 'system:system:OpenPortfolioForAdvisorEventHandler',
   },
   { object: 'context:brokerage', relation: 'operator', subject: 'system:system:brokerage.check-registration' },
+  {
+    object: 'context:branch-network',
+    relation: 'operator',
+    subject: 'system:system:branch-network.assign-identified-customer',
+  },
+  {
+    object: 'context:data-protection',
+    relation: 'eraser',
+    subject: 'system:system:data-protection.erase-personal-data-past-retention',
+  },
   // /ddd-ts-kit:system-grants
 ];
 

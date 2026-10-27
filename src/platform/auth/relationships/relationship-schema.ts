@@ -24,12 +24,17 @@ const elements: SchemaDefinition = {
     },
   },
   portfolio: {
-    relations: { branch: ['branch'], advisor: ['user'] },
+    relations: { branch: ['branch'], advisor: ['user'], member: ['customer'] },
+    derived: {
+      'branch-network:portfolio.search-customers': 'advisor',
+    },
   },
   customer: {
     relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
     derived: {
       'credit-application:application.submit': 'self',
+      'data-protection:data-subject.request-copy': 'self',
+      'branch-network:portfolio.search-customers': { anyOf: ['advisor'], butNot: ['conflicted'] },
       advisor: via('portfolio', 'advisor'),
     },
   },
@@ -37,6 +42,8 @@ const elements: SchemaDefinition = {
     relations: { customer: ['customer'], 'co-borrower': ['user'], broker: ['user'] },
     derived: {
       'credit-application:application.consent': via('customer', 'self'),
+      'credit-application:application.name-party': via('customer', 'self'),
+      'credit-application:application.correct': via('customer', 'self'),
       'credit-application:application.read': {
         anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
         butNot: [via('customer', 'conflicted')],
@@ -64,13 +71,17 @@ export const relationshipSchema = defineSchema({
   user: {},
   system: {},
   context: {
-    relations: { operator: ['user', 'system'] },
-    derived: Object.fromEntries(
-      permissions
-        .all()
-        .filter((permission) => !modelledOnAnElement.has(permission.id))
-        .map((permission) => [permission.id, 'operator']),
-    ),
+    relations: { operator: ['user', 'system'], eraser: ['system'] },
+    derived: {
+      ...Object.fromEntries(
+        permissions
+          .all()
+          .filter((permission) => !modelledOnAnElement.has(permission.id))
+          .map((permission) => [permission.id, 'operator']),
+      ),
+      'data-protection:data.erase': { anyOf: ['operator', 'eraser'] },
+      'data-protection:data-subject.request-copy': 'operator',
+    },
   },
   ...elements,
 });

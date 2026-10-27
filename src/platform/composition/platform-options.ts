@@ -2,6 +2,7 @@ import type { ErrorReporter, FileStorage, JobSettings } from '@ddd-ts-kit/kernel
 import type { QueueWorkerOptions } from '@ddd-ts-kit/scheduling';
 import type { ConsumerTrace } from '@ddd-ts-kit/tracing';
 import type { EventProvider } from '@/platform/events/event-provider';
+import type { RetentionPeriods } from '@/platform/config/read-retention-periods';
 import type { LogSettings } from '@/platform/observability/create-logger';
 import type { RedisServices } from '@/platform/redis/open-redis';
 import type { ResilienceSettings } from '@/platform/resilience/resilience-settings';
@@ -31,6 +32,8 @@ export interface PlatformOptions {
   readonly platformJobs?: boolean;
   /** The ids of the tenants that exist (`TENANTS`): a job declared `per-tenant` runs once for each. Left out (the tools, the tests), none, and such a job runs for nobody. */
   readonly tenants?: readonly string[];
+  /** How long each copy of personal data is kept (`RETENTION_PERIODS`); left out (the tools), none, and the copies that need one refuse to start. */
+  readonly retention?: RetentionPeriods;
   /** Concurrency per queue, polling interval and grace period of the worker of the background jobs; left out, one attempt at a time per queue. */
   readonly queues?: Pick<QueueWorkerOptions, 'concurrency' | 'pollIntervalMs' | 'graceMs'>;
   /** Whether a consumed event continues the trace of its publication (the default) or starts one linked to it. */

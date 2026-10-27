@@ -28,6 +28,7 @@ const application = composeApplication(
     resilience: config.resilience,
     jobs: { start: config.runJobs, settings: jobSettings(process.env) },
     tenants: config.tenants,
+    retention: config.retention,
     redis,
     files: openFiles(config.files),
   },

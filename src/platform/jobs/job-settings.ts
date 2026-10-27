@@ -24,6 +24,10 @@ export function jobSettings(environment: Environment, context?: string): Readonl
     'privacy.purge-expired': { enabled: environment['JOB_PRIVACY_PURGE_EXPIRED_ENABLED'] !== 'false' },
     // ddd-ts-kit:jobs
     'brokerage.check-registration': { enabled: environment['JOB_BROKERAGE_CHECK_REGISTRATION_ENABLED'] !== 'false' },
+
+    'data-protection.erase-personal-data-past-retention': {
+      enabled: environment['JOB_DATA_PROTECTION_ERASE_PERSONAL_DATA_PAST_RETENTION_ENABLED'] !== 'false',
+    },
     // /ddd-ts-kit:jobs
   };
 

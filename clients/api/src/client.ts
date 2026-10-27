@@ -53,11 +53,29 @@ export interface Client {
    */
   submitApplication(input: operations.SubmitApplicationInput, options?: CallOptions): Promise<operations.SubmitApplicationResult>;
   /**
+   * Name co borrower: `POST /applications/{id}/co-borrowers`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  nameCoBorrower(input: operations.NameCoBorrowerInput, options?: CallOptions): Promise<operations.NameCoBorrowerResult>;
+  /**
    * Give account consent: `POST /applications/{id}/consent`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
    */
   giveAccountConsent(input: operations.GiveAccountConsentInput, options?: CallOptions): Promise<operations.GiveAccountConsentResult>;
+  /**
+   * Correct entry: `POST /applications/{id}/corrections`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CORRECTION_ALREADY_RECORDED (422), INVALID_CORRECTION_REASON (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
+   */
+  correctEntry(input: operations.CorrectEntryInput, options?: CallOptions): Promise<operations.CorrectEntryResult>;
+  /**
+   * Name guarantor: `POST /applications/{id}/guarantors`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  nameGuarantor(input: operations.NameGuarantorInput, options?: CallOptions): Promise<operations.NameGuarantorResult>;
   /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
@@ -124,6 +142,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
    */
   screenCustomer(input: operations.ScreenCustomerInput, options?: CallOptions): Promise<operations.ScreenCustomerResult>;
+  /**
+   * Request personal data copy: `POST /data-subjects/{customerId}/copies`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  requestPersonalDataCopy(input: operations.RequestPersonalDataCopyInput, options?: CallOptions): Promise<operations.RequestPersonalDataCopyResult>;
   /**
    * Set delegation table: `PUT /delegation-table`.
    *
@@ -197,6 +221,24 @@ export interface Client {
    */
   changeMemberRole(input: operations.ChangeMemberRoleInput, options?: CallOptions): Promise<operations.ChangeMemberRoleResult>;
   /**
+   * Erase personal data past retention: `POST /personal-data/erasures`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  erasePersonalDataPastRetention(input: operations.ErasePersonalDataPastRetentionInput, options?: CallOptions): Promise<operations.ErasePersonalDataPastRetentionResult>;
+  /**
+   * Search advisor portfolios: `GET /portfolios`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  searchAdvisorPortfolios(input?: operations.SearchAdvisorPortfoliosInput, options?: CallOptions): Promise<operations.SearchAdvisorPortfoliosResult>;
+  /**
+   * Search portfolio customers: `GET /portfolios/{id}/customers`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PORTFOLIO (422), VALIDATION_FAILED (422).
+   */
+  searchPortfolioCustomers(input: operations.SearchPortfolioCustomersInput, options?: CallOptions): Promise<operations.SearchPortfolioCustomersResult>;
+  /**
    * Define product: `POST /products`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
@@ -226,7 +268,10 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     fileSuspiciousActivityReport: (input, call) => operations.fileSuspiciousActivityReport(connection, input, call),
     searchApplications: (input, call) => operations.searchApplications(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
+    nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
+    correctEntry: (input, call) => operations.correctEntry(connection, input, call),
+    nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
@@ -238,6 +283,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
+    requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
@@ -250,6 +296,9 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchMembers: (input, call) => operations.searchMembers(connection, input, call),
     removeMember: (input, call) => operations.removeMember(connection, input, call),
     changeMemberRole: (input, call) => operations.changeMemberRole(connection, input, call),
+    erasePersonalDataPastRetention: (input, call) => operations.erasePersonalDataPastRetention(connection, input, call),
+    searchAdvisorPortfolios: (input, call) => operations.searchAdvisorPortfolios(connection, input, call),
+    searchPortfolioCustomers: (input, call) => operations.searchPortfolioCustomers(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),

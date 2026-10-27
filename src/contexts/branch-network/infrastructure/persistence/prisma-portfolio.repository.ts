@@ -26,6 +26,14 @@ export class PrismaPortfolioRepository implements PortfolioRepository {
     return row === null ? undefined : PortfolioMapper.toDomain(row);
   }
 
+  async findByAdvisor(advisorId: string): Promise<Portfolio | undefined> {
+    const row = await this.database.client().branchNetworkPortfolio.findFirst({
+      where: { advisorId, ...tenantWhere(this.scope) },
+    });
+
+    return row === null ? undefined : PortfolioMapper.toDomain(row);
+  }
+
   async save(saved: Portfolio): Promise<void> {
     await optimisticUpdate(saved, async ({ expected, next }) => {
       const state = { ...PortfolioMapper.toRow(saved), version: next };

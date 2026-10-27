@@ -11,4 +11,8 @@ export class FakePortfolioRepository extends InMemoryRepository<Portfolio> imple
       }),
     );
   }
+
+  async findByAdvisor(advisorId: string): Promise<Portfolio | undefined> {
+    return this.all().find((portfolio) => portfolio.advisorId === advisorId);
+  }
 }

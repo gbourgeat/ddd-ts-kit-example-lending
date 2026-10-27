@@ -226,6 +226,43 @@ export function submitApplication(
   return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface NameCoBorrowerInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    coBorrowerId: string;
+  };
+}
+
+export type NameCoBorrowerResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Name co borrower: `POST /applications/{id}/co-borrowers`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function nameCoBorrower(
+  connection: Connection,
+  input: NameCoBorrowerInput,
+  options: CallOptions = {},
+): Promise<NameCoBorrowerResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/co-borrowers',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<NameCoBorrowerResult>(connection, operation, { ...input, ...options });
+}
+
 export interface GiveAccountConsentInput {
   readonly path: {
     readonly id: string;
@@ -259,6 +296,81 @@ export function giveAccountConsent(
   };
 
   return send<GiveAccountConsentResult>(connection, operation, { ...input, ...options });
+}
+
+export interface CorrectEntryInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    entryId: string;
+    reason: string;
+  };
+}
+
+export type CorrectEntryResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'CORRECTION_ALREADY_RECORDED' | 'INVALID_CORRECTION_REASON' | 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_ENTRY' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Correct entry: `POST /applications/{id}/corrections`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CORRECTION_ALREADY_RECORDED (422), INVALID_CORRECTION_REASON (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
+ */
+export function correctEntry(
+  connection: Connection,
+  input: CorrectEntryInput,
+  options: CallOptions = {},
+): Promise<CorrectEntryResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/corrections',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<CorrectEntryResult>(connection, operation, { ...input, ...options });
+}
+
+export interface NameGuarantorInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    guarantorId: string;
+  };
+}
+
+export type NameGuarantorResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Name guarantor: `POST /applications/{id}/guarantors`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function nameGuarantor(
+  connection: Connection,
+  input: NameGuarantorInput,
+  options: CallOptions = {},
+): Promise<NameGuarantorResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/guarantors',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SearchAuditEntriesInput {
@@ -569,6 +681,8 @@ export interface IdentifyCustomerInput {
     documentExpiresOn: string;
     address: string;
     addressProofDatedOn: string;
+    name: string;
+    birthDate: string;
   };
 }
 
@@ -711,6 +825,42 @@ export function screenCustomer(
   };
 
   return send<ScreenCustomerResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RequestPersonalDataCopyInput {
+  readonly path: {
+    readonly customerId: string;
+  };
+}
+
+export type RequestPersonalDataCopyResult =
+  | Success<200, {
+    url: string;
+    expiresAt: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Request personal data copy: `POST /data-subjects/{customerId}/copies`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function requestPersonalDataCopy(
+  connection: Connection,
+  input: RequestPersonalDataCopyInput,
+  options: CallOptions = {},
+): Promise<RequestPersonalDataCopyResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/data-subjects/{customerId}/copies',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<RequestPersonalDataCopyResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SetDelegationTableInput {
@@ -1161,6 +1311,122 @@ export function changeMemberRole(
   };
 
   return send<ChangeMemberRoleResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ErasePersonalDataPastRetentionInput {
+  readonly body: {
+    asOf: string;
+  };
+}
+
+export type ErasePersonalDataPastRetentionResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Erase personal data past retention: `POST /personal-data/erasures`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function erasePersonalDataPastRetention(
+  connection: Connection,
+  input: ErasePersonalDataPastRetentionInput,
+  options: CallOptions = {},
+): Promise<ErasePersonalDataPastRetentionResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/personal-data/erasures',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ErasePersonalDataPastRetentionResult>(connection, operation, { ...input, ...options });
+}
+
+export interface SearchAdvisorPortfoliosInput {
+  readonly query?: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: id. */
+    readonly sort?: string;
+  };
+}
+
+export type SearchAdvisorPortfoliosResult =
+  | Success<200, Schemas.IdentifierLinePage>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Search advisor portfolios: `GET /portfolios`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function searchAdvisorPortfolios(
+  connection: Connection,
+  input: SearchAdvisorPortfoliosInput = {},
+  options: CallOptions = {},
+): Promise<SearchAdvisorPortfoliosResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/portfolios',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<SearchAdvisorPortfoliosResult>(connection, operation, { ...input, ...options });
+}
+
+export interface SearchPortfolioCustomersInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly query?: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: id. */
+    readonly sort?: string;
+  };
+}
+
+export type SearchPortfolioCustomersResult =
+  | Success<200, Schemas.IdentifierLinePage>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_PORTFOLIO' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Search portfolio customers: `GET /portfolios/{id}/customers`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PORTFOLIO (422), VALIDATION_FAILED (422).
+ */
+export function searchPortfolioCustomers(
+  connection: Connection,
+  input: SearchPortfolioCustomersInput,
+  options: CallOptions = {},
+): Promise<SearchPortfolioCustomersResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/portfolios/{id}/customers',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<SearchPortfolioCustomersResult>(connection, operation, { ...input, ...options });
 }
 
 export interface DefineProductInput {

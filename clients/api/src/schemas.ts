@@ -5,6 +5,18 @@ export type Accepted = {
   id: string;
 };
 
+export type IdentifierLine = {
+  id: string;
+};
+
+export type IdentifierLinePage = {
+  items: Array<IdentifierLine>;
+  /** Present when it is cheap to count. */
+  total?: number;
+  /** Present when more items follow. */
+  nextCursor?: string;
+};
+
 export type IdentifyCustomerBody = {
   documentKind: 'Passport' | 'NationalIdentityCard' | 'ResidencePermit';
   documentNumber: string;
@@ -12,6 +24,8 @@ export type IdentifyCustomerBody = {
   documentExpiresOn: string;
   address: string;
   addressProofDatedOn: string;
+  name: string;
+  birthDate: string;
 };
 
 export type InvitationToken = {

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import type { RelationTuple } from '@ddd-ts-kit/auth/rebac';
 import { createHttpClient, expectStatus, type HttpClient } from '@ddd-ts-kit/testing/e2e';
-import { expectSpanTree, installTestTracing } from '@ddd-ts-kit/tracing/testing';
+import { expectSpanTree, installTestTracing, type ExpectedSpan } from '@ddd-ts-kit/tracing/testing';
 import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
 import { FakeIntermediariesRegister } from '@/contexts/brokerage/test/fakes/intermediaries-register.fake';
 import { relateSystemActors } from '@/platform/auth/relationships/relate-system-actors';
@@ -23,6 +23,35 @@ import { storyOf } from '$test/e2e/support/story-of';
 const registration = { registrationNumber: 'REG-0001' };
 const tenantId = 'acme-bank';
 const dailyCheck = 'brokerage.check-registration';
+
+const registrationSpanTree: readonly ExpectedSpan[] = [
+  {
+    name: 'POST /brokers',
+    kind: 'SERVER',
+    children: [
+      {
+        name: 'command RegisterBrokerCommand',
+        children: [
+          { name: 'repository BrokerRepository.save' },
+          {
+            name: 'unit-of-work before-commit',
+            children: [
+              {
+                name: 'domain-event brokerage.broker.registered',
+                children: [
+                  {
+                    name: 'handler BrokerRegisteredPublisher',
+                    children: [{ name: 'outbox append brokerage.broker.registered' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
 
 describe('Register broker, end to end', () => {
   const tracing = installTestTracing();
@@ -65,24 +94,7 @@ describe('Register broker, end to end', () => {
     });
 
     // Exact on names and structure, and kept before the tests whose request leaves work behind (a relay still publishing would add its spans here).
-    expectSpanTree(storyOf(trace), [
-      {
-        name: 'POST /brokers',
-        kind: 'SERVER',
-        children: [
-          {
-            name: 'command RegisterBrokerCommand',
-            children: [
-              { name: 'repository BrokerRepository.save' },
-              {
-                name: 'unit-of-work before-commit',
-                children: [{ name: 'domain-event brokerage.broker.registered' }],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+    expectSpanTree(storyOf(trace), registrationSpanTree);
   });
 
   it('answers 201 with the new broker when the intermediaries register confirms the registration', async () => {

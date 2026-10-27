@@ -3,6 +3,9 @@ import { Money } from '@/shared-kernel/money.vo';
 import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
+import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
+import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/file/domain/events/credit-application-guarantor-named.event';
+import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -12,6 +15,19 @@ interface CreditApplicationSubmittedData {
 
 interface CreditApplicationAccountConsentGivenData {
   readonly expiresAt: string;
+}
+
+interface CreditApplicationCoBorrowerNamedData {
+  readonly coBorrowerId: string;
+}
+
+interface CreditApplicationGuarantorNamedData {
+  readonly guarantorId: string;
+}
+
+interface CreditApplicationEntryCorrectedData {
+  readonly correctedEntryId: string;
+  readonly reason: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -37,5 +53,26 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     encode: (event): CreditApplicationAccountConsentGivenData => ({ expiresAt: event.expiresAt.toISOString() }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationAccountConsentGiven(aggregateId, occurredAt, data.instant('expiresAt')),
+  }),
+  [CreditApplicationCoBorrowerNamed.eventName]: defineStoredEvent(CreditApplicationCoBorrowerNamed, {
+    version: 1,
+    encode: (event): CreditApplicationCoBorrowerNamedData => ({ coBorrowerId: event.coBorrowerId }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationCoBorrowerNamed(aggregateId, occurredAt, data.text('coBorrowerId')),
+  }),
+  [CreditApplicationGuarantorNamed.eventName]: defineStoredEvent(CreditApplicationGuarantorNamed, {
+    version: 1,
+    encode: (event): CreditApplicationGuarantorNamedData => ({ guarantorId: event.guarantorId }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationGuarantorNamed(aggregateId, occurredAt, data.text('guarantorId')),
+  }),
+  [CreditApplicationEntryCorrected.eventName]: defineStoredEvent(CreditApplicationEntryCorrected, {
+    version: 1,
+    encode: (event): CreditApplicationEntryCorrectedData => ({
+      correctedEntryId: event.correctedEntryId,
+      reason: event.reason,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationEntryCorrected(aggregateId, occurredAt, data.text('correctedEntryId'), data.text('reason')),
   }),
 };

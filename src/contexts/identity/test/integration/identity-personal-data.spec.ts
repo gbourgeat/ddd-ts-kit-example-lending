@@ -71,7 +71,7 @@ beforeEach(async () => {
   await database.reset();
   scope = new FixedExecutionScope(workOf('acme'));
   repository = new PrismaAccountRepository(database.persistence.database, scope, clock);
-  erasure = new PrismaIdentityPersonalDataErasure(database.persistence.database);
+  erasure = new PrismaIdentityPersonalDataErasure(database.persistence.database, { days: 30 });
   exported = new PrismaIdentityPersonalDataExport(database.persistence.database);
 });
 

@@ -6,6 +6,7 @@ import { customerDueDiligencePermissions } from '@/contexts/customer-due-diligen
 import { IdentifyCustomerCommand } from '@/contexts/customer-due-diligence/application/commands/identify-customer/identify-customer.command';
 import { IdentifyCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/identify-customer/identify-customer.handler';
 import { FakeCustomerRepository } from '@/contexts/customer-due-diligence/test/fakes/customer.repository.fake';
+import { FakeScreeningProvider } from '@/contexts/customer-due-diligence/test/fakes/screening-provider.fake';
 import { IdentityDocumentKind } from '@/contexts/customer-due-diligence/domain/vocabularies/identity-document-kind.vocabulary';
 import type { PersonIdentity } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 
@@ -19,6 +20,8 @@ const holders = authorizationMiddleware({
 const holder = anActor().withRole('holder').build();
 
 const now = new Date('2026-06-01T00:00:00.000Z');
+
+const screenedPerson = { name: 'Ada Lovelace', birthDate: new Date('1980-05-01T00:00:00.000Z') };
 
 const validIdentity: PersonIdentity = {
   documentKind: IdentityDocumentKind.Passport,
@@ -39,6 +42,25 @@ describe('Identify customer', () => {
     expect(await customerRepository.findById(id)).toBeDefined();
   });
 
+  it('screens the person with its name and birth date, and records no possible match when the lists do not hold it', async () => {
+    const { commandBus, customerRepository, screeningProvider } = arrange();
+
+    const id = await commandBus.execute(identify(validIdentity));
+
+    expect(screeningProvider.screened).toEqual([screenedPerson]);
+    expect((await customerRepository.findById(id))?.toState().possibleMatchFoundAt).toBeUndefined();
+  });
+
+  it('still identifies a person the lists hold, and records the possible match for compliance', async () => {
+    const { commandBus, customerRepository, screeningProvider } = arrange();
+
+    screeningProvider.markPossibleMatch(screenedPerson.name);
+    const id = await commandBus.execute(identify(validIdentity));
+
+    expect(id).toBe('customer-1');
+    expect((await customerRepository.findById(id))?.toState().possibleMatchFoundAt).toEqual(now);
+  });
+
   it('is refused to an actor who does not hold the permission customer.identify', async () => {
     const { commandBus } = arrange();
 
@@ -50,6 +72,8 @@ describe('Identify customer', () => {
       validIdentity.documentExpiresOn,
       validIdentity.address,
       validIdentity.addressProofDatedOn,
+      screenedPerson.name,
+      screenedPerson.birthDate,
     );
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'FORBIDDEN' });
@@ -85,6 +109,8 @@ function identify(identity: PersonIdentity): IdentifyCustomerCommand {
     identity.documentExpiresOn,
     identity.address,
     identity.addressProofDatedOn,
+    screenedPerson.name,
+    screenedPerson.birthDate,
   );
 }
 
@@ -93,9 +119,11 @@ function arrange() {
   // As the application hands it to the handler: the save announces the events of the customer to `domainEvents`.
   const customerRepository = dispatching(new FakeCustomerRepository());
 
-  const handler = new IdentifyCustomerHandler(customerRepository, ids, clock);
+  const screeningProvider = new FakeScreeningProvider();
+
+  const handler = new IdentifyCustomerHandler(customerRepository, ids, clock, screeningProvider);
 
   commandBus.use(holders).register(IdentifyCustomerCommand, handler);
 
-  return { commandBus, customerRepository, domainEvents };
+  return { commandBus, customerRepository, domainEvents, screeningProvider };
 }
