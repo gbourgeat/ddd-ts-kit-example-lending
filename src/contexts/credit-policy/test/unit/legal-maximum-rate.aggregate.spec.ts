@@ -35,7 +35,8 @@ describe('aLegalMaximumRate exposes what it holds', () => {
   it('gives back each fact the aggregate was born with', () => {
     const built = aLegalMaximumRate().build();
 
-    expect(built.category).toEqual('personal-loan');
+    expect(built.category).toEqual('personal');
+    expect(built.rateBasisPoints).toBe(2000);
     expect(built.effectiveFrom).toEqual(new Date('2026-01-01T00:00:00.000Z'));
   });
 });

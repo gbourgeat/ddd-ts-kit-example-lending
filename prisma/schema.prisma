@@ -262,8 +262,14 @@ model BranchNetworkConflictOfInterest {
 }
 
 model CreditPolicyProduct {
-  id           String   @id
-  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  id                     String   @id
+  registeredAt           DateTime @map("registered_at") @db.Timestamptz(3)
+  amountMinimumCents     Int      @map("amount_minimum_cents")
+  amountMaximumCents     Int      @map("amount_maximum_cents")
+  durationMinimumMonths  Int      @map("duration_minimum_months")
+  durationMaximumMonths  Int      @map("duration_maximum_months")
+  arrangementFeeCents    Int      @map("arrangement_fee_cents")
+  insuranceMandatory     Boolean  @map("insurance_mandatory")
   scoreThreshold Int @map("score_threshold")
   version      Int
   tenantId     String   @map("tenant_id")
@@ -298,6 +304,7 @@ model CreditPolicyLegalMaximumRate {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
   category     String @map("category")
+  rateBasisPoints Int @map("rate_basis_points")
   effectiveFrom DateTime @map("effective_from")
   version      Int
   tenantId     String   @map("tenant_id")
@@ -315,6 +322,7 @@ model CreditPolicyDelegationTable {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
   effectiveFrom DateTime @map("effective_from")
+  levels       Json     @map("levels")
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)

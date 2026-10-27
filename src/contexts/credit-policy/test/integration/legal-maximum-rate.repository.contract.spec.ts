@@ -64,6 +64,35 @@ describe('PrismaLegalMaximumRateRepository, tenant by tenant', () => {
 
     expect(await repository.findById(saved.id)).toBeUndefined();
   });
+
+  it('finds the rate of a category with the latest date of effect, and the rate it keeps', async () => {
+    await database.reset();
+
+    const scope = new FixedExecutionScope(workOf('acme'));
+    const repository = new PrismaLegalMaximumRateRepository(database.persistence.database, scope, clock);
+
+    const earlier = aLegalMaximumRate()
+      .identifiedBy('rate-earlier')
+      .forCategory('car')
+      .atRate(1400)
+      .takingEffectOn(new Date('2026-01-01T00:00:00.000Z'))
+      .build();
+
+    const later = aLegalMaximumRate()
+      .identifiedBy('rate-later')
+      .forCategory('car')
+      .atRate(1450)
+      .takingEffectOn(new Date('2026-07-01T00:00:00.000Z'))
+      .build();
+
+    await repository.save(later);
+    await repository.save(earlier);
+
+    const latest = await repository.findLatestOf('car');
+
+    expect(latest?.id).toBe('rate-later');
+    expect(latest?.rateBasisPoints).toBe(1450);
+  });
 });
 
 function workOf(tenantId: string): ExecutionContext {

@@ -26,6 +26,15 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 | Risk rating | Low, medium or high: the customer's class, which the rate grid is organised by | Score |
 | Defined | a product is put in the catalogue with its threshold |  |
 | Published | a value of the bank is published with the day from which it applies |  |
+| Arrangement | The one-off fee charged to the borrower when a loan is granted, held as a whole amount in cents |  |
+| Fee | The amount a product charges the borrower beyond the interest |  |
+| Bounds | The minimum and the maximum a product accepts, on the amount or on the duration |  |
+| Amount | The sum lent to the borrower, held as a whole amount in cents |  |
+| Duration | The length of a loan, held as a whole number of months |  |
+| Inverted | A minimum set above its maximum |  |
+| Terms | The conditions a product is sold with: its amounts, durations, arrangement fee, insurance and score threshold |  |
+| Schedule | the order of the legal maximum rates of one category by their dates of effect |  |
+| Set | a delegation table is set when it is recorded with the day it takes effect |  |
 
 ## Aggregates
 
@@ -51,7 +60,11 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `credit-policy:rate-grid.publish`
+- `credit-policy:product.define`
+- `credit-policy:legal-maximum-rate.publish`
+- `credit-policy:delegation-table.set`
+- `credit-policy:residual-income-minimum.set`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -92,13 +105,48 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: none; downstreams: `credit-application` (published-language), `servicing` (published-language).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `DefineProduct` | command | `product.define` |
+| `PublishLegalMaximumRate` | command | `legal-maximum-rate.publish` |
+| `PublishRateGrid` | command | `rate-grid.publish` |
+| `SetDelegationTable` | command | `delegation-table.set` |
+| `SetResidualIncomeMinimum` | command | `residual-income-minimum.set` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| PUT | `/delegation-table` | `setDelegationTable` | `DelegationTableRoutes` | `Authenticated` | `SetDelegationTable` | `delegation-table.set` | body: `SetDelegationTableBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidDelegationTable` |
+| POST | `/legal-maximum-rates` | `publishLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `PublishLegalMaximumRate` | `legal-maximum-rate.publish` | body: `PublishLegalMaximumRateBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidLegalMaximumRate` |
+| POST | `/products` | `defineProduct` | `ProductsRoutes` | `Authenticated` | `DefineProduct` | `product.define` | body: `DefineProductBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.ProductBoundsInverted`, `CreditPolicyCodes.InvalidArrangementFee`, `CreditPolicyCodes.InvalidScoreThreshold` |
+| POST | `/rate-grids` | `publishRateGrid` | `RateGridsRoutes` | `Authenticated` | `PublishRateGrid` | `rate-grid.publish` | body: `PublishRateGridBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+| PUT | `/residual-income-minimums` | `setResidualIncomeMinimum` | `ResidualIncomeMinimumsRoutes` | `Authenticated` | `SetResidualIncomeMinimum` | `residual-income-minimum.set` | body: `SetResidualIncomeMinimumBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidResidualIncomeMinimum` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `DelegationTableRepository` | external | `PrismaDelegationTableRepository` |
-| `LegalMaximumRateRepository` | external | `PrismaLegalMaximumRateRepository` |
-| `ProductRepository` | external | `PrismaProductRepository` |
-| `RateGridRepository` | external | `PrismaRateGridRepository` |
-| `ResidualIncomeMinimumRepository` | external | `PrismaResidualIncomeMinimumRepository` |
+| `DelegationTableRepository` | repository | `PrismaDelegationTableRepository` |
+| `LegalMaximumRateRepository` | repository | `PrismaLegalMaximumRateRepository` |
+| `ProductRepository` | repository | `PrismaProductRepository` |
+| `RateGridRepository` | repository | `PrismaRateGridRepository` |
+| `ResidualIncomeMinimumRepository` | repository | `PrismaResidualIncomeMinimumRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `InvalidArrangementFee` | `forCents` | `INVALID_ARRANGEMENT_FEE` | `cents` |
+| `InvalidDelegationTable` | `forLimit` | `INVALID_DELEGATION_TABLE` | `level`, `amountCents` |
+| `InvalidDelegationTable` | `forLevels` | `INVALID_DELEGATION_TABLE` | `levels` |
+| `InvalidLegalMaximumRate` | `forBasisPoints` | `INVALID_LEGAL_MAXIMUM_RATE` | `basisPoints` |
+| `InvalidLegalMaximumRate` | `forCategory` | `INVALID_LEGAL_MAXIMUM_RATE` | `category` |
+| `InvalidLegalMaximumRate` | `forBeforeLatest` | `INVALID_LEGAL_MAXIMUM_RATE` | `effectiveFrom`, `latestEffectiveFrom` |
+| `InvalidResidualIncomeMinimum` | `forCents` | `INVALID_RESIDUAL_INCOME_MINIMUM` | `cents` |
+| `InvalidScoreThreshold` | `forScore` | `INVALID_SCORE_THRESHOLD` | `score` |
+| `ProductBoundsInverted` | `onAmount` | `PRODUCT_BOUNDS_INVERTED` | `minimum`, `maximum` |
+| `ProductBoundsInverted` | `onDuration` | `PRODUCT_BOUNDS_INVERTED` | `minimum`, `maximum` |
 <!-- /ddd-ts-kit:reference -->

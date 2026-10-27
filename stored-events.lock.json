@@ -1,4 +1,7 @@
 {
+  "customer-due-diligence.customer.business-registered": {
+    "1": "sha256:25b7e8efe3401359"
+  },
   "customer-due-diligence.customer.identified": {
     "1": "sha256:733dac3b56fba725"
   }
