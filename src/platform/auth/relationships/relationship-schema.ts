@@ -25,6 +25,9 @@ const elements: SchemaDefinition = {
   },
   portfolio: {
     relations: { branch: ['branch'], advisor: ['user'], member: ['customer'] },
+    derived: {
+      'branch-network:portfolio.search-customers': 'advisor',
+    },
   },
   customer: {
     relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
