@@ -32,6 +32,8 @@ Brokers bring applications, and the check of their registration is a supporting 
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `brokerage.broker.registered` (version 1)
+- `brokerage.broker.registration-lapsed` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -99,6 +101,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/brokers` | `registerBroker` | `BrokersRoutes` | `Authenticated` | `RegisterBroker` | `broker.register` | body: `RegisterBrokerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BrokerageCodes.InvalidBrokerRegistration` |
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `brokerage.broker.registered` | 1 | `BrokerRegisteredPublisher` |
+| `brokerage.broker.registration-lapsed` | 1 | `BrokerRegistrationLapsedPublisher` |
 
 ### Ports
 

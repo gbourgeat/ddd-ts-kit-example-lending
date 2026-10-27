@@ -20,6 +20,11 @@ Retention and erasure are a legal obligation every context serves, with no busin
 | Copy of data | The copy of all the bank keeps about a data subject, given on request | Application file |
 | Processing register | The list of the processings of personal data and their purposes | Impact assessment |
 | Impact assessment | The assessment of the scoring model, which processes personal data at scale and decides access to credit | Assessment (credit-application) |
+| Personal data | Any information about a data subject that the bank keeps | Data subject |
+| Retention | How long personal data are kept after the relevant end, before erasure | Schedule (servicing) |
+| Erase | Remove the personal data of a data subject once its retention is over |  |
+| Past | Beyond the retention period, after the relevant end |  |
+| Data erase | The removal of the personal data of a data subject past their retention | Erasure |
 
 ## Aggregates
 
@@ -41,13 +46,15 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `data-protection:data.erase`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
 
 <!-- ddd-ts-kit:jobs -->
-No scheduled job.
+| Job | Schedule | Command |
+|---|---|---|
+| `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs
@@ -87,9 +94,22 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `identity` (conformist); downstreams: `customer-due-diligence` (customer-supplier), `servicing` (customer-supplier).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `ErasePersonalDataPastRetention` | command | `data.erase` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/personal-data/erasures` | `erasePersonalDataPastRetention` | `PersonalDataRoutes` | `Authenticated` | `ErasePersonalDataPastRetention` | `data.erase` | body: `ErasePersonalDataPastRetentionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `RetentionPeriodRepository` | external | `PrismaRetentionPeriodRepository` |
+| `PersonalDataPurge` | external | `PlatformPersonalDataPurge` |
+| `RetentionPeriodRepository` | repository | `PrismaRetentionPeriodRepository` |
 <!-- /ddd-ts-kit:reference -->

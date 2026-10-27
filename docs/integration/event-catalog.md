@@ -30,6 +30,32 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | --- | --- | --- | --- |
 | `staffMemberId` | string | yes |  |
 
+## brokerage
+
+### brokerage.broker.registered
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `brokerage.broker.registered` | 1 | A broker is registered with the bank and may bring applications. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `brokerId` | string | yes |  |
+
+### brokerage.broker.registration-lapsed
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `brokerage.broker.registration-lapsed` | 1 | The registration of a broker lapsed: the broker may no longer bring applications until registered again. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `brokerId` | string | yes |  |
+
 ## credit-application
 
 ### credit-application.credit-application.submitted

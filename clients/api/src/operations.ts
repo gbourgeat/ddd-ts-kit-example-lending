@@ -226,6 +226,43 @@ export function submitApplication(
   return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface NameCoBorrowerInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    coBorrowerId: string;
+  };
+}
+
+export type NameCoBorrowerResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Name co borrower: `POST /applications/{id}/co-borrowers`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function nameCoBorrower(
+  connection: Connection,
+  input: NameCoBorrowerInput,
+  options: CallOptions = {},
+): Promise<NameCoBorrowerResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/co-borrowers',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<NameCoBorrowerResult>(connection, operation, { ...input, ...options });
+}
+
 export interface GiveAccountConsentInput {
   readonly path: {
     readonly id: string;
@@ -1163,6 +1200,39 @@ export function changeMemberRole(
   };
 
   return send<ChangeMemberRoleResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ErasePersonalDataPastRetentionInput {
+  readonly body: {
+    asOf: string;
+  };
+}
+
+export type ErasePersonalDataPastRetentionResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Erase personal data past retention: `POST /personal-data/erasures`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function erasePersonalDataPastRetention(
+  connection: Connection,
+  input: ErasePersonalDataPastRetentionInput,
+  options: CallOptions = {},
+): Promise<ErasePersonalDataPastRetentionResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/personal-data/erasures',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ErasePersonalDataPastRetentionResult>(connection, operation, { ...input, ...options });
 }
 
 export interface DefineProductInput {

@@ -1,0 +1,16 @@
+import { describe, expect, it } from '@jest/globals';
+import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
+
+describe('CreditApplicationCoBorrowerNamed', () => {
+  it('is named after the context, the aggregate and the fact, and carries the co-borrower named', () => {
+    const event = new CreditApplicationCoBorrowerNamed(
+      'credit-application-1',
+      new Date('2026-01-01T00:00:00.000Z'),
+      'customer-2',
+    );
+
+    expect(event.name).toBe('credit-application.credit-application.co-borrower-named');
+    expect(event.aggregateId).toBe('credit-application-1');
+    expect(event.coBorrowerId).toBe('customer-2');
+  });
+});
