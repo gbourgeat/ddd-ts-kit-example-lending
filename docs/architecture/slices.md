@@ -56,7 +56,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US2.01 | customer-due-diligence | skeleton | Customer, event-sourced, born identified | `aggregate customer-due-diligence Customer --event-sourced --birth Identified` | | conductor | todo |
+| US2.01 | customer-due-diligence | skeleton | Customer, event-sourced, born identified | `aggregate customer-due-diligence Customer --event-sourced --birth Identified` | | conductor | done |
 | US2.02 | customer-due-diligence | skeleton | Screening provider (port and fake adapter) | `port customer-due-diligence ScreeningProvider`; `adapter customer-due-diligence ScreeningProvider --kind external` | | conductor | todo |
 | US2.03 | customer-due-diligence | contract | Customer identified, published | `integration-event customer-due-diligence Customer Identified --version 1` | US2.01 | conductor | todo |
 | US2.04 | customer-due-diligence | slice | Identify a customer (person) | `command customer-due-diligence IdentifyCustomer --permission customer.identify --aggregate Customer`; `route customer-due-diligence IdentifyCustomer --method POST --path /customers --command` | US2.01, US2.03 | customer-due-diligence | todo |

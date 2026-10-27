@@ -29,10 +29,12 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Refresh | The renewal of due diligence: yearly for high risk, every three years for medium, every five years for low | Due diligence |
 | Overdue | Said of a due diligence whose refresh is past its date; no credit is disbursed until it is done | Refresh: the renewal itself |
 | Relationship | The bank's business relationship with a customer; it ends on a confirmed sanctions match | Portfolio (branch-network) |
+| Identified | the customer is known to the bank: identity and proof of address checked for a person, registration for a business |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `Customer` (event-sourced)
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
