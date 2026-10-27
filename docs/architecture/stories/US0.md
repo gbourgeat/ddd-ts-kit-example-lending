@@ -84,8 +84,8 @@ What blocks the close, each for the owner or the environment, none for the code:
 2. AC2 stays pending: its locked form lists the applications (`GET /applications`), the route of US6.18.
    The acceptance-judge refused the replacement (verdict `us0-e0a3fa4974adb251.md`). It closes when
    US6.18 is built, or when the owner accepts a client-visible proof of "no application recorded".
-3. `npm run check:arch` reports `tree/closed` on `src/contexts/credit-application/.claude/`: the harness
-   wrote `.claude/.cc-writes` there (untracked, not in git). Not deleted here, since it is the harness's
+3. `npm run check:arch` reports `tree/closed` on the harness's folder inside the `credit-application` context (a
+   `.claude` folder, `tree/documented-paths` warning): the harness wrote `.cc-writes` there (untracked, not in git). Not deleted here, since it is the harness's
    folder: the owner removes it, or the harness stops writing into the context.
 4. `npm run verify`: typecheck, lint, format, unit coverage (86 suites, 408 tests) and depcruise pass; deadcode
    and `docs --check` pass after the commit `d5b7ea7`. Not run in full: the e2e gate stops it (item 1), and
