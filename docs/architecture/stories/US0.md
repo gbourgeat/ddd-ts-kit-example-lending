@@ -60,3 +60,42 @@ change them. A decision that changes a locked acceptance scenario goes through t
   route of US6.18, which is not in US0: the refusal is observed through the events published instead
   (none for a refused submission). Both amend through the acceptance-judge before the lock is written
   again. Open, to be settled by the conductor when the row is closed.
+- D7 (US0.01 and US0.04, the shape of `Submitted`). Version 1 is final for US0 and recorded in
+  `stored-events.lock.json` (`docs --stored-events`); a change of it needs version 2 and its upcaster.
+  Conductor, owner brief, to confirm.
+- D8 (US0.05, the payload). The public payload carries the application id, the applicant (an opaque id,
+  no personal data), the amount in cents and the duration in months. Conductor, owner brief, to confirm.
+
+## Report
+
+Status at the close of this session: every row of US0 is committed on `us0-walking-skeleton`, the story
+is not closed.
+
+Commits (branch `us0-walking-skeleton`, base `main`): `81be091` story, design review and acceptance;
+`04b6836` US0.01; `91689ec` US0.02; `07c6eee` the derived keys named after the permission ids; `040978a`
+US0.03; `c1fa4d3` US0.06; `0ee1798` decisions; `b689e92` US0.04; `81e0dc2` AC1 amended; `9625081` US0.05;
+`d5b7ea7` the stored lock and the builder used.
+
+What blocks the close, each for the owner or the environment, none for the code:
+1. The e2e suites (`test/acceptance/us0.acceptance.spec.ts`, `test/e2e/submit-application.e2e.spec.ts`)
+   fail to load `@confluentinc/kafka-javascript`: its native binding is not built in this sandbox.
+   `npm rebuild @confluentinc/kafka-javascript` outside the sandbox, then `npm run test:e2e`. So AC1 and
+   AC3 are unproven here, and AC3's `pending(...)` stays until its scenario runs and passes.
+2. AC2 stays pending: its locked form lists the applications (`GET /applications`), the route of US6.18.
+   The acceptance-judge refused the replacement (verdict `us0-e0a3fa4974adb251.md`). It closes when
+   US6.18 is built, or when the owner accepts a client-visible proof of "no application recorded".
+3. `npm run check:arch` reports `tree/closed` on `src/contexts/credit-application/.claude/`: the harness
+   wrote `.claude/.cc-writes` there (untracked, not in git). Not deleted here, since it is the harness's
+   folder: the owner removes it, or the harness stops writing into the context.
+4. `npm run verify`: typecheck, lint, format, unit coverage (86 suites, 408 tests) and depcruise pass; deadcode
+   and `docs --check` pass after the commit `d5b7ea7`. Not run in full: the e2e gate stops it (item 1), and
+   the contracts `openapi/`, `clients/` and the SDK are written outside the sandbox by the owner
+   (`docs/tooling/frictions.md`, the rows of step 5).
+5. Markers left in credit-application, each for a later row, none of US0: repository lookups and
+   snapshots (US6.18 and after), the fake's lookups, the contract's `mutate` case (no second intention in
+   US0), the e2e publish `it.todo` (covered by AC3). `story-check US0` counts them as its own while the
+   story is open.
+6. The migration of `authorization.relation_tuples` and the `authorization` schema are for the owner
+   (`## For the owner` in `docs/architecture/plan.md`).
+
+Decisions: D1 to D8 above, provisional under the owner brief.
