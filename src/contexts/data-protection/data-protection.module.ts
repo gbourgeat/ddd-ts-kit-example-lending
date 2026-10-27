@@ -15,6 +15,10 @@ import { ErasePersonalDataPastRetentionHandler } from '@/contexts/data-protectio
 import { ErasePersonalDataPastRetentionJob } from '@/contexts/data-protection/application/scheduling/erase-personal-data-past-retention.job';
 import { RequestPersonalDataCopyCommand } from '@/contexts/data-protection/application/commands/request-personal-data-copy/request-personal-data-copy.command';
 import { RequestPersonalDataCopyHandler } from '@/contexts/data-protection/application/commands/request-personal-data-copy/request-personal-data-copy.handler';
+import { PlatformPersonalDataGathering } from '@/contexts/data-protection/infrastructure/external/platform-personal-data-gathering';
+import { FileCopyOfDataStore } from '@/contexts/data-protection/infrastructure/external/file-copy-of-data-store';
+import { runExport } from '@/platform/privacy/run-export';
+import { tenantDirectory } from '@/platform/composition/tenant-directory';
 // /ddd-ts-kit:imports
 
 export interface DataProtectionWiring {
@@ -55,10 +59,27 @@ function registerHandlers(platform: Platform): void {
     { context: 'data-protection' },
   );
 
-  platform.commands.register(RequestPersonalDataCopyCommand, new RequestPersonalDataCopyHandler(), {
+  const gathering = new PlatformPersonalDataGathering((subject, operator) =>
+    gatherPersonalData(platform, subject, operator),
+  );
+
+  const copies = new FileCopyOfDataStore(platform.files.storage, platform.files.keys);
+
+  platform.commands.register(RequestPersonalDataCopyCommand, new RequestPersonalDataCopyHandler(gathering, copies), {
     context: 'data-protection',
   });
   // /ddd-ts-kit:handlers
+}
+
+/** The export of every context's records of a subject, in every tenant the directory lists: none is refused, a copy of nothing is not a copy. */
+async function gatherPersonalData(platform: Platform, subject: string, operator: string) {
+  const tenants = await tenantDirectory(platform.persistence).tenants();
+
+  if (tenants.length === 0) {
+    throw new Error('The tenant directory lists no tenant: no copy can be gathered');
+  }
+
+  return runExport(subject, { platform, operator, correlationId: platform.ids.next(), tenants });
 }
 
 /** What the context does when an event happens: its own events and those of the other contexts. */
@@ -91,7 +112,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'data-protection' }),
     }),
     requires(RequestPersonalDataCopyCommand, dataProtectionPermissions['data-subject.request-copy'], {
-      resource: () => ({ type: 'context', id: 'data-protection' }),
+      resource: (command) => ({ type: 'customer', id: command.customerId }),
     }),
     // /ddd-ts-kit:authorization
   ];

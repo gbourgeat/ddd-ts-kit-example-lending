@@ -5,6 +5,8 @@ import { createTestBuses } from '@ddd-ts-kit/testing';
 import { dataProtectionPermissions } from '@/contexts/data-protection/data-protection.permissions';
 import { RequestPersonalDataCopyCommand } from '@/contexts/data-protection/application/commands/request-personal-data-copy/request-personal-data-copy.command';
 import { RequestPersonalDataCopyHandler } from '@/contexts/data-protection/application/commands/request-personal-data-copy/request-personal-data-copy.handler';
+import { FakePersonalDataGathering } from '@/contexts/data-protection/test/fakes/personal-data-gathering.fake';
+import { FakeCopyOfDataStore } from '@/contexts/data-protection/test/fakes/copy-of-data-store.fake';
 
 const holders = authorizationMiddleware({
   authorizer: new RoleBasedAuthorizer({
@@ -18,30 +20,57 @@ const holders = authorizationMiddleware({
 const holder = anActor().withRole('holder').build();
 
 describe('Request personal data copy', () => {
-  it('completes without answering anything', async () => {
+  it('answers the link that downloads the copy the store signed', async () => {
     const { commandBus } = arrange();
-    const command = new RequestPersonalDataCopyCommand(holder);
 
-    await expect(commandBus.execute(command)).resolves.toBeUndefined();
+    const link = await commandBus.execute(new RequestPersonalDataCopyCommand(holder, 'customer-1'));
+
+    expect(link.url).toBe('https://files.example.test/copies/1');
+  });
+
+  it('gathers what the contexts keep of the customer, for the operator who asks', async () => {
+    const { commandBus, gathering } = arrange();
+
+    await commandBus.execute(new RequestPersonalDataCopyCommand(holder, 'customer-1'));
+
+    expect(gathering.requests).toEqual([{ subject: 'customer-1', operator: holder.id }]);
+  });
+
+  it('stores the gathered document as the one copy of the customer', async () => {
+    const { commandBus, store } = arrange();
+
+    await commandBus.execute(new RequestPersonalDataCopyCommand(holder, 'customer-1'));
+
+    expect(store.stored.map((document) => document.subject)).toEqual(['customer-1']);
   });
 
   it('is refused to an actor who does not hold the permission data-subject.request-copy', async () => {
     const { commandBus } = arrange();
-    const command = new RequestPersonalDataCopyCommand(anActor().build());
+    const command = new RequestPersonalDataCopyCommand(anActor().build(), 'customer-1');
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
 
-  // TODO(domain): replace each entry below by a test named after the business behaviour of "request personal data copy": arrange with builders and fakes of its ports, execute through the bus, assert the outcome; when several specs of data-protection share this arrangement, `npx ddd-ts-kit generate test-world data-protection` writes it once in test/worlds/.
-  it.todo('applies the business decision to the aggregate');
-  it.todo('refuses the command when a business rule is violated, with the expected error code');
-  it.todo('saves and publishes nothing when the command is refused');
+  it('stores and gathers nothing when the command is refused', async () => {
+    const { commandBus, gathering, store } = arrange();
+
+    await expect(
+      commandBus.execute(new RequestPersonalDataCopyCommand(anActor().build(), 'customer-1')),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+
+    expect(gathering.requests).toHaveLength(0);
+    expect(store.stored).toHaveLength(0);
+  });
 });
 
 function arrange() {
   const { commandBus } = createTestBuses();
+  const gathering = new FakePersonalDataGathering();
+  const store = new FakeCopyOfDataStore();
 
-  commandBus.use(holders).register(RequestPersonalDataCopyCommand, new RequestPersonalDataCopyHandler());
+  commandBus
+    .use(holders)
+    .register(RequestPersonalDataCopyCommand, new RequestPersonalDataCopyHandler(gathering, store));
 
-  return { commandBus };
+  return { commandBus, gathering, store };
 }

@@ -9,26 +9,28 @@ import { dataProtectionControllers } from '@/contexts/data-protection/data-prote
 
 const caller: Actor = { id: 'user-1', type: 'user', roles: [], attributes: {} };
 
-describe('POST /data-subjects/me/copies', () => {
-  it('answers 204 when the use case succeeds', async () => {
+describe('POST /data-subjects/:customerId/copies', () => {
+  it('answers 200 with the signed link to the copy when the use case succeeds', async () => {
     const commands = new InMemoryCommandBus().register(RequestPersonalDataCopyCommand, {
-      execute: async () => undefined,
+      execute: async () => ({
+        url: 'https://files.example.test/copies/1',
+        expiresAt: new Date('2026-10-27T01:00:00.000Z'),
+      }),
     });
 
     const route = nestControllerRoute(RequestPersonalDataCopyController, {
       instanceOf: () => new RequestPersonalDataCopyController(commands),
-      // A DTO without a decorated field yet accepts the empty object alone: whitelist and forbidNonWhitelisted refuse any field.
       schemaOfClass: (dto) => classSchema(dto, { validator: { forbidUnknownValues: false } }),
     });
 
     const response = await executeRoute(
       route,
-      { params: {}, query: {}, headers: {}, body: {}, raw: undefined },
+      { params: { customerId: 'customer-1' }, query: {}, headers: {}, body: {}, raw: undefined },
       { validateResponses: true, resolvePrincipal: () => caller },
     );
 
-    expect(response.status).toBe(204);
-    expect(route.path).toBe('/data-subjects/me/copies');
+    expect(response.status).toBe(200);
+    expect(route.path).toBe('/data-subjects/:customerId/copies');
     expect(dataProtectionControllers).toContain(RequestPersonalDataCopyController);
   });
 

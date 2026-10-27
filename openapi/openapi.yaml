@@ -1699,7 +1699,7 @@ paths:
           x-error-codes:
             - UNKNOWN_CUSTOMER
             - VALIDATION_FAILED
-  /data-subjects/me/copies:
+  /data-subjects/{customerId}/copies:
     post:
       operationId: requestPersonalDataCopy
       summary: Request personal data copy
@@ -1707,21 +1707,37 @@ paths:
         - data-protection
       security:
         - bearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
+      parameters:
+        - name: customerId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
-        '204':
-          description: Done.
+        '200':
+          description: The answer.
           headers:
             Cache-Control:
               description: How the caches on the way may keep this answer.
               schema:
                 type: string
                 const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  url:
+                    type: string
+                  expiresAt:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                type: object
+                required:
+                  - url
+                  - expiresAt
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:
@@ -1738,14 +1754,14 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - FORBIDDEN
-        '415':
-          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
-            - UNSUPPORTED_MEDIA_TYPE
+            - NOT_ACCEPTABLE
         '422':
           description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
           content:

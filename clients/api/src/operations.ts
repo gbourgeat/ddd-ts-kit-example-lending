@@ -753,20 +753,25 @@ export function screenCustomer(
 }
 
 export interface RequestPersonalDataCopyInput {
-  readonly body: Record<string, unknown>;
+  readonly path: {
+    readonly customerId: string;
+  };
 }
 
 export type RequestPersonalDataCopyResult =
-  | Success<204, undefined>
+  | Success<200, {
+    url: string;
+    expiresAt: string;
+  }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
-  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
   | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
 
 /**
- * Request personal data copy: `POST /data-subjects/me/copies`.
+ * Request personal data copy: `POST /data-subjects/{customerId}/copies`.
  *
- * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
  */
 export function requestPersonalDataCopy(
   connection: Connection,
@@ -775,9 +780,9 @@ export function requestPersonalDataCopy(
 ): Promise<RequestPersonalDataCopyResult> {
   const operation: Operation = {
     method: 'POST',
-    path: '/data-subjects/me/copies',
+    path: '/data-subjects/{customerId}/copies',
     security: [['bearer']],
-    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
   };
 
   return send<RequestPersonalDataCopyResult>(connection, operation, { ...input, ...options });

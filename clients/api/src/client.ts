@@ -131,9 +131,9 @@ export interface Client {
    */
   screenCustomer(input: operations.ScreenCustomerInput, options?: CallOptions): Promise<operations.ScreenCustomerResult>;
   /**
-   * Request personal data copy: `POST /data-subjects/me/copies`.
+   * Request personal data copy: `POST /data-subjects/{customerId}/copies`.
    *
-   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
    */
   requestPersonalDataCopy(input: operations.RequestPersonalDataCopyInput, options?: CallOptions): Promise<operations.RequestPersonalDataCopyResult>;
   /**

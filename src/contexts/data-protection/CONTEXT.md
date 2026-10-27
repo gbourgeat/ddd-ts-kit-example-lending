@@ -107,13 +107,15 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
-| POST | `/data-subjects/me/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `data-subject.request-copy` | body: `RequestPersonalDataCopyBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
+| POST | `/data-subjects/:customerId/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `data-subject.request-copy` |  | 200: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/personal-data/erasures` | `erasePersonalDataPastRetention` | `PersonalDataRoutes` | `Authenticated` | `ErasePersonalDataPastRetention` | `data.erase` | body: `ErasePersonalDataPastRetentionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
+| `CopyOfDataStore` | external | `FileCopyOfDataStore` |
+| `PersonalDataGathering` | external | `PlatformPersonalDataGathering` |
 | `PersonalDataPurge` | external | `PlatformPersonalDataPurge` |
 | `RetentionPeriodRepository` | repository | `PrismaRetentionPeriodRepository` |
 <!-- /ddd-ts-kit:reference -->
