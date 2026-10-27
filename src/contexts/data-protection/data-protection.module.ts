@@ -12,6 +12,7 @@ import { PlatformPersonalDataPurge } from '@/contexts/data-protection/infrastruc
 import { runPurge } from '@/platform/privacy/run-purge';
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
 import { ErasePersonalDataPastRetentionHandler } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
+import { ErasePersonalDataPastRetentionJob } from '@/contexts/data-protection/application/scheduling/erase-personal-data-past-retention.job';
 // /ddd-ts-kit:imports
 
 export interface DataProtectionWiring {
@@ -64,6 +65,15 @@ function registerReactions(platform: Platform): void {
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
   platform.backgroundJobs.register(CopyOfDataTimeoutBackgroundJob, [platform.processes]);
+
+  const erasePersonalDataPastRetentionJob = new ErasePersonalDataPastRetentionJob(platform.commands);
+
+  platform.jobs.register({
+    name: 'data-protection.erase-personal-data-past-retention',
+    schedule: { cron: '0 3 * * *', timeZone: 'Europe/Paris' },
+    tenancy: 'per-tenant',
+    run: (execution) => erasePersonalDataPastRetentionJob.run(execution),
+  });
   // /ddd-ts-kit:jobs
 }
 
