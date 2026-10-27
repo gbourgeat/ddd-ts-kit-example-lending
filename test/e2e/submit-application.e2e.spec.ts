@@ -73,7 +73,23 @@ describe('Submit application, end to end', () => {
         children: [
           {
             name: 'command SubmitApplicationCommand',
-            children: [{ name: 'repository CreditApplicationRepository.save' }],
+            children: [
+              { name: 'repository CreditApplicationRepository.save' },
+              {
+                name: 'unit-of-work before-commit',
+                children: [
+                  {
+                    name: 'domain-event credit-application.credit-application.submitted',
+                    children: [
+                      {
+                        name: 'handler CreditApplicationSubmittedPublisher',
+                        children: [{ name: 'outbox append credit-application.credit-application.submitted' }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
