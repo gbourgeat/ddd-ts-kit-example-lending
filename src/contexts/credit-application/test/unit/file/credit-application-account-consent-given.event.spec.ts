@@ -6,6 +6,7 @@ describe('CreditApplicationAccountConsentGiven', () => {
     const event = new CreditApplicationAccountConsentGiven(
       'credit-application-1',
       new Date('2026-01-01T00:00:00.000Z'),
+      new Date('2026-04-01T00:00:00.000Z'),
     );
 
     expect(event.name).toBe('credit-application.credit-application.account-consent-given');
