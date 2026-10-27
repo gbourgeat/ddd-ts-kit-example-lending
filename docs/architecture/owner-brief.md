@@ -21,14 +21,14 @@ page before it asks anything, and decides by it.
 - The stack is imposed (it covers what the other examples of ddd-ts-kit do not):
 
   ```bash
-  npx -y ddd-ts-kit@0.95.0 init --http nest --di nest --routes nest --validation class-validator \
+  npx -y ddd-ts-kit@0.96.0 init --http nest --di nest --routes nest --validation class-validator \
     --orm prisma --database postgres --events outbox --broker kafka --cache redis --queue redis \
     --storage s3 --authn keycloak --authz rebac --audit on --event-sourcing on --privacy on \
     --tenancy shared-table --errors sentry --logger winston --docs-ui scalar --ci github \
     --tests jest --sdk --agent-profile regulated --package-manager npm
   ```
 
-  Always `ddd-ts-kit@0.95.0`, never `@latest`: this project proves that published version.
+  Always `ddd-ts-kit@0.96.0`, never `@latest`: this project proves that published version.
 - Banks are the tenants. Identity (accounts, organisations as tenants, members, invitations,
   delegations) is the `identity` preset of the kit.
 - `CreditApplication` (the application file) and `Loan` (the ledger) are event-sourced, and so is
