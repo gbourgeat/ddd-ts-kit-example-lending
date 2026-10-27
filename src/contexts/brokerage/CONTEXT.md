@@ -88,4 +88,5 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `BrokerRepository` | external | `PrismaBrokerRepository` |
+| `IntermediariesRegister` | external | `RemoteIntermediariesRegister` |
 <!-- /ddd-ts-kit:reference -->
