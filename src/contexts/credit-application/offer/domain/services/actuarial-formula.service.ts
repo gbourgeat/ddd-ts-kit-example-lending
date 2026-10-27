@@ -8,16 +8,28 @@ export type LoanTerms = {
   readonly nominalRate: number;
 };
 
+/** A span of whole months and days: 1 month and 3 days is 1 / 12 + 3 / 365 years (remark (c) of Annex I). */
+export type Interval = {
+  readonly months: number;
+  readonly days: number;
+};
+
+/**
+ * The repayments of a credit. The monthly fee (insurance) joins the repayment stream of the annual percentage rate,
+ * not the instalment. The instalments fall at the first interval after the drawdown, then every month.
+ */
 export type RepaymentPlan = {
   readonly netCredit: Money;
   readonly instalment: Money;
   readonly monthlyFee: Money;
   readonly months: number;
+  readonly firstInstalmentAfter: Interval;
 };
 
 const BISECTION_STEPS = 100;
 const HIGHEST_RATE = 1;
 const MONTHS_PER_YEAR = 12;
+const DAYS_PER_YEAR = 365;
 const TENTHS_PER_UNIT_RATE = 1000;
 const HALF = 0.5;
 
@@ -40,8 +52,11 @@ export class ActuarialFormulaService {
     return Money.ofCents(Math.round(payment));
   }
 
-  /** The rate X where the net credit equals the repayments of instalment plus monthly fee, at k / 12 years. */
-  annualPercentageRateOf(plan: RepaymentPlan): AnnualPercentageRate {
+  /**
+   * The annual rate X, as a decimal (0.06434412 is 6.434412 per cent), where the net credit equals the repayments
+   * discounted at X, the k-th repayment falling at the first interval plus (k - 1) / 12 years.
+   */
+  annualRateOf(plan: RepaymentPlan): number {
     const repayment = plan.instalment.cents + plan.monthlyFee.cents;
     let low = 0;
     let high = HIGHEST_RATE;
@@ -49,23 +64,30 @@ export class ActuarialFormulaService {
     for (let step = 0; step < BISECTION_STEPS; step++) {
       const middle = (low + high) * HALF;
 
-      if (this.presentValue(repayment, plan.months, middle) > plan.netCredit.cents) {
+      if (this.presentValue(plan, repayment, middle) > plan.netCredit.cents) {
         low = middle;
       } else {
         high = middle;
       }
     }
 
-    const annualRate = (low + high) * HALF;
-
-    return AnnualPercentageRate.ofTenths(Math.floor(annualRate * TENTHS_PER_UNIT_RATE + HALF));
+    return (low + high) * HALF;
   }
 
-  private presentValue(repayment: number, months: number, annualRate: number): number {
+  /** The annual percentage rate, stated to one decimal of a per cent as the offer states it. */
+  annualPercentageRateOf(plan: RepaymentPlan): AnnualPercentageRate {
+    return AnnualPercentageRate.ofTenths(Math.round(this.annualRateOf(plan) * TENTHS_PER_UNIT_RATE));
+  }
+
+  private presentValue(plan: RepaymentPlan, repayment: number, annualRate: number): number {
+    const { firstInstalmentAfter } = plan;
+    const firstYears = firstInstalmentAfter.months / MONTHS_PER_YEAR + firstInstalmentAfter.days / DAYS_PER_YEAR;
     let total = 0;
 
-    for (let month = 1; month <= months; month++) {
-      total += repayment * (1 + annualRate) ** (-month / MONTHS_PER_YEAR);
+    for (let instalment = 0; instalment < plan.months; instalment++) {
+      const years = firstYears + instalment / MONTHS_PER_YEAR;
+
+      total += repayment * (1 + annualRate) ** -years;
     }
 
     return total;
