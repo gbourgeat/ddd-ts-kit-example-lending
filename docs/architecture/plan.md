@@ -1,6 +1,6 @@
 # Architecture plan
 
-Next: 7 build - the conductor's wave 1 skeletons, then the walking skeleton US0.04, in `docs/architecture/slices.md`
+Next: 7 build - the owner decides the open lines of `## For the owner` on branch `wave1-skeletons`, then the walking skeleton US0.04 (PR #6)
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -188,7 +188,7 @@ grant of a right is audited.
 | 4 | Draw the context map | `docs/architecture/context-map.md`, then `docs/context-map.md` | done (`docs/context-map.md` at bootstrap) |
 | 5 | Choose the stack and bootstrap | `ddd-ts-kit.config.json`, the project | done (every gate green except `docs:check`, whose contracts the sandbox refuses to write: see `## For the owner`) |
 | 6 | Plan the slices | `docs/architecture/slices.md` | done (167 rows in 16 stories, `plan-waves` green; the contracts of step 5 still wait on the owner, see `## For the owner`) |
-| 7 | Build | code, one commit per slice | todo |
+| 7 | Build | code, one commit per slice | in progress: wave 1 on `wave1-skeletons` (16 done, 9 partial, 2 blocked, see `## For the owner`) |
 
 Status is `todo`, `in progress`, `done` or `skipped` (with the reason under Decisions).
 
@@ -245,6 +245,13 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Step 6 rejected direct debit: no retry; the instalment stays unpaid and enters the arrears buckets; the retry is open with the owner (conductor, owner brief, to confirm)
 - 2026-10-27 Step 6 conflicts and staff roles reach credit-application by integration events into projections, checked at the decision: a conflicted person never decides (conductor, owner brief, to confirm)
 - 2026-10-27 Step 6 amounts in cents live in the shared kernel (row US0.06); if the kernel refuses the generator, a friction (conductor, owner brief)
+- 2026-10-27 Step 7 wave 1 built on `wave1-skeletons` from `main`, not on the trunk; the conductor's rows of wave 1 outside US0 (PR #6): 27. The two identity rows of wave 1 (US1.01, US14.05) are worker rows, left to `worker-scope identity` (conductor, owner brief)
+- 2026-10-27 Step 7 skeleton states hold primitives; amounts are integer cents until the Money value object of US0.06 lands on the trunk (PR #6) (conductor, owner brief, to confirm)
+- 2026-10-27 Step 7 reference rows (rate grid, legal maximum rate, delegation table, residual income minimum) carry their date of effect (conductor, owner brief, to confirm)
+- 2026-10-27 Step 7 a retention period records no fact: the periods are the bank's configuration (conductor, owner brief, to confirm)
+- 2026-10-27 Step 7 external ports: the port and its in-memory fake are committed; the remote adapter has its method and refuses every call until a transport exists, and no provider is chosen (the owner brief forbids a real provider) (conductor, owner brief, to confirm)
+- 2026-10-27 Step 7 audit: a command declares its changed fields as it arrives, by default an entry carries identifiers and codes only (conductor, owner brief)
+- 2026-10-27 Step 7 batches: the five credit-policy skeletons in one commit (shared context file and Prisma schema), the coverage specs in one `test` commit, the generator's Prisma and behaviour files in the commit of their generator (conductor, owner brief)
 - 2026-10-27 Step 6 `--module` on every generator command of a row of `credit-application` and `servicing` (the generator refuses an aggregate, a port, a domain event or a value object without it; its usage lines do not show the flag, kit issue #354); `service servicing` takes none, it hosts the whole context (owner)
 
 ## For the owner
@@ -254,6 +261,14 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - `git push` (refused by the settings: yours).
 - A line to decide: `ddd-ts-kit check` prints `0 errors, 0 warnings, 7 suppressions`. The seven are the identity preset's directives on its repositories, each citing ADR-0001. `AGENTS.md` names the line with `0 suppressions`: accept the preset's decision and change the expected line, or ask the kit to count them apart.
 - Not run, yours when you want to see it run: `npm run infra:up`, then `npm run dev`; the API documentation is on `/docs`.
+- Names the kit refuses, both from the design of `slices.md`: `ScoringModel` (credit-scoring, US5.01: the word "model" is a technical word) and `CopyOfData` (data-protection, US13.02: ends with "Data"). Rename them in `slices.md` (the glossary terms are "Scoring model" and "Copy of data"), or allow the names with `--allow-name`. Both rows stay `todo` until then.
+- A real provider or a sandbox for each external port (owner brief: no real provider). Partial rows, the port and fake committed: US2.02 screening, US4.02 intermediaries register, US6.01 national register of incidents, US6.02 account information, US8.02 electronic signature, US9.03 payment provider, US10.01 mail and text messages, US10.02 register (servicing), US11.03 financial intelligence unit. The remote adapters refuse calls. The translators of US6.01, US6.02, US9.03 and US10.02 are generated with their markers: no sample format exists. Choose the fake as the runtime adapter (the owner brief's reading) or give the format of each provider.
+- `npm run docs:check` is red on one line: `customer-due-diligence.customer.identified version 1 unrecorded in stored-events.lock.json`. Run `npx ddd-ts-kit docs --stored-events` once the birth shape of Customer is final; the identification slices (US2.04) may add a field, which would need version 2 with its upcaster (`event-sourcing/upcaster-required`). Everything before the last gate of `npm run verify` is green in the worktree.
+- Migrations: `npx ddd-ts-kit prisma-generate --name <what-it-does>` (`npm run db:generate`) was not run: it needs a database and creates `prisma/migrations`, which the project does not have. The tables of the wave 1 skeletons are in `prisma/schema.prisma` only.
+- Identity worker rows of wave 1: US1.01 and US14.05, with `npx ddd-ts-kit worker-scope identity --base origin/main --rows US1.01,US14.05`.
+- The sandbox needs `PRISMA_SCHEMA_ENGINE_BINARY` set to the engine in `~/.cache/prisma` for every command that runs `db:client` (`verify`, `test`, `typecheck`); see `docs/tooling/frictions.md`.
+- The StaffMember commit is over the commit-size advisory (26 files): the generator wrote its personal-data wiring in the same run. Accepted, not split.
+- Push: not done; the branch `wave1-skeletons` is local (`git push` yours).
 - Kit issues to file, with the rows marked `to file` of `docs/tooling/frictions.md`: the contracts and hooks refused by the sandbox, the seven suppressions, the blank "Not to be confused with" cells that `--term` cannot carry.
 
 ## Open questions
