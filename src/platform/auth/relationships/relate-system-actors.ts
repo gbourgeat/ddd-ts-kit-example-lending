@@ -7,6 +7,7 @@ import type { RelationTuple, RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
  */
 const systemRelationships: readonly RelationTuple[] = [
   // ddd-ts-kit:system-grants
+  { object: 'context:branch-network', relation: 'operator', subject: 'system:OpenPortfolioForAdvisorEventHandler' },
   // /ddd-ts-kit:system-grants
 ];
 
