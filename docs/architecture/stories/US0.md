@@ -137,3 +137,24 @@ Decisions: D1 to D8 above, provisional under the owner brief.
 - The trace of the submission (`test/e2e/submit-application.e2e.spec.ts`, "is one trace") now expects the domain
   event, its handler `CreditApplicationSubmittedPublisher` and the outbox append under `unit-of-work before-commit`.
   The spec passes. Owner, `plan.md` Decisions.
+
+### Close status: blocked by US6.18, stopped here
+
+Status: **not closed**. Every row of US0 is done and committed on `us0-walking-skeleton`; the acceptance is written
+and locked (`npx ddd-ts-kit acceptance US0 --gate written` → `gate written: 1 left`).
+
+What blocks the close:
+1. AC2 (`#US0.04 #US0.02 #US0.03`) stays `pending(...)` until US6.18 builds `GET /applications` (owner decision 1).
+   Its locked body lists the applications, a route answering 404 today. The change to Jest's `expect` (kit issue
+   #436) was refused by the acceptance-judge (verdict `us0-a4fb82d0b747fa98.md`), so the lock is unchanged and AC2
+   is not re-locked. The story closes when US6.18 is done: AC2 then loses its wrapper and passes.
+2. Consequence: `npm run verify` stops at `test:e2e` with `Tests: 1 failed, 1 todo, 7 passed, 9 total`, the failure
+   being AC2's `expectStatus` (404 against 200) refused by `pending(...)`, kit issue #436. The gates after it pass
+   when run alone: `check:arch` `0 errors, 0 warnings, 7 suppressions in 426 files`, `depcruise`, `deadcode`,
+   `docs:check`.
+3. Still open for the owner, unchanged: the seven suppressions of the identity preset (`docs/architecture/plan.md`,
+   "For the owner"), the migration of `authorization.relation_tuples`, the contracts regenerated outside the sandbox.
+
+Decisions taken so far, all in this file and in `plan.md` `## Decisions`: D1 to D10 above (conductor, owner brief,
+to confirm where marked); owner decisions 1 to 3 (AC2 pending until US6.18; the AC2 change to Jest's `expect`, refused
+by the judge and not applied; the trace tree of the submission, done, `ea3ce0c`).
