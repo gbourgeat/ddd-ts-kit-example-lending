@@ -13,6 +13,10 @@ import { RegisterBrokerHandler } from '@/contexts/brokerage/application/commands
 import { CheckRegistrationCommand } from '@/contexts/brokerage/application/commands/check-registration/check-registration.command';
 import { CheckRegistrationHandler } from '@/contexts/brokerage/application/commands/check-registration/check-registration.handler';
 import { CheckRegistrationJob } from '@/contexts/brokerage/application/scheduling/check-registration.job';
+import { BrokerRegisteredPublisher } from '@/contexts/brokerage/application/integration/publishers/broker-registered.publisher';
+import { BrokerRegistered } from '@/contexts/brokerage/domain/events/broker-registered.event';
+import { BrokerRegistrationLapsedPublisher } from '@/contexts/brokerage/application/integration/publishers/broker-registration-lapsed.publisher';
+import { BrokerRegistrationLapsed } from '@/contexts/brokerage/domain/events/broker-registration-lapsed.event';
 // /ddd-ts-kit:imports
 
 export interface BrokerageWiring {
@@ -65,6 +69,27 @@ function registerHandlers(platform: Platform): void {
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
+  const brokerRegisteredPublisher = platform.adapter(new BrokerRegisteredPublisher(platform.publisher, platform.ids), {
+    kind: 'domain-event-handler',
+    context: 'brokerage',
+  });
+
+  platform.domainEvents.on(BrokerRegistered.eventName, async (event) => {
+    if (event instanceof BrokerRegistered) {
+      await brokerRegisteredPublisher.handle(event);
+    }
+  });
+
+  const brokerRegistrationLapsedPublisher = platform.adapter(
+    new BrokerRegistrationLapsedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'brokerage' },
+  );
+
+  platform.domainEvents.on(BrokerRegistrationLapsed.eventName, async (event) => {
+    if (event instanceof BrokerRegistrationLapsed) {
+      await brokerRegistrationLapsedPublisher.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 
