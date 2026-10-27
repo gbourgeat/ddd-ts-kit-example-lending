@@ -3,7 +3,7 @@ import type { LoanEvent } from '@/contexts/servicing/ledger/domain/aggregates/lo
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 
 // TODO(domain): give each data type the fields its event carries beyond its id and instant, in plain data (texts, numbers, ISO dates); personal data is written `personalData(subjectId, value)`. A type stored once never changes: a change is a new version with its upcaster (event-sourcing/upcaster-required).
-interface LoanPaidOutData {}
+type LoanPaidOutData = Record<string, never>;
 
 /** How the events of Loan are kept in its stream: one entry per event, read back by `decode`. */
 export const loanEvents: StoredEventTypes<LoanEvent> = {
