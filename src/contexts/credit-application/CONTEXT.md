@@ -121,4 +121,10 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe credit-application --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `credit-policy` (published-language), `credit-scoring` (customer-supplier), `customer-due-diligence` (customer-supplier), `brokerage` (published-language), `branch-network` (published-language), `identity` (conformist); downstreams: `servicing` (published-language), `reporting` (published-language).
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `RepaymentIncidentRegister` | external | `RemoteRepaymentIncidentRegister` |
 <!-- /ddd-ts-kit:reference -->
