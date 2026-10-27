@@ -13,6 +13,8 @@ import { runPurge } from '@/platform/privacy/run-purge';
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
 import { ErasePersonalDataPastRetentionHandler } from '@/contexts/data-protection/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
 import { ErasePersonalDataPastRetentionJob } from '@/contexts/data-protection/application/scheduling/erase-personal-data-past-retention.job';
+import { RequestPersonalDataCopyCommand } from '@/contexts/data-protection/application/commands/request-personal-data-copy/request-personal-data-copy.command';
+import { RequestPersonalDataCopyHandler } from '@/contexts/data-protection/application/commands/request-personal-data-copy/request-personal-data-copy.handler';
 // /ddd-ts-kit:imports
 
 export interface DataProtectionWiring {
@@ -52,6 +54,10 @@ function registerHandlers(platform: Platform): void {
     new ErasePersonalDataPastRetentionHandler(personalDataPurge),
     { context: 'data-protection' },
   );
+
+  platform.commands.register(RequestPersonalDataCopyCommand, new RequestPersonalDataCopyHandler(), {
+    context: 'data-protection',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -82,6 +88,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(ErasePersonalDataPastRetentionCommand, dataProtectionPermissions['data.erase'], {
+      resource: () => ({ type: 'context', id: 'data-protection' }),
+    }),
+    requires(RequestPersonalDataCopyCommand, dataProtectionPermissions['data-subject.request-copy'], {
       resource: () => ({ type: 'context', id: 'data-protection' }),
     }),
     // /ddd-ts-kit:authorization
