@@ -3,6 +3,8 @@ model FinancialCrimeAlert {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
   repaymentReference String @map("repayment_reference")
+  closedAt     DateTime? @map("closed_at") @db.Timestamptz(3)
+  closureReason String?  @map("closure_reason")
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)

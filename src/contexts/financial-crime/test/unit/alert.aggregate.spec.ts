@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
+import { expectRefusal } from '@ddd-ts-kit/testing';
 import { AlertRaised } from '@/contexts/financial-crime/domain/events/alert-raised.event';
 import { Alert } from '@/contexts/financial-crime/domain/aggregates/alert.aggregate';
 import { anAlert } from '@/contexts/financial-crime/test/builders/alert.builder';
@@ -36,5 +37,32 @@ describe('anAlert exposes what it holds', () => {
     const built = anAlert().build();
 
     expect(built.repaymentReference).toEqual('repayment-1');
+  });
+});
+
+describe('Alert closure', () => {
+  const closedOn = new Date('2026-04-02T09:00:00.000Z');
+
+  it('is closed on the day given, with the reason the compliance officer gives', () => {
+    const alert = anAlert().build();
+
+    alert.close('Payer confirmed as the borrower spouse', closedOn);
+
+    expect(alert.closedAt).toEqual(closedOn);
+    expect(alert.closureReason).toBe('Payer confirmed as the borrower spouse');
+  });
+
+  it('refuses to close an alert without a reason', () => {
+    const alert = anAlert().build();
+
+    expectRefusal(() => alert.close('   ', closedOn), 'CLOSURE_REASON_MISSING');
+  });
+
+  it('refuses to close an alert a second time', () => {
+    const alert = anAlert().build();
+
+    alert.close('Reviewed', closedOn);
+
+    expectRefusal(() => alert.close('Reviewed again', closedOn), 'ALERT_ALREADY_CLOSED');
   });
 });

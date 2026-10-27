@@ -9,6 +9,8 @@ export const AlertMapper = {
     const loaded = Alert.rehydrate(row.id, {
       registeredAt: row.registeredAt,
       repaymentReference: row.repaymentReference,
+      closedAt: row.closedAt ?? undefined,
+      closureReason: row.closureReason ?? undefined,
     });
 
     loaded.version = row.version;
@@ -17,6 +19,12 @@ export const AlertMapper = {
   },
 
   toRow(saved: Alert): AlertColumns {
-    return { id: saved.id, ...saved.toState() };
+    return {
+      id: saved.id,
+      registeredAt: saved.registeredAt,
+      repaymentReference: saved.repaymentReference,
+      closedAt: saved.closedAt ?? null,
+      closureReason: saved.closureReason ?? null,
+    };
   },
 };

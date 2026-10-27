@@ -13,7 +13,7 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 | [credit-scoring](credit-scoring.md) | 6 | 3 | 4 |
 | [customer-due-diligence](customer-due-diligence.md) | 28 | 0 | 12 |
 | [data-protection](data-protection.md) | 10 | 1 | 5 |
-| [financial-crime](financial-crime.md) | 29 | 0 | 10 |
+| [financial-crime](financial-crime.md) | 42 | 0 | 15 |
 | [identity](identity.md) | 175 | 0 | 60 |
 | [reporting](reporting.md) | 1 | 0 | 1 |
 | [servicing](servicing.md) | 15 | 6 | 9 |
