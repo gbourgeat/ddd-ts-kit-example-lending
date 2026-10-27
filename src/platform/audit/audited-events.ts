@@ -19,6 +19,7 @@ import {
   delegationTablePublishedV1,
   residualIncomeMinimumPublishedV1,
 } from '@/contexts/credit-policy/published-language';
+import { brokerRegisteredV1, brokerRegistrationLapsedV1 } from '@/contexts/brokerage/published-language';
 // /ddd-ts-kit:imports
 
 /** Every integration event the contexts declare: the audit trail records that each one occurred. `generate integration-event` adds to it. */
@@ -41,5 +42,7 @@ export const auditedEvents = createEventRegistry([
   delegationTablePublishedV1,
   residualIncomeMinimumPublishedV1,
   customerAdvisorAssignedV1,
+  brokerRegisteredV1,
+  brokerRegistrationLapsedV1,
   // /ddd-ts-kit:events
 ]);
