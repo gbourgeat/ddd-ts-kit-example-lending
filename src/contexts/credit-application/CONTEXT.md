@@ -174,17 +174,17 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 
-### Consumed events
-
-| Event | Version | From | Handler | Consumer |
-|---|---|---|---|---|
-| `branch-network.conflict-of-interest.declared` | 1 | `branch-network` | `KeepDeclaredConflictsIntegrationHandler` | `credit-application.keep-declared-conflicts` |
-
 ### Publishers
 
 | Event | Versions | Publisher |
 |---|---|---|
 | `credit-application.credit-application.submitted` | 1 | `CreditApplicationSubmittedPublisher` |
+
+### Projections
+
+| Projection | Class | Applies |
+|---|---|---|
+| not read | `DeclaredConflictsProjection` |  |
 
 ### Ports
 
@@ -193,6 +193,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
 | `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
+| `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `OfferRepository` | external | `PrismaOfferRepository` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |

@@ -26,8 +26,9 @@ import { NameGuarantorHandler } from '@/contexts/credit-application/file/applica
 import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
 import { CorrectEntryHandler } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.handler';
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
-import { conflictOfInterestDeclaredV1 as keepDeclaredConflictsDefinition } from '@/contexts/branch-network/published-language';
-import { KeepDeclaredConflictsIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-declared-conflicts.integration-handler';
+import { conflictOfInterestDeclaredV1 as declaredConflictsDefinition } from '@/contexts/branch-network/published-language';
+import { DeclaredConflictsProjection } from '@/contexts/credit-application/decision/application/projections/declared-conflicts.projection';
+import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-declared-conflicts-store.repository';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -133,18 +134,24 @@ function registerReactions(platform: Platform): void {
     }
   });
 
-  const keepDeclaredConflictsIntegrationHandler = new KeepDeclaredConflictsIntegrationHandler(platform.commands);
+  const declaredConflictsProjection = new DeclaredConflictsProjection(
+    platform.adapter(new PrismaDeclaredConflictsStore(platform.persistence.database, platform.scope), {
+      kind: 'repository',
+      context: 'credit-application',
+      token: 'DeclaredConflictsStore',
+    }),
+  );
 
   subscribeAll(platform.subscriberFor('credit-application'), [
     consume(
-      keepDeclaredConflictsDefinition,
+      declaredConflictsDefinition,
       {
-        consumer: 'credit-application.keep-declared-conflicts',
+        consumer: 'credit-application.declared-conflicts',
         processed: platform.persistence.processedEvents,
         unitOfWork: platform.persistence.unitOfWork,
         scope: platform.scope,
       },
-      (event) => keepDeclaredConflictsIntegrationHandler.handle(event),
+      (event) => declaredConflictsProjection.declared(event),
     ),
   ]);
   // /ddd-ts-kit:reactions
