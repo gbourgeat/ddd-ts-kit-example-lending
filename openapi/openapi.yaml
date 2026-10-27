@@ -9,6 +9,7 @@ tags:
   - name: credit-application
   - name: credit-policy
   - name: customer-due-diligence
+  - name: data-protection
   - name: financial-crime
   - name: identity
 paths:
@@ -2651,6 +2652,61 @@ paths:
             - ORGANISATION_NOT_FOUND
             - OWNERS_ONLY
             - OWN_ROLE
+            - VALIDATION_FAILED
+  /personal-data/erasures:
+    post:
+      operationId: erasePersonalDataPastRetention
+      summary: Erase personal data past retention
+      tags:
+        - data-protection
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
             - VALIDATION_FAILED
   /products:
     post:

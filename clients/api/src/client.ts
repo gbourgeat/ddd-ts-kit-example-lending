@@ -197,6 +197,12 @@ export interface Client {
    */
   changeMemberRole(input: operations.ChangeMemberRoleInput, options?: CallOptions): Promise<operations.ChangeMemberRoleResult>;
   /**
+   * Erase personal data past retention: `POST /personal-data/erasures`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  erasePersonalDataPastRetention(input: operations.ErasePersonalDataPastRetentionInput, options?: CallOptions): Promise<operations.ErasePersonalDataPastRetentionResult>;
+  /**
    * Define product: `POST /products`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
@@ -250,6 +256,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchMembers: (input, call) => operations.searchMembers(connection, input, call),
     removeMember: (input, call) => operations.removeMember(connection, input, call),
     changeMemberRole: (input, call) => operations.changeMemberRole(connection, input, call),
+    erasePersonalDataPastRetention: (input, call) => operations.erasePersonalDataPastRetention(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
