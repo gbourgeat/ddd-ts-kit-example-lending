@@ -13,16 +13,28 @@ describe('SuspiciousActivityReport', () => {
     expect(born.registeredAt).toEqual(bornAt);
   });
 
-  it('records the fact that it is filed', () => {
+  it('is born pending, with no filing reference, and records no fact while it waits', () => {
+    const pending = aSuspiciousActivityReport().build();
+
+    expect(pending.filingReference).toBeUndefined();
+    expect(pending.pullEvents()).toEqual([]);
+  });
+
+  it('records the fact that it is filed once the financial intelligence unit gives its reference', () => {
     const bornAt = new Date('2026-03-01T00:00:00.000Z');
 
-    const recorded = aSuspiciousActivityReport().identifiedBy('suspicious-activity-report-7').bornAt(bornAt).build();
+    const filed = aSuspiciousActivityReport()
+      .identifiedBy('suspicious-activity-report-7')
+      .bornAt(bornAt)
+      .filedAs('FIU-7')
+      .build();
 
-    expect(recorded.pullEvents()).toEqual([new SuspiciousActivityReportFiled('suspicious-activity-report-7', bornAt)]);
+    expect(filed.filingReference).toBe('FIU-7');
+    expect(filed.pullEvents()).toEqual([new SuspiciousActivityReportFiled('suspicious-activity-report-7', bornAt)]);
   });
 
   it('is rehydrated in its stored state without recording a new fact', () => {
-    const stored = aSuspiciousActivityReport().build();
+    const stored = aSuspiciousActivityReport().filedAs('FIU-3').build();
 
     const loaded = SuspiciousActivityReport.rehydrate(stored.id, stored.toState());
 

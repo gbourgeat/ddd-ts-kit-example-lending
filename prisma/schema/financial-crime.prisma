@@ -21,6 +21,7 @@ model FinancialCrimeSuspiciousActivityReport {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
   subjectReference String @map("subject_reference")
+  filingReference String? @map("filing_reference")
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)
