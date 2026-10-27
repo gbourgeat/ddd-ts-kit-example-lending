@@ -331,7 +331,7 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US13.01 | data-protection | skeleton | Retention period by context and by kind of data | `aggregate data-protection RetentionPeriod`; `repository data-protection RetentionPeriod --tenant-scoped` | | conductor | todo |
+| US13.01 | data-protection | skeleton | Retention period by context and by kind of data | `aggregate data-protection RetentionPeriod`; `repository data-protection RetentionPeriod --tenant-scoped` | | conductor | done |
 | US13.02 | data-protection | skeleton | Copy of a customer's data: the process that gathers each context's data | `process data-protection CopyOfData` | | conductor | todo |
 | US13.03 | data-protection | slice | A customer asks for a copy of all we keep about them | `command data-protection RequestCopyOfData --permission data-subject.request-copy`; `route data-protection RequestCopyOfData --method POST --path /data-subjects/me/copies --command` | US13.02 | data-protection | todo |
 | US13.04 | data-protection | slice | Erase personal data after retention (due diligence 5 years after the relationship, loan 10 years after closing, refused application 6 months) | `command data-protection EraseExpiredPersonalData --permission data.erase --aggregate RetentionPeriod`; `job data-protection EraseExpiredPersonalData --cron "0 3 * * *" --time-zone Europe/Paris --command EraseExpiredPersonalData` | US13.01 | data-protection | todo |

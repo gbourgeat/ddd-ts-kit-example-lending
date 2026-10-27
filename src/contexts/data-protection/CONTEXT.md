@@ -24,6 +24,7 @@ Retention and erasure are a legal obligation every context serves, with no busin
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `RetentionPeriod`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -81,4 +82,10 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe data-protection --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `identity` (conformist); downstreams: `customer-due-diligence` (customer-supplier), `servicing` (customer-supplier).
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `RetentionPeriodRepository` | external | `PrismaRetentionPeriodRepository` |
 <!-- /ddd-ts-kit:reference -->
