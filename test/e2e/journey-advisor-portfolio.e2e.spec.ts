@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 import { expectStatus } from '@ddd-ts-kit/testing/e2e';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 
 const advisor = { name: 'Grace Hopper', email: 'grace@example.test' };
+const tenantId = 'acme-bank';
 
 describe('Advisor gets a portfolio, end to end', () => {
   let application: RunningApplication;
@@ -15,13 +16,9 @@ describe('Advisor gets a portfolio, end to end', () => {
     await application.close();
   });
 
-  beforeEach(async () => {
-    await application.reset();
-  });
-
   it('opens an empty portfolio for the advisor appointed on the branch, as the system actor', async () => {
     await application.relate({ object: 'context:branch-network', relation: 'operator', subject: 'user:ada' });
-    const ada = await application.as({ id: 'ada' });
+    const ada = await application.as({ id: 'ada', tenantId });
 
     const opened = await ada.post('/branches', {});
 
