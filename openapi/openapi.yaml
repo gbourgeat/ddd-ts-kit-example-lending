@@ -1699,6 +1699,77 @@ paths:
           x-error-codes:
             - UNKNOWN_CUSTOMER
             - VALIDATION_FAILED
+  /data-subjects/{customerId}/copies:
+    post:
+      operationId: requestPersonalDataCopy
+      summary: Request personal data copy
+      tags:
+        - data-protection
+      security:
+        - bearer: []
+      parameters:
+        - name: customerId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  url:
+                    type: string
+                  expiresAt:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                type: object
+                required:
+                  - url
+                  - expiresAt
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
   /delegation-table:
     put:
       operationId: setDelegationTable

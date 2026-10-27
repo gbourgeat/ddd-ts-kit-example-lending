@@ -752,6 +752,42 @@ export function screenCustomer(
   return send<ScreenCustomerResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RequestPersonalDataCopyInput {
+  readonly path: {
+    readonly customerId: string;
+  };
+}
+
+export type RequestPersonalDataCopyResult =
+  | Success<200, {
+    url: string;
+    expiresAt: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Request personal data copy: `POST /data-subjects/{customerId}/copies`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function requestPersonalDataCopy(
+  connection: Connection,
+  input: RequestPersonalDataCopyInput,
+  options: CallOptions = {},
+): Promise<RequestPersonalDataCopyResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/data-subjects/{customerId}/copies',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<RequestPersonalDataCopyResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetDelegationTableInput {
   readonly body: {
     effectiveFrom: string;

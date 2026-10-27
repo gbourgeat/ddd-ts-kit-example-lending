@@ -25,6 +25,7 @@ Retention and erasure are a legal obligation every context serves, with no busin
 | Erase | Remove the personal data of a data subject once its retention is over |  |
 | Past | Beyond the retention period, after the relevant end |  |
 | Data erase | The removal of the personal data of a data subject past their retention | Erasure |
+| Request | A data subject asks the bank for a copy of the personal data it keeps |  |
 
 ## Aggregates
 
@@ -47,6 +48,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `data-protection:data.erase`
+- `data-protection:data-subject.request-copy`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -99,17 +101,21 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `ErasePersonalDataPastRetention` | command | `data.erase` |
+| `RequestPersonalDataCopy` | command | `public` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
+| POST | `/data-subjects/:customerId/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `public` |  | 200: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/personal-data/erasures` | `erasePersonalDataPastRetention` | `PersonalDataRoutes` | `Authenticated` | `ErasePersonalDataPastRetention` | `data.erase` | body: `ErasePersonalDataPastRetentionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
+| `CopyOfDataStore` | external | `FileCopyOfDataStore` |
+| `PersonalDataGathering` | external | `PlatformPersonalDataGathering` |
 | `PersonalDataPurge` | external | `PlatformPersonalDataPurge` |
 | `RetentionPeriodRepository` | repository | `PrismaRetentionPeriodRepository` |
 <!-- /ddd-ts-kit:reference -->
