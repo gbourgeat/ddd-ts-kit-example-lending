@@ -11,6 +11,7 @@ import type { TracedApplication } from '@ddd-ts-kit/tracing';
 import { accessPolicies } from '@/platform/auth/authorization/access-policies';
 import { createAuthorizer } from '@/platform/auth/authorization/create-authorizer';
 import { createRelationTuples } from '@/platform/auth/relationships/create-relation-tuples';
+import { StreamAuditReader } from '@/platform/audit/streams/stream-audit-reader';
 import { UseCaseProtection } from '@/platform/auth/authorization/use-case-protection';
 import { createCommandBus } from '@/platform/buses/create-command-bus';
 import { createQueryBus } from '@/platform/buses/create-query-bus';
@@ -48,6 +49,7 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
 
   return {
     ...founded,
+    audit: { ...foundations.audit, reader: new StreamAuditReader(foundations.audit.reader, scope, authorizer) },
     ...platformEvents(persistence, options, foundations),
     // The queue, its worker and the runner of the process managers: a timeout is a command the runner sends on the bus.
     ...createBackgroundWork({ persistence, options, foundations, commands }),
