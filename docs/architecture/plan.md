@@ -288,6 +288,7 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 US14.02 is back in progress: the commands of financial-crime still write their entries into the general chain, which the stream readable by compliance only forbids; the row is done when no entry of financial-crime reaches the general chain, proven by a spec (owner)
 - 2026-10-27 The address of a customer is personal data: it is declared as a personal field of its context (`privacy/declared-field`), not only sealed in the event (owner)
 - 2026-10-27 A row is done when it works in the started application, not only when `verify` is green: US1.08 (the handler acts as the system actor, which needs its grant in `relate-system-actors.ts`), US4.03 (`broker.register` granted to no role), US4.04 (the daily job of the check not registered) are back in progress, and so is any row whose permission no role holds (`portfolio.open` of US1.08). Each closes with the started application doing it, as the story verifier checks (owner)
+- 2026-10-27 The worked examples of the APR are no longer the owner's own computation: `docs/architecture/apr-worked-examples.md` now holds four examples of the report prepared for the European Commission (DG FISMA, January 2015), figures unchanged, with X to six decimals; US8.04 is back in progress until its spec proves each X to six decimals and the APR to one, the interval in days of example 2 included (owner)
 
 ## For the owner
 
