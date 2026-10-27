@@ -8,6 +8,7 @@ export const StaffMemberMapper = {
   toDomain(row: StaffMemberRow): StaffMember {
     const loaded = StaffMember.rehydrate(row.id, {
       registeredAt: row.registeredAt,
+      branchId: row.branchId,
       name: row.name,
       email: row.email,
     });

@@ -142,6 +142,41 @@ export function submitApplication(
   return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface GiveAccountConsentInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type GiveAccountConsentResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Give account consent: `POST /applications/{id}/consent`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function giveAccountConsent(
+  connection: Connection,
+  input: GiveAccountConsentInput,
+  options: CallOptions = {},
+): Promise<GiveAccountConsentResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/consent',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<GiveAccountConsentResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SearchAuditEntriesInput {
   readonly query?: {
     /** Size of the page. */
@@ -247,6 +282,78 @@ export function openBranch(
   return send<OpenBranchResult>(connection, operation, { ...input, ...options });
 }
 
+export interface AppointStaffMemberInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    name: string;
+    email: string;
+  };
+}
+
+export type AppointStaffMemberResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'BRANCH_NOT_OPENED' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Appoint staff member: `POST /branches/{id}/staff`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BRANCH_NOT_OPENED (422), VALIDATION_FAILED (422).
+ */
+export function appointStaffMember(
+  connection: Connection,
+  input: AppointStaffMemberInput,
+  options: CallOptions = {},
+): Promise<AppointStaffMemberResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/branches/{id}/staff',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<AppointStaffMemberResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RegisterBrokerInput {
+  readonly body: {
+    registrationNumber: string;
+  };
+}
+
+export type RegisterBrokerResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_BROKER_REGISTRATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Register broker: `POST /brokers`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+ */
+export function registerBroker(
+  connection: Connection,
+  input: RegisterBrokerInput,
+  options: CallOptions = {},
+): Promise<RegisterBrokerResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/brokers',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RegisterBrokerResult>(connection, operation, { ...input, ...options });
+}
+
 export interface RegisterBusinessInput {
   readonly body: {
     customerId: string;
@@ -283,6 +390,45 @@ export function registerBusiness(
   };
 
   return send<RegisterBusinessResult>(connection, operation, { ...input, ...options });
+}
+
+export interface IdentifyCustomerInput {
+  readonly body: {
+    documentKind: 'Passport' | 'NationalIdentityCard' | 'ResidencePermit';
+    documentNumber: string;
+    issuingCountry: string;
+    documentExpiresOn: string;
+    address: string;
+    addressProofDatedOn: string;
+  };
+}
+
+export type IdentifyCustomerResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'IDENTITY_DOCUMENT_EXPIRED' | 'PROOF_OF_ADDRESS_TOO_OLD' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Identify a person with its identity document and its proof of address: `POST /customers`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IDENTITY_DOCUMENT_EXPIRED (422), PROOF_OF_ADDRESS_TOO_OLD (422), VALIDATION_FAILED (422).
+ */
+export function identifyCustomer(
+  connection: Connection,
+  input: IdentifyCustomerInput,
+  options: CallOptions = {},
+): Promise<IdentifyCustomerResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<IdentifyCustomerResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SetDelegationTableInput {

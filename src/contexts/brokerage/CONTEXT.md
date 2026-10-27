@@ -21,6 +21,7 @@ Brokers bring applications, and the check of their registration is a supporting 
 | Registration lapsed | The registration is no longer valid; the broker can no longer bring applications | Refusal |
 | Bring | A broker's act of submitting an application to the bank | Assignment |
 | Registered | a broker is entered on the intermediaries register with its registration number |  |
+| Check | The daily verification that a broker's registration is still valid on the day; a lapsed one is marked |  |
 
 ## Aggregates
 
@@ -42,7 +43,8 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `brokerage:broker.register`
+- `brokerage:broker.check`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -83,10 +85,29 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `identity` (conformist); downstreams: `credit-application` (published-language).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `CheckRegistration` | command | `broker.check` |
+| `RegisterBroker` | command | `broker.register` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/brokers` | `registerBroker` | `BrokersRoutes` | `Authenticated` | `RegisterBroker` | `broker.register` | body: `RegisterBrokerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BrokerageCodes.InvalidBrokerRegistration` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `BrokerRepository` | external | `PrismaBrokerRepository` |
+| `BrokerRepository` | repository | `PrismaBrokerRepository` |
 | `IntermediariesRegister` | external | `SimulatedIntermediariesRegister` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `InvalidBrokerRegistration` | `forRegistration` | `INVALID_BROKER_REGISTRATION` | `registrationNumber` |
 <!-- /ddd-ts-kit:reference -->

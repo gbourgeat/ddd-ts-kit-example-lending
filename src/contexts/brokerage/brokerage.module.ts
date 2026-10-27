@@ -4,6 +4,14 @@ import { brokerageControllers } from '@/contexts/brokerage/brokerage.controllers
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { PrismaBrokerRepository } from '@/contexts/brokerage/infrastructure/persistence/prisma-broker.repository';
+import { SimulatedIntermediariesRegister } from '@/contexts/brokerage/infrastructure/external/simulated-intermediaries-register.adapter';
+import { requires } from '@ddd-ts-kit/auth';
+import { brokeragePermissions } from '@/contexts/brokerage/brokerage.permissions';
+import { RegisterBrokerCommand } from '@/contexts/brokerage/application/commands/register-broker/register-broker.command';
+import { RegisterBrokerHandler } from '@/contexts/brokerage/application/commands/register-broker/register-broker.handler';
+import { CheckRegistrationCommand } from '@/contexts/brokerage/application/commands/check-registration/check-registration.command';
+import { CheckRegistrationHandler } from '@/contexts/brokerage/application/commands/check-registration/check-registration.handler';
 // /ddd-ts-kit:imports
 
 export interface BrokerageWiring {
@@ -30,6 +38,28 @@ export function brokerageModule(platform: Platform): BrokerageWiring {
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
+  const brokerRepository = platform.adapter(
+    new PrismaBrokerRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'brokerage', token: 'BrokerRepository' },
+  );
+
+  const intermediaries = platform.adapter(new SimulatedIntermediariesRegister(), {
+    kind: 'external',
+    context: 'brokerage',
+    token: 'IntermediariesRegister',
+  });
+
+  platform.commands.register(
+    RegisterBrokerCommand,
+    new RegisterBrokerHandler(brokerRepository, intermediaries, platform.ids, platform.clock),
+    { context: 'brokerage' },
+  );
+
+  platform.commands.register(
+    CheckRegistrationCommand,
+    new CheckRegistrationHandler(brokerRepository, intermediaries, platform.clock),
+    { context: 'brokerage' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -49,6 +79,12 @@ function registerJobs(platform: Platform): void {
 function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
+    requires(RegisterBrokerCommand, brokeragePermissions['broker.register'], {
+      resource: () => ({ type: 'context', id: 'brokerage' }),
+    }),
+    requires(CheckRegistrationCommand, brokeragePermissions['broker.check'], {
+      resource: () => ({ type: 'context', id: 'brokerage' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }

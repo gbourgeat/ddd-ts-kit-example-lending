@@ -2,11 +2,16 @@ import { defineStoredEvent, type StoredEventTypes } from '@ddd-ts-kit/kernel';
 import { Money } from '@/shared-kernel/money.vo';
 import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
+import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
   readonly amountInCents: number;
   readonly durationMonths: number;
+}
+
+interface CreditApplicationAccountConsentGivenData {
+  readonly expiresAt: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -26,5 +31,11 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.number('durationMonths'),
         occurredAt,
       ),
+  }),
+  [CreditApplicationAccountConsentGiven.eventName]: defineStoredEvent(CreditApplicationAccountConsentGiven, {
+    version: 1,
+    encode: (event): CreditApplicationAccountConsentGivenData => ({ expiresAt: event.expiresAt.toISOString() }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationAccountConsentGiven(aggregateId, occurredAt, data.instant('expiresAt')),
   }),
 };

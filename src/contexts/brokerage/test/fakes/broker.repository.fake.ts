@@ -11,4 +11,8 @@ export class FakeBrokerRepository extends InMemoryRepository<Broker> implements 
       }),
     );
   }
+
+  async findNotLapsed(): Promise<Broker[]> {
+    return this.all().filter((broker) => broker.lapsedOn === undefined);
+  }
 }

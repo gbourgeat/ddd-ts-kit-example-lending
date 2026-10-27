@@ -31,6 +31,12 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Relationship | The bank's business relationship with a customer; it ends on a confirmed sanctions match | Portfolio (branch-network) |
 | Identified | the customer is known to the bank: identity and proof of address checked for a person, registration for a business |  |
 | Registered | The business's registration is recorded by the bank, before its directors and beneficial owners are identified |  |
+| Identity | The identity of a person: the identity document and the proof of address the bank checked |  |
+| Document | An identity document: a passport, a national identity card or a residence permit |  |
+| Expired | Past its expiry date on the day of identification |  |
+| Proof | A document showing the address of a person |  |
+| Address | Where a person lives, as stated on its proof of address |  |
+| Old | Dated more than three months before the day of identification |  |
 
 ## Aggregates
 
@@ -54,6 +60,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `customer-due-diligence:business.register`
+- `customer-due-diligence:customer.identify`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -100,6 +107,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `IdentifyCustomer` | command | `customer.identify` |
 | `RegisterBusiness` | command | `business.register` |
 
 ### Routes
@@ -107,6 +115,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/businesses` | `registerBusiness` | `BusinessesRoutes` | `Authenticated` | `RegisterBusiness` | `business.register` | body: `RegisterBusinessBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `BUSINESS_ALREADY_REGISTERED` |
+| POST | `/customers` | `identifyCustomer` | `CustomersRoutes` | `Authenticated` | `IdentifyCustomer` | `customer.identify` | body: `IdentifyCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
 
 ### Publishers
 
@@ -126,5 +135,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
 | `BusinessAlreadyRegistered` | `forCustomer` | `BUSINESS_ALREADY_REGISTERED` | none |
+| `IdentityDocumentExpired` | `forCustomer` | `IDENTITY_DOCUMENT_EXPIRED` | none |
+| `ProofOfAddressTooOld` | `forCustomer` | `PROOF_OF_ADDRESS_TOO_OLD` | none |
 | `UnknownCustomer` | `forCustomer` | `UNKNOWN_CUSTOMER` | none |
 <!-- /ddd-ts-kit:reference -->

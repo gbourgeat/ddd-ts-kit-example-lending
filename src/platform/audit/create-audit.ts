@@ -17,6 +17,7 @@ import type { BusMiddleware } from '@ddd-ts-kit/kernel';
 import type { Persistence } from '@/platform/database/persistence';
 import { auditPermissions } from '@/platform/audit/audit.permissions';
 import { auditedEvents } from '@/platform/audit/audited-events';
+import { chainOfStream } from '@/platform/audit/streams/chain-of-stream';
 import { SearchAuditEntriesQuery } from '@/platform/audit/search-audit-entries/search-audit-entries.query';
 
 /** The name the audit trail consumes integration events under: its idempotency scope, and its queues behind a broker. */
@@ -79,5 +80,5 @@ export function createAudit(persistence: Persistence, source: AuditSource): Audi
 const AUDIT_SCHEMA = 'audit';
 
 function createAuditTrail(persistence: Persistence): AuditTrail & AuditReader & ArchivableAuditTrail {
-  return new PrismaAuditTrail(persistence.database, { schema: AUDIT_SCHEMA });
+  return new PrismaAuditTrail(persistence.database, { schema: AUDIT_SCHEMA, chainOf: chainOfStream });
 }

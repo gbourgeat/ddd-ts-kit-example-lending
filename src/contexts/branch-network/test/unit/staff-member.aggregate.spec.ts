@@ -9,12 +9,14 @@ describe('StaffMember', () => {
 
     const born = aStaffMember()
       .identifiedBy('staff-7')
+      .onBranch('branch-2')
       .named('Grace Hopper')
       .reachableAt('grace@bank.test')
       .bornAt(bornAt)
       .build();
 
     expect(born.id).toBe('staff-7');
+    expect(born.branchId).toBe('branch-2');
     expect(born.name).toBe('Grace Hopper');
     expect(born.email).toBe('grace@bank.test');
     expect(born.registeredAt).toEqual(bornAt);

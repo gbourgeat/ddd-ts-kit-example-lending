@@ -3,6 +3,7 @@ import { InMemoryEventStore, InMemorySubjectKeyStore, PersonalDataCipher } from 
 import { repositoryContract } from '@ddd-ts-kit/testing/contracts';
 import { Customer } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
 import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
+import { aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 import { FakeCustomerRepository } from '@/contexts/customer-due-diligence/test/fakes/customer.repository.fake';
 
 const runner = { describe, it, expect, beforeEach, afterEach };
@@ -15,7 +16,7 @@ const expectations = {
   createAggregate: () => {
     born += 1;
 
-    return Customer.create(`customer-${born}`, bornAt);
+    return Customer.create(`customer-${born}`, aPersonIdentity(), bornAt);
   },
   // The business of the customer is registered: an update the store must keep, and refuse stale once saved.
   mutate: (changed: Customer) =>

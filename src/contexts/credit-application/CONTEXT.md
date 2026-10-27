@@ -50,6 +50,13 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Submitted | the application was received from an applicant or a broker, and its file opened |  |
 | Duration | The number of whole months over which the requested amount is repaid |  |
 | Net income | The household's monthly income net of tax, the base of the debt to income ratio |  |
+| Annual | the period of a year over which the annual percentage rate is stated |  |
+| Percentage | the rate expressed in per cent, stated to one decimal |  |
+| Rate | the interest rate of a credit, nominal or annual |  |
+| Actuarial | the discounting of the repayments at their exact dates, in years from the drawdown |  |
+| Formula | the equation of Annex I of the Consumer Credit Directive that gives the annual percentage rate |  |
+| Account | A bank account of the applicant, read through an account information provider for the income and expenses of the application |  |
+| Given | Past participle of give: the fact that a permission was handed over at an instant, recorded in the file |  |
 
 ## Modules
 
@@ -83,6 +90,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `credit-application:application.submit`
+- `credit-application:application.consent`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -133,6 +141,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `GiveAccountConsent` | command | `application.consent` |
 | `SubmitApplication` | command | `application.submit` |
 
 ### Routes
@@ -140,6 +149,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
+| POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 
 ### Publishers
 
@@ -163,5 +173,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
+| `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
+| `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
 <!-- /ddd-ts-kit:reference -->

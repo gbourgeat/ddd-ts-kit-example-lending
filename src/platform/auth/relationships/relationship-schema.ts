@@ -19,6 +19,9 @@ const elements: SchemaDefinition = {
   },
   branch: {
     relations: { bank: ['bank'], manager: ['user'] },
+    derived: {
+      'branch-network:staff-member.list': 'manager',
+    },
   },
   portfolio: {
     relations: { branch: ['branch'], advisor: ['user'] },
@@ -33,6 +36,7 @@ const elements: SchemaDefinition = {
   application: {
     relations: { customer: ['customer'], 'co-borrower': ['user'], broker: ['user'] },
     derived: {
+      'credit-application:application.consent': via('customer', 'self'),
       'credit-application:application.read': {
         anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
         butNot: [via('customer', 'conflicted')],

@@ -1,4 +1,7 @@
 {
+  "credit-application.credit-application.account-consent-given": {
+    "1": "sha256:9feb13a63258d925"
+  },
   "credit-application.credit-application.submitted": {
     "1": "sha256:9fc1a08288528135"
   },
@@ -6,7 +9,8 @@
     "1": "sha256:25b7e8efe3401359"
   },
   "customer-due-diligence.customer.identified": {
-    "1": "sha256:733dac3b56fba725"
+    "1": "sha256:733dac3b56fba725",
+    "2": "sha256:8ccff80e0d86ce8f"
   },
   "servicing.loan.paid-out": {
     "1": "sha256:733dac3b56fba725"

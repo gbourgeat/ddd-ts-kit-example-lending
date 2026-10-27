@@ -17,6 +17,7 @@ model BranchNetworkBranch {
 model BranchNetworkStaffMember {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  branchId     String   @map("branch_id")
   name String @map("name")
   email String @map("email")
   version      Int

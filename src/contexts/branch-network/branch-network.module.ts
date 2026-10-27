@@ -13,6 +13,16 @@ import { ConflictOfInterestDeclaredPublisher } from '@/contexts/branch-network/a
 import { ConflictOfInterestDeclared } from '@/contexts/branch-network/domain/events/conflict-of-interest-declared.event';
 import { StaffMemberAppointedPublisher } from '@/contexts/branch-network/application/integration/publishers/staff-member-appointed.publisher';
 import { StaffMemberAppointed } from '@/contexts/branch-network/domain/events/staff-member-appointed.event';
+import { PrismaStaffMemberRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-staff-member.repository';
+import { AppointStaffMemberCommand } from '@/contexts/branch-network/application/commands/appoint-staff-member/appoint-staff-member.command';
+import { AppointStaffMemberHandler } from '@/contexts/branch-network/application/commands/appoint-staff-member/appoint-staff-member.handler';
+import { OpenPortfolioForAdvisorEventHandler } from '@/contexts/branch-network/application/event-handlers/open-portfolio-for-advisor.event-handler';
+import { PrismaPortfolioRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-portfolio.repository';
+import { OpenPortfolioCommand } from '@/contexts/branch-network/application/commands/open-portfolio/open-portfolio.command';
+import { OpenPortfolioHandler } from '@/contexts/branch-network/application/commands/open-portfolio/open-portfolio.handler';
+import { SearchBranchStaffHandler } from '@/contexts/branch-network/application/queries/search-branch-staff/search-branch-staff.handler';
+import { SearchBranchStaffQuery } from '@/contexts/branch-network/application/queries/search-branch-staff/search-branch-staff.query';
+import { InMemorySearchBranchStaffReader } from '@/contexts/branch-network/infrastructure/persistence/in-memory-search-branch-staff.reader';
 // /ddd-ts-kit:imports
 
 export interface BranchNetworkWiring {
@@ -47,6 +57,39 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(OpenBranchCommand, new OpenBranchHandler(branchRepository, platform.ids, platform.clock), {
     context: 'branch-network',
   });
+
+  const staffMemberRepository = platform.adapter(
+    new PrismaStaffMemberRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'branch-network', token: 'StaffMemberRepository' },
+  );
+
+  platform.commands.register(
+    AppointStaffMemberCommand,
+    new AppointStaffMemberHandler(branchRepository, staffMemberRepository, platform.ids, platform.clock),
+    { context: 'branch-network' },
+  );
+
+  const portfolioRepository = platform.adapter(
+    new PrismaPortfolioRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'branch-network', token: 'PortfolioRepository' },
+  );
+
+  platform.commands.register(
+    OpenPortfolioCommand,
+    new OpenPortfolioHandler(portfolioRepository, platform.ids, platform.clock),
+    { context: 'branch-network' },
+  );
+
+  const searchBranchStaffReader = platform.adapter(new InMemorySearchBranchStaffReader(), {
+    kind: 'repository',
+    context: 'branch-network',
+  });
+
+  platform.queries.register(
+    SearchBranchStaffQuery,
+    new SearchBranchStaffHandler(searchBranchStaffReader, platform.access),
+    { context: 'branch-network' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -74,6 +117,22 @@ function registerReactions(platform: Platform): void {
       await staffMemberAppointedPublisher.handle(event);
     }
   });
+
+  const staffMemberRepositoryOfReaction = platform.adapter(
+    new PrismaStaffMemberRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'branch-network', token: 'StaffMemberRepository' },
+  );
+
+  const openPortfolioForAdvisorEventHandler = platform.adapter(
+    new OpenPortfolioForAdvisorEventHandler(staffMemberRepositoryOfReaction, platform.commands),
+    { kind: 'domain-event-handler', context: 'branch-network' },
+  );
+
+  platform.domainEvents.on(StaffMemberAppointed.eventName, async (event) => {
+    if (event instanceof StaffMemberAppointed) {
+      await openPortfolioForAdvisorEventHandler.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 
@@ -89,6 +148,15 @@ function declaredUseCases(): UseCaseDeclaration[] {
     // ddd-ts-kit:authorization
     requires(OpenBranchCommand, branchNetworkPermissions['branch.open'], {
       resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
+    requires(AppointStaffMemberCommand, branchNetworkPermissions['staff-member.appoint'], {
+      resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
+    requires(OpenPortfolioCommand, branchNetworkPermissions['portfolio.open'], {
+      resource: () => ({ type: 'context', id: 'branch-network' }),
+    }),
+    requires(SearchBranchStaffQuery, branchNetworkPermissions['staff-member.list'], {
+      resource: (query) => ({ type: 'branch', id: query.branchId }),
     }),
     // /ddd-ts-kit:authorization
   ];

@@ -2,10 +2,16 @@
 import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
+import { AppointStaffMemberController } from '@/contexts/branch-network/presentation/http/branches/appoint-staff-member/appoint-staff-member.controller';
 import { OpenBranchController } from '@/contexts/branch-network/presentation/http/branches/open-branch/open-branch.controller';
+import { AppointStaffMemberParams } from '@/contexts/branch-network/presentation/http/branches/appoint-staff-member/appoint-staff-member.params';
+import { AppointStaffMemberBody } from '@/contexts/branch-network/presentation/http/branches/appoint-staff-member/appoint-staff-member.body';
 import { OpenBranchBody } from '@/contexts/branch-network/presentation/http/branches/open-branch/open-branch.body';
 
 /** The Nest controllers of branch-network, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const branchNetworkControllers: readonly Type<unknown>[] = [
+  withSignatures(AppointStaffMemberController, {
+    appointStaffMember: { params: AppointStaffMemberParams, body: AppointStaffMemberBody, answer: acceptedSchema },
+  }),
   withSignatures(OpenBranchController, { openBranch: { body: OpenBranchBody, answer: acceptedSchema } }),
 ];

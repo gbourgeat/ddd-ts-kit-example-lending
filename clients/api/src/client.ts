@@ -41,6 +41,12 @@ export interface Client {
    */
   submitApplication(input: operations.SubmitApplicationInput, options?: CallOptions): Promise<operations.SubmitApplicationResult>;
   /**
+   * Give account consent: `POST /applications/{id}/consent`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  giveAccountConsent(input: operations.GiveAccountConsentInput, options?: CallOptions): Promise<operations.GiveAccountConsentResult>;
+  /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
@@ -53,11 +59,29 @@ export interface Client {
    */
   openBranch(input: operations.OpenBranchInput, options?: CallOptions): Promise<operations.OpenBranchResult>;
   /**
+   * Appoint staff member: `POST /branches/{id}/staff`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BRANCH_NOT_OPENED (422), VALIDATION_FAILED (422).
+   */
+  appointStaffMember(input: operations.AppointStaffMemberInput, options?: CallOptions): Promise<operations.AppointStaffMemberResult>;
+  /**
+   * Register broker: `POST /brokers`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+   */
+  registerBroker(input: operations.RegisterBrokerInput, options?: CallOptions): Promise<operations.RegisterBrokerResult>;
+  /**
    * Register the business of a customer: `POST /businesses`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BUSINESS_ALREADY_REGISTERED (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
    */
   registerBusiness(input: operations.RegisterBusinessInput, options?: CallOptions): Promise<operations.RegisterBusinessResult>;
+  /**
+   * Identify a person with its identity document and its proof of address: `POST /customers`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IDENTITY_DOCUMENT_EXPIRED (422), PROOF_OF_ADDRESS_TOO_OLD (422), VALIDATION_FAILED (422).
+   */
+  identifyCustomer(input: operations.IdentifyCustomerInput, options?: CallOptions): Promise<operations.IdentifyCustomerResult>;
   /**
    * Set delegation table: `PUT /delegation-table`.
    *
@@ -158,9 +182,13 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
     closeAlert: (input, call) => operations.closeAlert(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
+    giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
+    appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
+    registerBroker: (input, call) => operations.registerBroker(connection, input, call),
     registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),
+    identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),

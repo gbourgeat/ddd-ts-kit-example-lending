@@ -27,6 +27,8 @@ Who follows which customer, and who may decide on it, is needed for the business
 | Opened | the branch is open: it has a place, it can take its staff and its portfolios |  |
 | Appointed | a person becomes a staff member of a bank |  |
 | Declared | a staff member puts a conflict of interest on record |  |
+| Search | Read a page of the staff of a branch, for a branch manager of that branch |  |
+| List | The staff of a branch, as one page of the search |  |
 
 ## Aggregates
 
@@ -56,6 +58,9 @@ Who follows which customer, and who may decide on it, is needed for the business
 
 <!-- ddd-ts-kit:permissions -->
 - `branch-network:branch.open`
+- `branch-network:staff-member.appoint`
+- `branch-network:portfolio.open`
+- `branch-network:staff-member.list`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -102,13 +107,17 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `AppointStaffMember` | command | `staff-member.appoint` |
 | `OpenBranch` | command | `branch.open` |
+| `OpenPortfolio` | command | `portfolio.open` |
+| `SearchBranchStaff` | query | `staff-member.list` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
+| POST | `/branches/:id/staff` | `appointStaffMember` | `BranchesRoutes` | `Authenticated` | `AppointStaffMember` | `staff-member.appoint` | params: `AppointStaffMemberParams`, body: `AppointStaffMemberBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.BranchNotOpened` |
 
 ### Publishers
 
@@ -125,6 +134,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
 | `BranchRepository` | repository | `PrismaBranchRepository` |
 | `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
-| `PortfolioRepository` | external | `PrismaPortfolioRepository` |
-| `StaffMemberRepository` | external | `PrismaStaffMemberRepository` |
+| `PortfolioRepository` | repository | `PrismaPortfolioRepository` |
+| `SearchBranchStaffReader` | repository | `InMemorySearchBranchStaffReader` |
+| `StaffMemberRepository` | repository | `PrismaStaffMemberRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `BranchNotOpened` | `forBranch` | `BRANCH_NOT_OPENED` | `branchId` |
+| `UnknownStaffMember` | `forStaffMember` | `UNKNOWN_STAFF_MEMBER` | none |
 <!-- /ddd-ts-kit:reference -->

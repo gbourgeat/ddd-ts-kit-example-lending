@@ -4,6 +4,7 @@ import { StaffMember } from '@/contexts/branch-network/domain/aggregates/staff-m
 interface StaffMemberIngredients {
   readonly id: string;
   readonly bornAt: Date;
+  readonly branchId: string;
   readonly name: string;
   readonly email: string;
 }
@@ -15,6 +16,10 @@ export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMem
 
   bornAt(instant: Date): this {
     return this.with('bornAt', instant);
+  }
+
+  onBranch(branchId: string): this {
+    return this.with('branchId', branchId);
   }
 
   named(name: string): this {
@@ -29,13 +34,18 @@ export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMem
     return {
       id: sequence('staff-member'),
       bornAt: new Date('2026-01-01T00:00:00.000Z'),
+      branchId: 'branch-1',
       name: 'Ada Lovelace',
       email: 'ada.lovelace@bank.test',
     };
   }
 
   protected construct(ingredients: StaffMemberIngredients): StaffMember {
-    return StaffMember.create(ingredients.id, ingredients.name, ingredients.email, ingredients.bornAt);
+    return StaffMember.create(
+      ingredients.id,
+      { branchId: ingredients.branchId, name: ingredients.name, email: ingredients.email },
+      ingredients.bornAt,
+    );
   }
 }
 
