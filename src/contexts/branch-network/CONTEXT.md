@@ -57,6 +57,7 @@ Who follows which customer, and who may decide on it, is needed for the business
 <!-- ddd-ts-kit:permissions -->
 - `branch-network:branch.open`
 - `branch-network:staff-member.appoint`
+- `branch-network:portfolio.open`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -105,6 +106,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `AppointStaffMember` | command | `staff-member.appoint` |
 | `OpenBranch` | command | `branch.open` |
+| `OpenPortfolio` | command | `portfolio.open` |
 
 ### Routes
 
@@ -128,7 +130,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
 | `BranchRepository` | repository | `PrismaBranchRepository` |
 | `ConflictOfInterestRepository` | external | `PrismaConflictOfInterestRepository` |
-| `PortfolioRepository` | external | `PrismaPortfolioRepository` |
+| `PortfolioRepository` | repository | `PrismaPortfolioRepository` |
 | `StaffMemberRepository` | repository | `PrismaStaffMemberRepository` |
 
 ### Errors
@@ -136,4 +138,5 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
 | `BranchNotOpened` | `forBranch` | `BRANCH_NOT_OPENED` | `branchId` |
+| `UnknownStaffMember` | `forStaffMember` | `UNKNOWN_STAFF_MEMBER` | none |
 <!-- /ddd-ts-kit:reference -->
