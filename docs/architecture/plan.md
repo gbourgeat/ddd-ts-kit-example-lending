@@ -247,6 +247,10 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Step 6 amounts in cents live in the shared kernel (row US0.06); if the kernel refuses the generator, a friction (conductor, owner brief)
 - 2026-10-27 Step 6 `--module` on every generator command of a row of `credit-application` and `servicing` (the generator refuses an aggregate, a port, a domain event or a value object without it; its usage lines do not show the flag, kit issue #354); `service servicing` takes none, it hosts the whole context (owner)
 
+- 2026-10-27 US0 AC2 stays `pending(...)` until US6.18 builds the list of applications: US0 merges with AC2 pending, and the story closes when US6.18 is done (owner)
+- 2026-10-27 US0 AC2 under Jest: the status of the list is to be checked by Jest's `expect(listed.status).toBe(200)`, because `pending(...)` refuses the node:assert failure of `expectStatus` (kit issue #436). The acceptance-judge refused this change of the locked scenario (`test/acceptance/verdicts/us0-a4fb82d0b747fa98.md`), so the lock keeps `expectStatus` and AC2 stays pending as above; the change is not applied (owner, the judge's verdict)
+- 2026-10-27 US0 trace of the submission (`test/e2e/submit-application.e2e.spec.ts`): the expected tree completes the comment's description, under `unit-of-work before-commit` the domain event, its handler `CreditApplicationSubmittedPublisher` and the outbox append; a spec of the slice, not a locked scenario (owner)
+
 ## For the owner
 
 - `npm run docs:generate` outside the sandbox: it writes `openapi/openapi.yaml`, `docs/integration/event-catalog.md` and the clients, which are read-only here (`EROFS`, see `docs/tooling/frictions.md`). Then `npm run docs:check` ends with `The generated documentation is up to date.`, and `npm run verify` is green. Commit the regenerated contracts as `docs(api): regenerate the contracts`.

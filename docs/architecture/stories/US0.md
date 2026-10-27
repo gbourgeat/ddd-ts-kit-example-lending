@@ -124,3 +124,16 @@ Decisions: D1 to D8 above, provisional under the owner brief.
   (`b9f038e`); no file is read or written by US0. Conductor, owner brief, to confirm.
 - Decision D10 (the built Kafka binding). Copied from the main checkout into the worktree's
   `node_modules` (same lock entry), so the e2e suites load; not a code change. Conductor, owner brief.
+
+### Update: owner decisions at the close of the session
+
+- AC2 stays `pending(...)` until US6.18 builds the list of applications (`GET /applications`). US0 is merged with
+  AC2 pending; **the story closes when US6.18 is done**: the AC2 scenario then loses its wrapper and passes.
+  Owner, `plan.md` Decisions.
+- AC2 under Jest (kit issue #436): the change to `expect(listed.status).toBe(200)` was given to the acceptance-judge
+  and refused (verdict `us0-a4fb82d0b747fa98.md` in the verdicts folder): the locked scenario keeps `expectStatus`,
+  so the change is not applied and the lock is not written again. The friction is in `docs/tooling/frictions.md`.
+  Owner, `plan.md` Decisions.
+- The trace of the submission (`test/e2e/submit-application.e2e.spec.ts`, "is one trace") now expects the domain
+  event, its handler `CreditApplicationSubmittedPublisher` and the outbox append under `unit-of-work before-commit`.
+  The spec passes. Owner, `plan.md` Decisions.
