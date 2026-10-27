@@ -304,6 +304,7 @@ model CreditPolicyLegalMaximumRate {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
   category     String @map("category")
+  rateBasisPoints Int @map("rate_basis_points")
   effectiveFrom DateTime @map("effective_from")
   version      Int
   tenantId     String   @map("tenant_id")
@@ -321,6 +322,7 @@ model CreditPolicyDelegationTable {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
   effectiveFrom DateTime @map("effective_from")
+  levels       Json     @map("levels")
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)
