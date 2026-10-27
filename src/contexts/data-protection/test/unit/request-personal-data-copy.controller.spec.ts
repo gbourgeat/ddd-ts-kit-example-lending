@@ -10,11 +10,11 @@ import { dataProtectionControllers } from '@/contexts/data-protection/data-prote
 const caller: Actor = { id: 'user-1', type: 'user', roles: [], attributes: {} };
 
 describe('POST /data-subjects/:customerId/copies', () => {
-  it('answers 200 with the signed link to the copy when the use case succeeds', async () => {
+  it('answers 201 with the copy and the signed link to it when the use case succeeds', async () => {
     const commands = new InMemoryCommandBus().register(RequestPersonalDataCopyCommand, {
       execute: async () => ({
-        url: 'https://files.example.test/copies/1',
-        expiresAt: new Date('2026-10-27T01:00:00.000Z'),
+        copyId: 'copy-1',
+        link: { url: 'https://files.example.test/copies/1', expiresAt: new Date('2026-10-27T09:00:00.000Z') },
       }),
     });
 
@@ -29,12 +29,9 @@ describe('POST /data-subjects/:customerId/copies', () => {
       { validateResponses: true, resolvePrincipal: () => caller },
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({ copyId: 'copy-1', url: 'https://files.example.test/copies/1' });
     expect(route.path).toBe('/data-subjects/:customerId/copies');
     expect(dataProtectionControllers).toContain(RequestPersonalDataCopyController);
   });
-
-  // TODO(domain): replace each entry below by a test of the contract a client relies on.
-  it.todo('refuses an input that does not have the expected shape with 422');
-  it.todo('answers the documented status for each error code of the use case');
 });

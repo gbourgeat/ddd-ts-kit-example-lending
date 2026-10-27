@@ -149,6 +149,12 @@ export interface Client {
    */
   requestPersonalDataCopy(input: operations.RequestPersonalDataCopyInput, options?: CallOptions): Promise<operations.RequestPersonalDataCopyResult>;
   /**
+   * Request personal data copy link: `GET /data-subjects/{customerId}/copies/{copyId}/link`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), FILE_NOT_FOUND (404), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  requestPersonalDataCopyLink(input: operations.RequestPersonalDataCopyLinkInput, options?: CallOptions): Promise<operations.RequestPersonalDataCopyLinkResult>;
+  /**
    * Set delegation table: `PUT /delegation-table`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
@@ -284,6 +290,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
+    requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),

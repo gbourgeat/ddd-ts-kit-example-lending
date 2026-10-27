@@ -26,6 +26,7 @@ Retention and erasure are a legal obligation every context serves, with no busin
 | Past | Beyond the retention period, after the relevant end |  |
 | Data erase | The removal of the personal data of a data subject past their retention | Erasure |
 | Request | A data subject asks the bank for a copy of the personal data it keeps |  |
+| Link | The signed address that downloads a copy of data, valid one hour |  |
 
 ## Aggregates
 
@@ -102,12 +103,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `ErasePersonalDataPastRetention` | command | `data.erase` |
 | `RequestPersonalDataCopy` | command | `public` |
+| `RequestPersonalDataCopyLink` | command | `public` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
-| POST | `/data-subjects/:customerId/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `public` |  | 200: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN` |
+| POST | `/data-subjects/:customerId/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `public` |  | 201: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN` |
+| GET | `/data-subjects/:customerId/copies/:copyId/link` | `requestPersonalDataCopyLink` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopyLink` | `public` | params: `RequestPersonalDataCopyLinkParams` | 200: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN`, `FILE_NOT_FOUND` |
 | POST | `/personal-data/erasures` | `erasePersonalDataPastRetention` | `PersonalDataRoutes` | `Authenticated` | `ErasePersonalDataPastRetention` | `data.erase` | body: `ErasePersonalDataPastRetentionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Ports
@@ -118,4 +121,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `PersonalDataGathering` | external | `PlatformPersonalDataGathering` |
 | `PersonalDataPurge` | external | `PlatformPersonalDataPurge` |
 | `RetentionPeriodRepository` | repository | `PrismaRetentionPeriodRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `UnknownPersonalDataCopy` | `forUnknownPersonalDataCopy` | `FILE_NOT_FOUND` | none |
 <!-- /ddd-ts-kit:reference -->
