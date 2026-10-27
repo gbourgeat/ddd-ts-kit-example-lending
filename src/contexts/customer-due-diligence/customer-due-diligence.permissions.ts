@@ -8,5 +8,6 @@ export const customerDueDiligencePermissions = definePermissions('customer-due-d
   'customer.read': { description: 'Get customer file' },
   'customer.assign-advisor': { description: 'Assign advisor' },
   'customer.screen': { description: 'Screen customer' },
+  'match.confirm': { description: 'Confirm sanctions match' },
   // /ddd-ts-kit:permissions
 });
