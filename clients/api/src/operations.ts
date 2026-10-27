@@ -298,6 +298,44 @@ export function giveAccountConsent(
   return send<GiveAccountConsentResult>(connection, operation, { ...input, ...options });
 }
 
+export interface CorrectEntryInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    entryId: string;
+    reason: string;
+  };
+}
+
+export type CorrectEntryResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'CORRECTION_ALREADY_RECORDED' | 'INVALID_CORRECTION_REASON' | 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_ENTRY' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Correct entry: `POST /applications/{id}/corrections`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CORRECTION_ALREADY_RECORDED (422), INVALID_CORRECTION_REASON (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
+ */
+export function correctEntry(
+  connection: Connection,
+  input: CorrectEntryInput,
+  options: CallOptions = {},
+): Promise<CorrectEntryResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/corrections',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<CorrectEntryResult>(connection, operation, { ...input, ...options });
+}
+
 export interface NameGuarantorInput {
   readonly path: {
     readonly id: string;

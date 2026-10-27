@@ -2,11 +2,14 @@
 import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
+import { CorrectEntryController } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.controller';
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
 import { NameGuarantorController } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.controller';
 import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
+import { CorrectEntryParams } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.params';
+import { CorrectEntryBody } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.body';
 import { GiveAccountConsentParams } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.params';
 import { GiveAccountConsentBody } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.body';
 import { NameCoBorrowerParams } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.params';
@@ -17,6 +20,9 @@ import { SubmitApplicationBody } from '@/contexts/credit-application/file/presen
 
 /** The Nest controllers of credit-application, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const creditApplicationControllers: readonly Type<unknown>[] = [
+  withSignatures(CorrectEntryController, {
+    correctEntry: { params: CorrectEntryParams, body: CorrectEntryBody, answer: acceptedSchema },
+  }),
   withSignatures(GiveAccountConsentController, {
     giveAccountConsent: { params: GiveAccountConsentParams, body: GiveAccountConsentBody, answer: acceptedSchema },
   }),
