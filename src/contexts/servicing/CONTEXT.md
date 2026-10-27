@@ -123,4 +123,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `LoanRepository` | external | `EventStoreLoanRepository` |
 | `PaymentProvider` | external | `SimulatedPaymentProvider` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `InvalidSchedule` | `forInvalidTerms` | `INVALID_SCHEDULE` | none |
 <!-- /ddd-ts-kit:reference -->
