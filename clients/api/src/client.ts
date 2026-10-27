@@ -77,6 +77,12 @@ export interface Client {
    */
   registerBusiness(input: operations.RegisterBusinessInput, options?: CallOptions): Promise<operations.RegisterBusinessResult>;
   /**
+   * Get customer file: `GET /customer-files`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  getCustomerFile(input?: operations.GetCustomerFileInput, options?: CallOptions): Promise<operations.GetCustomerFileResult>;
+  /**
    * Identify a person with its identity document and its proof of address: `POST /customers`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IDENTITY_DOCUMENT_EXPIRED (422), PROOF_OF_ADDRESS_TOO_OLD (422), VALIDATION_FAILED (422).
@@ -194,6 +200,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
     registerBroker: (input, call) => operations.registerBroker(connection, input, call),
     registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),
+    getCustomerFile: (input, call) => operations.getCustomerFile(connection, input, call),
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
