@@ -40,6 +40,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Borrower notice | The mail or text message sent to a borrower at each arrears stage | Declaration |
 | Daily run | The night computation of the instalments due, for each bank | Direct debit |
 | Instalments | Direct debits and rejected debits. |  |
+| Paid out | The loan has been paid to the borrower and its schedule has started | Paid off, the loan repaid in full |
 
 ## Modules
 
@@ -52,6 +53,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `Loan` (event-sourced)
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -117,7 +119,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `BorrowerNotifier` | external | `RemoteBorrowerNotifier` |
-| `PaymentProvider` | external | `RemotePaymentProvider` |
-| `RepaymentIncidentRegister` | external | `RemoteRepaymentIncidentRegister` |
+| `BorrowerNotifier` | external | `SimulatedBorrowerNotifier` |
+| `LoanRepository` | external | `EventStoreLoanRepository` |
+| `PaymentProvider` | external | `SimulatedPaymentProvider` |
+| `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 <!-- /ddd-ts-kit:reference -->

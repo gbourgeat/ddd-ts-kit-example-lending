@@ -46,6 +46,8 @@ function tokenOf(actor: TestActor, { key, issuer }: Signing): Promise<string> {
   const claims = {
     realm_access: { roles: actor.roles ?? [] },
     preferred_username: actor.id,
+    email: actor.id + '@example.test',
+    email_verified: true,
     sid: 'session-of-' + actor.id,
     ...(actor.tenantId === undefined ? {} : { tenant_id: actor.tenantId }),
   };

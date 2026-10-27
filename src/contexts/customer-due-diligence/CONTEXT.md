@@ -119,7 +119,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `CustomerRepository` | repository | `EventStoreCustomerRepository` |
-| `ScreeningProvider` | external | `RemoteScreeningProvider` |
+| `ScreeningProvider` | external | `SimulatedScreeningProvider` |
 
 ### Errors
 

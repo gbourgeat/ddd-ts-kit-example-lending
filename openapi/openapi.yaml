@@ -8,6 +8,7 @@ tags:
   - name: credit-application
   - name: credit-policy
   - name: customer-due-diligence
+  - name: financial-crime
   - name: identity
 paths:
   /accounts/me:
@@ -141,6 +142,87 @@ paths:
             - ACCOUNT_NOT_FOUND
             - LAST_OWNER
             - ORGANISATION_NOT_FOUND
+  /alerts/{id}/closure:
+    post:
+      operationId: closeAlert
+      summary: Close alert
+      tags:
+        - financial-crime
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                reason:
+                  type: string
+              type: object
+              required:
+                - reason
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ALERT_ALREADY_CLOSED, CLOSURE_REASON_MISSING, UNKNOWN_ALERT, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ALERT_ALREADY_CLOSED
+            - CLOSURE_REASON_MISSING
+            - UNKNOWN_ALERT
+            - VALIDATION_FAILED
   /applications:
     post:
       operationId: submitApplication

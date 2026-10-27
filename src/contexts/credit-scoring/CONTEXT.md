@@ -21,10 +21,12 @@ The scoring model is the bank's own judgement of credit risk, versioned and owne
 | Band | The range a score falls in; the best band is green | Risk rating |
 | Green band | The best band of the model; the only band an advisor may decide with | Green score as a colour |
 | Factor | An input that pushed the score down, stated in words a customer understands | Input |
+| Published | A version of the scoring model made available for use by the credit decisions | Draft, the version being prepared |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `ScoringModel`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -80,4 +82,10 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe credit-scoring --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: none; downstreams: `credit-application` (customer-supplier).
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `ScoringModelRepository` | external | `PrismaScoringModelRepository` |
 <!-- /ddd-ts-kit:reference -->

@@ -24,6 +24,7 @@ Anti-money-laundering is a legal duty that supports the business; its restricted
 | Raised | an alert is raised on a repayment that needs a compliance review |  |
 | Filed | a suspicious activity report is filed with the financial intelligence unit |  |
 | Rule | a condition under which a repayment raises an alert: an early repayment above the threshold within a year of the payout, or a payer account not the borrower's |  |
+| Closure reason | the reason a compliance officer gives for closing an alert, required |  |
 
 ## Aggregates
 
@@ -47,6 +48,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `financial-crime:alert.raise`
+- `financial-crime:alert.close`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -91,13 +93,28 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `CloseAlert` | command | `alert.close` |
 | `RaiseAlert` | command | `alert.raise` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/alerts/:id/closure` | `closeAlert` | `AlertsRoutes` | `Authenticated` | `CloseAlert` | `alert.close` | params: `CloseAlertParams`, body: `CloseAlertBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `FinancialCrimeCodes.AlertAlreadyClosed`, `FinancialCrimeCodes.UnknownAlert`, `FinancialCrimeCodes.ClosureReasonMissing` |
 
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
 | `AlertRepository` | repository | `PrismaAlertRepository` |
-| `FinancialIntelligenceUnit` | external | `RemoteFinancialIntelligenceUnit` |
+| `FinancialIntelligenceUnit` | external | `SimulatedFinancialIntelligenceUnit` |
 | `SuspiciousActivityReportRepository` | external | `PrismaSuspiciousActivityReportRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `AlertAlreadyClosed` | `forAlert` | `ALERT_ALREADY_CLOSED` | none |
+| `ClosureReasonMissing` | `forAlert` | `CLOSURE_REASON_MISSING` | none |
+| `UnknownAlert` | `forAlert` | `UNKNOWN_ALERT` | none |
 <!-- /ddd-ts-kit:reference -->

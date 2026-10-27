@@ -35,6 +35,8 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 | Terms | The conditions a product is sold with: its amounts, durations, arrangement fee, insurance and score threshold |  |
 | Schedule | the order of the legal maximum rates of one category by their dates of effect |  |
 | Set | a delegation table is set when it is recorded with the day it takes effect |  |
+| List | the read of the products of the catalogue, by an applicant |  |
+| Search | a read of the products of the catalogue, one page at a time, asked by an applicant |  |
 
 ## Aggregates
 
@@ -49,6 +51,11 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `credit-policy.delegation-table.published` (version 1)
+- `credit-policy.legal-maximum-rate.published` (version 1)
+- `credit-policy.product.defined` (version 1)
+- `credit-policy.rate-grid.published` (version 1)
+- `credit-policy.residual-income-minimum.published` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -112,6 +119,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DefineProduct` | command | `product.define` |
 | `PublishLegalMaximumRate` | command | `legal-maximum-rate.publish` |
 | `PublishRateGrid` | command | `rate-grid.publish` |
+| `SearchProductCatalogue` | query | `public` |
 | `SetDelegationTable` | command | `delegation-table.set` |
 | `SetResidualIncomeMinimum` | command | `residual-income-minimum.set` |
 
@@ -125,6 +133,16 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/rate-grids` | `publishRateGrid` | `RateGridsRoutes` | `Authenticated` | `PublishRateGrid` | `rate-grid.publish` | body: `PublishRateGridBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
 | PUT | `/residual-income-minimums` | `setResidualIncomeMinimum` | `ResidualIncomeMinimumsRoutes` | `Authenticated` | `SetResidualIncomeMinimum` | `residual-income-minimum.set` | body: `SetResidualIncomeMinimumBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditPolicyCodes.InvalidResidualIncomeMinimum` |
 
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `credit-policy.delegation-table.published` | 1 | `DelegationTablePublishedPublisher` |
+| `credit-policy.legal-maximum-rate.published` | 1 | `LegalMaximumRatePublishedPublisher` |
+| `credit-policy.product.defined` | 1 | `ProductDefinedPublisher` |
+| `credit-policy.rate-grid.published` | 1 | `RateGridPublishedPublisher` |
+| `credit-policy.residual-income-minimum.published` | 1 | `ResidualIncomeMinimumPublishedPublisher` |
+
 ### Ports
 
 | Port | Kind | Adapters |
@@ -134,6 +152,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ProductRepository` | repository | `PrismaProductRepository` |
 | `RateGridRepository` | repository | `PrismaRateGridRepository` |
 | `ResidualIncomeMinimumRepository` | repository | `PrismaResidualIncomeMinimumRepository` |
+| `SearchProductCatalogueReader` | repository | `PrismaSearchProductCatalogueReader` |
 
 ### Errors
 

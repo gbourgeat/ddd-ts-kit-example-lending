@@ -214,6 +214,11 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-26 Decision amount is the amount of the loan requested, co-borrower total not added (conductor, owner brief, to confirm)
 - 2026-10-26 Consent to read accounts is per application, not per bank (conductor, owner brief, to confirm)
 - 2026-10-26 Customer relationship is established before any credit; an applicant is a customer once identified (conductor, owner brief)
+- 2026-10-27 Identification of a person: an identity document (passport, national identity card or residence permit) with its number, issuing country and expiry date, valid on the day of identification, and a proof of address dated within three months; refused when the document is expired or the proof of address older than three months, the reason named (conductor, owner brief, to confirm)
+- 2026-10-27 Appointment of a member of staff to a branch: the appointment names the branch, which must be opened (an opened branch can take its staff, the glossary); an appointment to a branch not opened is refused with the reason named. The member of staff holds the branch of the appointment. The published StaffMemberAppointed v1 keeps its payload: a field that consumers need is a new version, not a change of v1 (conductor, owner brief, to confirm)
+- 2026-10-27 The shape of servicing.loan.paid-out version 1 is final: the Loan is born paid out and no other event of it is stored yet; it is recorded in stored-events.lock.json, and any later change is a new version with its upcaster (conductor, owner brief, to confirm)
+- 2026-10-27 Net income must be positive for the debt to income ratio; a zero or negative net income is refused with INVALID_NET_INCOME (conductor, owner brief, to confirm)
+- 2026-10-27 Opening an organisation (a bank, a tenant) is reserved to the platform operator: a signed-in person with no relation to it is refused with 403 (conductor, owner brief, to confirm)
 - 2026-10-26 Eleven contexts, two cores (`credit-application`, `credit-scoring`), `financial-crime` restricted to compliance, `identity` as kit preset; access rights, external systems, notifications and audit are not contexts (`contexts.md`) (conductor, owner brief)
 - 2026-10-26 Payout gated in `credit-application` by a synchronous read of due diligence, so that no credit is disbursed at the instant of payout (conductor, owner brief, to confirm)
 - 2026-10-26 Audit entries of `financial-crime` go to a stream readable by compliance only (conductor, owner brief, to confirm)
@@ -293,6 +298,11 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - The migration writing the table of the relationships, `authorization.relation_tuples` (model `RelationTuple`, the new schema `authorization`): none is in the repo, to be written and applied by the owner (US0.03).
 - Build the native Kafka binding of `@confluentinc/kafka-javascript` before running the acceptance suite: it cannot load in this sandbox (US0.03).
 - Simulated adapters (0.95.0, `generate adapter <context> <Port> --kind simulated`): deferred as the upgrade asked. The remote adapters that only throw are replaced in a later step.
+- Wave 3, blocked on the environment: no PostgreSQL is reachable from the sandbox, so the e2e specs and the working migrations of the rows that store a field (US1.01, US1.07, US2.04 if stored) wait for a reachable database. Give the sandbox a `DATABASE_URL` to a PostgreSQL (the example is `postgres://app:app@localhost:5432/app`).
+- Wave 3, `docs:check`: recorded by the conductor (see Decisions, the loan paid-out shape); nothing left open on it.
+- Wave 3, decisions taken by the conductor under the owner brief, to confirm: identification of a person; appointment to a branch names the opened branch; opening an organisation reserved to the operator (signed-in grant narrowed in `src/platform/auth/authorization/signed-in-grants.ts`, commit 925ae04).
+- Wave 3, US2.04 blocked: `event-sourcing/upcaster-required` on the birth event of Customer (its version 1 stored shape changed to carry the identity facts: a version 2 with an upcaster is needed, and the owner decides what a birth recorded before has), and `privacy/declared-field` on the document number and the address of the birth event (the personal fields to declare). The branch build/customer-due-diligence has the scope staged, not committed (conductor, owner).
+- Wave 3, US8.04 blocked: the APR is proven against the worked examples of the directive, and none is in the repository. The owner gives the examples (inputs and expected rate) and the precision the rate states.
 
 ## Open questions
 

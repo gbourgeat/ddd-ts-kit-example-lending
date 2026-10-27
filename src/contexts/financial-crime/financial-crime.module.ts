@@ -9,6 +9,8 @@ import { requires } from '@ddd-ts-kit/auth';
 import { financialCrimePermissions } from '@/contexts/financial-crime/financial-crime.permissions';
 import { RaiseAlertCommand } from '@/contexts/financial-crime/application/commands/raise-alert/raise-alert.command';
 import { RaiseAlertHandler } from '@/contexts/financial-crime/application/commands/raise-alert/raise-alert.handler';
+import { CloseAlertCommand } from '@/contexts/financial-crime/application/commands/close-alert/close-alert.command';
+import { CloseAlertHandler } from '@/contexts/financial-crime/application/commands/close-alert/close-alert.handler';
 // /ddd-ts-kit:imports
 
 export interface FinancialCrimeWiring {
@@ -43,6 +45,10 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(RaiseAlertCommand, new RaiseAlertHandler(alertRepository, platform.ids, platform.clock), {
     context: 'financial-crime',
   });
+
+  platform.commands.register(CloseAlertCommand, new CloseAlertHandler(alertRepository, platform.clock), {
+    context: 'financial-crime',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -63,6 +69,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(RaiseAlertCommand, financialCrimePermissions['alert.raise'], {
+      resource: () => ({ type: 'context', id: 'financial-crime' }),
+    }),
+    requires(CloseAlertCommand, financialCrimePermissions['alert.close'], {
       resource: () => ({ type: 'context', id: 'financial-crime' }),
     }),
     // /ddd-ts-kit:authorization
