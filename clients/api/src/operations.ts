@@ -1235,6 +1235,54 @@ export function erasePersonalDataPastRetention(
   return send<ErasePersonalDataPastRetentionResult>(connection, operation, { ...input, ...options });
 }
 
+export interface SearchAdvisorPortfoliosInput {
+  readonly query?: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: id. */
+    readonly sort?: string;
+  };
+}
+
+export type SearchAdvisorPortfoliosResult =
+  | Success<200, {
+    items: Array<{
+      id: string;
+    }>;
+    /** Present when it is cheap to count. */
+    total?: number;
+    /** Present when more items follow. */
+    nextCursor?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Search advisor portfolios: `GET /portfolios`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function searchAdvisorPortfolios(
+  connection: Connection,
+  input: SearchAdvisorPortfoliosInput = {},
+  options: CallOptions = {},
+): Promise<SearchAdvisorPortfoliosResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/portfolios',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<SearchAdvisorPortfoliosResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SearchPortfolioCustomersInput {
   readonly path: {
     readonly id: string;

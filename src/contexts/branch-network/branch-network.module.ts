@@ -5,7 +5,7 @@ import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { PrismaBranchRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-branch.repository';
-import { requires } from '@ddd-ts-kit/auth';
+import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { branchNetworkPermissions } from '@/contexts/branch-network/branch-network.permissions';
 import { OpenBranchCommand } from '@/contexts/branch-network/application/commands/open-branch/open-branch.command';
 import { OpenBranchHandler } from '@/contexts/branch-network/application/commands/open-branch/open-branch.handler';
@@ -34,6 +34,9 @@ import { AssignCustomerHandler } from '@/contexts/branch-network/application/com
 import { SearchPortfolioCustomersHandler } from '@/contexts/branch-network/application/queries/search-portfolio-customers/search-portfolio-customers.handler';
 import { SearchPortfolioCustomersQuery } from '@/contexts/branch-network/application/queries/search-portfolio-customers/search-portfolio-customers.query';
 import { RelationPortfolioCustomersReader } from '@/contexts/branch-network/infrastructure/persistence/relation-portfolio-customers.reader';
+import { SearchAdvisorPortfoliosHandler } from '@/contexts/branch-network/application/queries/search-advisor-portfolios/search-advisor-portfolios.handler';
+import { SearchAdvisorPortfoliosQuery } from '@/contexts/branch-network/application/queries/search-advisor-portfolios/search-advisor-portfolios.query';
+import { RelationAdvisorPortfoliosReader } from '@/contexts/branch-network/infrastructure/persistence/relation-advisor-portfolios.reader';
 // /ddd-ts-kit:imports
 
 export interface BranchNetworkWiring {
@@ -134,6 +137,17 @@ function registerHandlers(platform: Platform): void {
     new SearchPortfolioCustomersHandler(portfolioRepository, searchPortfolioCustomersReader, platform.access),
     { context: 'branch-network' },
   );
+
+  const searchAdvisorPortfoliosReader = platform.adapter(new RelationAdvisorPortfoliosReader(platform.relations), {
+    kind: 'repository',
+    context: 'branch-network',
+  });
+
+  platform.queries.register(
+    SearchAdvisorPortfoliosQuery,
+    new SearchAdvisorPortfoliosHandler(searchAdvisorPortfoliosReader, platform.access),
+    { context: 'branch-network' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -224,8 +238,10 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'branch-network' }),
     }),
     requires(SearchPortfolioCustomersQuery, branchNetworkPermissions['portfolio.search-customers'], {
-      resource: () => ({ type: 'context', id: 'branch-network' }),
+      resource: (query) => ({ type: 'portfolio', id: query.portfolioId }),
     }),
+    // Public: the portfolios of the signed-in advisor are narrowed by the access scope of the handler, on portfolios.
+    publicUseCase(SearchAdvisorPortfoliosQuery),
     // /ddd-ts-kit:authorization
   ];
 }

@@ -120,6 +120,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DeclareConflictOfInterest` | command | `conflict.declare` |
 | `OpenBranch` | command | `branch.open` |
 | `OpenPortfolio` | command | `portfolio.open` |
+| `SearchAdvisorPortfolios` | query | `public` |
 | `SearchBranchStaff` | query | `staff-member.list` |
 | `SearchPortfolioCustomers` | query | `portfolio.search-customers` |
 
@@ -130,6 +131,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/branches` | `openBranch` | `BranchesRoutes` | `Authenticated` | `OpenBranch` | `branch.open` | body: `OpenBranchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/branches/:id/staff` | `appointStaffMember` | `BranchesRoutes` | `Authenticated` | `AppointStaffMember` | `staff-member.appoint` | params: `AppointStaffMemberParams`, body: `AppointStaffMemberBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.BranchNotOpened` |
 | POST | `/conflicts` | `declareConflictOfInterest` | `ConflictsRoutes` | `Authenticated` | `DeclareConflictOfInterest` | `conflict.declare` | body: `DeclareConflictOfInterestBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.UnknownStaffMember`, `BranchNetworkCodes.ConflictOnOwnRecord` |
+| GET | `/portfolios` | `searchAdvisorPortfolios` | `PortfoliosRoutes` | `Authenticated` | `SearchAdvisorPortfolios` | `public` | query | 200: `page of SearchAdvisorPortfoliosLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | GET | `/portfolios/:id/customers` | `searchPortfolioCustomers` | `PortfoliosRoutes` | `Authenticated` | `SearchPortfolioCustomers` | `portfolio.search-customers` | params: `SearchPortfolioCustomersParams`, query | 200: `page of SearchPortfolioCustomersLine` | `UNAUTHORIZED`, `FORBIDDEN`, `BranchNetworkCodes.UnknownPortfolio` |
 
 ### Consumed events
@@ -154,6 +156,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BranchRepository` | repository | `PrismaBranchRepository` |
 | `ConflictOfInterestRepository` | repository | `PrismaConflictOfInterestRepository` |
 | `PortfolioRepository` | repository | `PrismaPortfolioRepository` |
+| `SearchAdvisorPortfoliosReader` | repository | `RelationAdvisorPortfoliosReader` |
 | `SearchBranchStaffReader` | repository | `InMemorySearchBranchStaffReader` |
 | `SearchPortfolioCustomersReader` | repository | `RelationPortfolioCustomersReader` |
 | `StaffMemberRepository` | repository | `PrismaStaffMemberRepository` |
