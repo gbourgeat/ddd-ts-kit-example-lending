@@ -44,7 +44,8 @@
   "contexts": {
     "identity": {
       "classification": "generic",
-      "upstreams": []
+      "upstreams": [],
+      "tenancy": "control-plane"
     },
     "data-protection": {
       "classification": "supporting",
@@ -205,5 +206,12 @@
   },
   "sdk": {
     "name": "{project}-{document}-client"
-  }
+  },
+  "deviations": [
+    {
+      "what": "contexts.identity.tenancy",
+      "adr": "0001",
+      "reason": "The identity context is the control plane of the tenants: it decides who belongs to which, and its rows belong to none of them."
+    }
+  ]
 }

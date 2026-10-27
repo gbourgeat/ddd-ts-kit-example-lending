@@ -8,9 +8,9 @@ import {
 import type { PrismaClient } from '$generated/prisma/client';
 import type { Persistence } from '@/platform/database/persistence';
 
-/** The schema of the messaging tables and of the background work, as prisma/schema.prisma names it. */
+/** The schema of the messaging tables and of the background work, as prisma/schema/schema.prisma names it. */
 const MESSAGING_SCHEMA = 'messaging';
-/** The schema of the event store, as prisma/schema.prisma names it. */
+/** The schema of the event store, as prisma/schema/schema.prisma names it. */
 const EVENT_STORE_SCHEMA = 'event_store';
 
 /** One object is the unit of work and what repositories query through; the stores are told how to reach their model. */

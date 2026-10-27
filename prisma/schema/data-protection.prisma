@@ -1,0 +1,19 @@
+// ddd-ts-kit:models
+model DataProtectionRetentionPeriod {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  contextName    String  @map("context_name")
+  kindOfData     String  @map("kind_of_data")
+  durationInMonths Int  @map("duration_in_months")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "retention_periods_tenant_idx")
+  @@map("retention_periods")
+  @@schema("data_protection")
+}
+// /ddd-ts-kit:models

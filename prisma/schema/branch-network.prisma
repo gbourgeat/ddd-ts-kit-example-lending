@@ -1,0 +1,67 @@
+// ddd-ts-kit:models
+model BranchNetworkBranch {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "branches_tenant_idx")
+  @@map("branches")
+  @@schema("branch_network")
+}
+
+model BranchNetworkStaffMember {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  name String @map("name")
+  email String @map("email")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "staff_members_tenant_idx")
+  @@map("staff_members")
+  @@schema("branch_network")
+}
+
+model BranchNetworkPortfolio {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  advisorId    String   @map("advisor_id")
+  branchId     String   @map("branch_id")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "portfolios_tenant_idx")
+  @@map("portfolios")
+  @@schema("branch_network")
+}
+
+model BranchNetworkConflictOfInterest {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  staffMemberId String  @map("staff_member_id")
+  customerId   String   @map("customer_id")
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "conflict_of_interests_tenant_idx")
+  @@map("conflict_of_interests")
+  @@schema("branch_network")
+}
+// /ddd-ts-kit:models
