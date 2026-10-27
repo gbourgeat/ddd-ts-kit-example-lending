@@ -1,7 +1,11 @@
 import { IsISO8601, IsString } from 'class-validator';
 
-/** The link that downloads the copy of the data subject, and the instant it expires. */
+/** The copy the data subject asked for: its identifier, and the link that downloads it, with the instant the link expires. */
 export class PersonalDataCopyLink {
+  /** The identifier of the copy, the link to a fresh one-hour link is built from it. */
+  @IsString()
+  copyId = '';
+
   /** The signed link: it downloads the copy until `expiresAt`, without any other credential. */
   @IsString()
   url = '';
