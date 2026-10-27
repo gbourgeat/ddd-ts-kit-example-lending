@@ -3,14 +3,26 @@ import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { RegisterBusinessController } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.controller';
+import { GetCustomerFileController } from '@/contexts/customer-due-diligence/presentation/http/customer-files/get-customer-file/get-customer-file.controller';
+import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
+import { DeclareDirectorsAndOwnersParams } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.params';
+import { DeclareDirectorsAndOwnersBody } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.body';
 import { IdentifyCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.body';
 
 /** The Nest controllers of customer-due-diligence, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   withSignatures(RegisterBusinessController, {
     registerBusiness: { body: RegisterBusinessBody, answer: acceptedSchema },
+  }),
+  withSignatures(GetCustomerFileController, {}),
+  withSignatures(DeclareDirectorsAndOwnersController, {
+    declareDirectorsAndOwners: {
+      params: DeclareDirectorsAndOwnersParams,
+      body: DeclareDirectorsAndOwnersBody,
+      answer: acceptedSchema,
+    },
   }),
   withSignatures(IdentifyCustomerController, {
     identifyCustomer: { body: IdentifyCustomerBody, answer: acceptedSchema },

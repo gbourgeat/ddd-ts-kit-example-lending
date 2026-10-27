@@ -977,6 +977,116 @@ paths:
             - CONFLICT_ON_OWN_RECORD
             - UNKNOWN_STAFF_MEMBER
             - VALIDATION_FAILED
+  /customer-files:
+    get:
+      operationId: getCustomerFile
+      summary: Get customer file
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: limit
+          in: query
+          description: Size of the page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            description: Size of the page.
+        - name: offset
+          in: query
+          description: Items to skip. Not with `cursor`.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Items to skip. Not with `cursor`.
+        - name: cursor
+          in: query
+          description: The `nextCursor` of the previous page. Not with `offset`.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            description: The `nextCursor` of the previous page. Not with `offset`.
+        - name: sort
+          in: query
+          description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+          required: false
+          schema:
+            type: string
+            description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+      responses:
+        '200':
+          description: One page of the search.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        identifiedAt:
+                          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                          type: string
+                      type: object
+                      required:
+                        - id
+                        - identifiedAt
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: Present when it is cheap to count.
+                  nextCursor:
+                    type: string
+                    description: Present when more items follow.
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
   /customers:
     post:
       operationId: identifyCustomer
@@ -1074,6 +1184,95 @@ paths:
           x-error-codes:
             - IDENTITY_DOCUMENT_EXPIRED
             - PROOF_OF_ADDRESS_TOO_OLD
+            - VALIDATION_FAILED
+  /customers/{id}/directors-and-owners:
+    post:
+      operationId: declareDirectorsAndOwners
+      summary: Identify each director and beneficial owner of a registered business as a person
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                directors:
+                  items:
+                    $ref: '#/components/schemas/IdentifyCustomerBody'
+                  type: array
+                beneficialOwners:
+                  items:
+                    $ref: '#/components/schemas/IdentifyCustomerBody'
+                  type: array
+              type: object
+              required:
+                - directors
+                - beneficialOwners
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: BUSINESS_NOT_REGISTERED, IDENTITY_DOCUMENT_EXPIRED, PROOF_OF_ADDRESS_TOO_OLD, UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - BUSINESS_NOT_REGISTERED
+            - IDENTITY_DOCUMENT_EXPIRED
+            - PROOF_OF_ADDRESS_TOO_OLD
+            - UNKNOWN_CUSTOMER
             - VALIDATION_FAILED
   /delegation-table:
     put:
@@ -2373,6 +2572,37 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    IdentifyCustomerBody:
+      properties:
+        documentKind:
+          type: string
+          enum:
+            - Passport
+            - NationalIdentityCard
+            - ResidencePermit
+        documentNumber:
+          minLength: 1
+          type: string
+        issuingCountry:
+          minLength: 1
+          type: string
+        documentExpiresOn:
+          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+          type: string
+        address:
+          minLength: 1
+          type: string
+        addressProofDatedOn:
+          pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+          type: string
+      type: object
+      required:
+        - documentKind
+        - documentNumber
+        - issuingCountry
+        - documentExpiresOn
+        - address
+        - addressProofDatedOn
     InvitationToken:
       properties:
         token:

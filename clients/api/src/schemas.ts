@@ -5,6 +5,15 @@ export type Accepted = {
   id: string;
 };
 
+export type IdentifyCustomerBody = {
+  documentKind: 'Passport' | 'NationalIdentityCard' | 'ResidencePermit';
+  documentNumber: string;
+  issuingCountry: string;
+  documentExpiresOn: string;
+  address: string;
+  addressProofDatedOn: string;
+};
+
 export type InvitationToken = {
   token: string;
 };
