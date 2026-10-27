@@ -12,6 +12,7 @@ export const SuspiciousActivityReportMapper = {
     const loaded = SuspiciousActivityReport.rehydrate(row.id, {
       registeredAt: row.registeredAt,
       subjectReference: row.subjectReference,
+      filingReference: row.filingReference ?? undefined,
     });
 
     loaded.version = row.version;
@@ -20,6 +21,6 @@ export const SuspiciousActivityReportMapper = {
   },
 
   toRow(saved: SuspiciousActivityReport): SuspiciousActivityReportColumns {
-    return { id: saved.id, ...saved.toState() };
+    return { id: saved.id, ...saved.toState(), filingReference: saved.filingReference ?? null };
   },
 };

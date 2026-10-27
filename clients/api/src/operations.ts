@@ -103,6 +103,39 @@ export function closeAlert(
   return send<CloseAlertResult>(connection, operation, { ...input, ...options });
 }
 
+export interface FileSuspiciousActivityReportInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type FileSuspiciousActivityReportResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * File suspicious activity report: `POST /alerts/{id}/reports`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function fileSuspiciousActivityReport(
+  connection: Connection,
+  input: FileSuspiciousActivityReportInput,
+  options: CallOptions = {},
+): Promise<FileSuspiciousActivityReportResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/alerts/{id}/reports',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<FileSuspiciousActivityReportResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SubmitApplicationInput {
   readonly body: {
     productId: string;
@@ -428,6 +461,55 @@ export function declareConflictOfInterest(
   return send<DeclareConflictOfInterestResult>(connection, operation, { ...input, ...options });
 }
 
+export interface GetCustomerFileInput {
+  readonly query?: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: id. */
+    readonly sort?: string;
+  };
+}
+
+export type GetCustomerFileResult =
+  | Success<200, {
+    items: Array<{
+      id: string;
+      identifiedAt: string;
+    }>;
+    /** Present when it is cheap to count. */
+    total?: number;
+    /** Present when more items follow. */
+    nextCursor?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Get customer file: `GET /customer-files`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function getCustomerFile(
+  connection: Connection,
+  input: GetCustomerFileInput = {},
+  options: CallOptions = {},
+): Promise<GetCustomerFileResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/customer-files',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<GetCustomerFileResult>(connection, operation, { ...input, ...options });
+}
+
 export interface IdentifyCustomerInput {
   readonly body: {
     documentKind: 'Passport' | 'NationalIdentityCard' | 'ResidencePermit';
@@ -465,6 +547,44 @@ export function identifyCustomer(
   };
 
   return send<IdentifyCustomerResult>(connection, operation, { ...input, ...options });
+}
+
+export interface DeclareDirectorsAndOwnersInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    directors: Array<Schemas.IdentifyCustomerBody>;
+    beneficialOwners: Array<Schemas.IdentifyCustomerBody>;
+  };
+}
+
+export type DeclareDirectorsAndOwnersResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'BUSINESS_NOT_REGISTERED' | 'IDENTITY_DOCUMENT_EXPIRED' | 'PROOF_OF_ADDRESS_TOO_OLD' | 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Identify each director and beneficial owner of a registered business as a person: `POST /customers/{id}/directors-and-owners`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BUSINESS_NOT_REGISTERED (422), IDENTITY_DOCUMENT_EXPIRED (422), PROOF_OF_ADDRESS_TOO_OLD (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function declareDirectorsAndOwners(
+  connection: Connection,
+  input: DeclareDirectorsAndOwnersInput,
+  options: CallOptions = {},
+): Promise<DeclareDirectorsAndOwnersResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{id}/directors-and-owners',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DeclareDirectorsAndOwnersResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SetDelegationTableInput {
