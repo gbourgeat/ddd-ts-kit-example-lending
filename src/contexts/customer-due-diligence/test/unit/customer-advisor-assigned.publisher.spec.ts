@@ -8,7 +8,9 @@ describe('Publishing "customer advisor assigned" to other contexts', () => {
     const bus = new InMemoryEventBus();
     const publisher = new CustomerAdvisorAssignedPublisher(bus, new SequentialIdGenerator('event'));
 
-    await publisher.handle(new CustomerAdvisorAssigned('customer-1', new Date('2026-01-01T00:00:00.000Z')));
+    await publisher.handle(
+      new CustomerAdvisorAssigned('customer-1', new Date('2026-01-01T00:00:00.000Z'), 'advisor-1'),
+    );
 
     expect(bus.published).toEqual([
       {
@@ -16,11 +18,8 @@ describe('Publishing "customer advisor assigned" to other contexts', () => {
         type: 'customer-due-diligence.customer.advisor-assigned',
         version: 1,
         occurredAt: '2026-01-01T00:00:00.000Z',
-        payload: { customerId: 'customer-1' },
+        payload: { customerId: 'customer-1', advisorId: 'advisor-1' },
       },
     ]);
   });
-
-  // TODO(domain): once the payload has its fields, assert each of them here: this test is the contract other contexts rely on.
-  it.todo('carries every field of the public payload');
 });

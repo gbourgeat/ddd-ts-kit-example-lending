@@ -12,7 +12,7 @@ export class CustomerAdvisorAssignedPublisher {
     const published = customerAdvisorAssignedV1.create(
       {
         customerId: event.aggregateId,
-        // TODO(domain): map each fact of the domain event to its field of the public payload, as primitives; leave out what other contexts must not depend on.
+        advisorId: event.advisorId,
       },
       { id: this.ids.next(), occurredAt: event.occurredAt },
     );

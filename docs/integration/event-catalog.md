@@ -115,13 +115,14 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 
 | Type | Version | Description | Deprecated |
 | --- | --- | --- | --- |
-| `customer-due-diligence.customer.advisor-assigned` | 1 | Customer advisor assigned. | no |
+| `customer-due-diligence.customer.advisor-assigned` | 1 | A customer was given its advisor of the branch network, who looks after it. | no |
 
 #### Payload of version 1
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `customerId` | string | yes |  |
+| `advisorId` | string | yes |  |
 
 ### customer-due-diligence.customer.identified
 

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
-import { expectStatus } from '@ddd-ts-kit/testing/e2e';
+import { collectEvents, expectStatus } from '@ddd-ts-kit/testing/e2e';
 import { startKeycloakStandIn } from '$test/e2e/support/identity/keycloak-stand-in';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { operatorOf, registeredCustomer } from '$test/e2e/support/customer-due-diligence/customer-files';
@@ -30,6 +30,21 @@ describe('Assign advisor, end to end', () => {
 
     expectStatus(assigned, 200);
     expect(assigned.body).toEqual({ id: customerId });
+  });
+
+  it('publishes the advisor assignment for the other contexts, with the customer and the advisor', async () => {
+    const operator = await operatorOf(application, 'ada');
+    const customerId = await registeredCustomer(operator);
+    const recorder = collectEvents(application.events, ['customer-due-diligence.customer.advisor-assigned']);
+
+    expectStatus(await operator.put(`/customers/${customerId}/advisor`, { advisorId: 'advisor-1' }), 200);
+
+    await application.settled();
+    recorder.stop();
+
+    expect(recorder.received('customer-due-diligence.customer.advisor-assigned')).toEqual([
+      expect.objectContaining({ payload: { customerId, advisorId: 'advisor-1' } }),
+    ]);
   });
 
   it('refuses the advisor of an unknown customer, and assigns nothing', async () => {

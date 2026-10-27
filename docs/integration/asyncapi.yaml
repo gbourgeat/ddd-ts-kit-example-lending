@@ -53,7 +53,7 @@ channels:
         $ref: '#/components/messages/credit-policy.residual-income-minimum.published.v1'
   customer-due-diligence.customer.advisor-assigned:
     address: customer-due-diligence.customer.advisor-assigned
-    description: Customer advisor assigned.
+    description: A customer was given its advisor of the branch network, who looks after it.
     messages:
       v1:
         $ref: '#/components/messages/customer-due-diligence.customer.advisor-assigned.v1'
@@ -560,7 +560,7 @@ components:
     customer-due-diligence.customer.advisor-assigned.v1:
       name: customer-due-diligence.customer.advisor-assigned
       title: customer-due-diligence.customer.advisor-assigned v1
-      summary: Customer advisor assigned.
+      summary: A customer was given its advisor of the branch network, who looks after it.
       contentType: application/json
       tags:
         - name: customer-due-diligence
@@ -589,9 +589,12 @@ components:
             properties:
               customerId:
                 type: string
+              advisorId:
+                type: string
             type: object
             required:
               - customerId
+              - advisorId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

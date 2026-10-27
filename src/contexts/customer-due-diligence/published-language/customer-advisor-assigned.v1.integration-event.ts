@@ -6,8 +6,7 @@ import { CustomerAdvisorAssignedV1Payload } from '@/contexts/customer-due-dilige
 export const customerAdvisorAssignedV1 = defineIntegrationEvent({
   type: 'customer-due-diligence.customer.advisor-assigned',
   version: 1,
-  // TODO(domain): describe in one sentence, for the teams of other contexts, what "customer advisor assigned" means.
-  description: 'Customer advisor assigned.',
+  description: 'A customer was given its advisor of the branch network, who looks after it.',
   payload: classSchema(CustomerAdvisorAssignedV1Payload),
 });
 
