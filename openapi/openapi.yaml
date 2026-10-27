@@ -2858,26 +2858,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - items
-                properties:
-                  items:
-                    type: array
-                    items:
-                      properties:
-                        id:
-                          type: string
-                      type: object
-                      required:
-                        - id
-                  total:
-                    type: integer
-                    minimum: 0
-                    description: Present when it is cheap to count.
-                  nextCursor:
-                    type: string
-                    description: Present when more items follow.
+                $ref: '#/components/schemas/IdentifierLinePage'
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:
@@ -2969,26 +2950,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - items
-                properties:
-                  items:
-                    type: array
-                    items:
-                      properties:
-                        id:
-                          type: string
-                      type: object
-                      required:
-                        - id
-                  total:
-                    type: integer
-                    minimum: 0
-                    description: Present when it is cheap to count.
-                  nextCursor:
-                    type: string
-                    description: Present when more items follow.
+                $ref: '#/components/schemas/IdentifierLinePage'
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:
@@ -3279,6 +3241,29 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    IdentifierLine:
+      properties:
+        id:
+          type: string
+      type: object
+      required:
+        - id
+    IdentifierLinePage:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifierLine'
+        total:
+          type: integer
+          minimum: 0
+          description: Present when it is cheap to count.
+        nextCursor:
+          type: string
+          description: Present when more items follow.
     IdentifyCustomerBody:
       properties:
         documentKind:

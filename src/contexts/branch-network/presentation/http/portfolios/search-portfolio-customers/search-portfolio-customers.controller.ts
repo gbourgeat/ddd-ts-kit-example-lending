@@ -7,11 +7,11 @@ import { classSchema } from '@ddd-ts-kit/validation/class-validator';
 import { BranchNetworkCodes } from '@/contexts/branch-network/branch-network.codes';
 import { SearchPortfolioCustomersQuery } from '@/contexts/branch-network/application/queries/search-portfolio-customers/search-portfolio-customers.query';
 import { PortfoliosRoutes } from '@/contexts/branch-network/presentation/http/portfolios.routes';
-import { SearchPortfolioCustomersLine } from '@/contexts/branch-network/presentation/http/portfolios/search-portfolio-customers/search-portfolio-customers.line';
+import { IdentifierLine } from '@/contexts/branch-network/presentation/http/shared/identifier-line.schema';
 import { SearchPortfolioCustomersParams } from '@/contexts/branch-network/presentation/http/portfolios/search-portfolio-customers/search-portfolio-customers.params';
 
 const query = pageQuerySchema({ sortable: ['id'], maxSize: 100 });
-const line = classSchema(SearchPortfolioCustomersLine);
+const line = classSchema(IdentifierLine, { shared: true });
 
 /** Built by Nest with the bus it injects, served by the kit: a page is no DTO class, so @KitRoute gives its query and its answer. */
 @Controller()

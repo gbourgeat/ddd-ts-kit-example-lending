@@ -17,9 +17,12 @@ export class AssignCustomerHandler implements CommandHandler<AssignCustomerComma
       throw UnknownPortfolio.forAdvisor(command.advisorId);
     }
 
-    // The membership is a relation written in the change: writing it twice leaves one tuple.
+    // The membership is a relation written in the change: writing it twice leaves one tuple. The customer
+    // also names its portfolio, so that the advisor of the portfolio is reached from the customer (the
+    // customer rules of the relationship schema, `via('portfolio', 'advisor')`).
     await this.relations.write([
       { object: `portfolio:${portfolio.id}`, relation: 'member', subject: `customer:${command.customerId}` },
+      { object: `customer:${command.customerId}`, relation: 'portfolio', subject: `portfolio:${portfolio.id}` },
     ]);
 
     return portfolio.id;

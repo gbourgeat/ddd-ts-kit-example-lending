@@ -6,10 +6,10 @@ import type { Infer } from '@ddd-ts-kit/validation';
 import { classSchema } from '@ddd-ts-kit/validation/class-validator';
 import { SearchAdvisorPortfoliosQuery } from '@/contexts/branch-network/application/queries/search-advisor-portfolios/search-advisor-portfolios.query';
 import { PortfoliosRoutes } from '@/contexts/branch-network/presentation/http/portfolios.routes';
-import { SearchAdvisorPortfoliosLine } from '@/contexts/branch-network/presentation/http/portfolios/search-advisor-portfolios/search-advisor-portfolios.line';
+import { IdentifierLine } from '@/contexts/branch-network/presentation/http/shared/identifier-line.schema';
 
 const query = pageQuerySchema({ sortable: ['id'], maxSize: 100 });
-const line = classSchema(SearchAdvisorPortfoliosLine);
+const line = classSchema(IdentifierLine, { shared: true });
 
 /** Built by Nest with the bus it injects, served by the kit: a page is no DTO class, so @KitRoute gives its query and its answer. */
 @Controller()

@@ -1249,15 +1249,7 @@ export interface SearchAdvisorPortfoliosInput {
 }
 
 export type SearchAdvisorPortfoliosResult =
-  | Success<200, {
-    items: Array<{
-      id: string;
-    }>;
-    /** Present when it is cheap to count. */
-    total?: number;
-    /** Present when more items follow. */
-    nextCursor?: string;
-  }>
+  | Success<200, Schemas.IdentifierLinePage>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
   | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
@@ -1300,15 +1292,7 @@ export interface SearchPortfolioCustomersInput {
 }
 
 export type SearchPortfolioCustomersResult =
-  | Success<200, {
-    items: Array<{
-      id: string;
-    }>;
-    /** Present when it is cheap to count. */
-    total?: number;
-    /** Present when more items follow. */
-    nextCursor?: string;
-  }>
+  | Success<200, Schemas.IdentifierLinePage>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
   | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
