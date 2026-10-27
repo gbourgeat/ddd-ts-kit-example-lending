@@ -224,6 +224,65 @@ paths:
             - CLOSURE_REASON_MISSING
             - UNKNOWN_ALERT
             - VALIDATION_FAILED
+  /alerts/{id}/reports:
+    post:
+      operationId: fileSuspiciousActivityReport
+      summary: File suspicious activity report
+      tags:
+        - financial-crime
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
   /applications:
     post:
       operationId: submitApplication

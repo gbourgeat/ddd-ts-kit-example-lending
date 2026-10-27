@@ -103,6 +103,39 @@ export function closeAlert(
   return send<CloseAlertResult>(connection, operation, { ...input, ...options });
 }
 
+export interface FileSuspiciousActivityReportInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type FileSuspiciousActivityReportResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * File suspicious activity report: `POST /alerts/{id}/reports`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function fileSuspiciousActivityReport(
+  connection: Connection,
+  input: FileSuspiciousActivityReportInput,
+  options: CallOptions = {},
+): Promise<FileSuspiciousActivityReportResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/alerts/{id}/reports',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<FileSuspiciousActivityReportResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SubmitApplicationInput {
   readonly body: {
     productId: string;
