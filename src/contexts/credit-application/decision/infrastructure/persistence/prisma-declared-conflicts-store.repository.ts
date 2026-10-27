@@ -1,6 +1,6 @@
 import { ownTenantWhere, tenantWhere } from '@ddd-ts-kit/prisma';
 import { tenantScopeOf, type EventStamp, type ExecutionScope } from '@ddd-ts-kit/kernel';
-import type { DeclaredConflictRow } from '@/contexts/credit-application/decision/application/read-model/declared-conflict-row';
+import type { DeclaredConflictRow } from '@/contexts/credit-application/decision/application/projections/declared-conflict-row.projection';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { DeclaredConflictMapper } from '@/contexts/credit-application/decision/infrastructure/persistence/declared-conflict.mapper';
 import type { Database } from '@/platform/database/database';
@@ -33,6 +33,15 @@ export class PrismaDeclaredConflictsStore implements DeclaredConflictsStore {
         skipDuplicates: true,
       });
     }
+  }
+
+  async searchOfCustomer(customerId: string): Promise<readonly DeclaredConflictRow[]> {
+    const records = await this.database.client().creditApplicationDeclaredConflict.findMany({
+      where: { customerId, ...tenantWhere(this.scope) },
+      orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
+    });
+
+    return records.map((record) => new DeclaredConflictMapper().toRow(record));
   }
 
   async find(conflictOfInterestId: string): Promise<DeclaredConflictRow | undefined> {

@@ -71,6 +71,12 @@ export interface Client {
    */
   correctEntry(input: operations.CorrectEntryInput, options?: CallOptions): Promise<operations.CorrectEntryResult>;
   /**
+   * Read declared conflicts: `GET /applications/{id}/declared-conflicts`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  readDeclaredConflicts(input: operations.ReadDeclaredConflictsInput, options?: CallOptions): Promise<operations.ReadDeclaredConflictsResult>;
+  /**
    * Name guarantor: `POST /applications/{id}/guarantors`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -271,6 +277,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
+    readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),

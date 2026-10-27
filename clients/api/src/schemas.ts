@@ -5,6 +5,12 @@ export type Accepted = {
   id: string;
 };
 
+export type DeclaredConflictLine = {
+  conflictOfInterestId: string;
+  staffMemberId: string;
+  customerId: string;
+};
+
 export type IdentifierLine = {
   id: string;
 };
