@@ -14,6 +14,7 @@ says. The sections after the markers are for the controller to write.
 
 | Context | Table | About | Personal data | On erasure | Kept |
 |---|---|---|---|---|---|
+| branch-network | `staff_members` | `id` | `name`, `email` | pseudonymised | until erased |
 | identity | `accounts` | `id` | `email`, `display_name` | pseudonymised | until erased |
 | identity | `invitations` | `id` | `email` | row deleted | 30 days after `expires_at` |
 

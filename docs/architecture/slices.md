@@ -32,7 +32,7 @@ ledger" (US0.06).
 |---|---|---|---|---|---|---|---|
 | US1.01 | identity | slice | Banks never see each other's data (tenant isolation spec) | `e2e identity OpenOrganisation` | | identity | todo |
 | US1.02 | branch-network | skeleton | Branch | `aggregate branch-network Branch`; `domain-event branch-network Branch Opened`; `repository branch-network Branch --tenant-scoped` | | conductor | done |
-| US1.03 | branch-network | skeleton | Staff member, with the appointment event | `aggregate branch-network StaffMember`; `domain-event branch-network StaffMember Appointed`; `repository branch-network StaffMember --tenant-scoped --personal name,email --erasure pseudonymise` | | conductor | todo |
+| US1.03 | branch-network | skeleton | Staff member, with the appointment event | `aggregate branch-network StaffMember`; `domain-event branch-network StaffMember Appointed`; `repository branch-network StaffMember --tenant-scoped --personal name,email --erasure pseudonymise` | | conductor | done |
 | US1.04 | branch-network | skeleton | Portfolio of an advisor | `aggregate branch-network Portfolio`; `domain-event branch-network Portfolio Opened`; `repository branch-network Portfolio --tenant-scoped` | | conductor | todo |
 | US1.05 | branch-network | skeleton | Declared conflict of interest | `aggregate branch-network ConflictOfInterest`; `domain-event branch-network ConflictOfInterest Declared`; `repository branch-network ConflictOfInterest --tenant-scoped` | | conductor | todo |
 | US1.06 | branch-network | slice | Open a branch | `command branch-network OpenBranch --permission branch.open --aggregate Branch`; `route branch-network OpenBranch --method POST --path /branches --command` | US1.02 | branch-network | todo |

@@ -25,11 +25,13 @@ Who follows which customer, and who may decide on it, is needed for the business
 | Conflict of interest | A declared link between a staff member and a customer or an application: a relative, an associate, or their own file | Sanctions match |
 | Declared conflict | A conflict of interest put on record by the staff member themselves | Conflict of interest, undeclared |
 | Opened | the branch is open: it has a place, it can take its staff and its portfolios |  |
+| Appointed | a person becomes a staff member of a bank |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
 - `Branch`
+- `StaffMember`
 <!-- /ddd-ts-kit:aggregates -->
 
 ## Published events
@@ -40,7 +42,9 @@ Who follows which customer, and who may decide on it, is needed for the business
 ## Personal data
 
 <!-- ddd-ts-kit:personal-data -->
-No personal data declared.
+| Table | About | Personal data | On erasure | Kept |
+|---|---|---|---|---|
+| `staff_members` | `id` | `name`, `email` | pseudonymised | until erased |
 <!-- /ddd-ts-kit:personal-data -->
 
 ## Permissions
@@ -93,5 +97,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Port | Kind | Adapters |
 |---|---|---|
+| `BranchNetworkPersonalDataErasure` | external | `PrismaBranchNetworkPersonalDataErasure` |
+| `BranchNetworkPersonalDataExport` | external | `PrismaBranchNetworkPersonalDataExport` |
 | `BranchRepository` | external | `PrismaBranchRepository` |
+| `StaffMemberRepository` | external | `PrismaStaffMemberRepository` |
 <!-- /ddd-ts-kit:reference -->

@@ -2,6 +2,7 @@ import type { PersonalDataExport } from '@ddd-ts-kit/kernel';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { PrismaIdentityPersonalDataExport } from '@/contexts/identity/infrastructure/persistence/prisma-identity-personal-data-export.repository';
+import { PrismaBranchNetworkPersonalDataExport } from '@/contexts/branch-network/infrastructure/persistence/prisma-branch-network-personal-data-export.repository';
 // /ddd-ts-kit:imports
 
 /**
@@ -16,6 +17,12 @@ export const dataSubjectExports: readonly ((platform: Platform) => PersonalDataE
       kind: 'repository',
       context: 'identity',
       token: 'IdentityPersonalDataExport',
+    }),
+  (platform) =>
+    platform.adapter(new PrismaBranchNetworkPersonalDataExport(platform.persistence.database, platform.scope), {
+      kind: 'repository',
+      context: 'branch-network',
+      token: 'BranchNetworkPersonalDataExport',
     }),
   // /ddd-ts-kit:exports
 ];
