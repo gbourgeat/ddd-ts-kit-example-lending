@@ -336,6 +336,9 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-27 Owner, wave 5 warning accepted: the address of a customer stays a warning of `privacy/declared-field` until the kit reads personal fields sealed in events: the event store has no read path for sealed fields yet, and the declaration is already written; the warning is accepted as a known limit (owner brief: record as accepted, with that reason)
 - 2026-10-27 Conductor, owner brief: a possible match is visible to compliance only once a read path exists (US2.08 and the list of matches); US2.07 is proven by the recorded event (conductor, owner brief, to confirm)
 
+- 2026-10-27 Wave 6 run 3, US8.04: the APR spec proves each example to 5e-9 as a rate (tighter than the 0.0000005 asked, which was read as six decimals of the percentage), and the APR to one decimal; the formula is the one on the trunk since wave 4 (test/unit/offer/actuarial-formula.service.spec.ts) (conductor, owner brief, to confirm)
+- 2026-10-27 Wave 6 run 3, US6.14: the co-borrower e2e passes on wave6 (test/e2e/name-co-borrower.e2e.spec.ts); the 500 does not reproduce in the in-process run, its cause is not read from a log (the commit of the trunk that named the party, 133dc83, precedes the proof) (conductor, owner brief, to confirm: a 500 against a real DATABASE_URL is not tested here)
+
 ## For the owner
 
 - Migrations of the wave 2 rows: no database here; `npm run db:generate working-<what>` for the product, legal maximum rate, delegation table, residual income minimum and alert columns; the schema commits are on the trunk.
