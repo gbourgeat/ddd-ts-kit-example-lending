@@ -75,7 +75,7 @@ export function createAudit(persistence: Persistence, source: AuditSource): Audi
   };
 }
 
-/** The schema the models of the trail declare in prisma/schema.prisma (`@@schema("audit")`). */
+/** The schema the models of the trail declare in prisma/schema/schema.prisma (`@@schema("audit")`). */
 const AUDIT_SCHEMA = 'audit';
 
 function createAuditTrail(persistence: Persistence): AuditTrail & AuditReader & ArchivableAuditTrail {

@@ -44,7 +44,7 @@
     "docs:generate": "ddd-ts-kit docs && npm run build && node dist/scripts/openapi.js && node dist/scripts/events.js && ddd-ts-kit sdk",
     "docs:check": "ddd-ts-kit docs --check && npm run build && node dist/scripts/openapi.js --check && node dist/scripts/events.js --check && ddd-ts-kit sdk --check",
     "regenerate": "ddd-ts-kit depcruise-config --write && npm run docs:generate",
-    "db:client": "prisma generate && prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script -o generated/schema.sql",
+    "db:client": "prisma generate && prisma migrate diff --from-empty --to-schema prisma/schema --script -o generated/schema.sql",
     "db:generate": "ddd-ts-kit prisma-generate --name",
     "db:migrate": "prisma migrate deploy",
     "pretypecheck": "npm run db:client",
