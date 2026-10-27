@@ -48,7 +48,15 @@ describe('Erase personal data past retention, end to end', () => {
       {
         name: 'POST /personal-data/erasures',
         kind: 'SERVER',
-        children: [{ name: 'command ErasePersonalDataPastRetentionCommand' }],
+        children: [
+          {
+            name: 'command ErasePersonalDataPastRetentionCommand',
+            children: [
+              { name: 'repository IdentityPersonalDataErasure.purgeExpired' },
+              { name: 'repository BranchNetworkPersonalDataErasure.purgeExpired' },
+            ],
+          },
+        ],
       },
     ]);
   });
@@ -64,9 +72,10 @@ describe('Erase personal data past retention, end to end', () => {
 
   it('keeps an entry of the erasure in the audit trail, with the operator as its actor', async () => {
     await application.relate({ object: 'context:data-protection', relation: 'operator', subject: 'user:ada' });
-    const ada = await application.as({ id: 'ada', roles: ['admin'] });
+    const ada = await application.as({ id: 'ada', roles: ['admin'], tenantId: 'acme-bank' });
 
     expectStatus(await ada.post('/personal-data/erasures', {}), 204);
+    await application.relate({ object: 'context:audit', relation: 'operator', subject: 'user:ada' });
 
     const trail = await ada.get('/audit/entries?action=ErasePersonalDataPastRetentionCommand');
     const { items } = trail.body as { items: { action: string; outcome: string; actorId: string }[] };
