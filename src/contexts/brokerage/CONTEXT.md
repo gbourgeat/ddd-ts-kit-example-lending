@@ -21,6 +21,7 @@ Brokers bring applications, and the check of their registration is a supporting 
 | Registration lapsed | The registration is no longer valid; the broker can no longer bring applications | Refusal |
 | Bring | A broker's act of submitting an application to the bank | Assignment |
 | Registered | a broker is entered on the intermediaries register with its registration number |  |
+| Check | The daily verification that a broker's registration is still valid on the day; a lapsed one is marked |  |
 
 ## Aggregates
 
@@ -43,6 +44,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `brokerage:broker.register`
+- `brokerage:broker.check`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -87,6 +89,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `CheckRegistration` | command | `broker.check` |
 | `RegisterBroker` | command | `broker.register` |
 
 ### Routes

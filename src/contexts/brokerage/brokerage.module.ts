@@ -10,6 +10,8 @@ import { requires } from '@ddd-ts-kit/auth';
 import { brokeragePermissions } from '@/contexts/brokerage/brokerage.permissions';
 import { RegisterBrokerCommand } from '@/contexts/brokerage/application/commands/register-broker/register-broker.command';
 import { RegisterBrokerHandler } from '@/contexts/brokerage/application/commands/register-broker/register-broker.handler';
+import { CheckRegistrationCommand } from '@/contexts/brokerage/application/commands/check-registration/check-registration.command';
+import { CheckRegistrationHandler } from '@/contexts/brokerage/application/commands/check-registration/check-registration.handler';
 // /ddd-ts-kit:imports
 
 export interface BrokerageWiring {
@@ -52,6 +54,12 @@ function registerHandlers(platform: Platform): void {
     new RegisterBrokerHandler(brokerRepository, intermediaries, platform.ids, platform.clock),
     { context: 'brokerage' },
   );
+
+  platform.commands.register(
+    CheckRegistrationCommand,
+    new CheckRegistrationHandler(brokerRepository, intermediaries, platform.clock),
+    { context: 'brokerage' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -72,6 +80,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(RegisterBrokerCommand, brokeragePermissions['broker.register'], {
+      resource: () => ({ type: 'context', id: 'brokerage' }),
+    }),
+    requires(CheckRegistrationCommand, brokeragePermissions['broker.check'], {
       resource: () => ({ type: 'context', id: 'brokerage' }),
     }),
     // /ddd-ts-kit:authorization
