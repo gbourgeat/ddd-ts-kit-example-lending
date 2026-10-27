@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import type { RelationTuple } from '@ddd-ts-kit/auth/rebac';
 import { createHttpClient, expectStatus, type HttpClient } from '@ddd-ts-kit/testing/e2e';
-import { expectSpanTree, installTestTracing } from '@ddd-ts-kit/tracing/testing';
+import { expectSpanTree, installTestTracing, type ExpectedSpan } from '@ddd-ts-kit/tracing/testing';
 import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
 import { FakeIntermediariesRegister } from '@/contexts/brokerage/test/fakes/intermediaries-register.fake';
 import { relateSystemActors } from '@/platform/auth/relationships/relate-system-actors';
@@ -24,7 +24,7 @@ const registration = { registrationNumber: 'REG-0001' };
 const tenantId = 'acme-bank';
 const dailyCheck = 'brokerage.check-registration';
 
-const registrationSpanTree = [
+const registrationSpanTree: readonly ExpectedSpan[] = [
   {
     name: 'POST /brokers',
     kind: 'SERVER',
