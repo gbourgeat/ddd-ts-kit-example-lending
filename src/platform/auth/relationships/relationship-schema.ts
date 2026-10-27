@@ -34,6 +34,7 @@ const elements: SchemaDefinition = {
     derived: {
       'credit-application:application.submit': 'self',
       'data-protection:data-subject.request-copy': 'self',
+      'branch-network:portfolio.search-customers': { anyOf: ['advisor'], butNot: ['conflicted'] },
       advisor: via('portfolio', 'advisor'),
     },
   },
