@@ -5,7 +5,7 @@ import type { Actor } from '@ddd-ts-kit/kernel';
 import { relationshipSchema } from '@/platform/auth/relationships/relationship-schema';
 
 const applicationSubmit: Permission = {
-  id: 'application.submit',
+  id: 'credit-application:application.submit',
   context: 'credit-application',
   name: 'submit',
   description: 'Submit an application for a loan, as the customer it is for',

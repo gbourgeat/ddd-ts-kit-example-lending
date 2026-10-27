@@ -26,14 +26,14 @@ const elements: SchemaDefinition = {
   customer: {
     relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
     derived: {
-      'application.submit': 'self',
+      'credit-application:application.submit': 'self',
       advisor: via('portfolio', 'advisor'),
     },
   },
   application: {
     relations: { customer: ['customer'], 'co-borrower': ['user'], broker: ['user'] },
     derived: {
-      'application.read': {
+      'credit-application:application.read': {
         anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
         butNot: [via('customer', 'conflicted')],
       },
@@ -42,7 +42,7 @@ const elements: SchemaDefinition = {
   loan: {
     relations: { application: ['application'] },
     derived: {
-      'loan.read': via('application', 'application.read'),
+      'servicing:loan.read': via('application', 'credit-application:application.read'),
     },
   },
 };

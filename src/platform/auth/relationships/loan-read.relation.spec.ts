@@ -5,7 +5,7 @@ import type { Actor } from '@ddd-ts-kit/kernel';
 import { relationshipSchema } from '@/platform/auth/relationships/relationship-schema';
 
 const loanRead: Permission = {
-  id: 'loan.read',
+  id: 'servicing:loan.read',
   context: 'servicing',
   name: 'read',
   description: 'Read a loan, as the people who may read its application',
