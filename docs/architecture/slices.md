@@ -345,7 +345,7 @@ Notes:
 | US13.05 | customer-due-diligence | slice | Customer's personal data sealed and shredded after retention, in the event store | `erasure-handler customer-due-diligence` | US13.04, US2.01 | customer-due-diligence | todo |
 | US13.06 | credit-application | slice | Refused application's personal data erased after six months | `erasure-handler credit-application --module file` | US13.04, US0.01 | credit-application | todo |
 | US13.07 | servicing | slice | Loan's personal data sealed and shredded ten years after closing | `erasure-handler servicing --module ledger` | US13.04, US9.02 | servicing | todo |
-| US13.08 | credit-scoring | slice | Impact assessment of the scoring model, recorded by staff each month | `command data-protection RecordScoringImpactAssessment --permission impact-assessment.record` | US5.01 | data-protection | todo |
+| US13.08 | credit-scoring | slice | Impact assessment of the scoring model, recorded by staff each month | `command data-protection RecordScoringImpactAssessment --permission impact-assessment.record` | US5.01 | data-protection | done |
 | US13.09 | data-protection | skeleton | Privacy register and impact assessment filled (docs/privacy/register.md, TODO(domain) lines 27, 31, 35) | edit `docs/privacy/register.md` (no generator): lawful basis per context, processors and transfers, retention of backups, logs and archives | US13.08 | conductor | todo |
 
 Serves: "Retention and personal data" (rows 48, 49, 51: US13.03, US13.04, US13.08); close 11 (the privacy register
