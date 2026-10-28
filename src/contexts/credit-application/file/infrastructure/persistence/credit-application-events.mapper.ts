@@ -97,9 +97,9 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     version: 3,
     upcasters: {
       // A submission of version 1 recorded no branch: it is read with an empty one, which no version 2 carries.
-      1: () => ({ branchId: '' }),
+      1: (data) => ({ ...data, branchId: '' }),
       // A submission of version 2 recorded no product: it is read with an empty one, which no version 3 carries.
-      2: () => ({ productId: '' }),
+      2: (data) => ({ ...data, productId: '' }),
     },
     encode: (event): CreditApplicationSubmittedData => ({
       applicantId: event.applicantId,
@@ -176,7 +176,7 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     version: 2,
     upcasters: {
       // An assessment of version 1 recorded no assessor: it is read with an empty one, which no version 2 carries.
-      1: () => ({ assessorId: '' }),
+      1: (data) => ({ ...data, assessorId: '' }),
     },
     encode: (event): CreditApplicationAssessedData => ({
       assessment: JSON.stringify(event.assessment),
@@ -243,7 +243,7 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     version: 2,
     upcasters: {
       // A decision of version 1 recorded no branch and no exception: it is read with an empty branch and no exception.
-      1: () => ({ branchId: '', exception: false }),
+      1: (data) => ({ ...data, branchId: '', exception: false }),
     },
     encode: (event): CreditApplicationDecidedData => ({
       outcome: event.outcome,
