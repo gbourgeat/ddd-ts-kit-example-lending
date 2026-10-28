@@ -9,6 +9,9 @@ export interface ScoringModelState {
 }
 
 export class ScoringModel extends AggregateRoot<string> {
+  /** The bank has one scoring model, kept under this identifier: its versions are numbered in turn. */
+  static readonly BANK_ID = 'bank-scoring-model';
+
   private constructor(
     id: string,
     private state: ScoringModelState,

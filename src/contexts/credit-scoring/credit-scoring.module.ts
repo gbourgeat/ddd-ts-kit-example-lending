@@ -9,6 +9,8 @@ import { requires } from '@ddd-ts-kit/auth';
 import { creditScoringPermissions } from '@/contexts/credit-scoring/credit-scoring.permissions';
 import { PublishScoringModelVersionCommand } from '@/contexts/credit-scoring/application/commands/publish-scoring-model-version/publish-scoring-model-version.command';
 import { PublishScoringModelVersionHandler } from '@/contexts/credit-scoring/application/commands/publish-scoring-model-version/publish-scoring-model-version.handler';
+import { ScoreApplicantHandler } from '@/contexts/credit-scoring/application/queries/score-applicant/score-applicant.handler';
+import { ScoreApplicantQuery } from '@/contexts/credit-scoring/application/queries/score-applicant/score-applicant.query';
 // /ddd-ts-kit:imports
 
 export interface CreditScoringWiring {
@@ -45,6 +47,10 @@ function registerHandlers(platform: Platform): void {
     new PublishScoringModelVersionHandler(scoringModelRepository, platform.ids, platform.clock),
     { context: 'credit-scoring' },
   );
+
+  platform.queries.register(ScoreApplicantQuery, new ScoreApplicantHandler(scoringModelRepository), {
+    context: 'credit-scoring',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -65,6 +71,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(PublishScoringModelVersionCommand, creditScoringPermissions['scoring-model.publish'], {
+      resource: () => ({ type: 'context', id: 'credit-scoring' }),
+    }),
+    requires(ScoreApplicantQuery, creditScoringPermissions['score.compute'], {
       resource: () => ({ type: 'context', id: 'credit-scoring' }),
     }),
     // /ddd-ts-kit:authorization

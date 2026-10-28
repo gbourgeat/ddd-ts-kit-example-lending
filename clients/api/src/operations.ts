@@ -2308,6 +2308,49 @@ export function setResidualIncomeMinimum(
   return send<SetResidualIncomeMinimumResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ScoreApplicantInput {
+  readonly body: {
+    debtToIncomePercent: number;
+    repaymentIncidents: number;
+    residualIncomeCents: number;
+    modelVersion: string;
+  };
+}
+
+export type ScoreApplicantResult =
+  | Success<200, {
+    score: number;
+    band: 'green' | 'amber' | 'red';
+    modelVersion: string;
+    inputs: Record<string, unknown>;
+    factors: Array<string>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_MODEL_VERSION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Score applicant: `POST /scores`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_MODEL_VERSION (422), VALIDATION_FAILED (422).
+ */
+export function scoreApplicant(
+  connection: Connection,
+  input: ScoreApplicantInput,
+  options: CallOptions = {},
+): Promise<ScoreApplicantResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/scores',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ScoreApplicantResult>(connection, operation, { ...input, ...options });
+}
+
 export interface PublishScoringModelVersionInput {
   readonly body: {
     modelRisk: 'low' | 'medium' | 'high';

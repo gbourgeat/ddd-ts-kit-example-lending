@@ -383,6 +383,12 @@ export interface Client {
    */
   setResidualIncomeMinimum(input: operations.SetResidualIncomeMinimumInput, options?: CallOptions): Promise<operations.SetResidualIncomeMinimumResult>;
   /**
+   * Score applicant: `POST /scores`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_MODEL_VERSION (422), VALIDATION_FAILED (422).
+   */
+  scoreApplicant(input: operations.ScoreApplicantInput, options?: CallOptions): Promise<operations.ScoreApplicantResult>;
+  /**
    * Publish scoring model version: `POST /scoring-models`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), SCORING_MODEL_LABEL_REQUIRED (422), VALIDATION_FAILED (422).
@@ -461,6 +467,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
+    scoreApplicant: (input, call) => operations.scoreApplicant(connection, input, call),
     publishScoringModelVersion: (input, call) => operations.publishScoringModelVersion(connection, input, call),
     getSuspiciousActivityReport: (input, call) => operations.getSuspiciousActivityReport(connection, input, call),
   };
