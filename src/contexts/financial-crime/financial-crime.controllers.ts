@@ -4,9 +4,13 @@ import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { CloseAlertController } from '@/contexts/financial-crime/presentation/http/alerts/close-alert/close-alert.controller';
 import { FileSuspiciousActivityReportController } from '@/contexts/financial-crime/presentation/http/alerts/file-suspicious-activity-report/file-suspicious-activity-report.controller';
+import { SearchAlertsController } from '@/contexts/financial-crime/presentation/http/alerts/search-alerts/search-alerts.controller';
+import { GetSuspiciousActivityReportController } from '@/contexts/financial-crime/presentation/http/reports/get-suspicious-activity-report/get-suspicious-activity-report.controller';
 import { CloseAlertParams } from '@/contexts/financial-crime/presentation/http/alerts/close-alert/close-alert.params';
 import { CloseAlertBody } from '@/contexts/financial-crime/presentation/http/alerts/close-alert/close-alert.body';
 import { FileSuspiciousActivityReportParams } from '@/contexts/financial-crime/presentation/http/alerts/file-suspicious-activity-report/file-suspicious-activity-report.params';
+import { GetSuspiciousActivityReportParams } from '@/contexts/financial-crime/presentation/http/reports/get-suspicious-activity-report/get-suspicious-activity-report.params';
+import { GetSuspiciousActivityReportAnswer } from '@/contexts/financial-crime/presentation/http/reports/get-suspicious-activity-report/get-suspicious-activity-report.answer';
 
 /** The Nest controllers of financial-crime, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const financialCrimeControllers: readonly Type<unknown>[] = [
@@ -15,5 +19,12 @@ export const financialCrimeControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(FileSuspiciousActivityReportController, {
     fileSuspiciousActivityReport: { params: FileSuspiciousActivityReportParams, answer: acceptedSchema },
+  }),
+  withSignatures(SearchAlertsController, {}),
+  withSignatures(GetSuspiciousActivityReportController, {
+    getSuspiciousActivityReport: {
+      params: GetSuspiciousActivityReportParams,
+      answer: GetSuspiciousActivityReportAnswer,
+    },
   }),
 ];

@@ -5,5 +5,7 @@ export const financialCrimePermissions = definePermissions('financial-crime', {
   'alert.raise': { description: 'Raise alert' },
   'alert.close': { description: 'Close alert' },
   'report.file': { description: 'File suspicious activity report' },
+  'alert.read': { description: 'List alerts' },
+  'report.read': { description: 'Get suspicious activity report' },
   // /ddd-ts-kit:permissions
 });
