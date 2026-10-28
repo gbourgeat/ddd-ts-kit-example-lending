@@ -198,7 +198,7 @@ Notes:
 | US7.11 | credit-application | slice | Decide a rescheduling under the delegation rules of a credit | `domain-event credit-application CreditApplication RescheduleDecided --module decision`; `command credit-application DecideRescheduling --permission application.reschedule --aggregate CreditApplication --module decision` | US7.05 | credit-application | done |
 | US7.12 | credit-application | contract | Decided, published with the outcome, the exception flag and the branch | `integration-event credit-application CreditApplication Decided --version 1 --module decision` | US7.04 | conductor | done |
 | US7.13 | credit-application | slice | Show what the decider saw when they decided | `query credit-application ShowDecisionView --permission application.decide --module decision` | US7.04 | credit-application | done |
-| US7.14 | credit-application | contract | Rescheduling decided, published for servicing | `integration-event credit-application CreditApplication RescheduleDecided --version 1 --module decision` | US7.11 | conductor | todo |
+| US7.14 | credit-application | contract | Rescheduling decided, published for servicing | `integration-event credit-application CreditApplication RescheduleDecided --version 1 --module decision` | US7.11 | conductor | done |
 
 Serves: "Decision" (rows 26 to 28: US7.04, US7.05, US7.07, US7.08); "Who may decide" (US7.01, US7.02, US7.05 for
 the table); "The person who prepared never decides" (US7.05); conflicts (US7.03, US7.06); rows 24 and 25

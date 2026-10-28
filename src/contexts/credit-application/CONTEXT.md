@@ -135,6 +135,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 
 <!-- ddd-ts-kit:events -->
 - `credit-application.credit-application.decided` (version 1)
+- `credit-application.credit-application.reschedule-decided` (version 1)
 - `credit-application.credit-application.submitted` (version 1)
 - `credit-application.credit-application.submitted` (version 2)
 <!-- /ddd-ts-kit:events -->
@@ -324,6 +325,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Event | Versions | Publisher |
 |---|---|---|
 | `credit-application.credit-application.decided` | 1 | `CreditApplicationDecidedPublisher` |
+| `credit-application.credit-application.reschedule-decided` | 1 | `CreditApplicationRescheduleDecidedPublisher` |
 | `credit-application.credit-application.submitted` | 1, 2 | `CreditApplicationSubmittedPublisher` |
 
 ### Projections

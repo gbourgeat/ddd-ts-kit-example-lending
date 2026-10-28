@@ -13,6 +13,7 @@ import {
   creditApplicationSubmittedV1,
   creditApplicationSubmittedV2,
   creditApplicationDecidedV1,
+  creditApplicationRescheduleDecidedV1,
 } from '@/contexts/credit-application/published-language';
 import {
   conflictOfInterestDeclaredV1,
@@ -63,5 +64,6 @@ export const auditedEvents = createEventRegistry([
   creditApplicationSubmittedV2,
   productDefinedV2,
   creditApplicationDecidedV1,
+  creditApplicationRescheduleDecidedV1,
   // /ddd-ts-kit:events
 ]);

@@ -85,6 +85,20 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `branchId` | string | yes |  |
 | `approvedAmountCents` | integer | yes |  |
 
+### credit-application.credit-application.reschedule-decided
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.reschedule-decided` | 1 | A decider decided, under the delegation rules, to reschedule the loan of an approved application: its new duration and the capital it covers. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
+| `durationMonths` | integer | yes |  |
+| `outstandingAmountCents` | integer | yes |  |
+
 ### credit-application.credit-application.submitted
 
 | Type | Version | Description | Deprecated |

@@ -48,6 +48,8 @@ import { ContestDecisionCommand } from '@/contexts/credit-application/decision/a
 import { ContestDecisionHandler } from '@/contexts/credit-application/decision/application/commands/contest-decision/contest-decision.handler';
 import { DecideReschedulingCommand } from '@/contexts/credit-application/decision/application/commands/decide-rescheduling/decide-rescheduling.command';
 import { DecideReschedulingHandler } from '@/contexts/credit-application/decision/application/commands/decide-rescheduling/decide-rescheduling.handler';
+import { CreditApplicationRescheduleDecidedPublisher } from '@/contexts/credit-application/decision/application/integration/publishers/credit-application-reschedule-decided.publisher';
+import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -105,6 +107,17 @@ export const decisionModule = {
     keepDeclaredConflicts(platform, given.declaredConflicts);
     keepReferenceData(platform);
     publishDecision(platform);
+
+    const creditApplicationRescheduleDecidedPublisher = platform.adapter(
+      new CreditApplicationRescheduleDecidedPublisher(platform.publisher, platform.ids),
+      { kind: 'domain-event-handler', context: 'credit-application' },
+    );
+
+    platform.domainEvents.on(CreditApplicationRescheduleDecided.eventName, async (event) => {
+      if (event instanceof CreditApplicationRescheduleDecided) {
+        await creditApplicationRescheduleDecidedPublisher.handle(event);
+      }
+    });
     // /ddd-ts-kit:reactions
   },
 
