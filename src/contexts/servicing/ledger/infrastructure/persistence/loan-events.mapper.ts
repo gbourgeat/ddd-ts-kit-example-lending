@@ -17,6 +17,13 @@ import { LoanEarlyRepaymentRecorded } from '@/contexts/servicing/ledger/domain/e
 import { LoanWrittenOff } from '@/contexts/servicing/ledger/domain/events/loan-written-off.event';
 import { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/loan-write-off-reversed.event';
 import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
+import { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
+
+/** The capital repaid on the withdrawal and the interest accrued to it, in whole cents. */
+interface LoanWithdrawalRepaymentRecordedData {
+  readonly capitalCents: number;
+  readonly interestCents: number;
+}
 
 /** The decision that rescheduled the loan, and the schedule that replaces the one in force. */
 interface LoanRescheduledData {
@@ -158,6 +165,20 @@ export const loanEvents: StoredEventTypes<LoanEvent> = {
     }),
     decode: (data, { aggregateId, occurredAt }) =>
       new LoanRescheduled(aggregateId, occurredAt, data.text('decisionId'), scheduleOf(data.record('schedule'))),
+  }),
+  [LoanWithdrawalRepaymentRecorded.eventName]: defineStoredEvent(LoanWithdrawalRepaymentRecorded, {
+    version: 1,
+    encode: (event): LoanWithdrawalRepaymentRecordedData => ({
+      capitalCents: event.capital.cents,
+      interestCents: event.interest.cents,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanWithdrawalRepaymentRecorded(
+        aggregateId,
+        occurredAt,
+        Money.ofCents(data.number('capitalCents')),
+        Money.ofCents(data.number('interestCents')),
+      ),
   }),
 };
 

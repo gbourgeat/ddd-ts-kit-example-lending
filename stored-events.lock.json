@@ -111,6 +111,9 @@
   "servicing.loan.scheduled": {
     "1": "sha256:78206acad92d34f1"
   },
+  "servicing.loan.withdrawal-repayment-recorded": {
+    "1": "sha256:832a1f0700ae4f28"
+  },
   "servicing.loan.write-off-reversed": {
     "1": "sha256:b850bdcabb77abf1"
   },

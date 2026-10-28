@@ -58,6 +58,10 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Reverse | Undo a write-off by a movement of opposite effect: the outstanding capital is open again |  |
 | Outstanding capital | The capital still owed by a loan: its principal, less the capital repaid by the instalments noted due, the early repayments and the write-off |  |
 | Decision | The approval of a rescheduling by credit-application, executed by the ledger as a new schedule |  |
+| Withdrawn | The borrower withdrew an application whose loan was already paid out: the loan is repaid, capital and interest accrued |  |
+| Withdrawal | The borrower's withdrawal of an application after its payout, which repays the loan |  |
+| Simple | Without compounding: each day's interest is on the principal only |  |
+| Interest | Interest accrued from the payout to a withdrawal, simple and daily: principal times the annual rate, times the whole days elapsed, over 365 days, in whole cents rounded down |  |
 
 ## Modules
 
@@ -96,6 +100,7 @@ No personal data declared.
 - `servicing:loan.repay-early`
 - `servicing:loan.write-off`
 - `servicing:loan.reschedule`
+- `servicing:loan.record-repayment`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -153,6 +158,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `ReadLoan` | query | `loan.read` |
 | `RecordPayout` | command | `loan.record-payout` |
+| `RecordWithdrawalRepayment` | command | `loan.record-repayment` |
 | `RepayEarly` | command | `loan.repay-early` |
 | `RescheduleLoan` | command | `loan.reschedule` |
 | `ReverseWriteOff` | command | `loan.write-off` |
@@ -174,6 +180,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|---|
 | `credit-application.credit-application.payout-authorised` | 1 | `credit-application` | `RecordPayoutOnPayoutAuthorisedIntegrationHandler` | `servicing.record-payout-on-payout-authorised` |
 | `credit-application.credit-application.reschedule-decided` | 1 | `credit-application` | `RescheduleOnDecisionIntegrationHandler` | `servicing.reschedule-on-decision` |
+| `credit-application.credit-application.withdrawn` | 1 | `credit-application` | `RepayWithdrawnLoanIntegrationHandler` | `servicing.repay-withdrawn-loan` |
 
 ### Publishers
 

@@ -17,6 +17,8 @@ import type { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/
 import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
 import { Money } from '@/shared-kernel/money.vo';
 import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
+import { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
+import { SimpleDailyInterestService } from '@/contexts/servicing/ledger/domain/services/simple-daily-interest.service';
 
 export type LoanEvent =
   | LoanPaidOut
@@ -26,7 +28,8 @@ export type LoanEvent =
   | LoanEarlyRepaymentRecorded
   | LoanWrittenOff
   | LoanWriteOffReversed
-  | LoanRescheduled;
+  | LoanRescheduled
+  | LoanWithdrawalRepaymentRecorded;
 
 /** The schedule that replaced the one of the payout, from the instalments noted due before it and the capital repaid before it. */
 export interface Rescheduling {
@@ -189,6 +192,28 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     this.record(new LoanRescheduled(this.id, now, decision.id, schedule));
   }
 
+  /**
+   * Repays the loan on the withdrawal of its application: the capital as paid out, and the interest accrued since the
+   * payout, then closes it. A loan already closed has nothing left to repay, so a delivery seen again records nothing.
+   */
+  repayOnWithdrawal(withdrawnAt: Date): void {
+    const schedule = this.state.schedule;
+
+    if (this.state.closedAt !== undefined || schedule === undefined) {
+      return;
+    }
+
+    const interest = new SimpleDailyInterestService().of(
+      schedule.principal,
+      schedule.annualRateBasisPoints,
+      this.state.registeredAt,
+      withdrawnAt,
+    );
+
+    this.record(new LoanWithdrawalRepaymentRecorded(this.id, withdrawnAt, schedule.principal, interest));
+    this.close(withdrawnAt);
+  }
+
   /** Whether the loan was closed on or before the instant: its retention then runs out. */
   closedOnOrBefore(instant: Date): boolean {
     return this.state.closedAt !== undefined && this.state.closedAt.getTime() <= instant.getTime();
@@ -250,6 +275,7 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
       [LoanWrittenOff.eventName]: (event) => this.applyWrittenOff(event),
       [LoanWriteOffReversed.eventName]: () => this.applyWriteOffReversed(),
       [LoanRescheduled.eventName]: (event) => this.applyRescheduled(event),
+      [LoanWithdrawalRepaymentRecorded.eventName]: (event) => this.applyWithdrawalRepaymentRecorded(event),
     };
   }
 
@@ -314,5 +340,10 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
       },
       rescheduledBy: [...this.state.rescheduledBy, event.decisionId],
     };
+  }
+
+  /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves here. */
+  private applyWithdrawalRepaymentRecorded(_event: LoanWithdrawalRepaymentRecorded): void {
+    return;
   }
 }

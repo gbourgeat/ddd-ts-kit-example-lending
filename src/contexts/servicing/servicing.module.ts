@@ -17,6 +17,7 @@ import { consume, subscribeAll } from '@ddd-ts-kit/events';
 import {
   creditApplicationPayoutAuthorisedV1 as recordPayoutOnPayoutAuthorisedDefinition,
   creditApplicationRescheduleDecidedV1 as rescheduleOnDecisionDefinition,
+  creditApplicationWithdrawnV1 as repayWithdrawnLoanDefinition,
 } from '@/contexts/credit-application/published-language';
 import { RecordPayoutOnPayoutAuthorisedIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/record-payout-on-payout-authorised.integration-handler';
 import { RecordPayoutCommand } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.command';
@@ -39,6 +40,9 @@ import { ReverseWriteOffHandler } from '@/contexts/servicing/ledger/application/
 import { RescheduleOnDecisionIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/reschedule-on-decision.integration-handler';
 import { RescheduleLoanCommand } from '@/contexts/servicing/ledger/application/commands/reschedule-loan/reschedule-loan.command';
 import { RescheduleLoanHandler } from '@/contexts/servicing/ledger/application/commands/reschedule-loan/reschedule-loan.handler';
+import { RepayWithdrawnLoanIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/repay-withdrawn-loan.integration-handler';
+import { RecordWithdrawalRepaymentCommand } from '@/contexts/servicing/ledger/application/commands/record-withdrawal-repayment/record-withdrawal-repayment.command';
+import { RecordWithdrawalRepaymentHandler } from '@/contexts/servicing/ledger/application/commands/record-withdrawal-repayment/record-withdrawal-repayment.handler';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -118,6 +122,10 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(RescheduleLoanCommand, new RescheduleLoanHandler(loanRepository, platform.clock), {
     context: 'servicing',
   });
+
+  platform.commands.register(RecordWithdrawalRepaymentCommand, new RecordWithdrawalRepaymentHandler(loanRepository), {
+    context: 'servicing',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -171,6 +179,21 @@ function registerReactions(platform: Platform): void {
         scope: platform.scope,
       },
       (event) => rescheduleOnDecisionIntegrationHandler.handle(event),
+    ),
+  ]);
+
+  const repayWithdrawnLoanIntegrationHandler = new RepayWithdrawnLoanIntegrationHandler(platform.commands);
+
+  subscribeAll(platform.subscriberFor('servicing'), [
+    consume(
+      repayWithdrawnLoanDefinition,
+      {
+        consumer: 'servicing.repay-withdrawn-loan',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      (event) => repayWithdrawnLoanIntegrationHandler.handle(event),
     ),
   ]);
   // /ddd-ts-kit:reactions
@@ -228,6 +251,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     requires(RescheduleLoanCommand, servicingPermissions['loan.reschedule'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(RecordWithdrawalRepaymentCommand, servicingPermissions['loan.record-repayment'], {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     // /ddd-ts-kit:authorization
