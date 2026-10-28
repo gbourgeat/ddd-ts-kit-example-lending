@@ -204,8 +204,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
-| `branch-network.staff-member.appointed` | 2 | `branch-network` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-decider-level` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `branch-network.staff-member.appointed` | 2 | `branch-network` | `KeepDeciderLevelIntegrationHandler` | not read |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | not read |
 
 ### Publishers
 

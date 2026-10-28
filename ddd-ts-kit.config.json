@@ -127,6 +127,7 @@
           "relationship": "conformist"
         }
       ],
+      "extraDirectories": ["composition"],
       "modules": {
         "file": {},
         "assessment": {},
