@@ -56,12 +56,12 @@ describe('Publish scoring model version, end to end', () => {
     expectStatus(response, 201);
   });
 
-  it('answers 400 to a model risk that is not low, medium or high', async () => {
+  it('answers 422 to a model risk that is not low, medium or high', async () => {
     const operator = await operatorOf(application, 'olivia');
 
     const response = await operator.post('/scoring-models', { modelRisk: 'extreme', label: '2026.1' });
 
-    expectStatus(response, 400);
+    expectStatus(response, 422);
   });
 
   it('answers 422 with SCORING_MODEL_LABEL_REQUIRED to a blank label', async () => {
@@ -89,6 +89,10 @@ describe('Publish scoring model version, end to end', () => {
             children: [
               { name: 'repository ScoringModelRepository.findById' },
               { name: 'repository ScoringModelRepository.save' },
+              {
+                name: 'unit-of-work before-commit',
+                children: [{ name: 'domain-event credit-scoring.scoring-model.published' }],
+              },
             ],
           },
         ],
