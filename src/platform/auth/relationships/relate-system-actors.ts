@@ -88,6 +88,7 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'keeper',
     subject: 'system:system:credit-application.lapse-broker-registration',
   },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.compute-due-instalments' },
   // /ddd-ts-kit:system-grants
 ];
 

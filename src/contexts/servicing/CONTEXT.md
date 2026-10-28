@@ -49,6 +49,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Borrower identified | The customer whose name the loan records is known to customer-due-diligence |  |
 | Loan read | The view of a loan the borrower's application reaches: its status, amount, duration and instalments, never its personal data |  |
 | Loan schedule | The amount, rate, duration and instalments of a loan, computed at its payout from the signed offer |  |
+| Compute | Work out each night which instalments of the schedule of a loan have fallen due |  |
 
 ## Modules
 
@@ -82,6 +83,7 @@ No personal data declared.
 - `servicing:loan.close`
 - `servicing:loan.record-payout`
 - `servicing:loan.read`
+- `servicing:loan.compute-due`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -90,6 +92,7 @@ No personal data declared.
 | Job | Schedule | Command |
 |---|---|---|
 | `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
+| `ComputeDueInstalmentsJob` | `` | `ComputeDueInstalments` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs
@@ -134,6 +137,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `CloseLoan` | command | `loan.close` |
+| `ComputeDueInstalments` | command | `loan.compute-due` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `ReadLoan` | query | `loan.read` |
 | `RecordPayout` | command | `loan.record-payout` |

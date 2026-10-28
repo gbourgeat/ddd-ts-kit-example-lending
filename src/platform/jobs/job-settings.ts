@@ -44,6 +44,10 @@ export function jobSettings(environment: Environment, context?: string): Readonl
     'servicing.erase-personal-data-past-retention': {
       enabled: environment['JOB_SERVICING_ERASE_PERSONAL_DATA_PAST_RETENTION_ENABLED'] !== 'false',
     },
+
+    'servicing.compute-due-instalments': {
+      enabled: environment['JOB_SERVICING_COMPUTE_DUE_INSTALMENTS_ENABLED'] !== 'false',
+    },
     // /ddd-ts-kit:jobs
   };
 
