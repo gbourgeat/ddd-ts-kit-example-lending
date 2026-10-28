@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, it } from '@jest/globals';
 import { expectStatus } from '@ddd-ts-kit/testing/e2e';
-import { expectSpanTree, installTestTracing } from '@ddd-ts-kit/tracing/testing';
+import { expectSpanTree, installTestTracing, type ExpectedSpan } from '@ddd-ts-kit/tracing/testing';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { storyOf } from '$test/e2e/support/story-of';
 import {
@@ -44,7 +44,7 @@ describe('Decide a rescheduling, one trace end to end', () => {
 });
 
 /** The spans of the request, exact on names and structure: the reads of the handler, its save, then the event in the before-commit phase. */
-const reschedulingTrace = [
+const reschedulingTrace: readonly ExpectedSpan[] = [
   {
     name: 'POST /applications/:id/rescheduling-decision',
     kind: 'SERVER',
