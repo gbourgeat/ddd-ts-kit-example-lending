@@ -33,4 +33,30 @@ describe('Offer', () => {
     expect(loaded.toState()).toEqual(stored.toState());
     expect(loaded.pullEvents()).toEqual([]);
   });
+
+  it('is issued on the day it is sent to the borrower, under the legal maximum in force that day', () => {
+    const issuedOn = new Date('2026-04-01T00:00:00.000Z');
+    const drafted = anOffer().atAnnualPercentageRate(61).underMaximum(1_250).build();
+
+    drafted.issue(issuedOn, 611);
+
+    expect(drafted.issuedAt).toEqual(issuedOn);
+  });
+
+  it('records the fact that it was issued, with its terms', () => {
+    const drafted = anOffer().atAnnualPercentageRate(61).underMaximum(1_250).build();
+
+    drafted.issue(new Date('2026-04-01T00:00:00.000Z'), 611);
+
+    expect(drafted.pullEvents()).toContainEqual(
+      expect.objectContaining({ name: 'credit-application.offer.issued', terms: drafted.terms }),
+    );
+  });
+
+  it('is refused to issue when its annual percentage rate is at the legal maximum in force that day', () => {
+    const drafted = anOffer().atAnnualPercentageRate(61).underMaximum(1_250).build();
+
+    expectRefusal(() => drafted.issue(new Date('2026-04-01T00:00:00.000Z'), 610), 'OFFER_ABOVE_LEGAL_MAXIMUM');
+    expect(drafted.issuedAt).toBeUndefined();
+  });
 });

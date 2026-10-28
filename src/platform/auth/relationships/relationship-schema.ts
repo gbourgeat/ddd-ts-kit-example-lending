@@ -49,6 +49,7 @@ const elements: SchemaDefinition = {
       'credit-application:application.correct': via('customer', 'self'),
       'credit-application:application.attach-document': via('customer', 'self'),
       'credit-application:application.read-accounts': via('customer', 'self'),
+      'credit-application:application.request-review': via('customer', 'self'),
       'credit-application:application.read': {
         anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
         butNot: [via('customer', 'conflicted')],
@@ -101,6 +102,8 @@ export const relationshipSchema = defineSchema({
       'credit-application:application.bring': 'broker',
       // The account of a member of staff appointed to a level (decider level projection) decides, within the limit of the level.
       'credit-application:application.decide': 'decider',
+      // A decider whose limit is below the amount asks for the exception to the level above.
+      'credit-application:application.request-exception': 'decider',
       'data-protection:data-subject.request-copy': 'operator',
       'data-protection:impact-assessment.record': 'operator',
     },

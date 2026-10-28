@@ -108,6 +108,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Force | in effect on a day: the table of the latest date of effect not after that day |  |
 | Brought | an application a broker brings on behalf of a customer, recorded with the broker who brought it |  |
 | Draft | the offer in preparation, priced from the approved application and the rate grid, not yet issued |  |
+| Issue | the offer sent to the borrower after its pre-contractual sheet, refused when its annual percentage rate is at or above the legal maximum rate in force that day |  |
 
 ## Modules
 
@@ -165,6 +166,7 @@ No personal data declared.
 - `credit-application:offer.draft`
 - `credit-application:offer.read-sheet`
 - `credit-application:application.request-exception`
+- `credit-application:offer.issue`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -227,6 +229,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DraftOffer` | command | `offer.draft` |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
+| `IssueOffer` | command | `offer.issue` |
 | `KeepBrokerRegistration` | command | not read |
 | `KeepDeciderLevel` | command | not read |
 | `KeepDelegationTable` | command | not read |
@@ -268,6 +271,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/exceptions` | `requestException` | `ApplicationsRoutes` | `Authenticated` | `RequestException` | `application.request-exception` | params: `RequestExceptionParams`, body: `RequestExceptionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/offer` | `issueOffer` | `ApplicationsRoutes` | `Authenticated` | `IssueOffer` | `offer.issue` | params: `IssueOfferParams`, body: `IssueOfferBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownOffer`, `CreditApplicationCodes.UnknownLegalMaximumRate`, `CreditApplicationCodes.OfferAboveLegalMaximum` |
 | POST | `/applications/:id/offer-draft` | `draftOffer` | `ApplicationsRoutes` | `Authenticated` | `DraftOffer` | `offer.draft` | params: `DraftOfferParams`, body: `DraftOfferBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.ApplicationNotApproved`, `CreditApplicationCodes.NoRateForOffer`, `CreditApplicationCodes.UnknownLegalMaximumRate`, `CreditApplicationCodes.OfferAboveLegalMaximum` |
 | GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/refusal-review` | `reviewProposedRefusal` | `ApplicationsRoutes` | `Authenticated` | `ReviewProposedRefusal` | `application.review-refusal` | params: `ReviewProposedRefusalParams`, body: `ReviewProposedRefusalBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.InvalidReviewReason`, `CreditApplicationCodes.NoRefusalToReview`, `CreditApplicationCodes.RefusalAlreadyReviewed`, `CreditApplicationCodes.ReviewerCannotBeAssessor` |

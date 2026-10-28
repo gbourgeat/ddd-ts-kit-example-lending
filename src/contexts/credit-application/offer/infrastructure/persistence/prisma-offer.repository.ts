@@ -26,6 +26,16 @@ export class PrismaOfferRepository implements OfferRepository {
     return row === null ? undefined : OfferMapper.toDomain(row);
   }
 
+  /** The most recently drafted offer of the application, when several were drafted. */
+  async findByApplicationId(applicationId: string): Promise<Offer | undefined> {
+    const row = await this.database.client().creditApplicationOffer.findFirst({
+      where: { applicationId, ...tenantWhere(this.scope) },
+      orderBy: { registeredAt: 'desc' },
+    });
+
+    return row === null ? undefined : OfferMapper.toDomain(row);
+  }
+
   async save(saved: Offer): Promise<void> {
     await optimisticUpdate(saved, async ({ expected, next }) => {
       const state = { ...OfferMapper.toRow(saved), version: next };

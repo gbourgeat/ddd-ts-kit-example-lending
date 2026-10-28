@@ -131,6 +131,12 @@ export interface Client {
    */
   nameGuarantor(input: operations.NameGuarantorInput, options?: CallOptions): Promise<operations.NameGuarantorResult>;
   /**
+   * Issue offer: `POST /applications/{id}/offer`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+   */
+  issueOffer(input: operations.IssueOfferInput, options?: CallOptions): Promise<operations.IssueOfferResult>;
+  /**
    * Draft offer: `POST /applications/{id}/offer-draft`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), APPLICATION_NOT_APPROVED (422), NO_RATE_FOR_OFFER (422), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
@@ -491,6 +497,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readDocument: (input, call) => operations.readDocument(connection, input, call),
     requestException: (input, call) => operations.requestException(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
+    issueOffer: (input, call) => operations.issueOffer(connection, input, call),
     draftOffer: (input, call) => operations.draftOffer(connection, input, call),
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),
     reviewProposedRefusal: (input, call) => operations.reviewProposedRefusal(connection, input, call),

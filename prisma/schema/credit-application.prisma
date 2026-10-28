@@ -12,6 +12,7 @@ model CreditApplicationOffer {
   instalmentCents            Int    @map("instalment_cents")
   arrangementFeeCents        Int    @map("arrangement_fee_cents")
   legalMaximumBasisPoints    Int    @map("legal_maximum_basis_points")
+  issuedAt                   DateTime? @map("issued_at") @db.Timestamptz(3)
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)
