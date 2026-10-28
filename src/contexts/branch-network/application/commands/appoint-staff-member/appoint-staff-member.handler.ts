@@ -27,6 +27,7 @@ export class AppointStaffMemberHandler implements CommandHandler<AppointStaffMem
         name: command.name,
         email: command.email,
         accountId: command.accountId,
+        level: command.level,
         ownCustomerId: command.ownCustomerId,
       },
       this.clock.now(),

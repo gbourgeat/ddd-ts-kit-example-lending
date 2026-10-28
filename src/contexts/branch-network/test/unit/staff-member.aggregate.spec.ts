@@ -27,7 +27,15 @@ describe('StaffMember', () => {
 
     const appointed = aStaffMember().identifiedBy('staff-7').bornAt(bornAt).build();
 
-    expect(appointed.pullEvents()).toEqual([new StaffMemberAppointed('staff-7', bornAt)]);
+    expect(appointed.pullEvents()).toEqual([
+      new StaffMemberAppointed('staff-7', bornAt, { branchId: 'branch-1', level: 'advisor' }),
+    ]);
+  });
+
+  it('is appointed at the level it was given', () => {
+    const appointed = aStaffMember().atLevel('credit-committee-member').build();
+
+    expect(appointed.level).toBe('credit-committee-member');
   });
 
   it('is rehydrated in its stored state without recording a new fact', () => {

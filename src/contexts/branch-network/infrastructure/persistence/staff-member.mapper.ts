@@ -12,6 +12,7 @@ export const StaffMemberMapper = {
       name: row.name,
       email: row.email,
       accountId: row.accountId,
+      level: row.level,
       ownCustomerId: row.ownCustomerId ?? undefined,
     });
 

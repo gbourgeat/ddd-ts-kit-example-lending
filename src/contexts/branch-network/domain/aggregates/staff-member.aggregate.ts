@@ -7,6 +7,7 @@ export interface StaffMemberState {
   readonly name: string;
   readonly email: string;
   readonly accountId: string;
+  readonly level: string;
   readonly ownCustomerId: string | undefined;
 }
 
@@ -15,6 +16,7 @@ export interface StaffMemberAppointment {
   readonly name: string;
   readonly email: string;
   readonly accountId: string;
+  readonly level: string;
   readonly ownCustomerId: string | undefined;
 }
 
@@ -29,7 +31,7 @@ export class StaffMember extends AggregateRoot<string> {
   static create(id: string, appointment: StaffMemberAppointment, now: Date): StaffMember {
     const appointed = new StaffMember(id, { registeredAt: now, ...appointment });
 
-    appointed.record(new StaffMemberAppointed(id, now));
+    appointed.record(new StaffMemberAppointed(id, now, { branchId: appointment.branchId, level: appointment.level }));
 
     return appointed;
   }
@@ -62,6 +64,11 @@ export class StaffMember extends AggregateRoot<string> {
 
   get email(): string {
     return this.state.email;
+  }
+
+  /** The level of the appointment, as the delegation table names it. */
+  get level(): string {
+    return this.state.level;
   }
 
   toState(): StaffMemberState {

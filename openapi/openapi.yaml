@@ -1162,6 +1162,8 @@ paths:
                   type: string
                 accountId:
                   type: string
+                level:
+                  type: string
                 ownCustomerId:
                   type: string
               type: object
@@ -1169,6 +1171,7 @@ paths:
                 - name
                 - email
                 - accountId
+                - level
       responses:
         '201':
           description: The answer.

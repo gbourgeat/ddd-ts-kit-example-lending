@@ -8,6 +8,7 @@ export class AppointStaffMemberCommand extends AuthorizedCommand<string> {
     readonly name: string,
     readonly email: string,
     readonly accountId: string,
+    readonly level: string,
     readonly ownCustomerId?: string,
   ) {
     super(actor);

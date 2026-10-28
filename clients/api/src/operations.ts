@@ -521,6 +521,7 @@ export interface AppointStaffMemberInput {
     name: string;
     email: string;
     accountId: string;
+    level: string;
     ownCustomerId?: string;
   };
 }
