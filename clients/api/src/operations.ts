@@ -819,6 +819,72 @@ export function identifyCustomer(
   return send<IdentifyCustomerResult>(connection, operation, { ...input, ...options });
 }
 
+export interface FlagOverdueDueDiligenceInput {
+  readonly path: {
+    readonly customerId: string;
+  };
+}
+
+export type FlagOverdueDueDiligenceResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Flag the due diligence of a customer as overdue when its refresh is past its date: `POST /customers/{customerId}/due-diligence/flag-overdue`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function flagOverdueDueDiligence(
+  connection: Connection,
+  input: FlagOverdueDueDiligenceInput,
+  options: CallOptions = {},
+): Promise<FlagOverdueDueDiligenceResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{customerId}/due-diligence/flag-overdue',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<FlagOverdueDueDiligenceResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ApproveHighRiskCustomerInput {
+  readonly path: {
+    readonly customerId: string;
+  };
+}
+
+export type ApproveHighRiskCustomerResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'CUSTOMER_NOT_HIGH_RISK' | 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Approve a customer rated high risk, as compliance; a re-rating clears the approval: `POST /customers/{customerId}/high-risk-approval`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), CUSTOMER_NOT_HIGH_RISK (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function approveHighRiskCustomer(
+  connection: Connection,
+  input: ApproveHighRiskCustomerInput,
+  options: CallOptions = {},
+): Promise<ApproveHighRiskCustomerResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{customerId}/high-risk-approval',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ApproveHighRiskCustomerResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AssignAdvisorInput {
   readonly path: {
     readonly id: string;
@@ -905,6 +971,7 @@ export type GetCustomerDueDiligenceResult =
     customerId: string;
     refreshedOn?: string;
     nextDueOn?: string;
+    flaggedOverdueOn?: string;
   }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
