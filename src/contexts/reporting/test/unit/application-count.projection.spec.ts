@@ -151,15 +151,13 @@ describe('Application count, one line per branch and month', () => {
     const counts = new FakeApplicationCounts();
     const projection = new ApplicationCountProjection(counts);
 
-    const tenantless = {
-      ...submitted({
-        id: 'credit-application-9',
-        branchId: 'branch-1',
-        requestedAmountCents: 1000,
-        occurredAt: '2026-03-14T09:00:00.000Z',
-      }),
-      tenantId: undefined,
-    };
+    const tenantless = submitted({
+      id: 'credit-application-9',
+      branchId: 'branch-1',
+      requestedAmountCents: 1000,
+      occurredAt: '2026-03-14T09:00:00.000Z',
+      withoutTenant: true,
+    });
 
     await expect(projection.submitted(tenantless)).rejects.toMatchObject({ code: 'APPLICATION_COUNT' });
 
@@ -172,6 +170,7 @@ interface SubmittedFact {
   readonly branchId: string;
   readonly requestedAmountCents: number;
   readonly occurredAt: string;
+  readonly withoutTenant?: boolean;
 }
 
 function submitted(fact: SubmittedFact) {
@@ -186,6 +185,6 @@ function submitted(fact: SubmittedFact) {
       },
       { id: `event-${fact.id}`, occurredAt: fact.occurredAt },
     ),
-    tenantId: 'acme-bank',
+    ...(fact.withoutTenant === true ? {} : { tenantId: 'acme-bank' }),
   };
 }
