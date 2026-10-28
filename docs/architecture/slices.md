@@ -135,8 +135,8 @@ lapsed can no longer bring one" (US6.12 refused on the day, with the projection 
 |---|---|---|---|---|---|---|---|
 | US5.01 | credit-scoring | skeleton | Scoring model, versioned | `aggregate credit-scoring ScoringModel`; `domain-event credit-scoring ScoringModel Published`; `repository credit-scoring ScoringModel --tenant-scoped` | | conductor | done |
 | US5.02 | credit-scoring | slice | Publish a version of the model by model risk | `command credit-scoring PublishScoringModelVersion --permission scoring-model.publish --aggregate ScoringModel`; `route credit-scoring PublishScoringModelVersion --method POST --path /scoring-models --command` | US5.01 | credit-scoring | done |
-| US5.03 | credit-scoring | slice | Score an applicant with the factors in words, and the band | `domain-service credit-scoring ScoreApplicant`; `vocabulary credit-scoring Band --value green --value amber --value red` | US5.02 | credit-scoring | todo |
-| US5.04 | credit-scoring | contract | Read contract: score, model version, inputs and factors | `query credit-scoring ScoreApplicant --permission score.compute` | US5.03 | conductor | todo |
+| US5.03 | credit-scoring | slice | Score an applicant with the factors in words, and the band | `domain-service credit-scoring ScoreApplicant`; `vocabulary credit-scoring Band --value green --value amber --value red` | US5.02 | credit-scoring | done |
+| US5.04 | credit-scoring | contract | Read contract: score, model version, inputs and factors | `query credit-scoring ScoreApplicant --permission score.compute` | US5.03 | conductor | done |
 
 Serves: "Assessment" (the internal score, the version, the factors, US5.02, US5.03, US5.04); "Decision" (the
 advisor limit applies to the best band, US5.03); "Retention and personal data" (the scoring model is
