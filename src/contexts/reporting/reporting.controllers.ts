@@ -2,14 +2,17 @@
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { DefaultedLoansController } from '@/contexts/reporting/presentation/http/reports/defaulted-loans/defaulted-loans.controller';
+import { DefaultsListController } from '@/contexts/reporting/presentation/http/reports/defaults-list/defaults-list.controller';
 import { MonthlyReportController } from '@/contexts/reporting/presentation/http/reports/monthly-report/monthly-report.controller';
 import { PortfolioAtRiskPerBranchController } from '@/contexts/reporting/presentation/http/reports/portfolio-at-risk-per-branch/portfolio-at-risk-per-branch.controller';
 import { DefaultedLoansAnswer } from '@/contexts/reporting/presentation/http/reports/defaulted-loans/defaulted-loans.answer';
+import { DefaultsListAnswer } from '@/contexts/reporting/presentation/http/reports/defaults-list/defaults-list.answer';
 import { PortfolioAtRiskPerBranchAnswer } from '@/contexts/reporting/presentation/http/reports/portfolio-at-risk-per-branch/portfolio-at-risk-per-branch.answer';
 
 /** The Nest controllers of reporting, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const reportingControllers: readonly Type<unknown>[] = [
   withSignatures(DefaultedLoansController, { defaultedLoans: { answer: DefaultedLoansAnswer } }),
+  withSignatures(DefaultsListController, { defaultsList: { answer: DefaultsListAnswer } }),
   withSignatures(MonthlyReportController, {}),
   withSignatures(PortfolioAtRiskPerBranchController, {
     portfolioAtRiskPerBranch: { answer: PortfolioAtRiskPerBranchAnswer },

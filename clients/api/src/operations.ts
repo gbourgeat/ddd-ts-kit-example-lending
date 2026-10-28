@@ -3308,6 +3308,36 @@ export function defaultedLoans(
   return send<DefaultedLoansResult>(connection, operation, { ...input, ...options });
 }
 
+export type DefaultsListInput = Record<string, never>;
+
+export type DefaultsListResult =
+  | Success<200, {
+    items: Array<Schemas.DefaultedLoanAnswer>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>;
+
+/**
+ * Defaults list: `GET /reports/defaults`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+ */
+export function defaultsList(
+  connection: Connection,
+  input: DefaultsListInput = {},
+  options: CallOptions = {},
+): Promise<DefaultsListResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/reports/defaults',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json' },
+  };
+
+  return send<DefaultsListResult>(connection, operation, { ...input, ...options });
+}
+
 export interface MonthlyReportInput {
   readonly query: {
     /** Size of the page. */

@@ -545,6 +545,12 @@ export interface Client {
    */
   defaultedLoans(input?: operations.DefaultedLoansInput, options?: CallOptions): Promise<operations.DefaultedLoansResult>;
   /**
+   * Defaults list: `GET /reports/defaults`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  defaultsList(input?: operations.DefaultsListInput, options?: CallOptions): Promise<operations.DefaultsListResult>;
+  /**
    * Monthly report: `GET /reports/monthly`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
@@ -674,6 +680,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
     defaultedLoans: (input, call) => operations.defaultedLoans(connection, input, call),
+    defaultsList: (input, call) => operations.defaultsList(connection, input, call),
     monthlyReport: (input, call) => operations.monthlyReport(connection, input, call),
     portfolioAtRiskPerBranch: (input, call) => operations.portfolioAtRiskPerBranch(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
