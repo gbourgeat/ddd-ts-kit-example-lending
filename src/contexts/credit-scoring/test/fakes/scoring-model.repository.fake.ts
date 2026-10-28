@@ -11,6 +11,4 @@ export class FakeScoringModelRepository extends InMemoryRepository<ScoringModel>
       }),
     );
   }
-
-  // TODO(domain): implement each lookup of ScoringModelRepository over `this.all()`, so that handlers are tested against a working repository.
 }

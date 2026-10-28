@@ -22,6 +22,7 @@ The scoring model is the bank's own judgement of credit risk, versioned and owne
 | Green band | The best band of the model; the only band an advisor may decide with | Green score as a colour |
 | Factor | An input that pushed the score down, stated in words a customer understands | Input |
 | Published | A version of the scoring model made available for use by the credit decisions | Draft, the version being prepared |
+| Label | The name given to a published version of the scoring model, for example 2026.1 | Name of the model |
 
 ## Aggregates
 
@@ -43,7 +44,7 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `credit-scoring:scoring-model.publish`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -83,9 +84,27 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: none; downstreams: `credit-application` (customer-supplier).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `PublishScoringModelVersion` | command | `scoring-model.publish` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/scoring-models` | `publishScoringModelVersion` | `ScoringModelsRoutes` | `Authenticated` | `PublishScoringModelVersion` | `scoring-model.publish` | body: `PublishScoringModelVersionBody` | 201: `PublishedScoringModelVersion` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditScoringCodes.ScoringModelLabelRequired` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
-| `ScoringModelRepository` | external | `PrismaScoringModelRepository` |
+| `ScoringModelRepository` | repository | `PrismaScoringModelRepository` |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `ScoringModelLabelRequired` | `forLabel` | `SCORING_MODEL_LABEL_REQUIRED` | none |
 <!-- /ddd-ts-kit:reference -->

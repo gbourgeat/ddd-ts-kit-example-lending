@@ -4,17 +4,21 @@ import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { RegisterBusinessController } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.controller';
 import { GetCustomerFileController } from '@/contexts/customer-due-diligence/presentation/http/customer-files/get-customer-file/get-customer-file.controller';
+import { ApproveHighRiskCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/approve-high-risk-customer/approve-high-risk-customer.controller';
 import { AssignAdvisorController } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.controller';
 import { ConfirmSanctionsMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.controller';
 import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
 import { DismissMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.controller';
+import { FlagOverdueDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/flag-overdue-due-diligence/flag-overdue-due-diligence.controller';
 import { GetCustomerDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.controller';
 import { GetCustomerRiskRatingController } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-risk-rating/get-customer-risk-rating.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
 import { RateCustomerRiskController } from '@/contexts/customer-due-diligence/presentation/http/customers/rate-customer-risk/rate-customer-risk.controller';
 import { RefreshDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/refresh-due-diligence/refresh-due-diligence.controller';
 import { ScreenCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.controller';
+import { FlagAllOverdueDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/due-diligence/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
+import { ApproveHighRiskCustomerParams } from '@/contexts/customer-due-diligence/presentation/http/customers/approve-high-risk-customer/approve-high-risk-customer.params';
 import { AssignAdvisorParams } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.params';
 import { AssignAdvisorBody } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.body';
 import { ConfirmSanctionsMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.params';
@@ -22,6 +26,7 @@ import { DeclareDirectorsAndOwnersParams } from '@/contexts/customer-due-diligen
 import { DeclareDirectorsAndOwnersBody } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.body';
 import { DismissMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.params';
 import { DismissMatchBody } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.body';
+import { FlagOverdueDueDiligenceParams } from '@/contexts/customer-due-diligence/presentation/http/customers/flag-overdue-due-diligence/flag-overdue-due-diligence.params';
 import { GetCustomerDueDiligenceParams } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.params';
 import { GetCustomerDueDiligenceAnswer } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.answer';
 import { GetCustomerRiskRatingParams } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-risk-rating/get-customer-risk-rating.params';
@@ -33,6 +38,7 @@ import { RefreshDueDiligenceParams } from '@/contexts/customer-due-diligence/pre
 import { RefreshDueDiligenceBody } from '@/contexts/customer-due-diligence/presentation/http/customers/refresh-due-diligence/refresh-due-diligence.body';
 import { ScreenCustomerParams } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.params';
 import { ScreenCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.body';
+import { FlagAllOverdueDueDiligenceBody } from '@/contexts/customer-due-diligence/presentation/http/due-diligence/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.body';
 
 /** The Nest controllers of customer-due-diligence, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
@@ -40,6 +46,9 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
     registerBusiness: { body: RegisterBusinessBody, answer: acceptedSchema },
   }),
   withSignatures(GetCustomerFileController, {}),
+  withSignatures(ApproveHighRiskCustomerController, {
+    approveHighRiskCustomer: { params: ApproveHighRiskCustomerParams, answer: acceptedSchema },
+  }),
   withSignatures(AssignAdvisorController, {
     assignAdvisor: { params: AssignAdvisorParams, body: AssignAdvisorBody, answer: acceptedSchema },
   }),
@@ -55,6 +64,9 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(DismissMatchController, {
     dismissMatch: { params: DismissMatchParams, body: DismissMatchBody, answer: acceptedSchema },
+  }),
+  withSignatures(FlagOverdueDueDiligenceController, {
+    flagOverdueDueDiligence: { params: FlagOverdueDueDiligenceParams, answer: acceptedSchema },
   }),
   withSignatures(GetCustomerDueDiligenceController, {
     getCustomerDueDiligence: { params: GetCustomerDueDiligenceParams, answer: GetCustomerDueDiligenceAnswer },
@@ -73,5 +85,8 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(ScreenCustomerController, {
     screenCustomer: { params: ScreenCustomerParams, body: ScreenCustomerBody, answer: acceptedSchema },
+  }),
+  withSignatures(FlagAllOverdueDueDiligenceController, {
+    flagAllOverdueDueDiligence: { body: FlagAllOverdueDueDiligenceBody, answer: null },
   }),
 ];

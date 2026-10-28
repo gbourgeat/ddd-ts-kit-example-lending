@@ -15,5 +15,7 @@ export const customerDueDiligencePermissions = definePermissions('customer-due-d
   'customer.read-risk': { description: 'Get customer risk rating' },
   'due-diligence.refresh': { description: 'Refresh due diligence' },
   'due-diligence.read': { description: 'Get customer due diligence' },
+  'customer.approve-high-risk': { description: 'Approve high risk customer' },
+  'due-diligence.flag-overdue': { description: 'Flag overdue due diligence' },
   // /ddd-ts-kit:permissions
 });

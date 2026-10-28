@@ -143,6 +143,18 @@ export interface Client {
    */
   identifyCustomer(input: operations.IdentifyCustomerInput, options?: CallOptions): Promise<operations.IdentifyCustomerResult>;
   /**
+   * Flag the due diligence of a customer as overdue when its refresh is past its date: `POST /customers/{customerId}/due-diligence/flag-overdue`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  flagOverdueDueDiligence(input: operations.FlagOverdueDueDiligenceInput, options?: CallOptions): Promise<operations.FlagOverdueDueDiligenceResult>;
+  /**
+   * Approve a customer rated high risk, as compliance; a re-rating clears the approval: `POST /customers/{customerId}/high-risk-approval`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), CUSTOMER_NOT_HIGH_RISK (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  approveHighRiskCustomer(input: operations.ApproveHighRiskCustomerInput, options?: CallOptions): Promise<operations.ApproveHighRiskCustomerResult>;
+  /**
    * Give a customer its advisor: `PUT /customers/{id}/advisor`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
@@ -214,6 +226,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
    */
   setDelegationTable(input: operations.SetDelegationTableInput, options?: CallOptions): Promise<operations.SetDelegationTableResult>;
+  /**
+   * Flag overdue every due diligence that falls due before the instant, for all customers: `POST /due-diligence/flag-overdue`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  flagAllOverdueDueDiligence(input: operations.FlagAllOverdueDueDiligenceInput, options?: CallOptions): Promise<operations.FlagAllOverdueDueDiligenceResult>;
   /**
    * Accept an invitation: `POST /invitations/acceptance`.
    *
@@ -316,6 +334,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
    */
   setResidualIncomeMinimum(input: operations.SetResidualIncomeMinimumInput, options?: CallOptions): Promise<operations.SetResidualIncomeMinimumResult>;
+  /**
+   * Publish scoring model version: `POST /scoring-models`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), SCORING_MODEL_LABEL_REQUIRED (422), VALIDATION_FAILED (422).
+   */
+  publishScoringModelVersion(input: operations.PublishScoringModelVersionInput, options?: CallOptions): Promise<operations.PublishScoringModelVersionResult>;
 }
 
 export function createClient(options: ClientOptions<SchemeName>): Client {
@@ -343,6 +367,8 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declareConflictOfInterest: (input, call) => operations.declareConflictOfInterest(connection, input, call),
     getCustomerFile: (input, call) => operations.getCustomerFile(connection, input, call),
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
+    flagOverdueDueDiligence: (input, call) => operations.flagOverdueDueDiligence(connection, input, call),
+    approveHighRiskCustomer: (input, call) => operations.approveHighRiskCustomer(connection, input, call),
     assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     getCustomerDueDiligence: (input, call) => operations.getCustomerDueDiligence(connection, input, call),
@@ -355,6 +381,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
+    flagAllOverdueDueDiligence: (input, call) => operations.flagAllOverdueDueDiligence(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
@@ -372,5 +399,6 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
+    publishScoringModelVersion: (input, call) => operations.publishScoringModelVersion(connection, input, call),
   };
 }

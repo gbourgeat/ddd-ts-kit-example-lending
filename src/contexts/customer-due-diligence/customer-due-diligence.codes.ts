@@ -6,6 +6,7 @@ export const CustomerDueDiligenceCodes = {
   BusinessNotRegistered: 'BUSINESS_NOT_REGISTERED',
   NoPossibleMatch: 'NO_POSSIBLE_MATCH',
   MissingReason: 'MISSING_REASON',
+  CustomerNotHighRisk: 'CUSTOMER_NOT_HIGH_RISK',
 } as const;
 
 export type CustomerDueDiligenceCode = (typeof CustomerDueDiligenceCodes)[keyof typeof CustomerDueDiligenceCodes];

@@ -208,6 +208,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
 | `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
+| `CustomerAdvisorBranchGateway` | gateway | `InProcessCustomerAdvisorBranchGateway` |
+| `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `OfferRepository` | external | `PrismaOfferRepository` |
@@ -227,4 +229,11 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
+
+### Gateways
+
+| Gateway | Upstream | Adapters |
+|---|---|---|
+| `CustomerAdvisorBranchGateway` | `branch-network` | `InProcessCustomerAdvisorBranchGateway` |
+| `CustomerIdentityGateway` | `customer-due-diligence` | `InProcessCustomerIdentityGateway` |
 <!-- /ddd-ts-kit:reference -->

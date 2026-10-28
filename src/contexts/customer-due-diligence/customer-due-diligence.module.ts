@@ -46,6 +46,13 @@ import { RefreshDueDiligenceHandler } from '@/contexts/customer-due-diligence/ap
 import { GetCustomerDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-due-diligence/get-customer-due-diligence.handler';
 import { GetCustomerDueDiligenceQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-due-diligence/get-customer-due-diligence.query';
 import { EventStoreGetCustomerDueDiligenceReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-get-customer-due-diligence.reader';
+import { ApproveHighRiskCustomerCommand } from '@/contexts/customer-due-diligence/application/commands/approve-high-risk-customer/approve-high-risk-customer.command';
+import { ApproveHighRiskCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/approve-high-risk-customer/approve-high-risk-customer.handler';
+import { FlagOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-overdue-due-diligence/flag-overdue-due-diligence.command';
+import { FlagOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-overdue-due-diligence/flag-overdue-due-diligence.handler';
+import { FlagAllOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.command';
+import { FlagAllOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.handler';
+import { FlagOverdueDueDiligenceJob } from '@/contexts/customer-due-diligence/application/scheduling/flag-overdue-due-diligence.job';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -173,6 +180,24 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new GetCustomerDueDiligenceHandler(getCustomerDueDiligenceReader, platform.access),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    ApproveHighRiskCustomerCommand,
+    new ApproveHighRiskCustomerHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
+
+  platform.commands.register(
+    FlagOverdueDueDiligenceCommand,
+    new FlagOverdueDueDiligenceHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
+
+  platform.commands.register(
+    FlagAllOverdueDueDiligenceCommand,
+    new FlagAllOverdueDueDiligenceHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -237,6 +262,14 @@ function registerReactions(platform: Platform): void {
 /** The jobs of the context, scheduled and in the background. */
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
+  const flagOverdueDueDiligenceJob = new FlagOverdueDueDiligenceJob(platform.commands);
+
+  platform.jobs.register({
+    name: 'customer-due-diligence.flag-overdue-due-diligence',
+    schedule: { cron: '0 1 * * *', timeZone: 'Europe/Paris' },
+    tenancy: 'per-tenant',
+    run: (execution) => flagOverdueDueDiligenceJob.run(execution),
+  });
   // /ddd-ts-kit:jobs
 }
 
@@ -281,6 +314,15 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(GetCustomerDueDiligenceQuery, customerDueDiligencePermissions['due-diligence.read'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(ApproveHighRiskCustomerCommand, customerDueDiligencePermissions['customer.approve-high-risk'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(FlagOverdueDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.flag-overdue'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(FlagAllOverdueDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.flag-overdue'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

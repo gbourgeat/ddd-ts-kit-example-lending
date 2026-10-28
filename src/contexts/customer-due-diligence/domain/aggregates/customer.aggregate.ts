@@ -16,22 +16,18 @@ import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligenc
 import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
 import { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
 import { CustomerDueDiligenceRefreshed } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-refreshed.event';
+import { CustomerNotHighRisk } from '@/contexts/customer-due-diligence/domain/errors/customer-not-high-risk.error';
+import { CustomerHighRiskApproved } from '@/contexts/customer-due-diligence/domain/events/customer-high-risk-approved.event';
+import { DueDiligenceCalendarService } from '@/contexts/customer-due-diligence/domain/services/due-diligence-calendar.service';
+import { CustomerDueDiligenceFlaggedOverdue } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-flagged-overdue.event';
+
+const dueDiligenceCalendar = new DueDiligenceCalendarService();
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
 
 /** A proof of address is accepted for this many months after its date. */
 const PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS = 3;
-
-/** How many years a due diligence stays current, by the risk rating of the customer. */
-const REFRESH_CADENCE_IN_YEARS: Record<RiskRating, number> = {
-  [RiskRating.High]: 1,
-  [RiskRating.Medium]: 3,
-  [RiskRating.Low]: 5,
-};
-
-/** A customer never rated is refreshed yearly. */
-const NEVER_RATED_REFRESH_CADENCE_IN_YEARS = 1;
 
 export type CustomerEvent =
   | CustomerIdentified
@@ -43,7 +39,9 @@ export type CustomerEvent =
   | CustomerRelationshipEnded
   | CustomerPossibleMatchDismissed
   | CustomerRiskRated
-  | CustomerDueDiligenceRefreshed;
+  | CustomerDueDiligenceRefreshed
+  | CustomerHighRiskApproved
+  | CustomerDueDiligenceFlaggedOverdue;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -71,6 +69,8 @@ export interface CustomerState {
   readonly riskRating?: RiskRating;
   readonly dueDiligenceRefreshedAt?: Date;
   readonly dueDiligenceDueOn?: Date;
+  readonly highRiskApprovedAt?: Date | undefined;
+  readonly dueDiligenceFlaggedOverdueAt?: Date | undefined;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -178,6 +178,15 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerRiskRated(this.id, now, rating));
   }
 
+  /** Compliance approves a customer rated high risk; a customer not rated high is refused, a rating never given included. */
+  approveHighRisk(now: Date): void {
+    if (this.state.riskRating !== RiskRating.High) {
+      throw CustomerNotHighRisk.forCustomer(this.id);
+    }
+
+    this.record(new CustomerHighRiskApproved(this.id, now));
+  }
+
   /** Refreshes the due diligence: the screening outcome is recorded, a possible match goes to review, the risk rating is restated only when the customer has one. */
   refreshDueDiligence(screening: 'clear' | 'possible-match', now: Date): void {
     const possibleMatch = screening === 'possible-match';
@@ -188,7 +197,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
         this.id,
         now,
         possibleMatch,
-        Customer.dueDiligenceDueOn(now, riskRating),
+        dueDiligenceCalendar.dueOn(now, riskRating),
         riskRating,
       ),
     );
@@ -196,6 +205,22 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     if (possibleMatch) {
       this.recordPossibleMatch(now);
     }
+  }
+
+  /** Flags the due diligence overdue once its refresh is past its date; a flag already set, or a due diligence still current, records nothing. */
+  flagOverdueDueDiligence(now: Date): void {
+    if (!this.isOverdueUnflagged(now)) {
+      return;
+    }
+
+    this.record(new CustomerDueDiligenceFlaggedOverdue(this.id, now));
+  }
+
+  /** Whether the due diligence falls due before the instant: a due diligence never refreshed is not due. */
+  isDueBefore(instant: Date): boolean {
+    const dueOn = this.state.dueDiligenceDueOn;
+
+    return dueOn !== undefined && dueOn.getTime() < instant.getTime();
   }
 
   toState(): CustomerState {
@@ -214,19 +239,9 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerPossibleMatchDismissed.eventName]: (event) => this.applyPossibleMatchDismissed(event),
       [CustomerRiskRated.eventName]: (event) => this.applyRiskRated(event),
       [CustomerDueDiligenceRefreshed.eventName]: (event) => this.applyDueDiligenceRefreshed(event),
+      [CustomerHighRiskApproved.eventName]: (event) => this.applyHighRiskApproved(event),
+      [CustomerDueDiligenceFlaggedOverdue.eventName]: (event) => this.applyDueDiligenceFlaggedOverdue(event),
     };
-  }
-
-  /** The day the due diligence falls due again: the cadence of the risk rating of the customer, yearly while it is never rated. */
-  private static dueDiligenceDueOn(now: Date, riskRating: RiskRating | undefined): Date {
-    const years =
-      riskRating === undefined ? NEVER_RATED_REFRESH_CADENCE_IN_YEARS : REFRESH_CADENCE_IN_YEARS[riskRating];
-
-    const dueOn = new Date(now.getTime());
-
-    dueOn.setUTCFullYear(dueOn.getUTCFullYear() + years);
-
-    return dueOn;
   }
 
   private static checkIdentity(id: string, identity: PersonIdentity, now: Date): void {
@@ -299,8 +314,9 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.state = { ...this.state, possibleMatchDismissedAt: event.occurredAt };
   }
 
+  /** A re-rating, whatever it is, clears an earlier approval of high risk: the customer must be approved again. */
   private applyRiskRated(event: CustomerRiskRated): void {
-    this.state = { ...this.state, riskRating: event.rating };
+    this.state = { ...this.state, riskRating: event.rating, highRiskApprovedAt: undefined };
   }
 
   private applyDueDiligenceRefreshed(event: CustomerDueDiligenceRefreshed): void {
@@ -308,7 +324,26 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       ...this.state,
       dueDiligenceRefreshedAt: event.occurredAt,
       dueDiligenceDueOn: event.nextDueOn,
+      dueDiligenceFlaggedOverdueAt: undefined,
       ...(event.riskRating === undefined ? {} : { riskRating: event.riskRating }),
     };
+  }
+
+  private applyDueDiligenceFlaggedOverdue(event: CustomerDueDiligenceFlaggedOverdue): void {
+    this.state = { ...this.state, dueDiligenceFlaggedOverdueAt: event.occurredAt };
+  }
+
+  private isOverdueUnflagged(now: Date): boolean {
+    const dueOn = this.state.dueDiligenceDueOn;
+
+    return (
+      dueOn !== undefined &&
+      this.state.dueDiligenceFlaggedOverdueAt === undefined &&
+      dueDiligenceCalendar.isOverdue(dueOn, now)
+    );
+  }
+
+  private applyHighRiskApproved(event: CustomerHighRiskApproved): void {
+    this.state = { ...this.state, highRiskApprovedAt: event.occurredAt };
   }
 }
