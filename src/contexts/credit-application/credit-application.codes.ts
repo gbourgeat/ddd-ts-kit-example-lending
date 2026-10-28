@@ -39,6 +39,7 @@ export const CreditApplicationCodes = {
   InvalidExceptionJustification: 'INVALID_EXCEPTION_JUSTIFICATION',
   ExceptionAlreadyRequested: 'EXCEPTION_ALREADY_REQUESTED',
   ExceptionNotAboveLimit: 'EXCEPTION_NOT_ABOVE_LIMIT',
+  HumanReviewNotAvailable: 'HUMAN_REVIEW_NOT_AVAILABLE',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

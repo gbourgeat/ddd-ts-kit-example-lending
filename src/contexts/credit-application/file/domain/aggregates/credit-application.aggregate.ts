@@ -26,6 +26,8 @@ import type { ProductLimits } from '@/contexts/credit-application/file/domain/va
 import type { ProductTermsFinding } from '@/contexts/credit-application/file/domain/values/product-terms-finding';
 import { AccountConsent } from '@/contexts/credit-application/file/domain/entities/account-consent.entity';
 import { CreditApplicationExceptionRequested } from '@/contexts/credit-application/file/domain/events/credit-application-exception-requested.event';
+import { CreditApplicationHumanReviewRequested } from '@/contexts/credit-application/file/domain/events/credit-application-human-review-requested.event';
+import { HumanReviewCheckService } from '@/contexts/credit-application/file/domain/services/human-review-check.service';
 import { ExceptionRequestCheckService } from '@/contexts/credit-application/file/domain/services/exception-request-check.service';
 import type { ExceptionRequest } from '@/contexts/credit-application/file/domain/values/exception-request';
 import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
@@ -52,6 +54,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     refusalReviewerId: '',
     decision: undefined,
     exception: undefined,
+    humanReview: undefined,
   };
 
   private constructor(id: string) {
@@ -136,6 +139,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   /** The decider decides the application: approve, approve with conditions or refuse, checked against the file. */
   decide(decision: DecisionInput): void {
     this.record(new DecisionCheckService().eventOf(this.id, this.state, decision));
+  }
+
+  /** The applicant asks for a human review of the refusal standing on the application: a person reviews it. */
+  requestHumanReview(request: { requesterId: string; requestedAt: Date }): void {
+    this.record(new HumanReviewCheckService().eventOf(this.id, this.state, request));
   }
 
   /** A decider requests an exception to the policy on the application, to the level above, with the justification in words. */
@@ -235,6 +243,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       // The broker changes no state of the file: the event itself keeps who brought the application.
       [CreditApplicationBrought.eventName]: () => undefined,
       [CreditApplicationExceptionRequested.eventName]: (event) => this.applyExceptionRequested(event),
+      [CreditApplicationHumanReviewRequested.eventName]: (event) => this.applyHumanReviewRequested(event),
     };
   }
 
@@ -311,6 +320,12 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
         justification: event.justification,
         requestedAt: event.occurredAt,
       },
+    });
+  }
+
+  private applyHumanReviewRequested(event: CreditApplicationHumanReviewRequested): void {
+    this.applyEntryAppended({
+      humanReview: { requesterId: event.requesterId, requestedAt: event.occurredAt },
     });
   }
 }

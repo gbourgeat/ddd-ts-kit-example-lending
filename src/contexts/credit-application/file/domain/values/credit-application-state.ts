@@ -38,4 +38,6 @@ export interface CreditApplicationState {
   readonly decision: DecisionRecord | undefined;
   /** The exception to the policy requested on the application, to the level above: undefined until a decider requests one. */
   readonly exception: ExceptionRequest | undefined;
+  /** The human review the applicant asked for on the refusal standing, undefined until the applicant asks. */
+  readonly humanReview: { readonly requesterId: string; readonly requestedAt: Date } | undefined;
 }

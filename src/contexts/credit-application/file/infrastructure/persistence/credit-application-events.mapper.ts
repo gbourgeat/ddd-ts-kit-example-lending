@@ -16,6 +16,7 @@ import { CreditApplicationDecided } from '@/contexts/credit-application/file/dom
 import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
 import { CreditApplicationExceptionRequested } from '@/contexts/credit-application/file/domain/events/credit-application-exception-requested.event';
+import { CreditApplicationHumanReviewRequested } from '@/contexts/credit-application/file/domain/events/credit-application-human-review-requested.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -96,6 +97,10 @@ interface CreditApplicationExceptionRequestedData {
   readonly requesterId: string;
   readonly targetLevel: string;
   readonly justification: string;
+}
+
+interface CreditApplicationHumanReviewRequestedData {
+  readonly requesterId: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -297,5 +302,11 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.text('targetLevel'),
         data.text('justification'),
       ),
+  }),
+  [CreditApplicationHumanReviewRequested.eventName]: defineStoredEvent(CreditApplicationHumanReviewRequested, {
+    version: 1,
+    encode: (event): CreditApplicationHumanReviewRequestedData => ({ requesterId: event.requesterId }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationHumanReviewRequested(aggregateId, occurredAt, data.text('requesterId')),
   }),
 };

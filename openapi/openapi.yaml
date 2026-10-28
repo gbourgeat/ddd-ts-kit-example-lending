@@ -1602,6 +1602,55 @@ paths:
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
+  /applications/{id}/human-review:
+    post:
+      operationId: requestHumanReview
+      summary: Request human review
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '422':
+          description: 'Unprocessable Content. Error codes: HUMAN_REVIEW_NOT_AVAILABLE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - HUMAN_REVIEW_NOT_AVAILABLE
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /applications/{id}/offer:
     post:
       operationId: issueOffer

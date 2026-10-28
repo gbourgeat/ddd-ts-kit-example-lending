@@ -37,6 +37,8 @@ import { requires } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { RequestExceptionCommand } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.command';
 import { RequestExceptionHandler } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.handler';
+import { RequestHumanReviewCommand } from '@/contexts/credit-application/decision/application/commands/request-human-review/request-human-review.command';
+import { RequestHumanReviewHandler } from '@/contexts/credit-application/decision/application/commands/request-human-review/request-human-review.handler';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -67,6 +69,9 @@ export const decisionModule = {
     registerDelegationTableHandlers(platform, delegationTables);
     registerDecideApplication(platform, repository, { deciderLevels, delegationTables, declaredConflicts });
 
+    platform.commands.register(RequestHumanReviewCommand, new RequestHumanReviewHandler(repository, platform.clock), {
+      context: 'credit-application',
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -92,6 +97,9 @@ export const decisionModule = {
       ...declareDecisionUseCases(),
       requires(RequestExceptionCommand, creditApplicationPermissions['application.request-exception'], {
         resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
+      requires(RequestHumanReviewCommand, creditApplicationPermissions['application.request-review'], {
+        resource: (command) => ({ type: 'application', id: command.applicationId }),
       }),
       // /ddd-ts-kit:authorization
     ];

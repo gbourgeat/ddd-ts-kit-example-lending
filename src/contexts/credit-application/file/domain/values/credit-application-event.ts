@@ -12,6 +12,7 @@ import type { CreditApplicationRefusalReviewed } from '@/contexts/credit-applica
 import type { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
 import type { CreditApplicationExceptionRequested } from '@/contexts/credit-application/file/domain/events/credit-application-exception-requested.event';
+import type { CreditApplicationHumanReviewRequested } from '@/contexts/credit-application/file/domain/events/credit-application-human-review-requested.event';
 
 /** Every fact the file of a credit application can hold. */
 export type CreditApplicationEvent =
@@ -28,4 +29,5 @@ export type CreditApplicationEvent =
   | CreditApplicationRefusalReviewed
   | CreditApplicationDecided
   | CreditApplicationBrought
-  | CreditApplicationExceptionRequested;
+  | CreditApplicationExceptionRequested
+  | CreditApplicationHumanReviewRequested;

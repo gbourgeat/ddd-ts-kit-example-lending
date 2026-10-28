@@ -131,6 +131,12 @@ export interface Client {
    */
   nameGuarantor(input: operations.NameGuarantorInput, options?: CallOptions): Promise<operations.NameGuarantorResult>;
   /**
+   * Request human review: `POST /applications/{id}/human-review`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), HUMAN_REVIEW_NOT_AVAILABLE (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  requestHumanReview(input: operations.RequestHumanReviewInput, options?: CallOptions): Promise<operations.RequestHumanReviewResult>;
+  /**
    * Issue offer: `POST /applications/{id}/offer`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
@@ -497,6 +503,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readDocument: (input, call) => operations.readDocument(connection, input, call),
     requestException: (input, call) => operations.requestException(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
+    requestHumanReview: (input, call) => operations.requestHumanReview(connection, input, call),
     issueOffer: (input, call) => operations.issueOffer(connection, input, call),
     draftOffer: (input, call) => operations.draftOffer(connection, input, call),
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),

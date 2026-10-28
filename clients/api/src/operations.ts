@@ -719,6 +719,38 @@ export function nameGuarantor(
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RequestHumanReviewInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type RequestHumanReviewResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<422, 'HUMAN_REVIEW_NOT_AVAILABLE' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Request human review: `POST /applications/{id}/human-review`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), HUMAN_REVIEW_NOT_AVAILABLE (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function requestHumanReview(
+  connection: Connection,
+  input: RequestHumanReviewInput,
+  options: CallOptions = {},
+): Promise<RequestHumanReviewResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/human-review',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 422: 'json' },
+  };
+
+  return send<RequestHumanReviewResult>(connection, operation, { ...input, ...options });
+}
+
 export interface IssueOfferInput {
   readonly path: {
     readonly id: string;

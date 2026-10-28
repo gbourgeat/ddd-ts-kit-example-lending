@@ -167,6 +167,7 @@ No personal data declared.
 - `credit-application:offer.read-sheet`
 - `credit-application:application.request-exception`
 - `credit-application:offer.issue`
+- `credit-application:application.request-review`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -250,6 +251,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadProductTermsFindings` | query | not read |
 | `ReadRateGrid` | query | not read |
 | `RequestException` | command | `application.request-exception` |
+| `RequestHumanReview` | command | `application.request-review` |
 | `ReviewProposedRefusal` | command | `application.review-refusal` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
@@ -271,6 +273,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/exceptions` | `requestException` | `ApplicationsRoutes` | `Authenticated` | `RequestException` | `application.request-exception` | params: `RequestExceptionParams`, body: `RequestExceptionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotAssessed`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.ExceptionAlreadyRequested`, `CreditApplicationCodes.InvalidExceptionJustification`, `CreditApplicationCodes.ExceptionNotAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide`, `CreditApplicationCodes.ConflictedDecider`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/human-review` | `requestHumanReview` | `ApplicationsRoutes` | `Authenticated` | `RequestHumanReview` | `application.request-review` | params: `RequestHumanReviewParams` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.HumanReviewNotAvailable` |
 | POST | `/applications/:id/offer` | `issueOffer` | `ApplicationsRoutes` | `Authenticated` | `IssueOffer` | `offer.issue` | params: `IssueOfferParams`, body: `IssueOfferBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownOffer`, `CreditApplicationCodes.UnknownLegalMaximumRate`, `CreditApplicationCodes.OfferAboveLegalMaximum` |
 | POST | `/applications/:id/offer-draft` | `draftOffer` | `ApplicationsRoutes` | `Authenticated` | `DraftOffer` | `offer.draft` | params: `DraftOfferParams`, body: `DraftOfferBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.ApplicationNotApproved`, `CreditApplicationCodes.NoRateForOffer`, `CreditApplicationCodes.UnknownLegalMaximumRate`, `CreditApplicationCodes.OfferAboveLegalMaximum` |
 | GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
@@ -363,6 +366,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BrokerRegistrationLapsed` | `forBroker` | `BROKER_REGISTRATION_LAPSED` | `brokerId` |
 | `CorrectionAlreadyRecorded` | `forEntry` | `CORRECTION_ALREADY_RECORDED` | none |
 | `ExceptionAlreadyRequested` | `forExceptionAlreadyRequested` | `EXCEPTION_ALREADY_REQUESTED` | none |
+| `HumanReviewNotAvailable` | `forHumanReviewNotAvailable` | `HUMAN_REVIEW_NOT_AVAILABLE` | none |
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
 | `InvalidDecisionConditions` | `forConditions` | `INVALID_DECISION_CONDITIONS` | none |
