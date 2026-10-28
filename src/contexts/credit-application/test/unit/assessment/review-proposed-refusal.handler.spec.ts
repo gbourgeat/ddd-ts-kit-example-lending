@@ -5,10 +5,8 @@ import { createTestBuses } from '@ddd-ts-kit/testing';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { ReviewProposedRefusalCommand } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.command';
 import { ReviewProposedRefusalHandler } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.handler';
-import {
-  CreditApplication,
-  type CreditApplicationState,
-} from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
 import type {
   AssessmentRecord,
   ProposedOutcome,

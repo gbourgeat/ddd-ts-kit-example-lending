@@ -111,3 +111,15 @@ describe('InstalmentScheduleService', () => {
     );
   });
 });
+
+describe('The balance of a schedule once instalments are paid', () => {
+  it('is cleared once every instalment of the schedule is paid', () => {
+    const terms = { principal: Money.ofCents(100_000), annualRateBasisPoints: 500, months: 12 };
+    const service = new InstalmentScheduleService();
+    const instalments = service.schedule(terms);
+
+    const balance = service.balanceAfter({ ...terms, instalments }, instalments.length);
+
+    expect(balance.cents).toBe(0);
+  });
+});

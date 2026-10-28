@@ -19,19 +19,21 @@ export async function openBank(app: RunningApplication): Promise<string> {
 }
 
 /** Registers a broker of the bank while its registration is valid, and returns its id. */
-export async function registerBroker(app: RunningApplication, bank: string): Promise<string> {
+export async function registerBroker(
+  app: RunningApplication,
+  bank: string,
+  number: string = registrationNumber,
+): Promise<string> {
   await app.relate({ object: 'context:brokerage', relation: 'operator', subject: 'user:ada' });
   const ada = await app.as({ id: 'ada', roles: ['admin'], tenantId: bank });
 
-  app.register.markValid(registrationNumber);
-  const created = expectStatus(await ada.post('/brokers', { registrationNumber }), 201);
+  app.register.markValid(number);
+  const created = expectStatus(await ada.post('/brokers', { registrationNumber: number }), 201);
 
   return (created.body as { id: string }).id;
 }
 
-/** The broker signed in as itself, holding the permission to bring applications of the context. */
+/** The broker signed in as itself: the relation that lets it bring applications was written by its registration, not here. */
 export async function brokerOf(app: RunningApplication, brokerId: string, bank: string): Promise<HttpClient> {
-  await app.relate({ object: 'context:credit-application', relation: 'broker', subject: `user:${brokerId}` });
-
   return app.as({ id: brokerId, tenantId: bank });
 }

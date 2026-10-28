@@ -134,6 +134,7 @@ No process manager.
 - Downstream of `data-protection` (customer-supplier).
 - Upstream of `branch-network` (published-language).
 - Upstream of `credit-application` (customer-supplier).
+- Upstream of `servicing` (published-language).
 <!-- /ddd-ts-kit:relationships -->
 
 ## Reference
@@ -141,7 +142,7 @@ No process manager.
 <!-- ddd-ts-kit:reference -->
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe customer-due-diligence --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
-**Dependencies**: upstreams: `identity` (conformist), `data-protection` (customer-supplier); downstreams: `branch-network` (published-language), `credit-application` (customer-supplier).
+**Dependencies**: upstreams: `identity` (conformist), `data-protection` (customer-supplier); downstreams: `branch-network` (published-language), `credit-application` (customer-supplier), `servicing` (published-language).
 
 ### Use cases
 

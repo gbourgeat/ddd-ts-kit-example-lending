@@ -49,10 +49,21 @@ const elements: SchemaDefinition = {
       'credit-application:application.correct': via('customer', 'self'),
       'credit-application:application.attach-document': via('customer', 'self'),
       'credit-application:application.read-accounts': via('customer', 'self'),
+      'credit-application:application.request-review': via('customer', 'self'),
+      'credit-application:application.contest': via('customer', 'self'),
+      // The borrower withdraws within 14 days of signing, without a reason.
+      'credit-application:application.withdraw': via('customer', 'self'),
       'credit-application:application.read': {
         anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
         butNot: [via('customer', 'conflicted')],
       },
+    },
+  },
+  offer: {
+    relations: { application: ['application'] },
+    derived: {
+      // The applicant accepts the offer drafted for their application, as they consent to it.
+      'credit-application:offer.accept': via('application', 'credit-application:application.consent'),
     },
   },
   loan: {
@@ -76,7 +87,13 @@ export const relationshipSchema = defineSchema({
   user: {},
   system: {},
   context: {
-    relations: { operator: ['user', 'system'], eraser: ['system'], keeper: ['system'], broker: ['user'] },
+    relations: {
+      operator: ['user', 'system'],
+      eraser: ['system'],
+      keeper: ['system'],
+      broker: ['user'],
+      decider: ['user'],
+    },
     derived: {
       ...Object.fromEntries(
         permissions
@@ -93,6 +110,14 @@ export const relationshipSchema = defineSchema({
       'credit-application:broker-registration.keep': 'keeper',
       'credit-application:broker-registration.lapse': 'keeper',
       'credit-application:application.bring': 'broker',
+      // The account of a member of staff appointed to a level (decider level projection) decides, within the limit of the level.
+      'credit-application:application.decide': 'decider',
+      // A decider whose limit is below the amount asks for the exception to the level above.
+      'credit-application:application.request-exception': 'decider',
+      // The credit committee decides an exception: a decider of the context, the level is checked by the handler.
+      'credit-application:exception.decide': 'decider',
+      // A rescheduling is decided like a credit, by a decider within their limit.
+      'credit-application:application.reschedule': 'decider',
       'data-protection:data-subject.request-copy': 'operator',
       'data-protection:impact-assessment.record': 'operator',
     },

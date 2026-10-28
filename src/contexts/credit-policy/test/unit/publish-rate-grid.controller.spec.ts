@@ -16,7 +16,7 @@ describe('POST /rate-grids', () => {
       execute: async () => 'rate-grid-1',
     });
 
-    const response = await publish(commands, { productId: 'product-1', effectiveFrom: '2026-11-01' });
+    const response = await publish(commands, { productId: 'product-1', effectiveFrom: '2026-11-01', rates: [] });
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ id: 'rate-grid-1' });
@@ -33,7 +33,7 @@ describe('POST /rate-grids', () => {
       },
     });
 
-    await publish(commands, { productId: 'product-1', effectiveFrom: '2026-11-01' });
+    await publish(commands, { productId: 'product-1', effectiveFrom: '2026-11-01', rates: [] });
 
     expect(received[0]?.productId).toBe('product-1');
     expect(received[0]?.effectiveFrom).toEqual(new Date('2026-11-01'));
@@ -44,7 +44,7 @@ describe('POST /rate-grids', () => {
       execute: async () => 'rate-grid-1',
     });
 
-    const response = await publish(commands, { productId: 'product-1', effectiveFrom: 'next tuesday' });
+    const response = await publish(commands, { productId: 'product-1', effectiveFrom: 'next tuesday', rates: [] });
 
     expect(response.status).toBe(422);
   });

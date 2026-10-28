@@ -21,6 +21,9 @@ import { PrismaSearchAlertsReader } from '@/contexts/financial-crime/infrastruct
 import { GetSuspiciousActivityReportHandler } from '@/contexts/financial-crime/application/queries/get-suspicious-activity-report/get-suspicious-activity-report.handler';
 import { GetSuspiciousActivityReportQuery } from '@/contexts/financial-crime/application/queries/get-suspicious-activity-report/get-suspicious-activity-report.query';
 import { PrismaGetSuspiciousActivityReportReader } from '@/contexts/financial-crime/infrastructure/persistence/prisma-get-suspicious-activity-report.reader';
+import { consume, subscribeAll } from '@ddd-ts-kit/events';
+import { loanPaymentReceivedV1 as watchRepaymentsDefinition } from '@/contexts/servicing/published-language';
+import { WatchRepaymentsIntegrationHandler } from '@/contexts/financial-crime/application/integration/handlers/watch-repayments.integration-handler';
 // /ddd-ts-kit:imports
 
 export interface FinancialCrimeWiring {
@@ -113,6 +116,20 @@ function registerHandlers(platform: Platform): void {
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
+  const watchRepaymentsIntegrationHandler = new WatchRepaymentsIntegrationHandler(platform.commands);
+
+  subscribeAll(platform.subscriberFor('financial-crime'), [
+    consume(
+      watchRepaymentsDefinition,
+      {
+        consumer: 'financial-crime.watch-repayments',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      (event) => watchRepaymentsIntegrationHandler.handle(event),
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 

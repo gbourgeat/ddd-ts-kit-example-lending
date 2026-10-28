@@ -78,9 +78,9 @@ describe('Keep the level of each decider, end to end', () => {
     await application.settled();
     published.stop();
 
-    const [event] = published.received(staffMemberAppointed);
+    const event = published.received(staffMemberAppointed).find((candidate) => candidate.version === 2);
 
-    return (event?.payload as { staffMemberId: string }).staffMemberId;
+    return (event?.payload as { accountId: string }).accountId;
   }
 
   async function deciderOf(accountId: string): Promise<HttpClient> {

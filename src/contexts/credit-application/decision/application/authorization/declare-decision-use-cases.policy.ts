@@ -10,19 +10,19 @@ import { DecideApplicationCommand } from '@/contexts/credit-application/decision
 /** What the use cases of the decision module require: the declared conflicts, the delegation table and the level of each decider kept and read, and the decision itself. */
 export function declareDecisionUseCases(): UseCaseDeclaration[] {
   return [
-    requires(ReadDeclaredConflictsQuery, creditApplicationPermissions['application.decide'], {
+    requires(ReadDeclaredConflictsQuery, creditApplicationPermissions['decision-data.read'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(KeepDelegationTableCommand, creditApplicationPermissions['delegation-table.keep'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
-    requires(ReadDelegationTableQuery, creditApplicationPermissions['application.decide'], {
+    requires(ReadDelegationTableQuery, creditApplicationPermissions['decision-data.read'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(KeepDeciderLevelCommand, creditApplicationPermissions['decider-level.keep'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
-    requires(ReadDeciderLevelQuery, creditApplicationPermissions['application.decide'], {
+    requires(ReadDeciderLevelQuery, creditApplicationPermissions['decision-data.read'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(DecideApplicationCommand, creditApplicationPermissions['application.decide'], {

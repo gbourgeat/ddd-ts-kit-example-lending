@@ -117,6 +117,7 @@ function registerHandlers(platform: Platform): void {
       staffMemberRepository,
       platform.ids,
       platform.clock,
+      platform.relations,
     ),
     { context: 'branch-network' },
   );
@@ -155,7 +156,15 @@ function registerHandlers(platform: Platform): void {
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
   const conflictOfInterestDeclaredPublisher = platform.adapter(
-    new ConflictOfInterestDeclaredPublisher(platform.publisher, platform.ids),
+    new ConflictOfInterestDeclaredPublisher(
+      platform.publisher,
+      platform.ids,
+      platform.adapter(new PrismaStaffMemberRepository(platform.persistence.database, platform.scope, platform.clock), {
+        kind: 'repository',
+        context: 'branch-network',
+        token: 'StaffMemberRepository',
+      }),
+    ),
     { kind: 'domain-event-handler', context: 'branch-network' },
   );
 

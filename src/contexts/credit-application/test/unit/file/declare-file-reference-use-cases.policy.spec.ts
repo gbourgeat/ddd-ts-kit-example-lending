@@ -19,10 +19,10 @@ describe('The file module use cases on reference data, as declared for authoriza
     expect(declared.resourceOf(instanceOf(KeepBrokerRegistrationCommand))).toEqual(onTheContext);
   });
 
-  it('requires application.decide to read a broker registration, on the context', () => {
+  it('requires decision-data.read to read a broker registration, on the context', () => {
     const declared = protectedDeclarationOf(ReadBrokerRegistrationQuery);
 
-    expect(declared.permission).toBe(creditApplicationPermissions['application.decide']);
+    expect(declared.permission).toBe(creditApplicationPermissions['decision-data.read']);
     expect(declared.resourceOf(instanceOf(ReadBrokerRegistrationQuery))).toEqual(onTheContext);
   });
 
@@ -33,10 +33,10 @@ describe('The file module use cases on reference data, as declared for authoriza
     expect(declared.resourceOf(instanceOf(KeepProductTermsCommand))).toEqual(onTheContext);
   });
 
-  it('requires application.decide to read product terms, on the context', () => {
+  it('requires decision-data.read to read product terms, on the context', () => {
     const declared = protectedDeclarationOf(ReadProductTermsQuery);
 
-    expect(declared.permission).toBe(creditApplicationPermissions['application.decide']);
+    expect(declared.permission).toBe(creditApplicationPermissions['decision-data.read']);
     expect(declared.resourceOf(instanceOf(ReadProductTermsQuery))).toEqual(onTheContext);
   });
 

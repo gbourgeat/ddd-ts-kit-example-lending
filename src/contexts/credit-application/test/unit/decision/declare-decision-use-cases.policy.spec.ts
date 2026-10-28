@@ -12,10 +12,10 @@ import { DecideApplicationCommand } from '@/contexts/credit-application/decision
 const onTheContext = { type: 'context', id: 'credit-application' };
 
 describe('The decision module use cases, as declared for authorization', () => {
-  it('requires application.decide for ReadDeclaredConflictsQuery, on the context', () => {
+  it('requires decision-data.read for ReadDeclaredConflictsQuery, on the context', () => {
     const declared = protectedDeclarationOf(ReadDeclaredConflictsQuery);
 
-    expect(declared.permission).toBe(creditApplicationPermissions['application.decide']);
+    expect(declared.permission).toBe(creditApplicationPermissions['decision-data.read']);
     expect(declared.resourceOf(instanceOf(ReadDeclaredConflictsQuery))).toEqual(onTheContext);
   });
 
@@ -26,10 +26,10 @@ describe('The decision module use cases, as declared for authorization', () => {
     expect(declared.resourceOf(instanceOf(KeepDelegationTableCommand))).toEqual(onTheContext);
   });
 
-  it('requires application.decide for ReadDelegationTableQuery, on the context', () => {
+  it('requires decision-data.read for ReadDelegationTableQuery, on the context', () => {
     const declared = protectedDeclarationOf(ReadDelegationTableQuery);
 
-    expect(declared.permission).toBe(creditApplicationPermissions['application.decide']);
+    expect(declared.permission).toBe(creditApplicationPermissions['decision-data.read']);
     expect(declared.resourceOf(instanceOf(ReadDelegationTableQuery))).toEqual(onTheContext);
   });
 
@@ -40,10 +40,10 @@ describe('The decision module use cases, as declared for authorization', () => {
     expect(declared.resourceOf(instanceOf(KeepDeciderLevelCommand))).toEqual(onTheContext);
   });
 
-  it('requires application.decide for ReadDeciderLevelQuery, on the context', () => {
+  it('requires decision-data.read for ReadDeciderLevelQuery, on the context', () => {
     const declared = protectedDeclarationOf(ReadDeciderLevelQuery);
 
-    expect(declared.permission).toBe(creditApplicationPermissions['application.decide']);
+    expect(declared.permission).toBe(creditApplicationPermissions['decision-data.read']);
     expect(declared.resourceOf(instanceOf(ReadDeciderLevelQuery))).toEqual(onTheContext);
   });
 

@@ -31,7 +31,13 @@ export class StaffMember extends AggregateRoot<string> {
   static create(id: string, appointment: StaffMemberAppointment, now: Date): StaffMember {
     const appointed = new StaffMember(id, { registeredAt: now, ...appointment });
 
-    appointed.record(new StaffMemberAppointed(id, now, { branchId: appointment.branchId, level: appointment.level }));
+    appointed.record(
+      new StaffMemberAppointed(id, now, {
+        branchId: appointment.branchId,
+        level: appointment.level,
+        accountId: appointment.accountId,
+      }),
+    );
 
     return appointed;
   }

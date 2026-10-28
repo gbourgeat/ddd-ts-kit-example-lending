@@ -28,7 +28,7 @@ describe('StaffMember', () => {
     const appointed = aStaffMember().identifiedBy('staff-7').bornAt(bornAt).build();
 
     expect(appointed.pullEvents()).toEqual([
-      new StaffMemberAppointed('staff-7', bornAt, { branchId: 'branch-1', level: 'advisor' }),
+      new StaffMemberAppointed('staff-7', bornAt, { branchId: 'branch-1', level: 'advisor', accountId: 'account-ada' }),
     ]);
   });
 

@@ -15,7 +15,12 @@ export class StaffMemberAppointedPublisher {
     const v1 = staffMemberAppointedV1.create({ staffMemberId }, { id: this.ids.next(), occurredAt: event.occurredAt });
 
     const v2 = staffMemberAppointedV2.create(
-      { staffMemberId, branchId: event.facts.branchId, level: event.facts.level },
+      {
+        staffMemberId,
+        branchId: event.facts.branchId,
+        level: event.facts.level,
+        accountId: event.facts.accountId,
+      },
       { id: this.ids.next(), occurredAt: event.occurredAt },
     );
 

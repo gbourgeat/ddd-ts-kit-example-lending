@@ -1,3 +1,4 @@
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { describe, expect, it } from '@jest/globals';
 import { createTestBuses } from '@ddd-ts-kit/testing';
 import { brokerRegisteredV1 } from '@/contexts/brokerage/published-language';
@@ -26,7 +27,11 @@ describe('When brokerage publishes brokerage.broker.registered', () => {
     const { commandBus } = createTestBuses();
     const registrations = new FakeBrokerRegistrations();
 
-    commandBus.register(KeepBrokerRegistrationCommand, new KeepBrokerRegistrationHandler(registrations));
+    commandBus.register(
+      KeepBrokerRegistrationCommand,
+      new KeepBrokerRegistrationHandler(registrations, new InMemoryRelationTupleStore()),
+    );
+
     const handler = new KeepBrokerRegistrationIntegrationHandler(commandBus);
 
     const event = brokerRegisteredV1.create(

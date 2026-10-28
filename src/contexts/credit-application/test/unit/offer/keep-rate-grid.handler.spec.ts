@@ -78,7 +78,7 @@ function arrange() {
 
 function publishedGrid(rateGridId: string, productId: string, occurredAt: string) {
   return rateGridPublishedV2.create(
-    { rateGridId, productId, effectiveFrom: '2026-01-01' },
+    { rateGridId, productId, effectiveFrom: '2026-01-01', rates: [] },
     { id: `event-${rateGridId}-${occurredAt}`, occurredAt },
   );
 }

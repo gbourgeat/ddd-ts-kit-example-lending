@@ -12,5 +12,9 @@ export class FakeOfferRepository extends InMemoryRepository<Offer> implements Of
     );
   }
 
-  // TODO(domain): implement each lookup of OfferRepository over `this.all()`, so that handlers are tested against a working repository.
+  async findByApplicationId(applicationId: string): Promise<Offer | undefined> {
+    const drafted = this.all().filter((offer) => offer.terms.applicationId === applicationId);
+
+    return drafted.sort((first, second) => second.registeredAt.getTime() - first.registeredAt.getTime())[0];
+  }
 }

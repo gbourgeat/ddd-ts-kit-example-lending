@@ -8,6 +8,33 @@ import type { RelationTuple, RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 const systemRelationships: readonly RelationTuple[] = [
   // ddd-ts-kit:system-grants
   {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:DeclareIncidentAfterTwoUnpaidEventHandler',
+  },
+  {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:WithdrawIncidentWhenPaidEventHandler',
+  },
+  {
+    object: 'context:financial-crime',
+    relation: 'operator',
+    subject: 'system:system:financial-crime.watch-repayments',
+  },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:CollectDueInstalmentEventHandler' },
+  {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:servicing.reschedule-on-decision',
+  },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.repay-withdrawn-loan' },
+  {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:servicing.record-payout-on-payout-authorised',
+  },
+  {
     object: 'context:branch-network',
     relation: 'operator',
     subject: 'system:system:OpenPortfolioForAdvisorEventHandler',
@@ -83,6 +110,9 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'keeper',
     subject: 'system:system:credit-application.lapse-broker-registration',
   },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.compute-due-instalments' },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.classify-arrears' },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.declare-default' },
   // /ddd-ts-kit:system-grants
 ];
 

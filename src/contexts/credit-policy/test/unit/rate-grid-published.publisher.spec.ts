@@ -12,6 +12,7 @@ describe('Publishing "rate grid published" to other contexts', () => {
       new RateGridPublished('rate-grid-1', new Date('2026-01-01T00:00:00.000Z'), {
         productId: 'personal-loan',
         effectiveFrom: new Date('2026-03-01T00:00:00.000Z'),
+        rates: [{ upToMonths: 36, rateBasisPoints: 590 }],
       }),
     );
 
@@ -21,7 +22,12 @@ describe('Publishing "rate grid published" to other contexts', () => {
         type: 'credit-policy.rate-grid.published',
         version: 2,
         occurredAt: '2026-01-01T00:00:00.000Z',
-        payload: { rateGridId: 'rate-grid-1', productId: 'personal-loan', effectiveFrom: '2026-03-01' },
+        payload: {
+          rateGridId: 'rate-grid-1',
+          productId: 'personal-loan',
+          effectiveFrom: '2026-03-01',
+          rates: [{ upToMonths: 36, rateBasisPoints: 590 }],
+        },
       },
     ]);
   });
@@ -29,14 +35,14 @@ describe('Publishing "rate grid published" to other contexts', () => {
   it('publishes each one with its own identifier', async () => {
     const bus = new InMemoryEventBus();
     const publisher = new RateGridPublishedPublisher(bus, new SequentialIdGenerator('event'));
-    const publication = { productId: 'car-loan', effectiveFrom: new Date('2026-03-01T00:00:00.000Z') };
+    const publication = { productId: 'car-loan', effectiveFrom: new Date('2026-03-01T00:00:00.000Z'), rates: [] };
 
     await publisher.handle(new RateGridPublished('first-1', new Date('2026-01-01T00:00:00.000Z'), publication));
     await publisher.handle(new RateGridPublished('second-2', new Date('2026-01-01T00:00:00.000Z'), publication));
 
     expect(bus.published.map((event) => event.payload)).toEqual([
-      { rateGridId: 'first-1', productId: 'car-loan', effectiveFrom: '2026-03-01' },
-      { rateGridId: 'second-2', productId: 'car-loan', effectiveFrom: '2026-03-01' },
+      { rateGridId: 'first-1', productId: 'car-loan', effectiveFrom: '2026-03-01', rates: [] },
+      { rateGridId: 'second-2', productId: 'car-loan', effectiveFrom: '2026-03-01', rates: [] },
     ]);
   });
 });

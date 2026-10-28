@@ -35,7 +35,11 @@ export class RateGridBuilder extends Builder<RateGridIngredients, RateGrid> {
   }
 
   protected construct(ingredients: RateGridIngredients): RateGrid {
-    return RateGrid.create(ingredients.id, ingredients.productId, ingredients.effectiveFrom, ingredients.bornAt);
+    return RateGrid.create(
+      ingredients.id,
+      { productId: ingredients.productId, effectiveFrom: ingredients.effectiveFrom, rates: [] },
+      ingredients.bornAt,
+    );
   }
 }
 

@@ -29,6 +29,8 @@ Anti-money-laundering is a legal duty that supports the business; its restricted
 | Read | a compliance officer looks at an alert or a report without changing it |  |
 | Get | the one record a compliance officer asks for, by its identifier |  |
 | Search | a compliance officer asks for the alerts matching criteria, one page of them in the order requested |  |
+| Watch | To look at each repayment received by servicing and decide whether it raises an alert |  |
+| Repayments | Payments received on a loan from the borrower, as published by servicing |  |
 
 ## Aggregates
 
@@ -114,6 +116,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/alerts/:id/closure` | `closeAlert` | `AlertsRoutes` | `Authenticated` | `CloseAlert` | `alert.close` | params: `CloseAlertParams`, body: `CloseAlertBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `FinancialCrimeCodes.AlertAlreadyClosed`, `FinancialCrimeCodes.UnknownAlert`, `FinancialCrimeCodes.ClosureReasonMissing` |
 | POST | `/alerts/:id/reports` | `fileSuspiciousActivityReport` | `AlertsRoutes` | `Authenticated` | `FileSuspiciousActivityReport` | `report.file` | params: `FileSuspiciousActivityReportParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN` |
 | GET | `/suspicious-activity-reports/:id` | `getSuspiciousActivityReport` | `ReportsRoutes` | `Authenticated` | `GetSuspiciousActivityReport` | `report.read` | params: `GetSuspiciousActivityReportParams` | 200: `GetSuspiciousActivityReportAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `FinancialCrimeCodes.UnknownSuspiciousActivityReport` |
+
+### Consumed events
+
+| Event | Version | From | Handler | Consumer |
+|---|---|---|---|---|
+| `servicing.loan.payment-received` | 1 | `servicing` | `WatchRepaymentsIntegrationHandler` | `financial-crime.watch-repayments` |
 
 ### Ports
 

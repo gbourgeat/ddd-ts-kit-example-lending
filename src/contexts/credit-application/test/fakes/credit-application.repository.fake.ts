@@ -1,5 +1,6 @@
 import { InMemoryEventStore, InMemorySubjectKeyStore, PersonalDataCipher } from '@ddd-ts-kit/kernel';
 import type { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
 
@@ -20,5 +21,11 @@ export class FakeCreditApplicationRepository implements CreditApplicationReposit
     return this.adapter.save(saved);
   }
 
-  // TODO(domain): implement each lookup of CreditApplicationRepository over the events of `this.store`, so that handlers are tested against a working repository.
+  findRefusedOnOrBefore(instant: Date): Promise<readonly CreditApplication[]> {
+    return this.adapter.findRefusedOnOrBefore(instant);
+  }
+
+  historyOf(id: string): Promise<readonly CreditApplicationEvent[]> {
+    return this.adapter.historyOf(id);
+  }
 }

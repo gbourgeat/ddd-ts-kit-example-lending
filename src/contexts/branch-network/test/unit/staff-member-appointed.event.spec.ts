@@ -6,10 +6,11 @@ describe('StaffMemberAppointed', () => {
     const event = new StaffMemberAppointed('staff-member-1', new Date('2026-01-01T00:00:00.000Z'), {
       branchId: 'branch-1',
       level: 'advisor',
+      accountId: 'account-1',
     });
 
     expect(event.name).toBe('branch-network.staff-member.appointed');
     expect(event.aggregateId).toBe('staff-member-1');
-    expect(event.facts).toEqual({ branchId: 'branch-1', level: 'advisor' });
+    expect(event.facts).toEqual({ branchId: 'branch-1', level: 'advisor', accountId: 'account-1' });
   });
 });

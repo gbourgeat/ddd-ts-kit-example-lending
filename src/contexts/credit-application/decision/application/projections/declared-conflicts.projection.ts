@@ -10,7 +10,8 @@ export class DeclaredConflictsProjection {
     await this.store.keep(
       {
         conflictOfInterestId: event.payload.conflictOfInterestId,
-        staffMemberId: event.payload.staffMemberId,
+        // The conflict is kept under the account of the staff member, the actor a decision is checked against.
+        staffMemberId: event.payload.accountId,
         customerId: event.payload.customerId,
       },
       stampOf(event),

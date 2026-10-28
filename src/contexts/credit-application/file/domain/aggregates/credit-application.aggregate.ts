@@ -1,5 +1,6 @@
 import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@ddd-ts-kit/kernel';
-import { Money } from '@/shared-kernel/money.vo';
+import type { Money } from '@/shared-kernel/money.vo';
+import { initialCreditApplicationState } from '@/contexts/credit-application/file/domain/values/initial-credit-application-state';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
@@ -7,17 +8,14 @@ import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/f
 import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
-import {
-  CreditApplicationAssessed,
-  type ProposedOutcome,
-} from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
+import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
 import type { RefusalConclusion } from '@/contexts/credit-application/file/domain/values/refusal-conclusion';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
 import { DecisionCheckService } from '@/contexts/credit-application/file/domain/services/decision-check.service';
+import { DecisionRecord } from '@/contexts/credit-application/file/domain/values/decision-record';
 import type { DecisionInput } from '@/contexts/credit-application/file/domain/values/decision-input';
-import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
@@ -27,79 +25,28 @@ import { ApplicationRequestService } from '@/contexts/credit-application/file/do
 import type { ApplicationRequest } from '@/contexts/credit-application/file/domain/values/application-request';
 import type { ProductLimits } from '@/contexts/credit-application/file/domain/values/product-limits';
 import type { ProductTermsFinding } from '@/contexts/credit-application/file/domain/values/product-terms-finding';
-import {
-  AccountConsent,
-  type AccountConsentState,
-} from '@/contexts/credit-application/file/domain/entities/account-consent.entity';
-
-export type CreditApplicationEvent =
-  | CreditApplicationSubmitted
-  | CreditApplicationAccountConsentGiven
-  | CreditApplicationCoBorrowerNamed
-  | CreditApplicationGuarantorNamed
-  | CreditApplicationEntryCorrected
-  | CreditApplicationDocumentAttached
-  | CreditApplicationRegisterConsulted
-  | CreditApplicationAssessed
-  | CreditApplicationRequestFoundOutsideProductTerms
-  | CreditApplicationRequestCheckedWithUnknownProductTerms
-  | CreditApplicationRefusalReviewed
-  | CreditApplicationDecided
-  | CreditApplicationBrought;
-
-export interface CreditApplicationState {
-  readonly applicantId: string;
-  readonly amount: Money;
-  readonly durationMonths: number;
-  readonly registeredAt: Date;
-  /** The branch the application was submitted on: empty when no advisor holds the applicant, or when it was submitted before the branch was recorded. */
-  readonly branchId: string;
-  /** The product the application is for: empty when none was given. */
-  readonly productId: string;
-  /** What the checks against the product found: a limit the request breaks, or terms not known. */
-  readonly productTermsFindings: readonly ProductTermsFinding[];
-  readonly accountConsent: AccountConsentState | undefined;
-  readonly coBorrowerIds: readonly string[];
-  readonly guarantorIds: readonly string[];
-  /** How many entries the file holds: the position of the last one. */
-  readonly entryCount: number;
-  /** The entries that a correction already names: a second correction of one of them is refused. */
-  readonly correctedEntryIds: readonly string[];
-  /** The documents stored for the file, by their key in the object store: the file holds the reference, never the content. */
-  readonly documentKeys: readonly string[];
-  /** How many parties the last consultation of the register found listed: undefined until the register is consulted. */
-  readonly listedPartyCount: number | undefined;
-  /** The last assessment: the outcome it proposed and the person who ran it, undefined until the application is assessed. */
-  readonly lastAssessment: { readonly proposedOutcome: ProposedOutcome; readonly assessorId: string } | undefined;
-  /** The conclusion of the review of the last assessment, undefined until a person reviews it. */
-  readonly refusalReviewConclusion: RefusalConclusion | undefined;
-  /** The reviewer of the last refusal review: with the assessor, the person who prepared the file. */
-  readonly refusalReviewerId: string;
-  /** The decision taken on the application, undefined until the decider decides it. */
-  readonly decision: { readonly outcome: DecisionOutcome; readonly deciderId: string } | undefined;
-}
+import { AccountConsent } from '@/contexts/credit-application/file/domain/entities/account-consent.entity';
+import { CreditApplicationExceptionRequested } from '@/contexts/credit-application/file/domain/events/credit-application-exception-requested.event';
+import { CreditApplicationHumanReviewRequested } from '@/contexts/credit-application/file/domain/events/credit-application-human-review-requested.event';
+import { HumanReviewCheckService } from '@/contexts/credit-application/file/domain/services/human-review-check.service';
+import { ExceptionRequestCheckService } from '@/contexts/credit-application/file/domain/services/exception-request-check.service';
+import type { ExceptionRequest } from '@/contexts/credit-application/file/domain/values/exception-request';
+import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
+import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
+import { CreditApplicationExceptionDecided } from '@/contexts/credit-application/file/domain/events/credit-application-exception-decided.event';
+import { CreditApplicationContested } from '@/contexts/credit-application/file/domain/events/credit-application-contested.event';
+import { ExceptionDecisionCheckService } from '@/contexts/credit-application/file/domain/services/exception-decision-check.service';
+import { ContestCheckService } from '@/contexts/credit-application/file/domain/services/contest-check.service';
+import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
+import { ReschedulingCheckService } from '@/contexts/credit-application/file/domain/services/rescheduling-check.service';
+import type { ReschedulingInput } from '@/contexts/credit-application/file/domain/values/rescheduling-input';
+import { CreditApplicationWithdrawn } from '@/contexts/credit-application/offer/domain/events/credit-application-withdrawn.event';
+import { CreditApplicationPayoutAuthorised } from '@/contexts/credit-application/offer/domain/events/credit-application-payout-authorised.event';
+import { WithdrawalCheckService } from '@/contexts/credit-application/offer/domain/services/withdrawal-check.service';
+import { PayoutAuthorisationCheckService } from '@/contexts/credit-application/offer/domain/services/payout-authorisation-check.service';
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
-  private state: CreditApplicationState = {
-    applicantId: '',
-    amount: Money.ofCents(0),
-    durationMonths: 0,
-    registeredAt: new Date(0),
-    branchId: '',
-    productId: '',
-    productTermsFindings: [],
-    accountConsent: undefined,
-    coBorrowerIds: [],
-    guarantorIds: [],
-    entryCount: 0,
-    correctedEntryIds: [],
-    documentKeys: [],
-    listedPartyCount: undefined,
-    lastAssessment: undefined,
-    refusalReviewConclusion: undefined,
-    refusalReviewerId: '',
-    decision: undefined,
-  };
+  private state: CreditApplicationState = initialCreditApplicationState();
 
   private constructor(id: string) {
     super(id);
@@ -183,6 +130,45 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   /** The decider decides the application: approve, approve with conditions or refuse, checked against the file. */
   decide(decision: DecisionInput): void {
     this.record(new DecisionCheckService().eventOf(this.id, this.state, decision));
+  }
+
+  /** The decider decides a rescheduling of the approved application: the schedule changes, the rate and the amount stay. */
+  decideRescheduling(rescheduling: ReschedulingInput): void {
+    this.record(new ReschedulingCheckService().eventOf(this.id, this.state, rescheduling));
+  }
+
+  /** The applicant asks for a human review of the refusal standing on the application: a person reviews it. */
+  requestHumanReview(request: { requesterId: string; requestedAt: Date }): void {
+    this.record(new HumanReviewCheckService().eventOf(this.id, this.state, request));
+  }
+
+  /** A decider requests an exception to the policy on the application, to the level above, with the justification in words. */
+  requestException(request: ExceptionRequest): void {
+    this.record(new ExceptionRequestCheckService().eventOf(this.id, this.state, request));
+  }
+
+  /** The credit committee decides the exception requested on the application: approved or refused, with its reasons. */
+  decideException(decision: Parameters<ExceptionDecisionCheckService['eventOf']>[2]): void {
+    this.record(new ExceptionDecisionCheckService().eventOf(this.id, this.state, decision));
+  }
+
+  /** The applicant contests the decision on the file, once: the contestation is kept and a person reviews the file. */
+  contest(contest: { requesterId: string; reason: string; contestedAt: Date }): void {
+    this.record(new ContestCheckService().eventOf(this.id, this.state, contest));
+  }
+
+  /** The borrower withdraws the application within 14 calendar days of the signing of its offer, without a reason, once. */
+  withdraw(signedAt: Date | undefined, withdrawnAt: Date): void {
+    const facts = { alreadyWithdrawn: this.state.withdrawnAt !== undefined, signedAt, now: withdrawnAt };
+
+    this.record(new WithdrawalCheckService().eventOf(this.id, facts));
+  }
+
+  /** The payout is authorised: refused before the 8th day after the signing, after a withdrawal, or to an ineligible customer. */
+  authorisePayout(payout: { signedAt: Date | undefined; ineligibility: string | undefined; now: Date }): void {
+    const facts = { withdrawn: this.state.withdrawnAt !== undefined, ...payout };
+
+    this.record(new PayoutAuthorisationCheckService().eventOf(this.id, facts));
   }
 
   /** A broker brought the application for the customer it was submitted for: the broker is kept in the file. */
@@ -276,6 +262,16 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationDecided.eventName]: (event) => this.applyDecided(event),
       // The broker changes no state of the file: the event itself keeps who brought the application.
       [CreditApplicationBrought.eventName]: () => undefined,
+      [CreditApplicationExceptionRequested.eventName]: (event) =>
+        this.applyEntryAppended(new ExceptionRequestCheckService().changesOf(event)),
+      [CreditApplicationHumanReviewRequested.eventName]: (event) => this.applyHumanReviewRequested(event),
+      [CreditApplicationExceptionDecided.eventName]: (event) =>
+        this.applyEntryAppended(new ExceptionDecisionCheckService().changesOf(event)),
+      [CreditApplicationRescheduleDecided.eventName]: () => this.applyEntryAppended({}),
+      [CreditApplicationContested.eventName]: (event) =>
+        this.applyEntryAppended(new ContestCheckService().changesOf(event, this.state)),
+      [CreditApplicationWithdrawn.eventName]: (event) => this.applyEntryAppended({ withdrawnAt: event.occurredAt }),
+      [CreditApplicationPayoutAuthorised.eventName]: () => this.applyEntryAppended({}),
     };
   }
 
@@ -341,6 +337,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   }
 
   private applyDecided(event: CreditApplicationDecided): void {
-    this.applyEntryAppended({ decision: { outcome: event.outcome, deciderId: event.deciderId } });
+    this.applyEntryAppended({ decision: DecisionRecord.of(event) });
+  }
+
+  private applyHumanReviewRequested(event: CreditApplicationHumanReviewRequested): void {
+    this.applyEntryAppended({ humanReview: { requesterId: event.requesterId, requestedAt: event.occurredAt } });
   }
 }

@@ -3,10 +3,10 @@ import type { ElectronicSignature } from '@/contexts/credit-application/offer/ap
 export class SimulatedElectronicSignature implements ElectronicSignature {
   private readonly requests = new Map<string, string>();
 
-  async requestSignature(offerId: string, borrowerName: string): Promise<string> {
+  async requestSignature(offerId: string, signerId: string): Promise<string> {
     const reference = 'SIG-' + offerId;
 
-    this.requests.set(reference, borrowerName);
+    this.requests.set(reference, signerId);
 
     return reference;
   }

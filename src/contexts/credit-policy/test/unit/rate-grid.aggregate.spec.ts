@@ -22,6 +22,7 @@ describe('RateGrid', () => {
       new RateGridPublished('rate-grid-7', bornAt, {
         productId: recorded.productId,
         effectiveFrom: recorded.effectiveFrom,
+        rates: [],
       }),
     ]);
   });

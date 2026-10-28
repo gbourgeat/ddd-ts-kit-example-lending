@@ -138,6 +138,7 @@
     },
     "servicing": {
       "classification": "supporting",
+      "extraDirectories": ["domain/values", "composition", "application/notices", "application/read-model"],
       "upstreams": [
         {
           "context": "credit-application",
@@ -154,6 +155,10 @@
         {
           "context": "data-protection",
           "relationship": "customer-supplier"
+        },
+        {
+          "context": "customer-due-diligence",
+          "relationship": "published-language"
         }
       ],
       "modules": {
@@ -178,6 +183,7 @@
     },
     "reporting": {
       "classification": "supporting",
+      "extraDirectories": ["application/read-model"],
       "upstreams": [
         {
           "context": "credit-application",
@@ -224,6 +230,31 @@
       "what": "contexts.credit-application.extraDirectories.domain/values",
       "adr": "0004",
       "reason": "Types and rules of the file module that are not value objects live in domain values"
+    },
+    {
+      "what": "contexts.servicing.extraDirectories.domain/values",
+      "adr": "0006",
+      "reason": "The union of the events, the state and the pure rules of the ledger live in ledger domain values to keep the aggregate under 350 lines (conductor, owner brief)"
+    },
+    {
+      "what": "contexts.servicing.extraDirectories.composition",
+      "adr": "0008",
+      "reason": "The registration of the handlers of the ledger and of the instalments moves out of the module file, which passed the 350-line limit (conductor, owner brief)"
+    },
+    {
+      "what": "contexts.servicing.extraDirectories.application/notices",
+      "adr": "0010",
+      "reason": "The wording of the notice of each arrears stage is a pure function of the stage (conductor, owner brief)"
+    },
+    {
+      "what": "contexts.servicing.extraDirectories.application/read-model",
+      "adr": "0010",
+      "reason": "The row, the criteria and the summary of the portfolio at risk are plain read-model types and pure functions (conductor, owner brief)"
+    },
+    {
+      "what": "contexts.reporting.extraDirectories.application/read-model",
+      "adr": "0007",
+      "reason": "The row and the criteria of the counts per branch are plain read-model types shared by the port, the projection and the reader (conductor, owner brief)"
     }
   ]
 }

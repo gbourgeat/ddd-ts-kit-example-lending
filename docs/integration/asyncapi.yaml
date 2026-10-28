@@ -35,6 +35,18 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/credit-application.credit-application.decided.v1'
+  credit-application.credit-application.payout-authorised:
+    address: credit-application.credit-application.payout-authorised
+    description: 'The payout of an approved application is authorised: the 8th day after signing has come, it was not withdrawn and the customer is eligible. Servicing opens the loan.'
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-application.credit-application.payout-authorised.v1'
+  credit-application.credit-application.reschedule-decided:
+    address: credit-application.credit-application.reschedule-decided
+    description: 'A decider decided, under the delegation rules, to reschedule the loan of an approved application: its new duration and the capital it covers.'
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-application.credit-application.reschedule-decided.v1'
   credit-application.credit-application.submitted:
     address: credit-application.credit-application.submitted
     description: A credit application was submitted, for an amount and a duration, on a branch.
@@ -43,6 +55,12 @@ channels:
         $ref: '#/components/messages/credit-application.credit-application.submitted.v1'
       v2:
         $ref: '#/components/messages/credit-application.credit-application.submitted.v2'
+  credit-application.credit-application.withdrawn:
+    address: credit-application.credit-application.withdrawn
+    description: The borrower withdrew the application within 14 calendar days of signing its offer. After a payout, servicing asks them to repay the capital and the interest accrued.
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-application.credit-application.withdrawn.v1'
   credit-policy.delegation-table.published:
     address: credit-policy.delegation-table.published
     description: 'A delegation table took effect: the amount each level of decider may approve, from its date of effect.'
@@ -141,6 +159,30 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/privacy.data-subject.erased.v1'
+  servicing.loan.arrears-bucket-entered:
+    address: servicing.loan.arrears-bucket-entered
+    description: A loan enters an arrears bucket, by the days past due of its oldest unpaid instalment, so that those who report the portfolio at risk follow it.
+    messages:
+      v1:
+        $ref: '#/components/messages/servicing.loan.arrears-bucket-entered.v1'
+  servicing.loan.defaulted:
+    address: servicing.loan.defaulted
+    description: A loan is declared in default, 90 days past due, and handed to collections.
+    messages:
+      v1:
+        $ref: '#/components/messages/servicing.loan.defaulted.v1'
+  servicing.loan.paid-out:
+    address: servicing.loan.paid-out
+    description: 'The money of a loan is paid out to its borrower and its schedule starts: the loan exists from this moment, under the identifier of the application it was granted for.'
+    messages:
+      v1:
+        $ref: '#/components/messages/servicing.loan.paid-out.v1'
+  servicing.loan.payment-received:
+    address: servicing.loan.payment-received
+    description: 'The instalment of a loan is received by direct debit: its number in the schedule and the amount collected, for those who watch the repayments.'
+    messages:
+      v1:
+        $ref: '#/components/messages/servicing.loan.payment-received.v1'
 operations:
   send.branch-network.conflict-of-interest.declared:
     action: send
@@ -173,6 +215,18 @@ operations:
       $ref: '#/channels/credit-application.credit-application.decided'
     messages:
       - $ref: '#/channels/credit-application.credit-application.decided/messages/v1'
+  send.credit-application.credit-application.payout-authorised:
+    action: send
+    channel:
+      $ref: '#/channels/credit-application.credit-application.payout-authorised'
+    messages:
+      - $ref: '#/channels/credit-application.credit-application.payout-authorised/messages/v1'
+  send.credit-application.credit-application.reschedule-decided:
+    action: send
+    channel:
+      $ref: '#/channels/credit-application.credit-application.reschedule-decided'
+    messages:
+      - $ref: '#/channels/credit-application.credit-application.reschedule-decided/messages/v1'
   send.credit-application.credit-application.submitted:
     action: send
     channel:
@@ -180,6 +234,12 @@ operations:
     messages:
       - $ref: '#/channels/credit-application.credit-application.submitted/messages/v1'
       - $ref: '#/channels/credit-application.credit-application.submitted/messages/v2'
+  send.credit-application.credit-application.withdrawn:
+    action: send
+    channel:
+      $ref: '#/channels/credit-application.credit-application.withdrawn'
+    messages:
+      - $ref: '#/channels/credit-application.credit-application.withdrawn/messages/v1'
   send.credit-policy.delegation-table.published:
     action: send
     channel:
@@ -274,6 +334,30 @@ operations:
       $ref: '#/channels/privacy.data-subject.erased'
     messages:
       - $ref: '#/channels/privacy.data-subject.erased/messages/v1'
+  send.servicing.loan.arrears-bucket-entered:
+    action: send
+    channel:
+      $ref: '#/channels/servicing.loan.arrears-bucket-entered'
+    messages:
+      - $ref: '#/channels/servicing.loan.arrears-bucket-entered/messages/v1'
+  send.servicing.loan.defaulted:
+    action: send
+    channel:
+      $ref: '#/channels/servicing.loan.defaulted'
+    messages:
+      - $ref: '#/channels/servicing.loan.defaulted/messages/v1'
+  send.servicing.loan.paid-out:
+    action: send
+    channel:
+      $ref: '#/channels/servicing.loan.paid-out'
+    messages:
+      - $ref: '#/channels/servicing.loan.paid-out/messages/v1'
+  send.servicing.loan.payment-received:
+    action: send
+    channel:
+      $ref: '#/channels/servicing.loan.payment-received'
+    messages:
+      - $ref: '#/channels/servicing.loan.payment-received/messages/v1'
 components:
   messages:
     branch-network.conflict-of-interest.declared.v1:
@@ -312,11 +396,14 @@ components:
                 type: string
               customerId:
                 type: string
+              accountId:
+                type: string
             type: object
             required:
               - conflictOfInterestId
               - staffMemberId
               - customerId
+              - accountId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -398,11 +485,14 @@ components:
                 type: string
               level:
                 type: string
+              accountId:
+                type: string
             type: object
             required:
               - staffMemberId
               - branchId
               - level
+              - accountId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -540,6 +630,108 @@ components:
             description: W3C traceparent captured at publication.
           correlationId:
             type: string
+    credit-application.credit-application.payout-authorised.v1:
+      name: credit-application.credit-application.payout-authorised
+      title: credit-application.credit-application.payout-authorised v1
+      summary: 'The payout of an approved application is authorised: the 8th day after signing has come, it was not withdrawn and the customer is eligible. Servicing opens the loan.'
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.payout-authorised
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+              customerId:
+                type: string
+              branchId:
+                type: string
+              amountCents:
+                type: integer
+              durationMonths:
+                type: integer
+              rateBasisPoints:
+                type: integer
+            type: object
+            required:
+              - creditApplicationId
+              - customerId
+              - branchId
+              - amountCents
+              - durationMonths
+              - rateBasisPoints
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-application.credit-application.reschedule-decided.v1:
+      name: credit-application.credit-application.reschedule-decided
+      title: credit-application.credit-application.reschedule-decided v1
+      summary: 'A decider decided, under the delegation rules, to reschedule the loan of an approved application: its new duration and the capital it covers.'
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.reschedule-decided
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+              durationMonths:
+                minimum: 1
+                type: integer
+              outstandingAmountCents:
+                type: integer
+            type: object
+            required:
+              - creditApplicationId
+              - durationMonths
+              - outstandingAmountCents
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
     credit-application.credit-application.submitted.v1:
       name: credit-application.credit-application.submitted
       title: credit-application.credit-application.submitted v1
@@ -636,6 +828,46 @@ components:
               - requestedAmountCents
               - durationMonths
               - branchId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-application.credit-application.withdrawn.v1:
+      name: credit-application.credit-application.withdrawn
+      title: credit-application.credit-application.withdrawn v1
+      summary: The borrower withdrew the application within 14 calendar days of signing its offer. After a payout, servicing asks them to repay the capital and the interest accrued.
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.withdrawn
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+            type: object
+            required:
+              - creditApplicationId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -1009,11 +1241,16 @@ components:
                     type: string
                   - format: date-time
                     type: string
+              rates:
+                items:
+                  $ref: '#/components/schemas/credit-policy.rate-grid.published.v2.RateGridPublishedV2BandPayload'
+                type: array
             type: object
             required:
               - rateGridId
               - productId
               - effectiveFrom
+              - rates
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -1543,6 +1780,181 @@ components:
             description: W3C traceparent captured at publication.
           correlationId:
             type: string
+    servicing.loan.arrears-bucket-entered.v1:
+      name: servicing.loan.arrears-bucket-entered
+      title: servicing.loan.arrears-bucket-entered v1
+      summary: A loan enters an arrears bucket, by the days past due of its oldest unpaid instalment, so that those who report the portfolio at risk follow it.
+      contentType: application/json
+      tags:
+        - name: servicing
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: servicing.loan.arrears-bucket-entered
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              loanId:
+                type: string
+              bucket:
+                type: string
+                enum:
+                  - OneToThirtyDays
+                  - ThirtyOneToSixtyDays
+                  - SixtyOneToNinetyDays
+                  - OverNinetyDays
+            type: object
+            required:
+              - loanId
+              - bucket
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    servicing.loan.defaulted.v1:
+      name: servicing.loan.defaulted
+      title: servicing.loan.defaulted v1
+      summary: A loan is declared in default, 90 days past due, and handed to collections.
+      contentType: application/json
+      tags:
+        - name: servicing
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: servicing.loan.defaulted
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              loanId:
+                type: string
+            type: object
+            required:
+              - loanId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    servicing.loan.paid-out.v1:
+      name: servicing.loan.paid-out
+      title: servicing.loan.paid-out v1
+      summary: 'The money of a loan is paid out to its borrower and its schedule starts: the loan exists from this moment, under the identifier of the application it was granted for.'
+      contentType: application/json
+      tags:
+        - name: servicing
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: servicing.loan.paid-out
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              loanId:
+                type: string
+            type: object
+            required:
+              - loanId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    servicing.loan.payment-received.v1:
+      name: servicing.loan.payment-received
+      title: servicing.loan.payment-received v1
+      summary: 'The instalment of a loan is received by direct debit: its number in the schedule and the amount collected, for those who watch the repayments.'
+      contentType: application/json
+      tags:
+        - name: servicing
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: servicing.loan.payment-received
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              loanId:
+                type: string
+              instalmentNumber:
+                minimum: 1
+                type: integer
+              amountCents:
+                type: integer
+            type: object
+            required:
+              - loanId
+              - instalmentNumber
+              - amountCents
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
   schemas:
     credit-policy.delegation-table.published.v2.DelegationTablePublishedV2LevelPayload:
       properties:
@@ -1554,3 +1966,13 @@ components:
       required:
         - level
         - amountCents
+    credit-policy.rate-grid.published.v2.RateGridPublishedV2BandPayload:
+      properties:
+        upToMonths:
+          type: integer
+        rateBasisPoints:
+          type: integer
+      type: object
+      required:
+        - upToMonths
+        - rateBasisPoints

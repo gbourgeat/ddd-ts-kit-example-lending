@@ -6,13 +6,20 @@ import { AssessApplicationController } from '@/contexts/credit-application/asses
 import { ConsultRepaymentIncidentRegisterController } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.controller';
 import { ReadAccountInformationController } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.controller';
 import { ReviewProposedRefusalController } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.controller';
+import { ContestDecisionController } from '@/contexts/credit-application/decision/presentation/http/applications/contest-decision/contest-decision.controller';
 import { DecideApplicationController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.controller';
+import { DecideExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.controller';
+import { DecideReschedulingController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-rescheduling/decide-rescheduling.controller';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
+import { RequestExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.controller';
+import { RequestHumanReviewController } from '@/contexts/credit-application/decision/presentation/http/applications/request-human-review/request-human-review.controller';
+import { ShowDecisionViewController } from '@/contexts/credit-application/decision/presentation/http/applications/show-decision-view/show-decision-view.controller';
 import { ReadDeciderLevelController } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.controller';
 import { ReadDelegationTableController } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.controller';
 import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
 import { BringApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.controller';
 import { CorrectEntryController } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.controller';
+import { ExplainRefusalController } from '@/contexts/credit-application/file/presentation/http/applications/explain-refusal/explain-refusal.controller';
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
 import { NameGuarantorController } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.controller';
@@ -22,7 +29,13 @@ import { SearchApplicationsController } from '@/contexts/credit-application/file
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
 import { ReadBrokerRegistrationController } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.controller';
 import { ReadProductTermsController } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.controller';
+import { AuthorizePayoutController } from '@/contexts/credit-application/offer/presentation/http/applications/authorize-payout/authorize-payout.controller';
+import { DraftOfferController } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.controller';
+import { IssueOfferController } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.controller';
+import { WithdrawLoanController } from '@/contexts/credit-application/offer/presentation/http/applications/withdraw-loan/withdraw-loan.controller';
 import { ReadLegalMaximumRateController } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.controller';
+import { AcceptOfferController } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.controller';
+import { ReadPreContractualSheetController } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.controller';
 import { ReadRateGridController } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.controller';
 import { AssessApplicationParams } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.params';
 import { AssessApplicationAnswer } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.answer';
@@ -32,10 +45,21 @@ import { ReadAccountInformationParams } from '@/contexts/credit-application/asse
 import { ReadAccountInformationBody } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.body';
 import { ReviewProposedRefusalParams } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.params';
 import { ReviewProposedRefusalBody } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.body';
+import { ContestDecisionParams } from '@/contexts/credit-application/decision/presentation/http/applications/contest-decision/contest-decision.params';
+import { ContestDecisionBody } from '@/contexts/credit-application/decision/presentation/http/applications/contest-decision/contest-decision.body';
 import { DecideApplicationParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.params';
 import { DecideApplicationBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.body';
+import { DecideExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.params';
+import { DecideExceptionBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.body';
+import { DecideReschedulingParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-rescheduling/decide-rescheduling.params';
+import { DecideReschedulingBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-rescheduling/decide-rescheduling.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
 import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.answer';
+import { RequestExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.params';
+import { RequestExceptionBody } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.body';
+import { RequestHumanReviewParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-human-review/request-human-review.params';
+import { ShowDecisionViewParams } from '@/contexts/credit-application/decision/presentation/http/applications/show-decision-view/show-decision-view.params';
+import { ShowDecisionViewAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/show-decision-view/show-decision-view.answer';
 import { ReadDeciderLevelParams } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.params';
 import { ReadDeciderLevelAnswer } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.answer';
 import { ReadDelegationTableParams } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.params';
@@ -44,6 +68,8 @@ import { AttachDocumentAnswer } from '@/contexts/credit-application/file/present
 import { BringApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.body';
 import { CorrectEntryParams } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.params';
 import { CorrectEntryBody } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.body';
+import { ExplainRefusalParams } from '@/contexts/credit-application/file/presentation/http/applications/explain-refusal/explain-refusal.params';
+import { ExplainRefusalAnswer } from '@/contexts/credit-application/file/presentation/http/applications/explain-refusal/explain-refusal.answer';
 import { GiveAccountConsentParams } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.params';
 import { GiveAccountConsentBody } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.body';
 import { NameCoBorrowerParams } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.params';
@@ -57,8 +83,20 @@ import { ReadBrokerRegistrationParams } from '@/contexts/credit-application/file
 import { ReadBrokerRegistrationAnswer } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.answer';
 import { ReadProductTermsParams } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.params';
 import { ReadProductTermsAnswer } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.answer';
+import { AuthorizePayoutParams } from '@/contexts/credit-application/offer/presentation/http/applications/authorize-payout/authorize-payout.params';
+import { AuthorizePayoutBody } from '@/contexts/credit-application/offer/presentation/http/applications/authorize-payout/authorize-payout.body';
+import { DraftOfferParams } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.params';
+import { DraftOfferBody } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.body';
+import { IssueOfferParams } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.params';
+import { IssueOfferBody } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.body';
+import { WithdrawLoanParams } from '@/contexts/credit-application/offer/presentation/http/applications/withdraw-loan/withdraw-loan.params';
+import { WithdrawLoanBody } from '@/contexts/credit-application/offer/presentation/http/applications/withdraw-loan/withdraw-loan.body';
 import { ReadLegalMaximumRateParams } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.params';
 import { ReadLegalMaximumRateAnswer } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.answer';
+import { AcceptOfferParams } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.params';
+import { AcceptOfferBody } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.body';
+import { ReadPreContractualSheetParams } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.params';
+import { ReadPreContractualSheetAnswer } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.answer';
 import { ReadRateGridParams } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.params';
 import { ReadRateGridAnswer } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.answer';
 
@@ -87,11 +125,29 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
       answer: acceptedSchema,
     },
   }),
+  withSignatures(ContestDecisionController, {
+    contestDecision: { params: ContestDecisionParams, body: ContestDecisionBody, answer: null },
+  }),
   withSignatures(DecideApplicationController, {
     decideApplication: { params: DecideApplicationParams, body: DecideApplicationBody, answer: acceptedSchema },
   }),
+  withSignatures(DecideExceptionController, {
+    decideException: { params: DecideExceptionParams, body: DecideExceptionBody, answer: null },
+  }),
+  withSignatures(DecideReschedulingController, {
+    decideRescheduling: { params: DecideReschedulingParams, body: DecideReschedulingBody, answer: null },
+  }),
   withSignatures(ReadDeclaredConflictsController, {
     readDeclaredConflicts: { params: ReadDeclaredConflictsParams, answer: ReadDeclaredConflictsAnswer },
+  }),
+  withSignatures(RequestExceptionController, {
+    requestException: { params: RequestExceptionParams, body: RequestExceptionBody, answer: null },
+  }),
+  withSignatures(RequestHumanReviewController, {
+    requestHumanReview: { params: RequestHumanReviewParams, answer: null },
+  }),
+  withSignatures(ShowDecisionViewController, {
+    showDecisionView: { params: ShowDecisionViewParams, answer: ShowDecisionViewAnswer },
   }),
   withSignatures(ReadDeciderLevelController, {
     readDeciderLevel: { params: ReadDeciderLevelParams, answer: ReadDeciderLevelAnswer },
@@ -105,6 +161,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(CorrectEntryController, {
     correctEntry: { params: CorrectEntryParams, body: CorrectEntryBody, answer: acceptedSchema },
+  }),
+  withSignatures(ExplainRefusalController, {
+    explainRefusal: { params: ExplainRefusalParams, answer: ExplainRefusalAnswer },
   }),
   withSignatures(GiveAccountConsentController, {
     giveAccountConsent: { params: GiveAccountConsentParams, body: GiveAccountConsentBody, answer: acceptedSchema },
@@ -127,8 +186,26 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(ReadProductTermsController, {
     readProductTerms: { params: ReadProductTermsParams, answer: ReadProductTermsAnswer },
   }),
+  withSignatures(AuthorizePayoutController, {
+    authorizePayout: { params: AuthorizePayoutParams, body: AuthorizePayoutBody, answer: null },
+  }),
+  withSignatures(DraftOfferController, {
+    draftOffer: { params: DraftOfferParams, body: DraftOfferBody, answer: acceptedSchema },
+  }),
+  withSignatures(IssueOfferController, {
+    issueOffer: { params: IssueOfferParams, body: IssueOfferBody, answer: null },
+  }),
+  withSignatures(WithdrawLoanController, {
+    withdrawLoan: { params: WithdrawLoanParams, body: WithdrawLoanBody, answer: null },
+  }),
   withSignatures(ReadLegalMaximumRateController, {
     readLegalMaximumRate: { params: ReadLegalMaximumRateParams, answer: ReadLegalMaximumRateAnswer },
+  }),
+  withSignatures(AcceptOfferController, {
+    acceptOffer: { params: AcceptOfferParams, body: AcceptOfferBody, answer: null },
+  }),
+  withSignatures(ReadPreContractualSheetController, {
+    readPreContractualSheet: { params: ReadPreContractualSheetParams, answer: ReadPreContractualSheetAnswer },
   }),
   withSignatures(ReadRateGridController, { readRateGrid: { params: ReadRateGridParams, answer: ReadRateGridAnswer } }),
 ];

@@ -12,6 +12,9 @@
   "credit-application.credit-application.co-borrower-named": {
     "1": "sha256:a3b8eb43c397ea60"
   },
+  "credit-application.credit-application.contested": {
+    "1": "sha256:1c6412b42d4b670a"
+  },
   "credit-application.credit-application.decided": {
     "1": "sha256:6f4c0bca797a9304",
     "2": "sha256:c82e5b7a35a32bb7"
@@ -22,8 +25,17 @@
   "credit-application.credit-application.entry-corrected": {
     "1": "sha256:5b747a08750d0be3"
   },
+  "credit-application.credit-application.exception-decided": {
+    "1": "sha256:4da3338277652f7b"
+  },
+  "credit-application.credit-application.exception-requested": {
+    "1": "sha256:9c7516279fdb28be"
+  },
   "credit-application.credit-application.guarantor-named": {
     "1": "sha256:25dd58ec9a66b312"
+  },
+  "credit-application.credit-application.human-review-requested": {
+    "1": "sha256:a054ed6a8da013e9"
   },
   "credit-application.credit-application.refusal-reviewed": {
     "1": "sha256:7bed8c0c6650bb3d"
@@ -80,7 +92,53 @@
   "customer-due-diligence.customer.sanctions-match-confirmed": {
     "1": "sha256:733dac3b56fba725"
   },
-  "servicing.loan.paid-out": {
+  "servicing.loan.arrears-bucket-entered": {
+    "1": "sha256:0206b5a57d44af0d"
+  },
+  "servicing.loan.arrears-cleared": {
     "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.closed": {
+    "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.defaulted": {
+    "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.early-repayment-recorded": {
+    "1": "sha256:f3a01c211296243d"
+  },
+  "servicing.loan.instalment-due-noted": {
+    "1": "sha256:93c79aef0844a567"
+  },
+  "servicing.loan.instalment-marked-unpaid": {
+    "1": "sha256:c2889d0182fe0df1"
+  },
+  "servicing.loan.paid-out": {
+    "1": "sha256:733dac3b56fba725",
+    "2": "sha256:a1d9654655ebb58f"
+  },
+  "servicing.loan.payment-received": {
+    "1": "sha256:4f15b4764949ab3f"
+  },
+  "servicing.loan.repayment-incident-declared": {
+    "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.repayment-incident-withdrawn": {
+    "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.rescheduled": {
+    "1": "sha256:4914db0ac40c6f51"
+  },
+  "servicing.loan.scheduled": {
+    "1": "sha256:78206acad92d34f1"
+  },
+  "servicing.loan.withdrawal-repayment-recorded": {
+    "1": "sha256:832a1f0700ae4f28"
+  },
+  "servicing.loan.write-off-reversed": {
+    "1": "sha256:b850bdcabb77abf1"
+  },
+  "servicing.loan.written-off": {
+    "1": "sha256:b850bdcabb77abf1"
   }
 }

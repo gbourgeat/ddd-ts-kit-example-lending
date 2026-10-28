@@ -49,7 +49,7 @@ export class DecisionCheckService {
       decision.conditions,
       decision.approvedAmountCents,
       file.branchId,
-      false,
+      decision.exception === true,
     );
   }
 

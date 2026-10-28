@@ -1,3 +1,4 @@
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { describe, expect, it } from '@jest/globals';
 import { createTestBuses } from '@ddd-ts-kit/testing';
 import { InMemoryCommandBus } from '@ddd-ts-kit/kernel';
@@ -29,6 +30,14 @@ describe('When branch-network publishes branch-network.staff-member.appointed', 
     expect(await levels.get('staff-member-1')).toMatchObject({ staffMemberId: 'staff-member-1', level: 'level-2' });
   });
 
+  it('keeps no decider for a member of staff who has no account to sign in with', async () => {
+    const { handler, levels } = arrange();
+
+    await handler.handle(appointed('level-2', ''));
+
+    expect(await levels.get('')).toBeUndefined();
+  });
+
   it('has the same outcome when the same event is delivered twice', async () => {
     const { handler, levels } = arrange();
     const event = appointed('level-2');
@@ -44,14 +53,14 @@ function arrange() {
   const { commandBus } = createTestBuses();
   const levels = new FakeDeciderLevels();
 
-  commandBus.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(levels));
+  commandBus.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(levels, new InMemoryRelationTupleStore()));
 
   return { handler: new KeepDeciderLevelIntegrationHandler(commandBus), levels };
 }
 
-function appointed(level: string) {
+function appointed(level: string, accountId = 'staff-member-1') {
   return staffMemberAppointedV2.create(
-    { staffMemberId: 'staff-member-1', branchId: 'branch-1', level },
+    { staffMemberId: 'staff-member-1', branchId: 'branch-1', level, accountId },
     { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
   );
 }

@@ -1,0 +1,17 @@
+// ddd-ts-kit:models
+/// The principal and the arrears bucket of each loan paid out, as the event store of the loans announces them: one row per tenant and loan.
+model ServicingPortfolioAtRisk {
+  tenantId         String   @map("tenant_id")
+  loanId           String   @id @map("loan_id")
+  principalCents   Int      @map("principal_cents")
+  bucket           String
+  open             Boolean
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion BigInt?  @map("last_event_version")
+  deleted          Boolean  @default(false)
+
+  @@index([tenantId], map: "portfolio_at_risk_tenant_idx")
+  @@map("portfolio_at_risk")
+  @@schema("servicing")
+}

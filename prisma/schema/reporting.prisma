@@ -16,3 +16,71 @@ model ReportingApplicationCount {
   @@map("application_counts")
   @@schema("reporting")
 }
+
+/// The decisions of a branch in a month, counted from the decisions: one row per tenant, branch and month.
+model ReportingDecisionCount {
+  key            String   @id
+  branchId       String   @map("branch_id")
+  month          String   @map("month")
+  decisionCount  Int      @map("decision_count")
+  approvalCount  Int      @map("approval_count")
+  exceptionCount Int      @map("exception_count")
+  lastEventAt    DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId    String   @map("last_event_id")
+  lastEventVersion Int?   @map("last_event_version")
+  deleted        Boolean  @default(false)
+  tenantId       String   @map("tenant_id")
+
+  @@index([tenantId, branchId, month], map: "decision_counts_tenant_idx")
+  @@map("decision_counts")
+  @@schema("reporting")
+}
+
+/// The arrears bucket each loan is in, as servicing last announced it: one row per tenant and loan.
+model ReportingPortfolioAtRisk {
+  key              String   @id
+  tenantId         String   @map("tenant_id")
+  loanId           String   @map("loan_id")
+  bucket           String   @map("bucket")
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+
+  @@index([tenantId], map: "portfolio_at_risk_tenant_idx")
+  @@map("portfolio_at_risk")
+  @@schema("reporting")
+}
+
+/// The branch and the amount paid out to each loan: one row per tenant and loan.
+model ReportingLoanPrincipal {
+  key              String   @id
+  tenantId         String   @map("tenant_id")
+  loanId           String   @map("loan_id")
+  branchId         String   @map("branch_id")
+  principalCents   Int      @map("principal_cents")
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+
+  @@index([tenantId, branchId], map: "loan_principals_tenant_idx")
+  @@map("loan_principals")
+  @@schema("reporting")
+}
+
+/// The loans servicing declared in default, and when: one row per tenant and loan.
+model ReportingDefaultedLoan {
+  key              String   @id
+  tenantId         String   @map("tenant_id")
+  loanId           String   @map("loan_id")
+  defaultedAt      DateTime @map("defaulted_at") @db.Timestamptz(3)
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+
+  @@index([tenantId], map: "defaulted_loans_tenant_idx")
+  @@map("defaulted_loans")
+  @@schema("reporting")
+}

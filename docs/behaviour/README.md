@@ -6,15 +6,15 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 
 | Page | Rules stated | Planned | Specs |
 |---|---|---|---|
-| [branch-network](branch-network.md) | 117 | 0 | 39 |
+| [branch-network](branch-network.md) | 119 | 0 | 39 |
 | [brokerage](brokerage.md) | 37 | 0 | 13 |
-| [credit-application](credit-application.md) | 398 | 22 | 154 |
+| [credit-application](credit-application.md) | 608 | 17 | 233 |
 | [credit-policy](credit-policy.md) | 139 | 0 | 49 |
 | [credit-scoring](credit-scoring.md) | 82 | 0 | 21 |
 | [customer-due-diligence](customer-due-diligence.md) | 192 | 12 | 68 |
 | [data-protection](data-protection.md) | 55 | 1 | 22 |
-| [financial-crime](financial-crime.md) | 63 | 0 | 23 |
+| [financial-crime](financial-crime.md) | 70 | 0 | 24 |
 | [identity](identity.md) | 175 | 0 | 60 |
-| [reporting](reporting.md) | 12 | 0 | 5 |
-| [servicing](servicing.md) | 32 | 8 | 14 |
-| [the application](application.md) | 312 | 4 | 74 |
+| [reporting](reporting.md) | 61 | 0 | 20 |
+| [servicing](servicing.md) | 282 | 11 | 96 |
+| [the application](application.md) | 513 | 4 | 123 |

@@ -9,4 +9,6 @@ export interface DecisionInput {
   readonly conditions: string;
   readonly approvedAmountCents: number;
   readonly decidedAt: Date;
+  /** Whether the decision rests on an approved exception to the policy, which lifts the limit of its decider. */
+  readonly exception?: boolean;
 }

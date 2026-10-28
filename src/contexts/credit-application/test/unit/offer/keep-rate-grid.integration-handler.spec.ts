@@ -51,7 +51,7 @@ function arrange() {
 
 function publishedGrid() {
   return rateGridPublishedV2.create(
-    { rateGridId: 'rate-grid-1', productId: 'personal-loan', effectiveFrom: '2026-01-01' },
+    { rateGridId: 'rate-grid-1', productId: 'personal-loan', effectiveFrom: '2026-01-01', rates: [] },
     { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
   );
 }

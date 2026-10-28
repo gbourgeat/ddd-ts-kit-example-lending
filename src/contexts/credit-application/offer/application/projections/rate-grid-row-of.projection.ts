@@ -7,5 +7,6 @@ export function rateGridRowOf(payload: RateGridPublishedV2['payload']): RateGrid
     rateGridId: payload.rateGridId,
     productId: payload.productId,
     effectiveFrom: new Date(payload.effectiveFrom),
+    rates: payload.rates.map((band) => ({ upToMonths: band.upToMonths, rateBasisPoints: band.rateBasisPoints })),
   };
 }

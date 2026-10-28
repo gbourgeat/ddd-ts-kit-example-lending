@@ -44,9 +44,25 @@ export function jobSettings(environment: Environment, context?: string): Readonl
     'servicing.erase-personal-data-past-retention': {
       enabled: environment['JOB_SERVICING_ERASE_PERSONAL_DATA_PAST_RETENTION_ENABLED'] !== 'false',
     },
+
+    'servicing.compute-due-instalments': {
+      enabled: environment['JOB_SERVICING_COMPUTE_DUE_INSTALMENTS_ENABLED'] !== 'false',
+    },
+
+    'servicing.classify-arrears': { enabled: environment['JOB_SERVICING_CLASSIFY_ARREARS_ENABLED'] !== 'false' },
+
+    'servicing.declare-default': { enabled: environment['JOB_SERVICING_DECLARE_DEFAULT_ENABLED'] !== 'false' },
     // /ddd-ts-kit:jobs
   };
 
+  return settingsOf(settings, context);
+}
+
+/** The settings of the jobs a process registers: the whole application leaves out the extracted contexts, a service keeps its context's. */
+function settingsOf(
+  settings: Readonly<Record<string, JobSettings>>,
+  context?: string,
+): Readonly<Record<string, JobSettings>> {
   if (context === undefined) {
     return Object.fromEntries(
       Object.entries(settings).filter(([name]) => !extracted.some((hosted) => name.startsWith(hosted + '.'))),

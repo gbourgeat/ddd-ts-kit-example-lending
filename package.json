@@ -36,7 +36,7 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "test:mutation": "stryker run && ddd-ts-kit mutation",
-    "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.e2e.config.js --passWithNoTests",
+    "test:e2e": "node --max-old-space-size=12288 --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.e2e.config.js --passWithNoTests",
     "openapi:generate": "npm run build && node dist/scripts/openapi.js",
     "openapi:check": "npm run build && node dist/scripts/openapi.js --check",
     "events:generate": "npm run build && node dist/scripts/events.js",

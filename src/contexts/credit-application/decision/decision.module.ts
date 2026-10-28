@@ -33,6 +33,23 @@ import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infr
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
+import { RequestExceptionCommand } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.command';
+import { RequestExceptionHandler } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.handler';
+import { RequestHumanReviewCommand } from '@/contexts/credit-application/decision/application/commands/request-human-review/request-human-review.command';
+import { RequestHumanReviewHandler } from '@/contexts/credit-application/decision/application/commands/request-human-review/request-human-review.handler';
+import { ShowDecisionViewHandler } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.handler';
+import { ShowDecisionViewQuery } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.query';
+import { RepositoryShowDecisionViewReader } from '@/contexts/credit-application/decision/infrastructure/persistence/repository-show-decision-view.reader';
+import { DecideExceptionCommand } from '@/contexts/credit-application/decision/application/commands/decide-exception/decide-exception.command';
+import { DecideExceptionHandler } from '@/contexts/credit-application/decision/application/commands/decide-exception/decide-exception.handler';
+import { ContestDecisionCommand } from '@/contexts/credit-application/decision/application/commands/contest-decision/contest-decision.command';
+import { ContestDecisionHandler } from '@/contexts/credit-application/decision/application/commands/contest-decision/contest-decision.handler';
+import { DecideReschedulingCommand } from '@/contexts/credit-application/decision/application/commands/decide-rescheduling/decide-rescheduling.command';
+import { DecideReschedulingHandler } from '@/contexts/credit-application/decision/application/commands/decide-rescheduling/decide-rescheduling.handler';
+import { CreditApplicationRescheduleDecidedPublisher } from '@/contexts/credit-application/decision/application/integration/publishers/credit-application-reschedule-decided.publisher';
+import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -62,6 +79,25 @@ export const decisionModule = {
     registerDeciderLevelHandlers(platform, deciderLevels);
     registerDelegationTableHandlers(platform, delegationTables);
     registerDecideApplication(platform, repository, { deciderLevels, delegationTables, declaredConflicts });
+
+    platform.commands.register(RequestHumanReviewCommand, new RequestHumanReviewHandler(repository, platform.clock), {
+      context: 'credit-application',
+    });
+
+    const showDecisionViewReader = platform.adapter(new RepositoryShowDecisionViewReader(repository), {
+      kind: 'repository',
+      context: 'credit-application',
+    });
+
+    platform.queries.register(ShowDecisionViewQuery, new ShowDecisionViewHandler(showDecisionViewReader), {
+      context: 'credit-application',
+    });
+
+    registerExceptionAndContest(platform, repository, {
+      deciderLimits: new DeciderLimitReader(deciderLevels, delegationTables),
+      declaredConflicts,
+    });
+
     // /ddd-ts-kit:handlers
   },
 
@@ -71,6 +107,17 @@ export const decisionModule = {
     keepDeclaredConflicts(platform, given.declaredConflicts);
     keepReferenceData(platform);
     publishDecision(platform);
+
+    const creditApplicationRescheduleDecidedPublisher = platform.adapter(
+      new CreditApplicationRescheduleDecidedPublisher(platform.publisher, platform.ids),
+      { kind: 'domain-event-handler', context: 'credit-application' },
+    );
+
+    platform.domainEvents.on(CreditApplicationRescheduleDecided.eventName, async (event) => {
+      if (event instanceof CreditApplicationRescheduleDecided) {
+        await creditApplicationRescheduleDecidedPublisher.handle(event);
+      }
+    });
     // /ddd-ts-kit:reactions
   },
 
@@ -85,6 +132,24 @@ export const decisionModule = {
     return [
       // ddd-ts-kit:authorization
       ...declareDecisionUseCases(),
+      requires(RequestExceptionCommand, creditApplicationPermissions['application.request-exception'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
+      requires(RequestHumanReviewCommand, creditApplicationPermissions['application.request-review'], {
+        resource: (command) => ({ type: 'application', id: command.applicationId }),
+      }),
+      requires(ShowDecisionViewQuery, creditApplicationPermissions['application.decide'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
+      requires(DecideExceptionCommand, creditApplicationPermissions['exception.decide'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
+      requires(ContestDecisionCommand, creditApplicationPermissions['application.contest'], {
+        resource: (command) => ({ type: 'application', id: command.applicationId }),
+      }),
+      requires(DecideReschedulingCommand, creditApplicationPermissions['application.reschedule'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },
@@ -109,9 +174,34 @@ function readModel<T extends object>(
   return platform.adapter(instance, { kind: 'repository', context: 'credit-application', token });
 }
 
+/** The commands that decide the exception requested and that contest a decision, over the repository of the file. */
+function registerExceptionAndContest(
+  platform: Platform,
+  repository: CreditApplicationRepository,
+  readModels: { readonly deciderLimits: DeciderLimitReader; readonly declaredConflicts: DeclaredConflictsStore },
+): void {
+  const { deciderLimits, declaredConflicts } = readModels;
+
+  platform.commands.register(
+    DecideExceptionCommand,
+    new DecideExceptionHandler(repository, deciderLimits, platform.clock, declaredConflicts),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(ContestDecisionCommand, new ContestDecisionHandler(repository, platform.clock), {
+    context: 'credit-application',
+  });
+
+  platform.commands.register(
+    DecideReschedulingCommand,
+    new DecideReschedulingHandler(repository, deciderLimits, platform.clock, declaredConflicts),
+    { context: 'credit-application' },
+  );
+}
+
 /** The command that keeps the level of each decider and the query that reads it, over the read model the module binds. */
 function registerDeciderLevelHandlers(platform: Platform, deciderLevels: DeciderLevels): void {
-  platform.commands.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(deciderLevels), {
+  platform.commands.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(deciderLevels, platform.relations), {
     context: 'credit-application',
   });
 
@@ -131,7 +221,7 @@ function registerDelegationTableHandlers(platform: Platform, delegationTables: D
   });
 }
 
-/** The command that decides an application, over the repository of the file and the read models of the limits. */
+/** The commands that decide an application and ask for an exception to it, over the repository of the file and the read models of the limits. */
 function registerDecideApplication(
   platform: Platform,
   repository: CreditApplicationRepository,
@@ -146,6 +236,12 @@ function registerDecideApplication(
   platform.commands.register(
     DecideApplicationCommand,
     new DecideApplicationHandler(repository, deciderLimits, platform.clock, readModels.declaredConflicts),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    RequestExceptionCommand,
+    new RequestExceptionHandler(repository, deciderLimits, platform.clock, readModels.declaredConflicts),
     { context: 'credit-application' },
   );
 }

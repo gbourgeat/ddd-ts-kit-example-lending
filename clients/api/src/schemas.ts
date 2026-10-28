@@ -5,6 +5,19 @@ export type Accepted = {
   id: string;
 };
 
+export type AssessmentShownLine = {
+  assessorId: string;
+  assessedAt: string;
+  modelVersion: string;
+  debtToIncomePercent: number;
+  repaymentIncidents: number;
+  residualIncomeCents: number;
+  score: number;
+  band: string;
+  factors: Array<string>;
+  proposedOutcome: string;
+};
+
 export type ConsultedPartyLine = {
   customerId: string;
   name: string;
@@ -12,10 +25,29 @@ export type ConsultedPartyLine = {
   listed: boolean;
 };
 
+export type DecisionShownLine = {
+  outcome: string;
+  deciderId: string;
+  level: string;
+  reasons: string;
+  conditions: string;
+  approvedAmountCents: number;
+  branchId: string;
+  exception: boolean;
+  decidedAt: string;
+};
+
 export type DeclaredConflictLine = {
   conflictOfInterestId: string;
   staffMemberId: string;
   customerId: string;
+};
+
+export type DefaultedLoanAnswer = {
+  loanId: string;
+  branchId: string;
+  principalCents: number;
+  defaultedAt: string;
 };
 
 export type DelegationTableLevelAnswer = {
@@ -50,6 +82,17 @@ export type InvitationToken = {
   token: string;
 };
 
+export type PortfolioAtRiskBranchAnswer = {
+  branchId: string;
+  paidOutCents: number;
+  oneToThirtyDaysCents: number;
+  thirtyOneToSixtyDaysCents: number;
+  sixtyOneToNinetyDaysCents: number;
+  overNinetyDaysCents: number;
+  atRiskCents: number;
+  portfolioAtRiskBasisPoints: number;
+};
+
 /** Problem details (RFC 9457) with a stable machine-readable code. */
 export type Problem = {
   /** URI identifying the kind of problem. */
@@ -69,6 +112,38 @@ export type Problem = {
   /** The facts of the refusal its code exposes, by name. Absent when it exposes none. */
   facts?: Record<string, unknown>;
   requestId: string;
+};
+
+export type RateBandAnswer = {
+  upToMonths: number;
+  rateBasisPoints: number;
+};
+
+export type RateBandBody = {
+  upToMonths: number;
+  rateBasisPoints: number;
+};
+
+export type ReadPortfolioAtRiskBucketAnswer = {
+  bucket: string;
+  loans: number;
+  principalCents: number;
+};
+
+export type RefusalReviewShownLine = {
+  reviewerId: string;
+  conclusion: string;
+  reason: string;
+  reviewedAt: string;
+};
+
+export type RegisterPartyLine = {
+  customerId: string;
+  listed: boolean;
+};
+
+export type RegisterShownLine = {
+  parties: Array<RegisterPartyLine>;
 };
 
 export type RequestedAmountBody = {

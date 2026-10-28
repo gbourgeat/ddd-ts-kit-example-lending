@@ -1,6 +1,6 @@
 import { defineStoredEvent, type StoredEventTypes } from '@ddd-ts-kit/kernel';
 import { Money } from '@/shared-kernel/money.vo';
-import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
@@ -15,6 +15,17 @@ import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
+import { CreditApplicationExceptionRequested } from '@/contexts/credit-application/file/domain/events/credit-application-exception-requested.event';
+import { CreditApplicationHumanReviewRequested } from '@/contexts/credit-application/file/domain/events/credit-application-human-review-requested.event';
+import { CreditApplicationExceptionDecided } from '@/contexts/credit-application/file/domain/events/credit-application-exception-decided.event';
+import { CreditApplicationContested } from '@/contexts/credit-application/file/domain/events/credit-application-contested.event';
+import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
+import { creditApplicationRescheduleDecidedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-reschedule-decided.mapper';
+import { creditApplicationContestedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-contested.mapper';
+import { CreditApplicationWithdrawn } from '@/contexts/credit-application/offer/domain/events/credit-application-withdrawn.event';
+import { CreditApplicationPayoutAuthorised } from '@/contexts/credit-application/offer/domain/events/credit-application-payout-authorised.event';
+import { creditApplicationWithdrawnStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-withdrawn.mapper';
+import { creditApplicationPayoutAuthorisedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-payout-authorised.mapper';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -91,15 +102,31 @@ interface CreditApplicationBroughtData {
   readonly brokerId: string;
 }
 
+interface CreditApplicationExceptionRequestedData {
+  readonly requesterId: string;
+  readonly targetLevel: string;
+  readonly justification: string;
+}
+
+interface CreditApplicationHumanReviewRequestedData {
+  readonly requesterId: string;
+}
+
+interface CreditApplicationExceptionDecidedData {
+  readonly outcome: string;
+  readonly deciderId: string;
+  readonly reasons: string;
+}
+
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
 export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> = {
   [CreditApplicationSubmitted.eventName]: defineStoredEvent(CreditApplicationSubmitted, {
     version: 3,
     upcasters: {
       // A submission of version 1 recorded no branch: it is read with an empty one, which no version 2 carries.
-      1: () => ({ branchId: '' }),
+      1: (data) => ({ ...data, branchId: '' }),
       // A submission of version 2 recorded no product: it is read with an empty one, which no version 3 carries.
-      2: () => ({ productId: '' }),
+      2: (data) => ({ ...data, productId: '' }),
     },
     encode: (event): CreditApplicationSubmittedData => ({
       applicantId: event.applicantId,
@@ -176,7 +203,7 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     version: 2,
     upcasters: {
       // An assessment of version 1 recorded no assessor: it is read with an empty one, which no version 2 carries.
-      1: () => ({ assessorId: '' }),
+      1: (data) => ({ ...data, assessorId: '' }),
     },
     encode: (event): CreditApplicationAssessedData => ({
       assessment: JSON.stringify(event.assessment),
@@ -243,7 +270,7 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     version: 2,
     upcasters: {
       // A decision of version 1 recorded no branch and no exception: it is read with an empty branch and no exception.
-      1: () => ({ branchId: '', exception: false }),
+      1: (data) => ({ ...data, branchId: '', exception: false }),
     },
     encode: (event): CreditApplicationDecidedData => ({
       outcome: event.outcome,
@@ -275,4 +302,46 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationBrought(aggregateId, occurredAt, data.text('brokerId')),
   }),
+  [CreditApplicationExceptionRequested.eventName]: defineStoredEvent(CreditApplicationExceptionRequested, {
+    version: 1,
+    encode: (event): CreditApplicationExceptionRequestedData => ({
+      requesterId: event.requesterId,
+      targetLevel: event.targetLevel,
+      justification: event.justification,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationExceptionRequested(
+        aggregateId,
+        occurredAt,
+        data.text('requesterId'),
+        data.text('targetLevel'),
+        data.text('justification'),
+      ),
+  }),
+  [CreditApplicationHumanReviewRequested.eventName]: defineStoredEvent(CreditApplicationHumanReviewRequested, {
+    version: 1,
+    encode: (event): CreditApplicationHumanReviewRequestedData => ({ requesterId: event.requesterId }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationHumanReviewRequested(aggregateId, occurredAt, data.text('requesterId')),
+  }),
+  [CreditApplicationExceptionDecided.eventName]: defineStoredEvent(CreditApplicationExceptionDecided, {
+    version: 1,
+    encode: (event): CreditApplicationExceptionDecidedData => ({
+      outcome: event.outcome,
+      deciderId: event.deciderId,
+      reasons: event.reasons,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationExceptionDecided(
+        aggregateId,
+        occurredAt,
+        data.text('outcome') as DecisionOutcome,
+        data.text('deciderId'),
+        data.text('reasons'),
+      ),
+  }),
+  [CreditApplicationRescheduleDecided.eventName]: creditApplicationRescheduleDecidedStored,
+  [CreditApplicationContested.eventName]: creditApplicationContestedStored,
+  [CreditApplicationWithdrawn.eventName]: creditApplicationWithdrawnStored,
+  [CreditApplicationPayoutAuthorised.eventName]: creditApplicationPayoutAuthorisedStored,
 };

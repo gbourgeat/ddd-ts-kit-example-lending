@@ -13,6 +13,8 @@ tags:
   - name: data-protection
   - name: financial-crime
   - name: identity
+  - name: reporting
+  - name: servicing
 paths:
   /accounts/me:
     put:
@@ -688,6 +690,71 @@ paths:
             - INVALID_AMOUNT
             - INVALID_DURATION
             - VALIDATION_FAILED
+  /applications/{id}/access-explanation:
+    get:
+      operationId: explainRefusal
+      summary: Explain refusal
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  outcome:
+                    type: string
+                type: object
+                required:
+                  - outcome
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: APPLICATION_NOT_VISIBLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - APPLICATION_NOT_VISIBLE
+            - VALIDATION_FAILED
   /applications/{id}/account-information:
     post:
       operationId: readAccountInformation
@@ -1013,6 +1080,75 @@ paths:
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
+  /applications/{id}/contestation:
+    post:
+      operationId: contestDecision
+      summary: Contest decision
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                reason:
+                  type: string
+              type: object
+              required:
+                - reason
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: CONTEST_ALREADY_RECORDED, CONTEST_NOT_DECIDED, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - CONTEST_ALREADY_RECORDED
+            - CONTEST_NOT_DECIDED
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /applications/{id}/corrections:
     post:
       operationId: correctEntry
@@ -1200,6 +1336,81 @@ paths:
             - UNKNOWN_CREDIT_APPLICATION
             - UNKNOWN_DECIDER_LEVEL
             - UNKNOWN_DELEGATION_TABLE
+            - VALIDATION_FAILED
+  /applications/{id}/decision-view:
+    get:
+      operationId: showDecisionView
+      summary: Show decision view
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  applicationId:
+                    type: string
+                  decision:
+                    $ref: '#/components/schemas/DecisionShownLine'
+                  assessment:
+                    $ref: '#/components/schemas/AssessmentShownLine'
+                  register:
+                    $ref: '#/components/schemas/RegisterShownLine'
+                  refusalReview:
+                    $ref: '#/components/schemas/RefusalReviewShownLine'
+                type: object
+                required:
+                  - applicationId
+                  - decision
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: NOT_DECIDED, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_DECIDED
+            - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
   /applications/{id}/declared-conflicts:
     get:
@@ -1446,6 +1657,164 @@ paths:
             - UNKNOWN_CREDIT_APPLICATION
             - UNKNOWN_ENTRY
             - VALIDATION_FAILED
+  /applications/{id}/exception-decision:
+    post:
+      operationId: decideException
+      summary: Decide exception
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                outcome:
+                  type: string
+                  enum:
+                    - approve
+                    - refuse
+                reasons:
+                  type: string
+              type: object
+              required:
+                - outcome
+                - reasons
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ALREADY_DECIDED, CONFLICTED_DECIDER, EXCEPTION_ALREADY_DECIDED, INVALID_DECISION_REASONS, NOT_CREDIT_COMMITTEE, NO_EXCEPTION_REQUESTED, PREPARER_CANNOT_DECIDE, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_DECIDER_LEVEL, UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ALREADY_DECIDED
+            - CONFLICTED_DECIDER
+            - EXCEPTION_ALREADY_DECIDED
+            - INVALID_DECISION_REASONS
+            - NOT_CREDIT_COMMITTEE
+            - NO_EXCEPTION_REQUESTED
+            - PREPARER_CANNOT_DECIDE
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_DECIDER_LEVEL
+            - UNKNOWN_DELEGATION_TABLE
+            - VALIDATION_FAILED
+  /applications/{id}/exceptions:
+    post:
+      operationId: requestException
+      summary: Request exception
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                justification:
+                  type: string
+              type: object
+              required:
+                - justification
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ALREADY_DECIDED, CONFLICTED_DECIDER, EXCEPTION_ALREADY_REQUESTED, EXCEPTION_NOT_ABOVE_LIMIT, INVALID_EXCEPTION_JUSTIFICATION, NOT_ASSESSED, PREPARER_CANNOT_DECIDE, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_DECIDER_LEVEL, UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ALREADY_DECIDED
+            - CONFLICTED_DECIDER
+            - EXCEPTION_ALREADY_REQUESTED
+            - EXCEPTION_NOT_ABOVE_LIMIT
+            - INVALID_EXCEPTION_JUSTIFICATION
+            - NOT_ASSESSED
+            - PREPARER_CANNOT_DECIDE
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_DECIDER_LEVEL
+            - UNKNOWN_DELEGATION_TABLE
+            - VALIDATION_FAILED
   /applications/{id}/guarantors:
     post:
       operationId: nameGuarantor
@@ -1523,6 +1892,263 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/human-review:
+    post:
+      operationId: requestHumanReview
+      summary: Request human review
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '422':
+          description: 'Unprocessable Content. Error codes: HUMAN_REVIEW_NOT_AVAILABLE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - HUMAN_REVIEW_NOT_AVAILABLE
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/offer:
+    post:
+      operationId: issueOffer
+      summary: Issue offer
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: OFFER_ABOVE_LEGAL_MAXIMUM, UNKNOWN_LEGAL_MAXIMUM_RATE, UNKNOWN_OFFER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - OFFER_ABOVE_LEGAL_MAXIMUM
+            - UNKNOWN_LEGAL_MAXIMUM_RATE
+            - UNKNOWN_OFFER
+            - VALIDATION_FAILED
+  /applications/{id}/offer-draft:
+    post:
+      operationId: draftOffer
+      summary: Draft offer
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: APPLICATION_NOT_APPROVED, NO_RATE_FOR_OFFER, OFFER_ABOVE_LEGAL_MAXIMUM, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_LEGAL_MAXIMUM_RATE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - APPLICATION_NOT_APPROVED
+            - NO_RATE_FOR_OFFER
+            - OFFER_ABOVE_LEGAL_MAXIMUM
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_LEGAL_MAXIMUM_RATE
+            - VALIDATION_FAILED
+  /applications/{id}/payout-authorisation:
+    post:
+      operationId: authorizePayout
+      summary: Authorize payout
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: OFFER_NOT_SIGNED, PAYOUT_AFTER_WITHDRAWAL, PAYOUT_NOT_ELIGIBLE, PAYOUT_TOO_EARLY, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - OFFER_NOT_SIGNED
+            - PAYOUT_AFTER_WITHDRAWAL
+            - PAYOUT_NOT_ELIGIBLE
+            - PAYOUT_TOO_EARLY
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
   /applications/{id}/product-terms-findings:
@@ -1745,6 +2371,149 @@ paths:
             - UNIDENTIFIED_PARTY
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
+  /applications/{id}/rescheduling-decision:
+    post:
+      operationId: decideRescheduling
+      summary: Decide rescheduling
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                durationMonths:
+                  type: integer
+                outstandingAmountCents:
+                  minimum: 0
+                  type: integer
+              type: object
+              required:
+                - durationMonths
+                - outstandingAmountCents
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: CONFLICTED_DECIDER, DECISION_ABOVE_LIMIT, INVALID_DURATION, PREPARER_CANNOT_DECIDE, RESCHEDULING_NOT_APPROVED, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_DECIDER_LEVEL, UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - CONFLICTED_DECIDER
+            - DECISION_ABOVE_LIMIT
+            - INVALID_DURATION
+            - PREPARER_CANNOT_DECIDE
+            - RESCHEDULING_NOT_APPROVED
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_DECIDER_LEVEL
+            - UNKNOWN_DELEGATION_TABLE
+            - VALIDATION_FAILED
+  /applications/{id}/withdrawal:
+    post:
+      operationId: withdrawLoan
+      summary: Withdraw loan
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: OFFER_NOT_SIGNED, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED, WITHDRAWAL_ALREADY_RECORDED, WITHDRAWAL_EXPIRED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - OFFER_NOT_SIGNED
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+            - WITHDRAWAL_ALREADY_RECORDED
+            - WITHDRAWAL_EXPIRED
   /audit/entries:
     get:
       operationId: searchAuditEntries
@@ -4288,6 +5057,758 @@ paths:
           x-error-codes:
             - UNKNOWN_LEGAL_MAXIMUM_RATE
             - VALIDATION_FAILED
+  /loans/portfolio-at-risk:
+    get:
+      operationId: readPortfolioAtRisk
+      summary: Read portfolio at risk
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  buckets:
+                    items:
+                      $ref: '#/components/schemas/ReadPortfolioAtRiskBucketAnswer'
+                    type: array
+                  openPrincipalCents:
+                    type: integer
+                  atRiskBasisPoints:
+                    type: integer
+                type: object
+                required:
+                  - buckets
+                  - openPrincipalCents
+                  - atRiskBasisPoints
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+  /loans/{id}:
+    get:
+      operationId: readLoan
+      summary: Read loan
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  loanId:
+                    type: string
+                  status:
+                    type: string
+                  principalCents:
+                    type: integer
+                  annualRateBasisPoints:
+                    type: integer
+                  durationMonths:
+                    type: integer
+                  instalmentsCents:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsDue:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsPaid:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsUnpaid:
+                    items:
+                      type: integer
+                    type: array
+                  arrearsBucket:
+                    type: string
+                  defaulted:
+                    type: boolean
+                  incidentDeclared:
+                    type: boolean
+                type: object
+                required:
+                  - loanId
+                  - status
+                  - principalCents
+                  - annualRateBasisPoints
+                  - durationMonths
+                  - instalmentsCents
+                  - instalmentsDue
+                  - instalmentsPaid
+                  - instalmentsUnpaid
+                  - arrearsBucket
+                  - defaulted
+                  - incidentDeclared
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
+  /loans/{id}/closure:
+    post:
+      operationId: closeLoan
+      summary: Close loan
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: LOAN_ALREADY_CLOSED, UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - LOAN_ALREADY_CLOSED
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
+  /loans/{id}/early-repayments:
+    post:
+      operationId: repayEarly
+      summary: Repay early
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                capitalCents:
+                  type: integer
+              type: object
+              required:
+                - capitalCents
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: EARLY_REPAYMENT_TOO_HIGH, INVALID_REPAYMENT, LOAN_ALREADY_CLOSED, UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - EARLY_REPAYMENT_TOO_HIGH
+            - INVALID_REPAYMENT
+            - LOAN_ALREADY_CLOSED
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
+  /loans/{id}/instalments/{number}/payments:
+    post:
+      operationId: recordLatePayment
+      summary: Record late payment
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: number
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                amountCents:
+                  type: integer
+              type: object
+              required:
+                - amountCents
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
+  /loans/{id}/statement:
+    get:
+      operationId: getLoanStatement
+      summary: Get loan statement
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: asOf
+          in: query
+          required: true
+          schema:
+            pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+            type: string
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  loanId:
+                    type: string
+                  asOf:
+                    type: string
+                  outstandingCapitalCents:
+                    type: integer
+                  arrearsCents:
+                    type: integer
+                  daysPastDue:
+                    type: integer
+                  instalmentsCents:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsDue:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsPaid:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsUnpaid:
+                    items:
+                      type: integer
+                    type: array
+                type: object
+                required:
+                  - loanId
+                  - asOf
+                  - outstandingCapitalCents
+                  - arrearsCents
+                  - daysPastDue
+                  - instalmentsCents
+                  - instalmentsDue
+                  - instalmentsPaid
+                  - instalmentsUnpaid
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
+  /loans/{id}/write-off:
+    post:
+      operationId: writeOffLoan
+      summary: Write off loan
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: LOAN_ALREADY_CLOSED, UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - LOAN_ALREADY_CLOSED
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
+  /loans/{id}/write-off-reversal:
+    post:
+      operationId: reverseWriteOff
+      summary: Reverse write off
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: LOAN_NOT_WRITTEN_OFF, UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - LOAN_NOT_WRITTEN_OFF
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
+  /offers/{id}/acceptance:
+    post:
+      operationId: acceptOffer
+      summary: Accept offer
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: OFFER_ALREADY_ACCEPTED, OFFER_EXPIRED, OFFER_NOT_ISSUED, UNKNOWN_OFFER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - OFFER_ALREADY_ACCEPTED
+            - OFFER_EXPIRED
+            - OFFER_NOT_ISSUED
+            - UNKNOWN_OFFER
+            - VALIDATION_FAILED
+  /offers/{id}/pre-contractual-sheet:
+    get:
+      operationId: readPreContractualSheet
+      summary: Read pre contractual sheet
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  offerId:
+                    type: string
+                  applicationId:
+                    type: string
+                  amountCents:
+                    type: integer
+                  durationMonths:
+                    type: integer
+                  rateBasisPoints:
+                    type: integer
+                  annualPercentageRate:
+                    type: string
+                  instalmentCents:
+                    type: integer
+                  arrangementFeeCents:
+                    type: integer
+                  totalToRepayCents:
+                    type: integer
+                type: object
+                required:
+                  - offerId
+                  - applicationId
+                  - amountCents
+                  - durationMonths
+                  - rateBasisPoints
+                  - annualPercentageRate
+                  - instalmentCents
+                  - arrangementFeeCents
+                  - totalToRepayCents
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_OFFER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_OFFER
+            - VALIDATION_FAILED
   /organisations:
     post:
       operationId: openOrganisation
@@ -5456,6 +6977,10 @@ paths:
                 effectiveFrom:
                   pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
                   type: string
+                rates:
+                  items:
+                    $ref: '#/components/schemas/RateBandBody'
+                  type: array
               type: object
               required:
                 - productId
@@ -5550,11 +7075,16 @@ paths:
                         type: string
                       - format: date-time
                         type: string
+                  rates:
+                    items:
+                      $ref: '#/components/schemas/RateBandAnswer'
+                    type: array
                 type: object
                 required:
                   - rateGridId
                   - productId
                   - effectiveFrom
+                  - rates
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:
@@ -5588,6 +7118,392 @@ paths:
           x-error-codes:
             - UNKNOWN_RATE_GRID
             - VALIDATION_FAILED
+  /reports/defaulted-loans:
+    get:
+      operationId: defaultedLoans
+      summary: Defaulted loans
+      tags:
+        - reporting
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  loans:
+                    items:
+                      $ref: '#/components/schemas/DefaultedLoanAnswer'
+                    type: array
+                type: object
+                required:
+                  - loans
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+  /reports/defaults:
+    get:
+      operationId: defaultsList
+      summary: Defaults list
+      tags:
+        - reporting
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+            Vary:
+              description: The request headers this answer depends on, besides the URL.
+              schema:
+                type: string
+                const: accept
+          content:
+            application/json:
+              schema:
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/DefaultedLoanAnswer'
+                    type: array
+                type: object
+                required:
+                  - items
+            text/csv:
+              schema:
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/DefaultedLoanAnswer'
+                    type: array
+                type: object
+                required:
+                  - items
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+  /reports/monthly:
+    get:
+      operationId: monthlyReport
+      summary: Monthly report
+      tags:
+        - reporting
+      security:
+        - bearer: []
+      parameters:
+        - name: limit
+          in: query
+          description: Size of the page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            description: Size of the page.
+        - name: offset
+          in: query
+          description: Items to skip. Not with `cursor`.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Items to skip. Not with `cursor`.
+        - name: cursor
+          in: query
+          description: The `nextCursor` of the previous page. Not with `offset`.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            description: The `nextCursor` of the previous page. Not with `offset`.
+        - name: sort
+          in: query
+          description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+          required: false
+          schema:
+            type: string
+            description: 'Comma-separated fields, a leading "-" for descending. Sortable: id.'
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: ^\d{4}-(0[1-9]|1[0-2])$
+      responses:
+        '200':
+          description: 'One page of the monthly report: one line per branch with a figure in the month.'
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+            Vary:
+              description: The request headers this answer depends on, besides the URL.
+              schema:
+                type: string
+                const: accept
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      properties:
+                        branchId:
+                          type: string
+                        month:
+                          type: string
+                        applicationCount:
+                          minimum: 0
+                          type: integer
+                        applicationAmountCents:
+                          minimum: 0
+                          type: integer
+                        decisionCount:
+                          minimum: 0
+                          type: integer
+                        approvalCount:
+                          minimum: 0
+                          type: integer
+                        exceptionCount:
+                          minimum: 0
+                          type: integer
+                        approvalRateBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                        exceptionShareBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                        portfolioAtRiskBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                      type: object
+                      required:
+                        - branchId
+                        - month
+                        - applicationCount
+                        - applicationAmountCents
+                        - decisionCount
+                        - approvalCount
+                        - exceptionCount
+                        - approvalRateBasisPoints
+                        - exceptionShareBasisPoints
+                        - portfolioAtRiskBasisPoints
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: Present when it is cheap to count.
+                  nextCursor:
+                    type: string
+                    description: Present when more items follow.
+            text/csv:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      properties:
+                        branchId:
+                          type: string
+                        month:
+                          type: string
+                        applicationCount:
+                          minimum: 0
+                          type: integer
+                        applicationAmountCents:
+                          minimum: 0
+                          type: integer
+                        decisionCount:
+                          minimum: 0
+                          type: integer
+                        approvalCount:
+                          minimum: 0
+                          type: integer
+                        exceptionCount:
+                          minimum: 0
+                          type: integer
+                        approvalRateBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                        exceptionShareBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                        portfolioAtRiskBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                      type: object
+                      required:
+                        - branchId
+                        - month
+                        - applicationCount
+                        - applicationAmountCents
+                        - decisionCount
+                        - approvalCount
+                        - exceptionCount
+                        - approvalRateBasisPoints
+                        - exceptionShareBasisPoints
+                        - portfolioAtRiskBasisPoints
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: Present when it is cheap to count.
+                  nextCursor:
+                    type: string
+                    description: Present when more items follow.
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - VALIDATION_FAILED
+  /reports/portfolio-at-risk:
+    get:
+      operationId: portfolioAtRiskPerBranch
+      summary: Portfolio at risk per branch
+      tags:
+        - reporting
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  branches:
+                    items:
+                      $ref: '#/components/schemas/PortfolioAtRiskBranchAnswer'
+                    type: array
+                type: object
+                required:
+                  - branches
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
   /residual-income-minimums:
     put:
       operationId: setResidualIncomeMinimum
@@ -5944,6 +7860,42 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    AssessmentShownLine:
+      properties:
+        assessorId:
+          type: string
+        assessedAt:
+          type: string
+        modelVersion:
+          type: string
+        debtToIncomePercent:
+          type: integer
+        repaymentIncidents:
+          type: integer
+        residualIncomeCents:
+          type: integer
+        score:
+          type: integer
+        band:
+          type: string
+        factors:
+          items:
+            type: string
+          type: array
+        proposedOutcome:
+          type: string
+      type: object
+      required:
+        - assessorId
+        - assessedAt
+        - modelVersion
+        - debtToIncomePercent
+        - repaymentIncidents
+        - residualIncomeCents
+        - score
+        - band
+        - factors
+        - proposedOutcome
     ConsultedPartyLine:
       properties:
         customerId:
@@ -5960,6 +7912,37 @@ components:
         - name
         - birthDate
         - listed
+    DecisionShownLine:
+      properties:
+        outcome:
+          type: string
+        deciderId:
+          type: string
+        level:
+          type: string
+        reasons:
+          type: string
+        conditions:
+          type: string
+        approvedAmountCents:
+          type: integer
+        branchId:
+          type: string
+        exception:
+          type: boolean
+        decidedAt:
+          type: string
+      type: object
+      required:
+        - outcome
+        - deciderId
+        - level
+        - reasons
+        - conditions
+        - approvedAmountCents
+        - branchId
+        - exception
+        - decidedAt
     DeclaredConflictLine:
       properties:
         conflictOfInterestId:
@@ -5973,6 +7956,26 @@ components:
         - conflictOfInterestId
         - staffMemberId
         - customerId
+    DefaultedLoanAnswer:
+      properties:
+        loanId:
+          type: string
+        branchId:
+          type: string
+        principalCents:
+          type: integer
+        defaultedAt:
+          oneOf:
+            - format: date
+              type: string
+            - format: date-time
+              type: string
+      type: object
+      required:
+        - loanId
+        - branchId
+        - principalCents
+        - defaultedAt
     DelegationTableLevelAnswer:
       properties:
         level:
@@ -6053,6 +8056,34 @@ components:
       type: object
       required:
         - token
+    PortfolioAtRiskBranchAnswer:
+      properties:
+        branchId:
+          type: string
+        paidOutCents:
+          type: integer
+        oneToThirtyDaysCents:
+          type: integer
+        thirtyOneToSixtyDaysCents:
+          type: integer
+        sixtyOneToNinetyDaysCents:
+          type: integer
+        overNinetyDaysCents:
+          type: integer
+        atRiskCents:
+          type: integer
+        portfolioAtRiskBasisPoints:
+          type: integer
+      type: object
+      required:
+        - branchId
+        - paidOutCents
+        - oneToThirtyDaysCents
+        - thirtyOneToSixtyDaysCents
+        - sixtyOneToNinetyDaysCents
+        - overNinetyDaysCents
+        - atRiskCents
+        - portfolioAtRiskBasisPoints
     Problem:
       type: object
       description: Problem details (RFC 9457) with a stable machine-readable code.
@@ -6098,6 +8129,76 @@ components:
           additionalProperties: true
         requestId:
           type: string
+    RateBandAnswer:
+      properties:
+        upToMonths:
+          type: integer
+        rateBasisPoints:
+          type: integer
+      type: object
+      required:
+        - upToMonths
+        - rateBasisPoints
+    RateBandBody:
+      properties:
+        upToMonths:
+          minimum: 1
+          type: integer
+        rateBasisPoints:
+          minimum: 0
+          type: integer
+      type: object
+      required:
+        - upToMonths
+        - rateBasisPoints
+    ReadPortfolioAtRiskBucketAnswer:
+      properties:
+        bucket:
+          type: string
+        loans:
+          type: integer
+        principalCents:
+          type: integer
+      type: object
+      required:
+        - bucket
+        - loans
+        - principalCents
+    RefusalReviewShownLine:
+      properties:
+        reviewerId:
+          type: string
+        conclusion:
+          type: string
+        reason:
+          type: string
+        reviewedAt:
+          type: string
+      type: object
+      required:
+        - reviewerId
+        - conclusion
+        - reason
+        - reviewedAt
+    RegisterPartyLine:
+      properties:
+        customerId:
+          type: string
+        listed:
+          type: boolean
+      type: object
+      required:
+        - customerId
+        - listed
+    RegisterShownLine:
+      properties:
+        parties:
+          items:
+            $ref: '#/components/schemas/RegisterPartyLine'
+          type: array
+      type: object
+      required:
+        - parties
     RequestedAmountBody:
       properties:
         cents:

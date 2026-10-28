@@ -65,6 +65,12 @@ export interface Client {
    */
   bringApplication(input: operations.BringApplicationInput, options?: CallOptions): Promise<operations.BringApplicationResult>;
   /**
+   * Explain refusal: `GET /applications/{id}/access-explanation`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), APPLICATION_NOT_VISIBLE (422), VALIDATION_FAILED (422).
+   */
+  explainRefusal(input: operations.ExplainRefusalInput, options?: CallOptions): Promise<operations.ExplainRefusalResult>;
+  /**
    * Read account information: `POST /applications/{id}/account-information`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), MISSING_ACCOUNT_CONSENT (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -89,6 +95,12 @@ export interface Client {
    */
   giveAccountConsent(input: operations.GiveAccountConsentInput, options?: CallOptions): Promise<operations.GiveAccountConsentResult>;
   /**
+   * Contest decision: `POST /applications/{id}/contestation`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), CONTEST_ALREADY_RECORDED (422), CONTEST_NOT_DECIDED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  contestDecision(input: operations.ContestDecisionInput, options?: CallOptions): Promise<operations.ContestDecisionResult>;
+  /**
    * Correct entry: `POST /applications/{id}/corrections`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CORRECTION_ALREADY_RECORDED (422), INVALID_CORRECTION_REASON (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
@@ -100,6 +112,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), DECISION_ABOVE_LIMIT (422), INVALID_DECISION_CONDITIONS (422), INVALID_DECISION_REASONS (422), NOT_ASSESSED (422), PREPARER_CANNOT_DECIDE (422), REFUSAL_NOT_REVIEWED (422), REFUSAL_PROPOSAL_STANDS (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
    */
   decideApplication(input: operations.DecideApplicationInput, options?: CallOptions): Promise<operations.DecideApplicationResult>;
+  /**
+   * Show decision view: `GET /applications/{id}/decision-view`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), NOT_DECIDED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  showDecisionView(input: operations.ShowDecisionViewInput, options?: CallOptions): Promise<operations.ShowDecisionViewResult>;
   /**
    * Read declared conflicts: `GET /applications/{id}/declared-conflicts`.
    *
@@ -119,11 +137,47 @@ export interface Client {
    */
   readDocument(input: operations.ReadDocumentInput, options?: CallOptions): Promise<operations.ReadDocumentResult>;
   /**
+   * Decide exception: `POST /applications/{id}/exception-decision`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), CONFLICTED_DECIDER (422), EXCEPTION_ALREADY_DECIDED (422), INVALID_DECISION_REASONS (422), NOT_CREDIT_COMMITTEE (422), NO_EXCEPTION_REQUESTED (422), PREPARER_CANNOT_DECIDE (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  decideException(input: operations.DecideExceptionInput, options?: CallOptions): Promise<operations.DecideExceptionResult>;
+  /**
+   * Request exception: `POST /applications/{id}/exceptions`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), CONFLICTED_DECIDER (422), EXCEPTION_ALREADY_REQUESTED (422), EXCEPTION_NOT_ABOVE_LIMIT (422), INVALID_EXCEPTION_JUSTIFICATION (422), NOT_ASSESSED (422), PREPARER_CANNOT_DECIDE (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  requestException(input: operations.RequestExceptionInput, options?: CallOptions): Promise<operations.RequestExceptionResult>;
+  /**
    * Name guarantor: `POST /applications/{id}/guarantors`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
    */
   nameGuarantor(input: operations.NameGuarantorInput, options?: CallOptions): Promise<operations.NameGuarantorResult>;
+  /**
+   * Request human review: `POST /applications/{id}/human-review`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), HUMAN_REVIEW_NOT_AVAILABLE (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  requestHumanReview(input: operations.RequestHumanReviewInput, options?: CallOptions): Promise<operations.RequestHumanReviewResult>;
+  /**
+   * Issue offer: `POST /applications/{id}/offer`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+   */
+  issueOffer(input: operations.IssueOfferInput, options?: CallOptions): Promise<operations.IssueOfferResult>;
+  /**
+   * Draft offer: `POST /applications/{id}/offer-draft`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), APPLICATION_NOT_APPROVED (422), NO_RATE_FOR_OFFER (422), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+   */
+  draftOffer(input: operations.DraftOfferInput, options?: CallOptions): Promise<operations.DraftOfferResult>;
+  /**
+   * Authorize payout: `POST /applications/{id}/payout-authorisation`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_NOT_SIGNED (422), PAYOUT_AFTER_WITHDRAWAL (422), PAYOUT_NOT_ELIGIBLE (422), PAYOUT_TOO_EARLY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  authorizePayout(input: operations.AuthorizePayoutInput, options?: CallOptions): Promise<operations.AuthorizePayoutResult>;
   /**
    * Read what the check of an application against its product found: `GET /applications/{id}/product-terms-findings`.
    *
@@ -142,6 +196,18 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNIDENTIFIED_PARTY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
    */
   consultRepaymentIncidentRegister(input: operations.ConsultRepaymentIncidentRegisterInput, options?: CallOptions): Promise<operations.ConsultRepaymentIncidentRegisterResult>;
+  /**
+   * Decide rescheduling: `POST /applications/{id}/rescheduling-decision`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), CONFLICTED_DECIDER (422), DECISION_ABOVE_LIMIT (422), INVALID_DURATION (422), PREPARER_CANNOT_DECIDE (422), RESCHEDULING_NOT_APPROVED (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  decideRescheduling(input: operations.DecideReschedulingInput, options?: CallOptions): Promise<operations.DecideReschedulingResult>;
+  /**
+   * Withdraw loan: `POST /applications/{id}/withdrawal`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_NOT_SIGNED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422), WITHDRAWAL_ALREADY_RECORDED (422), WITHDRAWAL_EXPIRED (422).
+   */
+  withdrawLoan(input: operations.WithdrawLoanInput, options?: CallOptions): Promise<operations.WithdrawLoanResult>;
   /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
@@ -329,6 +395,66 @@ export interface Client {
    */
   readLegalMaximumRate(input: operations.ReadLegalMaximumRateInput, options?: CallOptions): Promise<operations.ReadLegalMaximumRateResult>;
   /**
+   * Read portfolio at risk: `GET /loans/portfolio-at-risk`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  readPortfolioAtRisk(input?: operations.ReadPortfolioAtRiskInput, options?: CallOptions): Promise<operations.ReadPortfolioAtRiskResult>;
+  /**
+   * Read loan: `GET /loans/{id}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  readLoan(input: operations.ReadLoanInput, options?: CallOptions): Promise<operations.ReadLoanResult>;
+  /**
+   * Close loan: `POST /loans/{id}/closure`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  closeLoan(input: operations.CloseLoanInput, options?: CallOptions): Promise<operations.CloseLoanResult>;
+  /**
+   * Repay early: `POST /loans/{id}/early-repayments`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), EARLY_REPAYMENT_TOO_HIGH (422), INVALID_REPAYMENT (422), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  repayEarly(input: operations.RepayEarlyInput, options?: CallOptions): Promise<operations.RepayEarlyResult>;
+  /**
+   * Record late payment: `POST /loans/{id}/instalments/{number}/payments`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  recordLatePayment(input: operations.RecordLatePaymentInput, options?: CallOptions): Promise<operations.RecordLatePaymentResult>;
+  /**
+   * Get loan statement: `GET /loans/{id}/statement`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  getLoanStatement(input: operations.GetLoanStatementInput, options?: CallOptions): Promise<operations.GetLoanStatementResult>;
+  /**
+   * Write off loan: `POST /loans/{id}/write-off`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  writeOffLoan(input: operations.WriteOffLoanInput, options?: CallOptions): Promise<operations.WriteOffLoanResult>;
+  /**
+   * Reverse write off: `POST /loans/{id}/write-off-reversal`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_NOT_WRITTEN_OFF (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  reverseWriteOff(input: operations.ReverseWriteOffInput, options?: CallOptions): Promise<operations.ReverseWriteOffResult>;
+  /**
+   * Accept offer: `POST /offers/{id}/acceptance`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ALREADY_ACCEPTED (422), OFFER_EXPIRED (422), OFFER_NOT_ISSUED (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+   */
+  acceptOffer(input: operations.AcceptOfferInput, options?: CallOptions): Promise<operations.AcceptOfferResult>;
+  /**
+   * Read pre contractual sheet: `GET /offers/{id}/pre-contractual-sheet`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+   */
+  readPreContractualSheet(input: operations.ReadPreContractualSheetInput, options?: CallOptions): Promise<operations.ReadPreContractualSheetResult>;
+  /**
    * Open an organisation: `POST /organisations`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), INVALID_ORGANISATION_NAME (422), INVALID_ORGANISATION_SLUG (422), ORGANISATION_SLUG_TAKEN (422), VALIDATION_FAILED (422).
@@ -419,6 +545,30 @@ export interface Client {
    */
   readRateGrid(input: operations.ReadRateGridInput, options?: CallOptions): Promise<operations.ReadRateGridResult>;
   /**
+   * Defaulted loans: `GET /reports/defaulted-loans`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  defaultedLoans(input?: operations.DefaultedLoansInput, options?: CallOptions): Promise<operations.DefaultedLoansResult>;
+  /**
+   * Defaults list: `GET /reports/defaults`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  defaultsList(input?: operations.DefaultsListInput, options?: CallOptions): Promise<operations.DefaultsListResult>;
+  /**
+   * Monthly report: `GET /reports/monthly`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  monthlyReport(input: operations.MonthlyReportInput, options?: CallOptions): Promise<operations.MonthlyReportResult>;
+  /**
+   * Portfolio at risk per branch: `GET /reports/portfolio-at-risk`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  portfolioAtRiskPerBranch(input?: operations.PortfolioAtRiskPerBranchInput, options?: CallOptions): Promise<operations.PortfolioAtRiskPerBranchResult>;
+  /**
    * Set residual income minimum: `PUT /residual-income-minimums`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
@@ -456,19 +606,30 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchApplications: (input, call) => operations.searchApplications(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
     bringApplication: (input, call) => operations.bringApplication(connection, input, call),
+    explainRefusal: (input, call) => operations.explainRefusal(connection, input, call),
     readAccountInformation: (input, call) => operations.readAccountInformation(connection, input, call),
     assessApplication: (input, call) => operations.assessApplication(connection, input, call),
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
+    contestDecision: (input, call) => operations.contestDecision(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
     decideApplication: (input, call) => operations.decideApplication(connection, input, call),
+    showDecisionView: (input, call) => operations.showDecisionView(connection, input, call),
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     readDocument: (input, call) => operations.readDocument(connection, input, call),
+    decideException: (input, call) => operations.decideException(connection, input, call),
+    requestException: (input, call) => operations.requestException(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
+    requestHumanReview: (input, call) => operations.requestHumanReview(connection, input, call),
+    issueOffer: (input, call) => operations.issueOffer(connection, input, call),
+    draftOffer: (input, call) => operations.draftOffer(connection, input, call),
+    authorizePayout: (input, call) => operations.authorizePayout(connection, input, call),
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),
     reviewProposedRefusal: (input, call) => operations.reviewProposedRefusal(connection, input, call),
     consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
+    decideRescheduling: (input, call) => operations.decideRescheduling(connection, input, call),
+    withdrawLoan: (input, call) => operations.withdrawLoan(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
@@ -500,6 +661,16 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
     readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
+    readPortfolioAtRisk: (input, call) => operations.readPortfolioAtRisk(connection, input, call),
+    readLoan: (input, call) => operations.readLoan(connection, input, call),
+    closeLoan: (input, call) => operations.closeLoan(connection, input, call),
+    repayEarly: (input, call) => operations.repayEarly(connection, input, call),
+    recordLatePayment: (input, call) => operations.recordLatePayment(connection, input, call),
+    getLoanStatement: (input, call) => operations.getLoanStatement(connection, input, call),
+    writeOffLoan: (input, call) => operations.writeOffLoan(connection, input, call),
+    reverseWriteOff: (input, call) => operations.reverseWriteOff(connection, input, call),
+    acceptOffer: (input, call) => operations.acceptOffer(connection, input, call),
+    readPreContractualSheet: (input, call) => operations.readPreContractualSheet(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
     grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),
     revokeDelegation: (input, call) => operations.revokeDelegation(connection, input, call),
@@ -515,6 +686,10 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
+    defaultedLoans: (input, call) => operations.defaultedLoans(connection, input, call),
+    defaultsList: (input, call) => operations.defaultsList(connection, input, call),
+    monthlyReport: (input, call) => operations.monthlyReport(connection, input, call),
+    portfolioAtRiskPerBranch: (input, call) => operations.portfolioAtRiskPerBranch(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
     scoreApplicant: (input, call) => operations.scoreApplicant(connection, input, call),
     publishScoringModelVersion: (input, call) => operations.publishScoringModelVersion(connection, input, call),

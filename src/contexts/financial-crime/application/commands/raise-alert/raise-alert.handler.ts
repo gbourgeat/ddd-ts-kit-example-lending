@@ -21,6 +21,12 @@ export class RaiseAlertHandler implements CommandHandler<RaiseAlertCommand> {
       return undefined;
     }
 
+    const raised = await this.alertRepository.findByRepaymentReference(command.repaymentReference);
+
+    if (raised !== undefined) {
+      return raised.id;
+    }
+
     const alert = Alert.create(this.ids.next(), command.repaymentReference, this.clock.now());
 
     await this.alertRepository.save(alert);

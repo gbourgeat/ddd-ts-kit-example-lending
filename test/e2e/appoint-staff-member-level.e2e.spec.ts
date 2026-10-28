@@ -40,7 +40,7 @@ describe('Appoint staff member with its level, end to end', () => {
       expect.arrayContaining([
         expect.objectContaining({
           version: 2,
-          payload: { staffMemberId, branchId, level: 'advisor' },
+          payload: { staffMemberId, branchId, level: 'advisor', accountId: expect.any(String) },
         }),
       ]),
     );

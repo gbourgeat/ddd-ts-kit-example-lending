@@ -17,6 +17,7 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `conflictOfInterestId` | string | yes |  |
 | `staffMemberId` | string | yes |  |
 | `customerId` | string | yes |  |
+| `accountId` | string | yes |  |
 
 ### branch-network.staff-member.appointed
 
@@ -38,6 +39,7 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `staffMemberId` | string | yes |  |
 | `branchId` | string | yes |  |
 | `level` | string | yes |  |
+| `accountId` | string | yes |  |
 
 ## brokerage
 
@@ -83,6 +85,37 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `branchId` | string | yes |  |
 | `approvedAmountCents` | integer | yes |  |
 
+### credit-application.credit-application.payout-authorised
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.payout-authorised` | 1 | The payout of an approved application is authorised: the 8th day after signing has come, it was not withdrawn and the customer is eligible. Servicing opens the loan. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
+| `customerId` | string | yes |  |
+| `branchId` | string | yes |  |
+| `amountCents` | integer | yes |  |
+| `durationMonths` | integer | yes |  |
+| `rateBasisPoints` | integer | yes |  |
+
+### credit-application.credit-application.reschedule-decided
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.reschedule-decided` | 1 | A decider decided, under the delegation rules, to reschedule the loan of an approved application: its new duration and the capital it covers. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
+| `durationMonths` | integer | yes |  |
+| `outstandingAmountCents` | integer | yes |  |
+
 ### credit-application.credit-application.submitted
 
 | Type | Version | Description | Deprecated |
@@ -108,6 +141,18 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `requestedAmountCents` | integer | yes |  |
 | `durationMonths` | integer | yes |  |
 | `branchId` | string | yes |  |
+
+### credit-application.credit-application.withdrawn
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.withdrawn` | 1 | The borrower withdrew the application within 14 calendar days of signing its offer. After a payout, servicing asks them to repay the capital and the interest accrued. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
 
 ## credit-policy
 
@@ -201,6 +246,9 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `rateGridId` | string | yes |  |
 | `productId` | string | yes |  |
 | `effectiveFrom` | string (date) \| string (date-time) | yes |  |
+| `rates[]` | array of object | yes |  |
+| `rates[].upToMonths` | integer | yes |  |
+| `rates[].rateBasisPoints` | integer | yes |  |
 
 ### credit-policy.residual-income-minimum.published
 
@@ -373,3 +421,58 @@ Consumers: `identity`
 | --- | --- | --- | --- |
 | `subjectId` | string | yes | The opaque identifier of the data subject. |
 | `erasedAt` | string (date-time) | yes | When the platform erased its copies. |
+
+## servicing
+
+### servicing.loan.arrears-bucket-entered
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.arrears-bucket-entered` | 1 | A loan enters an arrears bucket, by the days past due of its oldest unpaid instalment, so that those who report the portfolio at risk follow it. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
+| `bucket` | enum ("OneToThirtyDays", "ThirtyOneToSixtyDays", "SixtyOneToNinetyDays", "OverNinetyDays") | yes |  |
+
+### servicing.loan.defaulted
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.defaulted` | 1 | A loan is declared in default, 90 days past due, and handed to collections. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
+
+### servicing.loan.paid-out
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.paid-out` | 1 | The money of a loan is paid out to its borrower and its schedule starts: the loan exists from this moment, under the identifier of the application it was granted for. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
+
+### servicing.loan.payment-received
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.payment-received` | 1 | The instalment of a loan is received by direct debit: its number in the schedule and the amount collected, for those who watch the repayments. | no |
+
+Consumers: `financial-crime`
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
+| `instalmentNumber` | integer | yes |  |
+| `amountCents` | integer | yes |  |
