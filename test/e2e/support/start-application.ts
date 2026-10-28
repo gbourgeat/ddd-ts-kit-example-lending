@@ -1,5 +1,5 @@
 import type { RelationTuple } from '@ddd-ts-kit/auth/rebac';
-import type { IntegrationEvent, IntegrationEventSubscriber } from '@ddd-ts-kit/kernel';
+import type { IntegrationEvent, IntegrationEventSubscriber, JobRun } from '@ddd-ts-kit/kernel';
 import { createHttpClient, settled, type HttpClient, type SettledOptions } from '@ddd-ts-kit/testing/e2e';
 import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/infrastructure/external/simulated-screening-provider.adapter';
 import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
@@ -9,7 +9,6 @@ import { creditApplicationModule } from '@/contexts/credit-application/credit-ap
 import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 import { identityModule } from '@/contexts/identity/identity.module';
 import { FakeIdentityProviderAdmin } from '@/contexts/identity/test/fakes/identity-provider-admin.fake';
-import { PrismaOrganisationTenantDirectory } from '@/contexts/identity/infrastructure/persistence/prisma-organisation-tenant-directory.reader';
 import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
 import type { Platform } from '@/platform/composition/platform';
 import type { AppConfig } from '@/platform/config/app-config';
@@ -159,7 +158,7 @@ async function start({ database, config, credentials, screening, register, incid
     events: application.eventSubscriber,
     publish: (events) => application.eventBus.publish(events),
     relate: (tuple) => application.platform.relations.write([tuple]),
-    runJob: (name) => runJobOf(application, database, name),
+    runJob: (name) => runJobOf(application, name),
     settled: (options) => settled({ outbox: () => database.persistence.outbox.stats() }, options),
     reset: async () => {
       await database.reset();
@@ -277,25 +276,18 @@ function eventsOf(config: AppConfig): EventProvider {
   return config.kafkaBrokers === noBroker ? inProcessEvents() : createEventProvider(config);
 }
 
-/** Runs a job now, as the scheduler would at its hour. */
-async function runJobOf(
-  application: ReturnType<typeof composeApplication>,
-  database: TestDatabase,
-  job: string,
-): Promise<unknown> {
-  await expectABankIsOpen(job, database.persistence.database);
+/** Runs a job now, as the scheduler would at its hour; a run that failed, did not happen or reached no tenant fails the spec. */
+async function runJobOf(application: ReturnType<typeof composeApplication>, name: string): Promise<JobRun> {
+  const run = await application.platform.jobs.runNow(name);
+  const { outcome, errorCode, tenants } = run;
 
-  return application.platform.jobs.runNow(job);
-}
-
-/**
- * A per-tenant job runs once per organisation and answers `succeeded` for nobody when none is open: the spec that runs it
- * opens the bank first (`POST /organisations`).
- */
-async function expectABankIsOpen(job: string, database: Persistence['database']): Promise<void> {
-  const banks = await new PrismaOrganisationTenantDirectory(database).tenants();
-
-  if (banks.length === 0) {
-    throw new Error(`The job ${job} runs per bank and no bank is open: open it first, with POST /organisations.`);
+  if (outcome !== 'succeeded') {
+    throw new Error(`The job ${name} ended ${outcome}${errorCode === undefined ? '' : ` (${errorCode})`}.`);
   }
+
+  if (tenants === 0) {
+    throw new Error(`The job ${name} is per-tenant and ran for no tenant: open a tenant first (an organisation).`);
+  }
+
+  return run;
 }

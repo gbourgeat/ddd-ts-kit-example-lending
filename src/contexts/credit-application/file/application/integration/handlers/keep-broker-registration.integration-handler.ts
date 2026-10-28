@@ -3,7 +3,6 @@ import { brokerRegisteredV1, type BrokerRegisteredV1 } from '@/contexts/brokerag
 import { KeepBrokerRegistrationCommand } from '@/contexts/credit-application/file/application/commands/keep-broker-registration/keep-broker-registration.command';
 
 /** Keeps a broker's registration in force from the day brokerage registered it. */
-// ddd-ts-kit-disable-next-line events/consumer-idempotent -- ADR-0005: registered in its module file, which the rule does not read
 export class KeepBrokerRegistrationIntegrationHandler {
   static readonly eventType = brokerRegisteredV1.type;
 

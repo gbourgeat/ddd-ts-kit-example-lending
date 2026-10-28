@@ -3,7 +3,6 @@ import { productDefinedV2, type ProductDefinedV2 } from '@/contexts/credit-polic
 import { KeepProductTermsCommand } from '@/contexts/credit-application/file/application/commands/keep-product-terms/keep-product-terms.command';
 import { productTermsRowOf } from '@/contexts/credit-application/file/application/projections/product-terms-row-of.projection';
 
-// ddd-ts-kit-disable-next-line events/consumer-idempotent -- ADR-0005: registered in its module file, which the rule does not read
 export class KeepProductTermsIntegrationHandler {
   static readonly eventType = productDefinedV2.type;
 
