@@ -1,3 +1,4 @@
+import type { RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import type { Clock, CommandHandler, IdGenerator } from '@ddd-ts-kit/kernel';
 import { Money } from '@/shared-kernel/money.vo';
 import type { ProductTerms } from '@/contexts/credit-application/file/application/ports/product-terms.port';
@@ -29,11 +30,12 @@ export class DraftOfferHandler implements CommandHandler<DraftOfferCommand> {
       readonly productTerms: ProductTerms;
       readonly ids: IdGenerator;
       readonly clock: Clock;
+      readonly relations: RelationTupleStore;
     },
   ) {}
 
   async execute(command: DraftOfferCommand): Promise<string> {
-    const { applications, pricing, productTerms, ids, clock } = this.dependencies;
+    const { applications, productTerms, ids, clock } = this.dependencies;
     const application = await applications.findById(command.applicationId);
 
     if (application === undefined) {
@@ -48,16 +50,7 @@ export class DraftOfferHandler implements CommandHandler<DraftOfferCommand> {
 
     const today = clock.now();
     const { productId, durationMonths } = approved;
-    const rate = await pricing.rateBasisPointsFor(productId, durationMonths, today);
-    const maximum = await pricing.legalMaximumBasisPointsFor(LEGAL_MAXIMUM_CATEGORY, today);
-
-    if (rate === undefined) {
-      throw NoRateForOffer.forProductAndDuration(productId, durationMonths);
-    }
-
-    if (maximum === undefined) {
-      throw UnknownLegalMaximumRate.forUnknownLegalMaximumRate();
-    }
+    const { rate, maximum } = await this.pricingOf(approved, today);
 
     const terms = new OfferTermsService().termsOf({
       applicationId: command.applicationId,
@@ -71,7 +64,35 @@ export class DraftOfferHandler implements CommandHandler<DraftOfferCommand> {
     const offer = Offer.draft(ids.next(), terms, today);
 
     await this.offerRepository.save(offer);
+    await this.linkToApplication(offer.id, command.applicationId);
 
     return offer.id;
+  }
+
+  /** The rate of the grid for the product and duration, and the legal maximum in force: both are needed to draft the offer. */
+  private async pricingOf(
+    approved: { productId: string; durationMonths: number },
+    today: Date,
+  ): Promise<{ rate: number; maximum: number }> {
+    const { pricing } = this.dependencies;
+    const rate = await pricing.rateBasisPointsFor(approved.productId, approved.durationMonths, today);
+    const maximum = await pricing.legalMaximumBasisPointsFor(LEGAL_MAXIMUM_CATEGORY, today);
+
+    if (rate === undefined) {
+      throw NoRateForOffer.forProductAndDuration(approved.productId, approved.durationMonths);
+    }
+
+    if (maximum === undefined) {
+      throw UnknownLegalMaximumRate.forUnknownLegalMaximumRate();
+    }
+
+    return { rate, maximum };
+  }
+
+  /** The offer belongs to its application: the applicant who consents to it may sign the offer (`offer.accept`). */
+  private async linkToApplication(offerId: string, applicationId: string): Promise<void> {
+    await this.dependencies.relations.write([
+      { object: `offer:${offerId}`, relation: 'application', subject: `application:${applicationId}` },
+    ]);
   }
 }

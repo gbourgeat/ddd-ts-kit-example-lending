@@ -111,6 +111,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Issue | the offer sent to the borrower after its pre-contractual sheet, refused when its annual percentage rate is at or above the legal maximum rate in force that day |  |
 | Show | to give back, to a decider or a reviewer, what a decision rests on, read from the file as it was recorded |  |
 | View | what the decider saw of an application when they decided: the decision with the assessment, the register answer and the refusal review it rested on, as the file recorded them, never the current data |  |
+| Accept | the borrower signs the offer electronically, within 15 days of its issue, which records the signing date |  |
+| Expired | an offer whose 15 days of validity, counted from its issue, have passed: it can no longer be signed |  |
 
 ## Modules
 
@@ -170,6 +172,7 @@ No personal data declared.
 - `credit-application:application.request-exception`
 - `credit-application:offer.issue`
 - `credit-application:application.request-review`
+- `credit-application:offer.accept`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -222,6 +225,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `AcceptOffer` | command | `offer.accept` |
 | `AssessApplication` | command | `application.assess` |
 | `AttachDocument` | command | `application.attach-document` |
 | `BringApplication` | command | not read |
@@ -288,6 +292,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | not read | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
 | GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | not read | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 | GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
+| POST | `/offers/:id/acceptance` | `acceptOffer` | `OffersRoutes` | `Authenticated` | `AcceptOffer` | `offer.accept` | params: `AcceptOfferParams`, body: `AcceptOfferBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownOffer`, `CreditApplicationCodes.OfferNotIssued`, `CreditApplicationCodes.OfferExpired`, `CreditApplicationCodes.OfferAlreadyAccepted` |
 | GET | `/offers/:id/pre-contractual-sheet` | `readPreContractualSheet` | `OffersRoutes` | `Authenticated` | `ReadPreContractualSheet` | `offer.read-sheet` | params: `ReadPreContractualSheetParams` | 200: `ReadPreContractualSheetAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownOffer` |
 | GET | `/product-terms/:productId` | `readProductTerms` | `ProductTermsRoutes` | `Authenticated` | `ReadProductTerms` | not read | params: `ReadProductTermsParams` | 200: `ReadProductTermsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownProductTerms` |
 | GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | not read | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
@@ -407,6 +412,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
 | `NoRateForOffer` | `forProductAndDuration` | `NO_RATE_FOR_OFFER` | `productId`, `durationMonths` |
 | `OfferAboveLegalMaximum` | `forAboveLegalMaximum` | `OFFER_ABOVE_LEGAL_MAXIMUM` | `annualPercentageRateTenths`, `legalMaximumBasisPoints` |
+| `OfferAlreadyAccepted` | `forAlreadyAccepted` | `OFFER_ALREADY_ACCEPTED` | `offerId` |
+| `OfferExpired` | `forExpiry` | `OFFER_EXPIRED` | `expiredAt` |
+| `OfferNotIssued` | `forNotIssued` | `OFFER_NOT_ISSUED` | `offerId` |
 | `UnknownLegalMaximumRate` | `forUnknownLegalMaximumRate` | `UNKNOWN_LEGAL_MAXIMUM_RATE` | none |
 | `UnknownOffer` | `forOffer` | `UNKNOWN_OFFER` | `offerId` |
 | `UnknownRateGrid` | `forUnknownRateGrid` | `UNKNOWN_RATE_GRID` | none |

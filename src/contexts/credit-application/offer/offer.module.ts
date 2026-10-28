@@ -31,10 +31,14 @@ import { ReadPreContractualSheetQuery } from '@/contexts/credit-application/offe
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import { PrismaProductTerms } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-product-terms.repository';
 import type { OfferPricing } from '@/contexts/credit-application/offer/application/ports/offer-pricing.port';
+import type { ElectronicSignature } from '@/contexts/credit-application/offer/application/ports/electronic-signature.port';
+import { SimulatedElectronicSignature } from '@/contexts/credit-application/offer/infrastructure/external/simulated-electronic-signature.adapter';
 import type { OfferRepository } from '@/contexts/credit-application/offer/domain/repositories/offer.repository';
 import { PrismaOfferPricing } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-offer-pricing.repository';
 import { IssueOfferCommand } from '@/contexts/credit-application/offer/application/commands/issue-offer/issue-offer.command';
 import { IssueOfferHandler } from '@/contexts/credit-application/offer/application/commands/issue-offer/issue-offer.handler';
+import { AcceptOfferCommand } from '@/contexts/credit-application/offer/application/commands/accept-offer/accept-offer.command';
+import { AcceptOfferHandler } from '@/contexts/credit-application/offer/application/commands/accept-offer/accept-offer.handler';
 // /ddd-ts-kit:imports
 
 /** What the module offer of the model registers; credit-application.module.ts composes it with the rest of the context. */
@@ -62,7 +66,19 @@ export const offerModule = {
       token: 'OfferPricing',
     });
 
-    registerOfferCommands(platform, { offerRepository, pricing, applications: given.repository });
+    const signature = platform.adapter(new SimulatedElectronicSignature(), {
+      kind: 'external',
+      context: 'credit-application',
+      token: 'ElectronicSignature',
+    });
+
+    registerOfferCommands(platform, { offerRepository, pricing, signature, applications: given.repository });
+
+    platform.commands.register(
+      AcceptOfferCommand,
+      new AcceptOfferHandler(offerRepository, { signature, clock: platform.clock }),
+      { context: 'credit-application' },
+    );
     // /ddd-ts-kit:handlers
   },
 
@@ -93,6 +109,9 @@ export const offerModule = {
       requires(IssueOfferCommand, creditApplicationPermissions['offer.issue'], {
         resource: () => ({ type: 'context', id: 'credit-application' }),
       }),
+      requires(AcceptOfferCommand, creditApplicationPermissions['offer.accept'], {
+        resource: (command) => ({ type: 'offer', id: command.offerId }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },
@@ -112,6 +131,7 @@ function registerOfferCommands(
   given: {
     readonly offerRepository: OfferRepository;
     readonly pricing: OfferPricing;
+    readonly signature: ElectronicSignature;
     readonly applications: CreditApplicationRepository;
   },
 ): void {
@@ -125,6 +145,7 @@ function registerOfferCommands(
       productTerms: new PrismaProductTerms(platform.persistence.database, platform.scope),
       ids: platform.ids,
       clock: platform.clock,
+      relations: platform.relations,
     }),
     { context: 'credit-application' },
   );

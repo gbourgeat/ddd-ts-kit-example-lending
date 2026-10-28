@@ -41,6 +41,9 @@ export const CreditApplicationCodes = {
   ExceptionNotAboveLimit: 'EXCEPTION_NOT_ABOVE_LIMIT',
   HumanReviewNotAvailable: 'HUMAN_REVIEW_NOT_AVAILABLE',
   NotDecided: 'NOT_DECIDED',
+  OfferNotIssued: 'OFFER_NOT_ISSUED',
+  OfferAlreadyAccepted: 'OFFER_ALREADY_ACCEPTED',
+  OfferExpired: 'OFFER_EXPIRED',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

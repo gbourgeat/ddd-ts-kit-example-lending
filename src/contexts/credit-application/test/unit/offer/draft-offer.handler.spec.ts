@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
 import { anActor } from '@ddd-ts-kit/auth/testing';
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { createTestBuses } from '@ddd-ts-kit/testing';
 import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
@@ -60,6 +61,18 @@ describe('Draft offer', () => {
       durationMonths: 60,
       rateBasisPoints: 640,
       legalMaximumBasisPoints: 1_250,
+    });
+  });
+
+  it('links the drafted offer to its application, so that its applicant may sign it', async () => {
+    const { commandBus, relations } = arrange();
+
+    const id = await commandBus.execute(new DraftOfferCommand(holder, 'approved-1'));
+
+    expect(relations.all()).toContainEqual({
+      object: `offer:${id}`,
+      relation: 'application',
+      subject: 'application:approved-1',
     });
   });
 
@@ -127,17 +140,20 @@ function arrange(given: { gridUpToMonths?: number; maximumBasisPoints?: number |
     aCreditApplication().identifiedBy('pending-1').forProduct('personal-loan').build(),
   ]);
 
+  const relations = new InMemoryRelationTupleStore();
+
   const handler = new DraftOfferHandler(offerRepository, {
     applications,
     pricing: pricingOf(given),
     productTerms: new FakeProductTerms(),
     ids,
     clock,
+    relations,
   });
 
   commandBus.use(holders).register(DraftOfferCommand, handler);
 
-  return { commandBus, offerRepository };
+  return { commandBus, offerRepository, relations };
 }
 
 function pricingOf(given: { gridUpToMonths?: number; maximumBasisPoints?: number | undefined }): FakeOfferPricing {

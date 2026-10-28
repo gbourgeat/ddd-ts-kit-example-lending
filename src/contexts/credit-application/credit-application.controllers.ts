@@ -28,6 +28,7 @@ import { ReadProductTermsController } from '@/contexts/credit-application/file/p
 import { DraftOfferController } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.controller';
 import { IssueOfferController } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.controller';
 import { ReadLegalMaximumRateController } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.controller';
+import { AcceptOfferController } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.controller';
 import { ReadPreContractualSheetController } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.controller';
 import { ReadRateGridController } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.controller';
 import { AssessApplicationParams } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.params';
@@ -74,6 +75,8 @@ import { IssueOfferParams } from '@/contexts/credit-application/offer/presentati
 import { IssueOfferBody } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.body';
 import { ReadLegalMaximumRateParams } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.params';
 import { ReadLegalMaximumRateAnswer } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.answer';
+import { AcceptOfferParams } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.params';
+import { AcceptOfferBody } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.body';
 import { ReadPreContractualSheetParams } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.params';
 import { ReadPreContractualSheetAnswer } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.answer';
 import { ReadRateGridParams } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.params';
@@ -161,6 +164,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(ReadLegalMaximumRateController, {
     readLegalMaximumRate: { params: ReadLegalMaximumRateParams, answer: ReadLegalMaximumRateAnswer },
+  }),
+  withSignatures(AcceptOfferController, {
+    acceptOffer: { params: AcceptOfferParams, body: AcceptOfferBody, answer: null },
   }),
   withSignatures(ReadPreContractualSheetController, {
     readPreContractualSheet: { params: ReadPreContractualSheetParams, answer: ReadPreContractualSheetAnswer },
