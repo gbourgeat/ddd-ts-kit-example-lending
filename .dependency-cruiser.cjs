@@ -209,7 +209,7 @@ module.exports = {
       },
       "to": {
         "path": "^src/contexts/[^/]+/published-language(/|\\.ts$)",
-        "pathNot": "^src/contexts/(servicing|credit-application|credit-policy|identity|data-protection)/"
+        "pathNot": "^src/contexts/(servicing|credit-application|credit-policy|identity|data-protection|customer-due-diligence)/"
       }
     },
     {

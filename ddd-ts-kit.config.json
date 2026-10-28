@@ -154,6 +154,10 @@
         {
           "context": "data-protection",
           "relationship": "customer-supplier"
+        },
+        {
+          "context": "customer-due-diligence",
+          "relationship": "published-language"
         }
       ],
       "modules": {

@@ -109,6 +109,7 @@ No process manager.
 - Downstream of `credit-policy` (published-language).
 - Downstream of `identity` (conformist).
 - Downstream of `data-protection` (customer-supplier).
+- Downstream of `customer-due-diligence` (published-language).
 - Upstream of `financial-crime` (published-language).
 - Upstream of `reporting` (published-language).
 <!-- /ddd-ts-kit:relationships -->
@@ -118,7 +119,7 @@ No process manager.
 <!-- ddd-ts-kit:reference -->
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe servicing --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
-**Dependencies**: upstreams: `credit-application` (published-language), `credit-policy` (published-language), `identity` (conformist), `data-protection` (customer-supplier); downstreams: `financial-crime` (published-language), `reporting` (published-language).
+**Dependencies**: upstreams: `credit-application` (published-language), `credit-policy` (published-language), `identity` (conformist), `data-protection` (customer-supplier), `customer-due-diligence` (published-language); downstreams: `financial-crime` (published-language), `reporting` (published-language).
 
 ### Use cases
 
