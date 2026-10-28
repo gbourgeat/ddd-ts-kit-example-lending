@@ -20,5 +20,7 @@ export class FakeLoanRepository implements LoanRepository {
     return this.adapter.save(saved);
   }
 
-  // TODO(domain): implement each lookup of LoanRepository over the events of `this.store`, so that handlers are tested against a working repository.
+  findClosedOnOrBefore(instant: Date): Promise<readonly Loan[]> {
+    return this.adapter.findClosedOnOrBefore(instant);
+  }
 }

@@ -13,6 +13,7 @@ tags:
   - name: data-protection
   - name: financial-crime
   - name: identity
+  - name: servicing
 paths:
   /accounts/me:
     put:
@@ -4365,6 +4366,69 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - UNKNOWN_LEGAL_MAXIMUM_RATE
+            - VALIDATION_FAILED
+  /loans/{id}/closure:
+    post:
+      operationId: closeLoan
+      summary: Close loan
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: LOAN_ALREADY_CLOSED, UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - LOAN_ALREADY_CLOSED
+            - UNKNOWN_LOAN
             - VALIDATION_FAILED
   /offers/{id}/pre-contractual-sheet:
     get:

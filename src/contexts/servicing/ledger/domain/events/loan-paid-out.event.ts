@@ -1,10 +1,12 @@
 import { NamedDomainEvent } from '@ddd-ts-kit/kernel';
+import type { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
 
+/** The money of the loan is paid out to its borrower, and its schedule starts. */
 export class LoanPaidOut extends NamedDomainEvent('servicing.loan.paid-out') {
   constructor(
     readonly aggregateId: string,
     readonly occurredAt: Date,
-    // TODO(domain): add as readonly parameters the facts a reaction needs to know about "loan paid out" (value objects or primitives, never the aggregate itself).
+    readonly borrower?: Borrower,
   ) {
     super();
   }

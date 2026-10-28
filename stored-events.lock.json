@@ -80,7 +80,11 @@
   "customer-due-diligence.customer.sanctions-match-confirmed": {
     "1": "sha256:733dac3b56fba725"
   },
-  "servicing.loan.paid-out": {
+  "servicing.loan.closed": {
     "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.paid-out": {
+    "1": "sha256:733dac3b56fba725",
+    "2": "sha256:a1d9654655ebb58f"
   }
 }
