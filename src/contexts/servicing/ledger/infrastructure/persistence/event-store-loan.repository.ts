@@ -5,7 +5,9 @@ import {
   type PersonalDataCipher,
   type StoredEvent,
 } from '@ddd-ts-kit/kernel';
-import { Loan, type LoanEvent, type LoanState } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
+import { Loan } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
+import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
+import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 import type { LoanRepository } from '@/contexts/servicing/ledger/domain/repositories/loan.repository';
 import { loanEvents } from '@/contexts/servicing/ledger/infrastructure/persistence/loan-events.mapper';
 

@@ -5,7 +5,7 @@ import {
   type StoredEventData,
   type StoredEventTypes,
 } from '@ddd-ts-kit/kernel';
-import type { LoanEvent } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
+import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 import { LoanClosed } from '@/contexts/servicing/ledger/domain/events/loan-closed.event';
 import { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';

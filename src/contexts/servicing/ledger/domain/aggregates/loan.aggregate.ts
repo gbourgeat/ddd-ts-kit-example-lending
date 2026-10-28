@@ -12,6 +12,7 @@ import { EarlyRepaymentTooHigh } from '@/contexts/servicing/ledger/domain/errors
 import { LoanNotWrittenOff } from '@/contexts/servicing/ledger/domain/errors/loan-not-written-off.error';
 import { InstalmentDueDateService } from '@/contexts/servicing/ledger/domain/services/instalment-due-date.service';
 import { EarlyRepaymentFeeService } from '@/contexts/servicing/ledger/domain/services/early-repayment-fee.service';
+import { MonthsRemainingService } from '@/contexts/servicing/ledger/domain/services/months-remaining.service';
 import { OutstandingCapitalService } from '@/contexts/servicing/ledger/domain/services/outstanding-capital.service';
 import type { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
 import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
@@ -19,44 +20,8 @@ import { Money } from '@/shared-kernel/money.vo';
 import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
 import { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
 import { SimpleDailyInterestService } from '@/contexts/servicing/ledger/domain/services/simple-daily-interest.service';
-
-export type LoanEvent =
-  | LoanPaidOut
-  | LoanClosed
-  | LoanScheduled
-  | LoanInstalmentDueNoted
-  | LoanEarlyRepaymentRecorded
-  | LoanWrittenOff
-  | LoanWriteOffReversed
-  | LoanRescheduled
-  | LoanWithdrawalRepaymentRecorded;
-
-/** The schedule that replaced the one of the payout, from the instalments noted due before it and the capital repaid before it. */
-export interface Rescheduling {
-  readonly schedule: LoanSchedule;
-  /** The instalments noted due before the rescheduling: the new schedule is numbered after them. */
-  readonly notedBefore: number;
-  /** The capital repaid early before the rescheduling, already out of the capital it covers. */
-  readonly earlyRepaidBefore: Money;
-}
-
-export interface LoanState {
-  readonly registeredAt: Date;
-  readonly closedAt: Date | undefined;
-  readonly borrower: Borrower | undefined;
-  /** The schedule of the payout: its principal is the amount paid out, its rate is kept by the loan. */
-  readonly schedule: LoanSchedule | undefined;
-  /** The schedule in force once the loan has been rescheduled; undefined while the schedule of the payout is in force. */
-  readonly rescheduling: Rescheduling | undefined;
-  /** The decisions, by their event id, whose rescheduling the loan already recorded: a delivery seen again records nothing. */
-  readonly rescheduledBy: readonly string[];
-  /** The numbers, counted from one, of the instalments already recorded as due. */
-  readonly instalmentsDue: readonly number[];
-  /** The capital repaid early, over the life of the loan. */
-  readonly earlyRepaid: Money;
-  /** The outstanding capital written off, while the write-off stands; undefined once reversed or never written off. */
-  readonly writtenOff: Money | undefined;
-}
+import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
+import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 
 export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
   private state: LoanState = {
@@ -288,17 +253,12 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     return this.state.rescheduling?.notedBefore ?? 0;
   }
 
-  /** The months of the schedule in force still to run at `now`: the monthly due dates passed since the payout are counted. */
+  /** The months of the schedule in force still to run at `now`. */
   private monthsRemaining(now: Date): number {
-    const lastNumber = this.notedBefore + (this.currentSchedule?.durationMonths ?? 0);
-    const dueDates = new InstalmentDueDateService();
-    let passed = 0;
+    const notedBefore = this.notedBefore;
+    const lastNumber = notedBefore + (this.currentSchedule?.durationMonths ?? 0);
 
-    while (passed < lastNumber && dueDates.dueOn(this.state.registeredAt, passed + 1).getTime() <= now.getTime()) {
-      passed += 1;
-    }
-
-    return lastNumber - Math.max(passed, this.notedBefore);
+    return new MonthsRemainingService().of({ paidOutAt: this.registeredAt, now, notedBefore, lastNumber });
   }
 
   private applyPaidOut(event: LoanPaidOut): void {

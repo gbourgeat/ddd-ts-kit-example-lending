@@ -62,6 +62,8 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Withdrawal | The borrower's withdrawal of an application after its payout, which repays the loan |  |
 | Simple | Without compounding: each day's interest is on the principal only |  |
 | Interest | Interest accrued from the payout to a withdrawal, simple and daily: principal times the annual rate, times the whole days elapsed, over 365 days, in whole cents rounded down |  |
+| Months | The months of a schedule, counted in whole calendar months |  |
+| Remaining | Still to run at an instant, not yet passed |  |
 
 ## Modules
 
