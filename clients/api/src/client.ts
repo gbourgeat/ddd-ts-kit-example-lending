@@ -395,6 +395,12 @@ export interface Client {
    */
   readLegalMaximumRate(input: operations.ReadLegalMaximumRateInput, options?: CallOptions): Promise<operations.ReadLegalMaximumRateResult>;
   /**
+   * Read portfolio at risk: `GET /loans/portfolio-at-risk`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  readPortfolioAtRisk(input?: operations.ReadPortfolioAtRiskInput, options?: CallOptions): Promise<operations.ReadPortfolioAtRiskResult>;
+  /**
    * Read loan: `GET /loans/{id}`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
@@ -655,6 +661,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
     readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
+    readPortfolioAtRisk: (input, call) => operations.readPortfolioAtRisk(connection, input, call),
     readLoan: (input, call) => operations.readLoan(connection, input, call),
     closeLoan: (input, call) => operations.closeLoan(connection, input, call),
     repayEarly: (input, call) => operations.repayEarly(connection, input, call),

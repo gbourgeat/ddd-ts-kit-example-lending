@@ -1,6 +1,8 @@
 import type { UseCaseDeclaration } from '@ddd-ts-kit/auth';
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
+import { CatchUpSubscription, EventSerializer } from '@ddd-ts-kit/kernel';
+import { applyingProjection } from '@ddd-ts-kit/kernel/declarations';
 // ddd-ts-kit:imports
 import { DeclareRepaymentIncidentCommand } from '@/contexts/servicing/arrears/application/commands/declare-repayment-incident/declare-repayment-incident.command';
 import { DeclareRepaymentIncidentHandler } from '@/contexts/servicing/arrears/application/commands/declare-repayment-incident/declare-repayment-incident.handler';
@@ -26,7 +28,17 @@ import { WithdrawIncidentWhenPaidEventHandler } from '@/contexts/servicing/arrea
 import { LoanArrearsCleared } from '@/contexts/servicing/arrears/domain/events/loan-arrears-cleared.event';
 import { NotifyBorrowerAtEachStageEventHandler } from '@/contexts/servicing/arrears/application/event-handlers/notify-borrower-at-each-stage.event-handler';
 import { SimulatedBorrowerNotifier } from '@/contexts/servicing/arrears/infrastructure/external/simulated-borrower-notifier.adapter';
+import { ReadPortfolioAtRiskHandler } from '@/contexts/servicing/arrears/application/queries/read-portfolio-at-risk/read-portfolio-at-risk.handler';
+import { ReadPortfolioAtRiskQuery } from '@/contexts/servicing/arrears/application/queries/read-portfolio-at-risk/read-portfolio-at-risk.query';
+import { PortfolioAtRiskProjection } from '@/contexts/servicing/arrears/application/projections/portfolio-at-risk.projection';
+import { PrismaPortfolioAtRisk } from '@/contexts/servicing/arrears/infrastructure/persistence/prisma-portfolio-at-risk.repository';
+import { CatchingUpPortfolioAtRiskReader } from '@/contexts/servicing/arrears/infrastructure/persistence/catching-up-portfolio-at-risk.reader';
+import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
+import { loanEvents } from '@/contexts/servicing/ledger/infrastructure/persistence/loan-events.mapper';
 // /ddd-ts-kit:imports
+
+/** The subscriber of the portfolio-at-risk projection: the name of its checkpoint. */
+const PORTFOLIO_AT_RISK_SUBSCRIBER = 'servicing.portfolio-at-risk';
 
 /** What the module arrears of the model registers; servicing.module.ts composes it with the rest of the context. */
 export const arrearsModule = {
@@ -61,59 +73,22 @@ export const arrearsModule = {
     });
 
     notifyBorrowerAtEachStage(platform, loanRepository);
+
+    platform.queries.register(
+      ReadPortfolioAtRiskQuery,
+      new ReadPortfolioAtRiskHandler(portfolioAtRiskReaderOf(platform)),
+      {
+        context: 'servicing',
+      },
+    );
     // /ddd-ts-kit:handlers
   },
 
   /** What the module does when an event happens: its own events and those of the other contexts. */
   registerReactions(platform: Platform): void {
     // ddd-ts-kit:reactions
-    const loanArrearsBucketEnteredPublisher = platform.adapter(
-      new LoanArrearsBucketEnteredPublisher(platform.publisher, platform.ids),
-      { kind: 'domain-event-handler', context: 'servicing' },
-    );
-
-    platform.domainEvents.on(LoanArrearsBucketEntered.eventName, async (event) => {
-      if (event instanceof LoanArrearsBucketEntered) {
-        await loanArrearsBucketEnteredPublisher.handle(event);
-      }
-    });
-
-    const loanDefaultedPublisher = platform.adapter(new LoanDefaultedPublisher(platform.publisher, platform.ids), {
-      kind: 'domain-event-handler',
-      context: 'servicing',
-    });
-
-    platform.domainEvents.on(LoanDefaulted.eventName, async (event) => {
-      if (event instanceof LoanDefaulted) {
-        await loanDefaultedPublisher.handle(event);
-      }
-    });
-
-    const declareIncidentAfterTwoUnpaidEventHandler = platform.adapter(
-      new DeclareIncidentAfterTwoUnpaidEventHandler(platform.commands),
-      { kind: 'domain-event-handler', context: 'servicing' },
-    );
-
-    platform.domainEvents.on(LoanInstalmentMarkedUnpaid.eventName, async (event) => {
-      if (event instanceof LoanInstalmentMarkedUnpaid) {
-        await declareIncidentAfterTwoUnpaidEventHandler.handle(event);
-      }
-    });
-
-    const withdrawIncidentWhenPaidEventHandler = platform.adapter(
-      new WithdrawIncidentWhenPaidEventHandler(platform.commands),
-      {
-        kind: 'domain-event-handler',
-        context: 'servicing',
-      },
-    );
-
-    platform.domainEvents.on(LoanArrearsCleared.eventName, async (event) => {
-      if (event instanceof LoanArrearsCleared) {
-        await withdrawIncidentWhenPaidEventHandler.handle(event);
-      }
-    });
-
+    publishArrearsAndDefaults(platform);
+    reactToRepaymentIncidents(platform);
     // /ddd-ts-kit:reactions
   },
 
@@ -156,6 +131,9 @@ export const arrearsModule = {
       requires(WithdrawRepaymentIncidentCommand, servicingPermissions['loan.withdraw-incident'], {
         resource: () => ({ type: 'context', id: 'servicing' }),
       }),
+      requires(ReadPortfolioAtRiskQuery, servicingPermissions['loan.read-portfolio'], {
+        resource: () => ({ type: 'context', id: 'servicing' }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },
@@ -168,6 +146,56 @@ export const arrearsModule = {
     ];
   },
 };
+
+/** The publishers of the arrears bucket entered and of the default, which tell the other contexts what the module decided. */
+function publishArrearsAndDefaults(platform: Platform): void {
+  const loanArrearsBucketEnteredPublisher = platform.adapter(
+    new LoanArrearsBucketEnteredPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'servicing' },
+  );
+
+  platform.domainEvents.on(LoanArrearsBucketEntered.eventName, async (event) => {
+    if (event instanceof LoanArrearsBucketEntered) {
+      await loanArrearsBucketEnteredPublisher.handle(event);
+    }
+  });
+
+  const loanDefaultedPublisher = platform.adapter(new LoanDefaultedPublisher(platform.publisher, platform.ids), {
+    kind: 'domain-event-handler',
+    context: 'servicing',
+  });
+
+  platform.domainEvents.on(LoanDefaulted.eventName, async (event) => {
+    if (event instanceof LoanDefaulted) {
+      await loanDefaultedPublisher.handle(event);
+    }
+  });
+}
+
+/** The repayment incident is declared after two unpaid instalments and withdrawn once the arrears are cleared. */
+function reactToRepaymentIncidents(platform: Platform): void {
+  const declareIncidentAfterTwoUnpaidEventHandler = platform.adapter(
+    new DeclareIncidentAfterTwoUnpaidEventHandler(platform.commands),
+    { kind: 'domain-event-handler', context: 'servicing' },
+  );
+
+  platform.domainEvents.on(LoanInstalmentMarkedUnpaid.eventName, async (event) => {
+    if (event instanceof LoanInstalmentMarkedUnpaid) {
+      await declareIncidentAfterTwoUnpaidEventHandler.handle(event);
+    }
+  });
+
+  const withdrawIncidentWhenPaidEventHandler = platform.adapter(
+    new WithdrawIncidentWhenPaidEventHandler(platform.commands),
+    { kind: 'domain-event-handler', context: 'servicing' },
+  );
+
+  platform.domainEvents.on(LoanArrearsCleared.eventName, async (event) => {
+    if (event instanceof LoanArrearsCleared) {
+      await withdrawIncidentWhenPaidEventHandler.handle(event);
+    }
+  });
+}
 
 /** The reaction reads the borrower through the loan repository and tells it by the notifier, once the classification is committed. */
 function notifyBorrowerAtEachStage(platform: Platform, loanRepository: LoanRepository): void {
@@ -189,5 +217,25 @@ function notifyBorrowerAtEachStage(platform: Platform, loanRepository: LoanRepos
       }
     },
     { phase: 'after-commit' },
+  );
+}
+
+/** The reader of the portfolio at risk: it catches the projection up with the event store, then answers from the rows of the tenant. */
+function portfolioAtRiskReaderOf(platform: Platform): CatchingUpPortfolioAtRiskReader {
+  const store = new PrismaPortfolioAtRisk(platform.persistence.database, platform.scope);
+  const serializer = new EventSerializer<LoanEvent>(loanEvents, { cipher: platform.eventSourcing.cipher });
+
+  const subscription = new CatchUpSubscription({
+    name: PORTFOLIO_AT_RISK_SUBSCRIBER,
+    store: platform.eventSourcing.events,
+    checkpoints: platform.eventSourcing.checkpoints,
+    unitOfWork: platform.persistence.unitOfWork,
+    scope: platform.scope,
+    apply: applyingProjection(new PortfolioAtRiskProjection(store), serializer),
+  });
+
+  return platform.adapter(
+    new CatchingUpPortfolioAtRiskReader(subscription, platform.persistence.database, platform.scope),
+    { kind: 'repository', context: 'servicing' },
   );
 }

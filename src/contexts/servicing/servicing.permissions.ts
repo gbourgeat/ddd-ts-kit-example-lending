@@ -16,5 +16,6 @@ export const servicingPermissions = definePermissions('servicing', {
   'loan.declare-default': { description: 'Declare default' },
   'loan.declare-incident': { description: 'Declare repayment incident' },
   'loan.withdraw-incident': { description: 'Withdraw repayment incident' },
+  'loan.read-portfolio': { description: 'Read portfolio at risk' },
   // /ddd-ts-kit:permissions
 });

@@ -83,6 +83,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Notify | Send the borrower one notice for an arrears stage, by mail and by text message: the notifier covers both channels | Notice to the payer by the bank |
 | Stage | One of the arrears buckets a loan enters as its days past due grow |  |
 | Each | Every time a loan enters a bucket, not once per loan |  |
+| Portfolio at risk | the share of the principal of the loans paid out and still open that is 31 days and over past due |  |
 
 ## Modules
 
@@ -130,6 +131,7 @@ No personal data declared.
 - `servicing:loan.declare-default`
 - `servicing:loan.declare-incident`
 - `servicing:loan.withdraw-incident`
+- `servicing:loan.read-portfolio`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -193,6 +195,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `GetLoanStatement` | query | `loan.read` |
 | `ReadLoan` | query | `loan.read` |
+| `ReadPortfolioAtRisk` | query | `loan.read-portfolio` |
 | `RecordLatePayment` | command | `loan.record-repayment` |
 | `RecordPayout` | command | `loan.record-payout` |
 | `RecordWithdrawalRepayment` | command | `loan.record-repayment` |
@@ -213,6 +216,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/loans/:id/statement` | `getLoanStatement` | `LoansRoutes` | `Authenticated` | `GetLoanStatement` | `loan.read` | params: `GetLoanStatementParams`, query: `GetLoanStatementQueryParams` | 200: `GetLoanStatementAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | POST | `/loans/:id/write-off` | `writeOffLoan` | `LoansRoutes` | `Authenticated` | `WriteOffLoan` | `loan.write-off` | params: `WriteOffLoanParams`, body: `WriteOffLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
 | POST | `/loans/:id/write-off-reversal` | `reverseWriteOff` | `LoansRoutes` | `Authenticated` | `ReverseWriteOff` | `loan.write-off` | params: `ReverseWriteOffParams`, body: `ReverseWriteOffBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanNotWrittenOff` |
+| GET | `/loans/portfolio-at-risk` | `readPortfolioAtRisk` | `LoansRoutes` | `Authenticated` | `ReadPortfolioAtRisk` | `loan.read-portfolio` |  | 200: `ReadPortfolioAtRiskAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Consumed events
 
@@ -231,6 +235,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `servicing.loan.paid-out` | 1 | `LoanPaidOutPublisher` |
 | `servicing.loan.payment-received` | 1 | `LoanPaymentReceivedPublisher` |
 
+### Projections
+
+| Projection | Class | Applies |
+|---|---|---|
+| `servicing.portfolio-at-risk` | `PortfolioAtRiskProjection` | `LoanScheduled`, `LoanArrearsBucketEntered`, `LoanClosed` |
+
 ### Ports
 
 | Port | Kind | Adapters |
@@ -241,7 +251,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `LoanRepository` | repository | `EventStoreLoanRepository` |
 | `PaymentProvider` | external | `SimulatedPaymentProvider` |
 | `PersonalDataErasure` | external | `RemotePersonalDataErasure` |
+| `PortfolioAtRisk` | not bound |  |
 | `ReadLoanReader` | repository | `EventStoreReadLoanReader` |
+| `ReadPortfolioAtRiskReader` | repository | `CatchingUpPortfolioAtRiskReader` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 
 ### Errors

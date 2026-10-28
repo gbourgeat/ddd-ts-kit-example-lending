@@ -2351,6 +2351,38 @@ export function readLegalMaximumRate(
   return send<ReadLegalMaximumRateResult>(connection, operation, { ...input, ...options });
 }
 
+export type ReadPortfolioAtRiskInput = Record<string, never>;
+
+export type ReadPortfolioAtRiskResult =
+  | Success<200, {
+    buckets: Array<Schemas.ReadPortfolioAtRiskBucketAnswer>;
+    openPrincipalCents: number;
+    atRiskBasisPoints: number;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>;
+
+/**
+ * Read portfolio at risk: `GET /loans/portfolio-at-risk`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+ */
+export function readPortfolioAtRisk(
+  connection: Connection,
+  input: ReadPortfolioAtRiskInput = {},
+  options: CallOptions = {},
+): Promise<ReadPortfolioAtRiskResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/loans/portfolio-at-risk',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json' },
+  };
+
+  return send<ReadPortfolioAtRiskResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadLoanInput {
   readonly path: {
     readonly id: string;

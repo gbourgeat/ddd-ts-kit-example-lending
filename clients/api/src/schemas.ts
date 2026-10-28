@@ -124,6 +124,12 @@ export type RateBandBody = {
   rateBasisPoints: number;
 };
 
+export type ReadPortfolioAtRiskBucketAnswer = {
+  bucket: string;
+  loans: number;
+  principalCents: number;
+};
+
 export type RefusalReviewShownLine = {
   reviewerId: string;
   conclusion: string;
