@@ -310,6 +310,49 @@ export function readAccountInformation(
   return send<ReadAccountInformationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface AssessApplicationInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type AssessApplicationResult =
+  | Success<201, {
+    applicationId: string;
+    modelVersion: string;
+    debtToIncomePercent: number;
+    repaymentIncidents: number;
+    residualIncomeCents: number;
+    score: number;
+    band: string;
+    factors: Array<string>;
+    proposedOutcome: 'approve' | 'refuse';
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'MISSING_ACCOUNT_INFORMATION' | 'NO_SCORE_AVAILABLE' | 'REGISTER_NOT_CONSULTED' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Assess application: `POST /applications/{id}/assessment`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), MISSING_ACCOUNT_INFORMATION (422), NO_SCORE_AVAILABLE (422), REGISTER_NOT_CONSULTED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function assessApplication(
+  connection: Connection,
+  input: AssessApplicationInput,
+  options: CallOptions = {},
+): Promise<AssessApplicationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/assessment',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<AssessApplicationResult>(connection, operation, { ...input, ...options });
+}
+
 export interface NameCoBorrowerInput {
   readonly path: {
     readonly id: string;

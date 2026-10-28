@@ -8,6 +8,7 @@ import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/f
 import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
+import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 
@@ -45,6 +46,11 @@ interface CreditApplicationDocumentAttachedData {
 interface CreditApplicationRegisterConsultedData {
   /** The answers as JSON text: the customer identifiers and whether each one is listed, never a name or a birth date. */
   readonly parties: string;
+}
+
+interface CreditApplicationAssessedData {
+  /** The assessment as JSON text: its inputs, its model version, its score, its band, its factors and the outcome proposed. */
+  readonly assessment: string;
 }
 
 interface CreditApplicationRequestFoundOutsideProductTermsData {
@@ -138,6 +144,16 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         aggregateId,
         occurredAt,
         JSON.parse(data.text('parties')) as { customerId: string; listed: boolean }[],
+      ),
+  }),
+  [CreditApplicationAssessed.eventName]: defineStoredEvent(CreditApplicationAssessed, {
+    version: 1,
+    encode: (event): CreditApplicationAssessedData => ({ assessment: JSON.stringify(event.assessment) }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationAssessed(
+        aggregateId,
+        occurredAt,
+        JSON.parse(data.text('assessment')) as CreditApplicationAssessed['assessment'],
       ),
   }),
   [CreditApplicationRequestFoundOutsideProductTerms.eventName]: defineStoredEvent(

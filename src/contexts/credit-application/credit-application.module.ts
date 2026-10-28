@@ -52,6 +52,8 @@ import { PrismaRateGrids } from '@/contexts/credit-application/offer/infrastruct
 import { registerRateGridHandlers } from '@/contexts/credit-application/composition/register-rate-grid-handlers.module';
 import { PrismaLegalMaximumRates } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-legal-maximum-rates.repository';
 import { registerLegalMaximumRateHandlers } from '@/contexts/credit-application/composition/register-legal-maximum-rate-handlers.module';
+import { AssessApplicationCommand } from '@/contexts/credit-application/assessment/application/commands/assess-application/assess-application.command';
+import { InProcessScoringGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-scoring.gateway';
 import { PrismaProductTerms } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-product-terms.repository';
 import { registerProductTermsHandlers } from '@/contexts/credit-application/composition/register-product-terms-handlers.module';
 import { PrismaBrokerRegistrations } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-broker-registrations.repository';
@@ -176,6 +178,11 @@ function registerHandlers(
       kind: 'external',
       context: 'credit-application',
       token: 'RepaymentIncidentRegister',
+    }),
+    scoring: platform.adapter(new InProcessScoringGateway(platform.scoring), {
+      kind: 'gateway',
+      context: 'credit-application',
+      token: 'ScoringGateway',
     }),
   });
 
@@ -316,6 +323,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     ...declareOfferUseCases(),
+    requires(AssessApplicationCommand, creditApplicationPermissions['application.assess'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
     ...declareFileReferenceUseCases(),
     // /ddd-ts-kit:authorization
   ];

@@ -12,6 +12,7 @@ import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/do
 import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
+import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
@@ -30,6 +31,7 @@ export type CreditApplicationEvent =
   | CreditApplicationEntryCorrected
   | CreditApplicationDocumentAttached
   | CreditApplicationRegisterConsulted
+  | CreditApplicationAssessed
   | CreditApplicationRequestFoundOutsideProductTerms
   | CreditApplicationRequestCheckedWithUnknownProductTerms;
 
@@ -53,6 +55,8 @@ export interface CreditApplicationState {
   readonly correctedEntryIds: readonly string[];
   /** The documents stored for the file, by their key in the object store: the file holds the reference, never the content. */
   readonly documentKeys: readonly string[];
+  /** How many parties the last consultation of the register found listed: undefined until the register is consulted. */
+  readonly listedPartyCount: number | undefined;
 }
 
 /** What the applicant asks for, and the instant the application is registered. */
@@ -79,6 +83,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     entryCount: 0,
     correctedEntryIds: [],
     documentKeys: [],
+    listedPartyCount: undefined,
   };
 
   private constructor(id: string) {
@@ -172,6 +177,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationRegisterConsulted(this.id, consultedAt, parties));
   }
 
+  /** The application is assessed: what it rests on and the outcome proposed are kept in the file, with the instant of the assessment. */
+  assess(assessment: CreditApplicationAssessed['assessment'], assessedAt: Date): void {
+    this.record(new CreditApplicationAssessed(this.id, assessedAt, assessment));
+  }
+
   /**
    * The check of the application against the limits of its product: each limit the request breaks is kept as a finding,
    * or, when the terms of the product are not known, that they are not. The application is never refused by a check.
@@ -227,6 +237,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     return this.state.guarantorIds;
   }
 
+  /** How many parties the last consultation of the register found listed, or undefined when it was never consulted. */
+  get listedPartyCount(): number | undefined {
+    return this.state.listedPartyCount;
+  }
+
   toState(): CreditApplicationState {
     return { ...this.state };
   }
@@ -240,6 +255,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationEntryCorrected.eventName]: (event) => this.applyEntryCorrected(event),
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
       [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
+      [CreditApplicationAssessed.eventName]: (event) => this.applyAssessed(event),
       [CreditApplicationRequestFoundOutsideProductTerms.eventName]: (event) =>
         this.applyRequestFoundOutsideProductTerms(event),
       [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: (event) =>
@@ -270,80 +286,60 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   }
 
   private applySubmitted(event: CreditApplicationSubmitted): void {
-    this.state = {
-      ...this.state,
+    this.applyEntryAppended({
       applicantId: event.applicantId,
       amount: event.amount,
       durationMonths: event.durationMonths,
       registeredAt: event.occurredAt,
       branchId: event.branchId,
       productId: event.productId,
-      entryCount: this.state.entryCount + 1,
-    };
+    });
+  }
+
+  /** A fact is appended to the file: the state takes what it changes, and the file holds one entry more. */
+  private applyEntryAppended(changes: Partial<CreditApplicationState>): void {
+    this.state = { ...this.state, ...changes, entryCount: this.state.entryCount + 1 };
   }
 
   private applyAccountConsentGiven(event: CreditApplicationAccountConsentGiven): void {
-    this.state = {
-      ...this.state,
-      accountConsent: { givenAt: event.occurredAt, expiresAt: event.expiresAt },
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ accountConsent: { givenAt: event.occurredAt, expiresAt: event.expiresAt } });
   }
 
   private applyCoBorrowerNamed(event: CreditApplicationCoBorrowerNamed): void {
-    this.state = {
-      ...this.state,
-      coBorrowerIds: [...this.state.coBorrowerIds, event.coBorrowerId],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ coBorrowerIds: [...this.state.coBorrowerIds, event.coBorrowerId] });
   }
 
   private applyGuarantorNamed(event: CreditApplicationGuarantorNamed): void {
-    this.state = {
-      ...this.state,
-      guarantorIds: [...this.state.guarantorIds, event.guarantorId],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ guarantorIds: [...this.state.guarantorIds, event.guarantorId] });
   }
 
   private applyEntryCorrected(event: CreditApplicationEntryCorrected): void {
-    this.state = {
-      ...this.state,
-      correctedEntryIds: [...this.state.correctedEntryIds, event.correctedEntryId],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ correctedEntryIds: [...this.state.correctedEntryIds, event.correctedEntryId] });
   }
 
   private applyDocumentAttached(event: CreditApplicationDocumentAttached): void {
-    this.state = {
-      ...this.state,
-      documentKeys: [...this.state.documentKeys, event.documentKey],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ documentKeys: [...this.state.documentKeys, event.documentKey] });
   }
 
-  private applyRegisterConsulted(_event: CreditApplicationRegisterConsulted): void {
-    this.state = {
-      ...this.state,
-      entryCount: this.state.entryCount + 1,
-    };
+  private applyRegisterConsulted(event: CreditApplicationRegisterConsulted): void {
+    this.applyEntryAppended({ listedPartyCount: event.parties.filter((party) => party.listed).length });
+  }
+
+  private applyAssessed(_event: CreditApplicationAssessed): void {
+    this.applyEntryAppended({});
   }
 
   private applyRequestFoundOutsideProductTerms(event: CreditApplicationRequestFoundOutsideProductTerms): void {
-    this.state = {
-      ...this.state,
-      productTermsFindings: [...this.state.productTermsFindings, event.finding],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyFinding(event.finding);
   }
 
   private applyRequestCheckedWithUnknownProductTerms(
     event: CreditApplicationRequestCheckedWithUnknownProductTerms,
   ): void {
-    this.state = {
-      ...this.state,
-      productTermsFindings: [...this.state.productTermsFindings, { kind: 'terms-unknown', productId: event.productId }],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyFinding({ kind: 'terms-unknown', productId: event.productId });
+  }
+
+  private applyFinding(finding: ProductTermsFinding): void {
+    this.applyEntryAppended({ productTermsFindings: [...this.state.productTermsFindings, finding] });
   }
 }
