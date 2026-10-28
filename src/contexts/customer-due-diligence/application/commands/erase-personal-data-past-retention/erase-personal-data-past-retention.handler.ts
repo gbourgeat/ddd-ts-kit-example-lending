@@ -1,21 +1,26 @@
-import type { Clock, CommandHandler, IdGenerator } from '@ddd-ts-kit/kernel';
-import { Customer } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
-import type { CustomerRepository } from '@/contexts/customer-due-diligence/domain/repositories/customer.repository';
+import { expiredBefore, type CommandHandler, type RetentionPeriod } from '@ddd-ts-kit/kernel';
+import type { PersonalDataErasure } from '@/contexts/customer-due-diligence/application/ports/personal-data-erasure.port';
 import type { ErasePersonalDataPastRetentionCommand } from '@/contexts/customer-due-diligence/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
+import type { CustomerRepository } from '@/contexts/customer-due-diligence/domain/repositories/customer.repository';
+
+/**
+ * How long the personal data of a customer is kept after its relationship ends: five years. Not yet an entry of
+ * `RETENTION_PERIODS` (owned by data-protection): until one exists, the period is written here.
+ */
+const CUSTOMER_RETENTION: RetentionPeriod = { years: 5 };
 
 export class ErasePersonalDataPastRetentionHandler implements CommandHandler<ErasePersonalDataPastRetentionCommand> {
   constructor(
     private readonly customerRepository: CustomerRepository,
-    private readonly ids: IdGenerator,
-    private readonly clock: Clock,
+    private readonly personalDataErasure: PersonalDataErasure,
   ) {}
 
-  async execute(command: ErasePersonalDataPastRetentionCommand): Promise<string> {
-    // TODO(domain): decide what "erase personal data past retention" does to a Customer: either it gives birth to one (keep `create`, pass the facts of `command` as value objects), or it changes an existing one (load it with `findById`, throw its refusal when there is none, `UnknownCustomer.forCustomer(id)` (`ddd-ts-kit generate error customer-due-diligence UnknownCustomer forCustomer`), call ONE intention method). The events it records leave with the save: nothing else to do here.
-    const customer = Customer.create(this.ids.next(), this.clock.now());
+  async execute(command: ErasePersonalDataPastRetentionCommand): Promise<void> {
+    const cutoff = expiredBefore(CUSTOMER_RETENTION, command.asOf);
+    const pastRetention = await this.customerRepository.findEndedOnOrBefore(cutoff);
 
-    await this.customerRepository.save(customer);
-
-    return customer.id;
+    for (const customer of pastRetention) {
+      await this.personalDataErasure.erase(customer.id);
+    }
   }
 }
