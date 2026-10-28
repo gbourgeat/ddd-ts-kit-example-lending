@@ -1,7 +1,11 @@
 import { describe, expect, it } from '@jest/globals';
+import { createTestBuses } from '@ddd-ts-kit/testing';
 import { InMemoryCommandBus } from '@ddd-ts-kit/kernel';
 import { legalMaximumRatePublishedV2 } from '@/contexts/credit-policy/published-language';
 import { KeepLegalMaximumRateIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-legal-maximum-rate.integration-handler';
+import { KeepLegalMaximumRateCommand } from '@/contexts/credit-application/offer/application/commands/keep-legal-maximum-rate/keep-legal-maximum-rate.command';
+import { KeepLegalMaximumRateHandler } from '@/contexts/credit-application/offer/application/commands/keep-legal-maximum-rate/keep-legal-maximum-rate.handler';
+import { FakeLegalMaximumRates } from '@/contexts/credit-application/test/fakes/legal-maximum-rates.fake';
 
 describe('When credit-policy publishes credit-policy.legal-maximum-rate.published', () => {
   it('listens to the type credit-policy publishes', () => {
@@ -17,25 +21,37 @@ describe('When credit-policy publishes credit-policy.legal-maximum-rate.publishe
     expect(handler.actor).toMatchObject({ id: 'system:credit-application.keep-legal-maximum-rate', type: 'system' });
   });
 
-  it('receives the event as credit-policy publishes it', async () => {
-    const handler = new KeepLegalMaximumRateIntegrationHandler(new InMemoryCommandBus());
-    const meta = { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' };
+  it('keeps the legal maximum rate with the category and the rate credit-policy published', async () => {
+    const { handler, rates } = arrange();
 
-    // TODO(domain): give the payload every field credit-policy declares, register the command the handler executes and assert what credit-application did.
-    const event = legalMaximumRatePublishedV2.create(
-      {
-        legalMaximumRateId: 'legal-maximum-rate-1',
-        category: 'consumer',
-        rateBasisPoints: 700,
-        effectiveFrom: '2026-01-01',
-      },
-      meta,
-    );
+    await handler.handle(publishedRate());
 
-    await expect(handler.handle(event)).resolves.toBeUndefined();
+    expect(await rates.get('maximum-1')).toMatchObject({ category: 'car', rateBasisPoints: 1250 });
   });
 
-  // TODO(domain): replace each entry below by a test that hands the handler an event built from the upstream declaration and asserts what credit-application did, through a real command bus with the handler and its fakes.
-  it.todo('executes the command that follows the upstream fact');
-  it.todo('has the same outcome when the same event is delivered twice');
+  it('has the same outcome when the same event is delivered twice', async () => {
+    const { handler, rates } = arrange();
+    const event = publishedRate();
+
+    await handler.handle(event);
+    await handler.handle(event);
+
+    expect(await rates.get('maximum-1')).toMatchObject({ rateBasisPoints: 1250 });
+  });
 });
+
+function arrange() {
+  const { commandBus } = createTestBuses();
+  const rates = new FakeLegalMaximumRates();
+
+  commandBus.register(KeepLegalMaximumRateCommand, new KeepLegalMaximumRateHandler(rates));
+
+  return { handler: new KeepLegalMaximumRateIntegrationHandler(commandBus), rates };
+}
+
+function publishedRate() {
+  return legalMaximumRatePublishedV2.create(
+    { legalMaximumRateId: 'maximum-1', category: 'car', rateBasisPoints: 1250, effectiveFrom: '2026-01-01' },
+    { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
+  );
+}

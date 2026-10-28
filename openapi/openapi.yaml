@@ -3701,6 +3701,84 @@ paths:
           x-error-codes:
             - INVALID_LEGAL_MAXIMUM_RATE
             - VALIDATION_FAILED
+  /legal-maximum-rates/{legalMaximumRateId}:
+    get:
+      operationId: readLegalMaximumRate
+      summary: Read legal maximum rate
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: legalMaximumRateId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  legalMaximumRateId:
+                    type: string
+                  category:
+                    type: string
+                  rateBasisPoints:
+                    type: integer
+                  effectiveFrom:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                type: object
+                required:
+                  - legalMaximumRateId
+                  - category
+                  - rateBasisPoints
+                  - effectiveFrom
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_LEGAL_MAXIMUM_RATE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_LEGAL_MAXIMUM_RATE
+            - VALIDATION_FAILED
   /organisations:
     post:
       operationId: openOrganisation
@@ -4842,6 +4920,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
+            - VALIDATION_FAILED
+  /rate-grids/{rateGridId}:
+    get:
+      operationId: readRateGrid
+      summary: Read rate grid
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: rateGridId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  rateGridId:
+                    type: string
+                  productId:
+                    type: string
+                  effectiveFrom:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                type: object
+                required:
+                  - rateGridId
+                  - productId
+                  - effectiveFrom
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_RATE_GRID, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_RATE_GRID
             - VALIDATION_FAILED
   /residual-income-minimums:
     put:

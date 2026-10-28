@@ -1695,6 +1695,44 @@ export function publishLegalMaximumRate(
   return send<PublishLegalMaximumRateResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadLegalMaximumRateInput {
+  readonly path: {
+    readonly legalMaximumRateId: string;
+  };
+}
+
+export type ReadLegalMaximumRateResult =
+  | Success<200, {
+    legalMaximumRateId: string;
+    category: string;
+    rateBasisPoints: number;
+    effectiveFrom: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_LEGAL_MAXIMUM_RATE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read legal maximum rate: `GET /legal-maximum-rates/{legalMaximumRateId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+ */
+export function readLegalMaximumRate(
+  connection: Connection,
+  input: ReadLegalMaximumRateInput,
+  options: CallOptions = {},
+): Promise<ReadLegalMaximumRateResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/legal-maximum-rates/{legalMaximumRateId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadLegalMaximumRateResult>(connection, operation, { ...input, ...options });
+}
+
 export interface OpenOrganisationInput {
   readonly body: {
     slug: string;
@@ -2196,6 +2234,43 @@ export function publishRateGrid(
   };
 
   return send<PublishRateGridResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadRateGridInput {
+  readonly path: {
+    readonly rateGridId: string;
+  };
+}
+
+export type ReadRateGridResult =
+  | Success<200, {
+    rateGridId: string;
+    productId: string;
+    effectiveFrom: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_RATE_GRID' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read rate grid: `GET /rate-grids/{rateGridId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_RATE_GRID (422), VALIDATION_FAILED (422).
+ */
+export function readRateGrid(
+  connection: Connection,
+  input: ReadRateGridInput,
+  options: CallOptions = {},
+): Promise<ReadRateGridResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/rate-grids/{rateGridId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadRateGridResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SetResidualIncomeMinimumInput {

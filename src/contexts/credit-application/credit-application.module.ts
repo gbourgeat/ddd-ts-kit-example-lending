@@ -25,10 +25,9 @@ import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/deci
 import { ReadDeclaredConflictsHandler } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.handler';
 import { ReadDeclaredConflictsQuery } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.query';
 import { AttachDocumentCommand } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.command';
-import { ReadDocumentHandler } from '@/contexts/credit-application/file/application/queries/read-document/read-document.handler';
+import { registerDocumentRetentionHandlers } from '@/contexts/credit-application/composition/register-document-retention-handlers.module';
 import { ReadDocumentQuery } from '@/contexts/credit-application/file/application/queries/read-document/read-document.query';
 import { registerDecisionReactions } from '@/contexts/credit-application/composition/register-decision-reactions.module';
-import { registerOfferReactions } from '@/contexts/credit-application/composition/register-offer-reactions.module';
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
 import { staffMemberAppointedV2 as deciderLevelDefinition } from '@/contexts/branch-network/published-language';
 import {
@@ -48,7 +47,6 @@ import { SimulatedAccountInformationProvider } from '@/contexts/credit-applicati
 import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-customer-identity.gateway';
 import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/credit-application/file/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
-import { ErasePersonalDataPastRetentionHandler } from '@/contexts/credit-application/file/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
 import { registerNightlyJobs } from '@/contexts/credit-application/composition/register-nightly-jobs.module';
 import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
 import { registerFileReactions } from '@/contexts/credit-application/composition/register-file-reactions.module';
@@ -63,6 +61,11 @@ import { ReadDeciderLevelQuery } from '@/contexts/credit-application/decision/ap
 import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-decider-levels.repository';
 import { registerDeciderLevelHandlers } from '@/contexts/credit-application/composition/register-decider-level-handlers.module';
 import { registerSubmissionReactions } from '@/contexts/credit-application/composition/register-submission-reactions.module';
+import { declareOfferUseCases } from '@/contexts/credit-application/offer/application/authorization/declare-offer-use-cases.policy';
+import { PrismaRateGrids } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-rate-grids.repository';
+import { registerRateGridHandlers } from '@/contexts/credit-application/composition/register-rate-grid-handlers.module';
+import { PrismaLegalMaximumRates } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-legal-maximum-rates.repository';
+import { registerLegalMaximumRateHandlers } from '@/contexts/credit-application/composition/register-legal-maximum-rate-handlers.module';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -185,16 +188,22 @@ function registerHandlers(
     }),
   });
 
-  platform.queries.register(
-    ReadDocumentQuery,
-    new ReadDocumentHandler(creditApplicationRepository, platform.files.storage),
-    { context: 'credit-application' },
-  );
+  registerDocumentRetentionHandlers(platform, creditApplicationRepository);
 
-  platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
+  const rateGrids = platform.adapter(new PrismaRateGrids(platform.persistence.database, platform.scope), {
+    kind: 'repository',
     context: 'credit-application',
+    token: 'RateGrids',
   });
 
+  registerRateGridHandlers(platform, rateGrids);
+
+  const legalMaximumRates = platform.adapter(
+    new PrismaLegalMaximumRates(platform.persistence.database, platform.scope),
+    { kind: 'repository', context: 'credit-application', token: 'LegalMaximumRates' },
+  );
+
+  registerLegalMaximumRateHandlers(platform, legalMaximumRates);
   // /ddd-ts-kit:handlers
 }
 
@@ -212,7 +221,6 @@ function registerReactions(platform: Platform, declaredConflicts: DeclaredConfli
 
   registerDecisionReactions(platform, declaredConflicts);
 
-  registerOfferReactions(platform);
   keepReferenceData(platform);
 
   registerFileReactions(platform);
@@ -316,6 +324,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(ErasePersonalDataPastRetentionCommand, creditApplicationPermissions['application.erase-past-retention'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
+    ...declareOfferUseCases(),
     // /ddd-ts-kit:authorization
   ];
 }
