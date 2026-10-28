@@ -15,5 +15,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'delegation-table.keep': { description: 'Keep delegation table' },
   'decider-level.keep': { description: 'Keep decider level' },
   'rate-grid.keep': { description: 'Keep rate grid' },
+  'legal-maximum-rate.keep': { description: 'Keep legal maximum rate' },
   // /ddd-ts-kit:permissions
 });

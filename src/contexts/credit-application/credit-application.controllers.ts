@@ -15,6 +15,7 @@ import { NameGuarantorController } from '@/contexts/credit-application/file/pres
 import { ReadDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/read-document/read-document.controller';
 import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
+import { ReadLegalMaximumRateController } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.controller';
 import { ReadRateGridController } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.controller';
 import { ConsultRepaymentIncidentRegisterParams } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.params';
 import { ConsultRepaymentIncidentRegisterAnswer } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.answer';
@@ -36,6 +37,8 @@ import { NameCoBorrowerBody } from '@/contexts/credit-application/file/presentat
 import { NameGuarantorParams } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.params';
 import { NameGuarantorBody } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.body';
 import { SubmitApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.body';
+import { ReadLegalMaximumRateParams } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.params';
+import { ReadLegalMaximumRateAnswer } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.answer';
 import { ReadRateGridParams } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.params';
 import { ReadRateGridAnswer } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.answer';
 
@@ -79,5 +82,8 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(ReadDocumentController, {}),
   withSignatures(SearchApplicationsController, {}),
   withSignatures(SubmitApplicationController, { submitApplication: { body: SubmitApplicationBody } }),
+  withSignatures(ReadLegalMaximumRateController, {
+    readLegalMaximumRate: { params: ReadLegalMaximumRateParams, answer: ReadLegalMaximumRateAnswer },
+  }),
   withSignatures(ReadRateGridController, { readRateGrid: { params: ReadRateGridParams, answer: ReadRateGridAnswer } }),
 ];

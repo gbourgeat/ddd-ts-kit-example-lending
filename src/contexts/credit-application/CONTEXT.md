@@ -131,6 +131,7 @@ No personal data declared.
 - `credit-application:delegation-table.keep`
 - `credit-application:decider-level.keep`
 - `credit-application:rate-grid.keep`
+- `credit-application:legal-maximum-rate.keep`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -190,7 +191,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `GiveAccountConsent` | command | `application.consent` |
 | `KeepDeciderLevel` | command | `decider-level.keep` |
 | `KeepDelegationTable` | command | `delegation-table.keep` |
-| `KeepRateGrid` | command | `rate-grid.keep` |
+| `KeepLegalMaximumRate` | command | not read |
+| `KeepRateGrid` | command | not read |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
 | `ReadAccountInformation` | command | `application.read-accounts` |
@@ -198,7 +200,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadDeclaredConflicts` | query | `application.decide` |
 | `ReadDelegationTable` | query | `application.decide` |
 | `ReadDocument` | query | `application.read` |
-| `ReadRateGrid` | query | `application.decide` |
+| `ReadLegalMaximumRate` | query | not read |
+| `ReadRateGrid` | query | not read |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
 
@@ -219,7 +222,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | `application.decide` | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
 | GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | `application.decide` | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
-| GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | `application.decide` | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
+| GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
+| GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | not read | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
 
 ### Consumed events
 
@@ -248,7 +252,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | not read | `DeclaredConflictsProjection` |  |
 | not read | not read |  |
 | not read | not read |  |
-| not read | `LegalMaximumRateProjection` |  |
+| not read | not read |  |
+| not read | not read |  |
 | not read | not read |  |
 | not read | not read |  |
 
@@ -266,10 +271,17 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
 | `DelegationTables` | not bound |  |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
+| `LegalMaximumRates` | not bound |  |
 | `OfferRepository` | external | `PrismaOfferRepository` |
 | `RateGrids` | not bound |  |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 | `SearchApplicationsReader` | repository | `PrismaSearchApplicationsReader` |
+
+### Policies
+
+| Policy | Permission |
+|---|---|
+| `DeclareOfferUseCases` | `rate-grid.keep` |
 
 ### Errors
 
@@ -287,6 +299,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
+| `UnknownLegalMaximumRate` | `forUnknownLegalMaximumRate` | `UNKNOWN_LEGAL_MAXIMUM_RATE` | none |
 | `UnknownRateGrid` | `forUnknownRateGrid` | `UNKNOWN_RATE_GRID` | none |
 
 ### Gateways

@@ -90,3 +90,20 @@ model CreditApplicationRateGrid {
   @@map("rate_grids")
   @@schema("credit_application")
 }
+
+/// The legal maximum rates read model: one row per maximum credit-policy published, for one category, from its day of effect.
+model CreditApplicationLegalMaximumRate {
+  legalMaximumRateId String   @id @map("legal_maximum_rate_id")
+  category           String   @map("category")
+  rateBasisPoints    Int      @map("rate_basis_points")
+  effectiveFrom      DateTime @map("effective_from") @db.Timestamptz(3)
+  lastEventAt        DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId        String   @map("last_event_id")
+  lastEventVersion   Int?     @map("last_event_version")
+  deleted            Boolean  @default(false)
+  tenantId           String   @map("tenant_id")
+
+  @@index([tenantId, legalMaximumRateId], map: "legal_maximum_rates_tenant_idx")
+  @@map("legal_maximum_rates")
+  @@schema("credit_application")
+}
