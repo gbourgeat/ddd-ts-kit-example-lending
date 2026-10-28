@@ -43,6 +43,8 @@ import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-appli
 import { ConsultRepaymentIncidentRegisterHandler } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.handler';
 import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-customer-identity.gateway';
 import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
+import { ReadDocumentHandler } from '@/contexts/credit-application/file/application/queries/read-document/read-document.handler';
+import { ReadDocumentQuery } from '@/contexts/credit-application/file/application/queries/read-document/read-document.query';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -188,6 +190,12 @@ function registerHandlers(
     ),
     { context: 'credit-application' },
   );
+
+  platform.queries.register(
+    ReadDocumentQuery,
+    new ReadDocumentHandler(creditApplicationRepository, platform.files.storage),
+    { context: 'credit-application' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -277,6 +285,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(ConsultRepaymentIncidentRegisterCommand, creditApplicationPermissions['application.consult-register'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(ReadDocumentQuery, creditApplicationPermissions['application.read'], {
+      resource: (query) => ({ type: 'application', id: query.applicationId }),
     }),
     // /ddd-ts-kit:authorization
   ];

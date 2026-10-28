@@ -91,9 +91,15 @@ export interface Client {
   /**
    * Attach document: `POST /applications/{id}/documents`.
    *
-   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
    */
   attachDocument(input: operations.AttachDocumentInput, options?: CallOptions): Promise<operations.AttachDocumentResult>;
+  /**
+   * Read a document of an application back: `GET /applications/{id}/documents/{documentKey}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
+   */
+  readDocument(input: operations.ReadDocumentInput, options?: CallOptions): Promise<operations.ReadDocumentResult>;
   /**
    * Name guarantor: `POST /applications/{id}/guarantors`.
    *
@@ -383,6 +389,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
+    readDocument: (input, call) => operations.readDocument(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),

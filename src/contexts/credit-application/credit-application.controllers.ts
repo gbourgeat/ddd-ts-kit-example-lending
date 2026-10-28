@@ -10,6 +10,7 @@ import { CorrectEntryController } from '@/contexts/credit-application/file/prese
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
 import { NameGuarantorController } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.controller';
+import { ReadDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/read-document/read-document.controller';
 import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
 import { ConsultRepaymentIncidentRegisterParams } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.params';
@@ -18,6 +19,7 @@ import { ReadAccountInformationParams } from '@/contexts/credit-application/asse
 import { ReadAccountInformationBody } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
 import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.answer';
+import { AttachDocumentAnswer } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.answer';
 import { CorrectEntryParams } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.params';
 import { CorrectEntryBody } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.body';
 import { GiveAccountConsentParams } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.params';
@@ -46,7 +48,7 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(ReadDeclaredConflictsController, {
     readDeclaredConflicts: { params: ReadDeclaredConflictsParams, answer: ReadDeclaredConflictsAnswer },
   }),
-  withSignatures(AttachDocumentController, { attachDocument: { answer: null } }),
+  withSignatures(AttachDocumentController, { attachDocument: { answer: AttachDocumentAnswer } }),
   withSignatures(CorrectEntryController, {
     correctEntry: { params: CorrectEntryParams, body: CorrectEntryBody, answer: acceptedSchema },
   }),
@@ -59,6 +61,7 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(NameGuarantorController, {
     nameGuarantor: { params: NameGuarantorParams, body: NameGuarantorBody, answer: acceptedSchema },
   }),
+  withSignatures(ReadDocumentController, {}),
   withSignatures(SearchApplicationsController, {}),
   withSignatures(SubmitApplicationController, { submitApplication: { body: SubmitApplicationBody } }),
 ];

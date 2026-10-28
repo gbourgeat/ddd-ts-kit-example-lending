@@ -37,11 +37,11 @@ describe('Attach document', () => {
   it('records the reference of the file on the application, and keeps the content visible in the object store', async () => {
     const { commandBus, creditApplicationRepository, storage } = await arrange();
 
-    const id = await commandBus.execute(new AttachDocumentCommand(applicant, APPLICATION_ID, aFile()));
-    const stored = await creditApplicationRepository.findById(id);
+    const answeredKey = await commandBus.execute(new AttachDocumentCommand(applicant, APPLICATION_ID, aFile()));
+    const stored = await creditApplicationRepository.findById(APPLICATION_ID);
     const [documentKey] = stored?.toState().documentKeys ?? [];
 
-    expect(id).toBe(APPLICATION_ID);
+    expect(answeredKey).toBe(documentKey);
     expect(stored?.toState().documentKeys).toHaveLength(1);
     expect(stored?.toState().entryCount).toBe(2);
     expect(storage.keys()).toEqual([documentKey]);

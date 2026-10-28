@@ -1020,13 +1020,22 @@ paths:
                 contentType: application/pdf, image/png, image/jpeg
       responses:
         '201':
-          description: Stored; the file is visible once the command has committed.
+          description: Stored; the body holds the key of the document, to read it back. The file is visible once the command has committed.
           headers:
             Cache-Control:
               description: How the caches on the way may keep this answer.
               schema:
                 type: string
                 const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  key:
+                    type: string
+                type: object
+                required:
+                  - key
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:
@@ -1043,6 +1052,14 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
         '413':
           description: 'Content Too Large. Error codes: FILE_TOO_LARGE.'
           content:
@@ -1067,6 +1084,81 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/documents/{documentKey}:
+    get:
+      operationId: readDocument
+      summary: Read a document of an application back
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: documentKey
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The stored content of the document, with its media type.
+          headers:
+            content-type:
+              description: The media type the document was attached with.
+              schema:
+                type: string
+            content-length:
+              description: The size of the document in bytes.
+              schema:
+                type: string
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CREDIT_APPLICATION, UNKNOWN_ENTRY, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_ENTRY
             - VALIDATION_FAILED
   /applications/{id}/guarantors:
     post:
