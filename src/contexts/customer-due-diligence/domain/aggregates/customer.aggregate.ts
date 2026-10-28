@@ -216,6 +216,13 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerDueDiligenceFlaggedOverdue(this.id, now));
   }
 
+  /** Whether the due diligence falls due before the instant: a due diligence never refreshed is not due. */
+  isDueBefore(instant: Date): boolean {
+    const dueOn = this.state.dueDiligenceDueOn;
+
+    return dueOn !== undefined && dueOn.getTime() < instant.getTime();
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }

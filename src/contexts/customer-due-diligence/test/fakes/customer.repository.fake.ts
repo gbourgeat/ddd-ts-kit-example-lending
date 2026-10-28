@@ -16,6 +16,10 @@ export class FakeCustomerRepository implements CustomerRepository {
     return this.adapter.findById(id);
   }
 
+  findDueBefore(instant: Date): Promise<readonly Customer[]> {
+    return this.adapter.findDueBefore(instant);
+  }
+
   save(saved: Customer): Promise<void> {
     return this.adapter.save(saved);
   }

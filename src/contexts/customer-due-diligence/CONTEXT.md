@@ -54,6 +54,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | High | Said of a risk rating of the highest class: a high risk customer |  |
 | Flag | The bank marks a due diligence whose refresh is past its date as overdue, once |  |
 | Calendar | The dates a due diligence falls due and is overdue, by the risk rating of the customer |  |
+| All | every customer the bank knows, at once, rather than one named customer |  |
 
 ## Aggregates
 
@@ -144,6 +145,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
 | `DismissMatch` | command | `match.dismiss` |
 | `EndRelationship` | command | `relationship.end` |
+| `FlagAllOverdueDueDiligence` | command | `due-diligence.flag-overdue` |
 | `FlagOverdueDueDiligence` | command | `due-diligence.flag-overdue` |
 | `GetCustomerDueDiligence` | query | `due-diligence.read` |
 | `GetCustomerFile` | query | `customer.read` |
@@ -172,6 +174,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | PUT | `/customers/:id/risk` | `rateCustomerRisk` | `CustomersRoutes` | `Authenticated` | `RateCustomerRisk` | `customer.rate-risk` | params: `RateCustomerRiskParams`, body: `RateCustomerRiskBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | GET | `/customers/:id/risk-rating` | `getCustomerRiskRating` | `CustomersRoutes` | `Authenticated` | `GetCustomerRiskRating` | `customer.read-risk` | params: `GetCustomerRiskRatingParams` | 200: `GetCustomerRiskRatingAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/customers/:id/screening` | `screenCustomer` | `CustomersRoutes` | `Authenticated` | `ScreenCustomer` | `customer.screen` | params: `ScreenCustomerParams`, body: `ScreenCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
+| POST | `/due-diligence/flag-overdue` | `flagAllOverdueDueDiligence` | `DueDiligenceRoutes` | `Authenticated` | `FlagAllOverdueDueDiligence` | `due-diligence.flag-overdue` | body: `FlagAllOverdueDueDiligenceBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Publishers
 

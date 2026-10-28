@@ -16,6 +16,7 @@ import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/pr
 import { RateCustomerRiskController } from '@/contexts/customer-due-diligence/presentation/http/customers/rate-customer-risk/rate-customer-risk.controller';
 import { RefreshDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/refresh-due-diligence/refresh-due-diligence.controller';
 import { ScreenCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.controller';
+import { FlagAllOverdueDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/due-diligence/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
 import { ApproveHighRiskCustomerParams } from '@/contexts/customer-due-diligence/presentation/http/customers/approve-high-risk-customer/approve-high-risk-customer.params';
 import { AssignAdvisorParams } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.params';
@@ -37,6 +38,7 @@ import { RefreshDueDiligenceParams } from '@/contexts/customer-due-diligence/pre
 import { RefreshDueDiligenceBody } from '@/contexts/customer-due-diligence/presentation/http/customers/refresh-due-diligence/refresh-due-diligence.body';
 import { ScreenCustomerParams } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.params';
 import { ScreenCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.body';
+import { FlagAllOverdueDueDiligenceBody } from '@/contexts/customer-due-diligence/presentation/http/due-diligence/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.body';
 
 /** The Nest controllers of customer-due-diligence, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
@@ -83,5 +85,8 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(ScreenCustomerController, {
     screenCustomer: { params: ScreenCustomerParams, body: ScreenCustomerBody, answer: acceptedSchema },
+  }),
+  withSignatures(FlagAllOverdueDueDiligenceController, {
+    flagAllOverdueDueDiligence: { body: FlagAllOverdueDueDiligenceBody, answer: null },
   }),
 ];
