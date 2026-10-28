@@ -36,6 +36,7 @@ A credential is given per security scheme of the contract, as a value or as a fu
 | `readDeclaredConflicts` | `GET /applications/{id}/declared-conflicts` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
 | `attachDocument` | `POST /applications/{id}/documents` | UNAUTHORIZED, FORBIDDEN, FILE_TOO_LARGE, UNSUPPORTED_MEDIA_TYPE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
 | `nameGuarantor` | `POST /applications/{id}/guarantors` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
+| `consultRepaymentIncidentRegister` | `POST /applications/{id}/register-consultations` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNIDENTIFIED_PARTY, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
 | `searchAuditEntries` | `GET /audit/entries` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, VALIDATION_FAILED |
 | `openBranch` | `POST /branches` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, VALIDATION_FAILED |
 | `appointStaffMember` | `POST /branches/{id}/staff` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, BRANCH_NOT_OPENED, VALIDATION_FAILED |
@@ -135,6 +136,7 @@ A credential is given per security scheme of the contract, as a value or as a fu
 - `PROOF_OF_ADDRESS_TOO_OLD`
 - `SCORING_MODEL_LABEL_REQUIRED`
 - `UNAUTHORIZED`
+- `UNIDENTIFIED_PARTY`
 - `UNKNOWN_ALERT`
 - `UNKNOWN_CREDIT_APPLICATION`
 - `UNKNOWN_CUSTOMER`

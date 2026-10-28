@@ -95,6 +95,12 @@ export interface Client {
    */
   nameGuarantor(input: operations.NameGuarantorInput, options?: CallOptions): Promise<operations.NameGuarantorResult>;
   /**
+   * Consult repayment incident register: `POST /applications/{id}/register-consultations`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNIDENTIFIED_PARTY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  consultRepaymentIncidentRegister(input: operations.ConsultRepaymentIncidentRegisterInput, options?: CallOptions): Promise<operations.ConsultRepaymentIncidentRegisterResult>;
+  /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
@@ -359,6 +365,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
+    consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),

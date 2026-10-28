@@ -11,6 +11,7 @@ import { InvalidCorrectionReason } from '@/contexts/credit-application/file/doma
 import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/domain/errors/correction-already-recorded.error';
 import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
+import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
 import {
   AccountConsent,
   type AccountConsentState,
@@ -22,7 +23,8 @@ export type CreditApplicationEvent =
   | CreditApplicationCoBorrowerNamed
   | CreditApplicationGuarantorNamed
   | CreditApplicationEntryCorrected
-  | CreditApplicationDocumentAttached;
+  | CreditApplicationDocumentAttached
+  | CreditApplicationRegisterConsulted;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -147,6 +149,14 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationEntryCorrected(this.id, correctedAt, correctedEntryId, reason));
   }
 
+  /** The repayment incident register was consulted for the parties of the application: the answer is kept, never the names. */
+  recordRegisterConsultation(
+    parties: readonly { readonly customerId: string; readonly listed: boolean }[],
+    consultedAt: Date,
+  ): void {
+    this.record(new CreditApplicationRegisterConsulted(this.id, consultedAt, parties));
+  }
+
   /** Whether the applicant's consent to read the accounts is given and not yet expired at `instant`. */
   hasValidAccountConsentAt(instant: Date): boolean {
     if (this.state.accountConsent === undefined) {
@@ -196,6 +206,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationGuarantorNamed.eventName]: (event) => this.applyGuarantorNamed(event),
       [CreditApplicationEntryCorrected.eventName]: (event) => this.applyEntryCorrected(event),
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
+      [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
     };
   }
 
@@ -269,6 +280,13 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.state = {
       ...this.state,
       documentKeys: [...this.state.documentKeys, event.documentKey],
+      entryCount: this.state.entryCount + 1,
+    };
+  }
+
+  private applyRegisterConsulted(_event: CreditApplicationRegisterConsulted): void {
+    this.state = {
+      ...this.state,
       entryCount: this.state.entryCount + 1,
     };
   }
