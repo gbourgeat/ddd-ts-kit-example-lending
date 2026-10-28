@@ -2,7 +2,7 @@ import type { Platform } from '@/platform/composition/platform';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import type { DeciderLevels } from '@/contexts/credit-application/decision/application/ports/decider-levels.port';
 import type { DelegationTables } from '@/contexts/credit-application/decision/application/ports/delegation-tables.port';
-import { DeciderLimitReader } from '@/contexts/credit-application/decision/application/services/decider-limit-reader';
+import { DeciderLimitReader } from '@/contexts/credit-application/decision/application/projections/decider-limit-reader.projection';
 import { DecideApplicationCommand } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.command';
 import { DecideApplicationHandler } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.handler';
 

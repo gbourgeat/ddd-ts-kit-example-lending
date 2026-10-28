@@ -4,7 +4,7 @@ import type {
   DecideApplicationCommand,
   DecisionRequest,
 } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.command';
-import type { DeciderLimitReader } from '@/contexts/credit-application/decision/application/services/decider-limit-reader';
+import type { DeciderLimitReader } from '@/contexts/credit-application/decision/application/projections/decider-limit-reader.projection';
 import { DecisionLimitService } from '@/contexts/credit-application/decision/domain/services/decision-limit.service';
 import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { UnknownCreditApplication } from '@/contexts/credit-application/file/domain/errors/unknown-credit-application.error';

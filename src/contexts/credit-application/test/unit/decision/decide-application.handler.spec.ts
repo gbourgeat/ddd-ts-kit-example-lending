@@ -5,7 +5,7 @@ import { createTestBuses } from '@ddd-ts-kit/testing';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { DecideApplicationCommand } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.command';
 import { DecideApplicationHandler } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.handler';
-import { DeciderLimitReader } from '@/contexts/credit-application/decision/application/services/decider-limit-reader';
+import { DeciderLimitReader } from '@/contexts/credit-application/decision/application/projections/decider-limit-reader.projection';
 import { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
 import { FakeCreditApplicationRepository } from '@/contexts/credit-application/test/fakes/credit-application.repository.fake';
 import { FakeDeciderLevels } from '@/contexts/credit-application/test/fakes/decider-levels.fake';
