@@ -53,7 +53,7 @@ describe('Decide application', () => {
     const command = new DecideApplicationCommand(holder, APPLICATION_ID, approval);
 
     await expect(commandBus.execute(command)).rejects.toMatchObject({ code: 'CONFLICTED_DECIDER' });
-    expect((await creditApplicationRepository.findById(APPLICATION_ID))?.decision).toBeUndefined();
+    expect((await creditApplicationRepository.findById(APPLICATION_ID))?.toState().decision).toBeUndefined();
   });
 
   it('is refused to an actor who does not hold the permission application.decide', async () => {
