@@ -77,6 +77,12 @@ export interface Client {
    */
   readDeclaredConflicts(input: operations.ReadDeclaredConflictsInput, options?: CallOptions): Promise<operations.ReadDeclaredConflictsResult>;
   /**
+   * Attach document: `POST /applications/{id}/documents`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  attachDocument(input: operations.AttachDocumentInput, options?: CallOptions): Promise<operations.AttachDocumentResult>;
+  /**
    * Name guarantor: `POST /applications/{id}/guarantors`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -148,6 +154,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), NO_POSSIBLE_MATCH (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
    */
   confirmSanctionsMatch(input: operations.ConfirmSanctionsMatchInput, options?: CallOptions): Promise<operations.ConfirmSanctionsMatchResult>;
+  /**
+   * Clear the possible match of a customer, with its reason, when compliance finds no sanctions match: `POST /customers/{id}/matches/dismiss`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), NO_POSSIBLE_MATCH (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  dismissMatch(input: operations.DismissMatchInput, options?: CallOptions): Promise<operations.DismissMatchResult>;
   /**
    * Screen a customer against the sanctions and politically exposed lists: `POST /customers/{id}/screening`.
    *
@@ -290,6 +302,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
+    attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
@@ -302,6 +315,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     confirmSanctionsMatch: (input, call) => operations.confirmSanctionsMatch(connection, input, call),
+    dismissMatch: (input, call) => operations.dismissMatch(connection, input, call),
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),

@@ -371,6 +371,40 @@ export function readDeclaredConflicts(
   return send<ReadDeclaredConflictsResult>(connection, operation, { ...input, ...options });
 }
 
+export interface AttachDocumentInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type AttachDocumentResult =
+  | Success<201, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<413, 'FILE_TOO_LARGE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Attach document: `POST /applications/{id}/documents`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function attachDocument(
+  connection: Connection,
+  input: AttachDocumentInput,
+  options: CallOptions = {},
+): Promise<AttachDocumentResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/documents',
+    security: [['bearer']],
+    responses: { 201: 'none', 401: 'json', 403: 'json', 413: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<AttachDocumentResult>(connection, operation, { ...input, ...options });
+}
+
 export interface NameGuarantorInput {
   readonly path: {
     readonly id: string;
@@ -856,6 +890,43 @@ export function confirmSanctionsMatch(
   };
 
   return send<ConfirmSanctionsMatchResult>(connection, operation, { ...input, ...options });
+}
+
+export interface DismissMatchInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    reason: string;
+  };
+}
+
+export type DismissMatchResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'NO_POSSIBLE_MATCH' | 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Clear the possible match of a customer, with its reason, when compliance finds no sanctions match: `POST /customers/{id}/matches/dismiss`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), NO_POSSIBLE_MATCH (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function dismissMatch(
+  connection: Connection,
+  input: DismissMatchInput,
+  options: CallOptions = {},
+): Promise<DismissMatchResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{id}/matches/dismiss',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DismissMatchResult>(connection, operation, { ...input, ...options });
 }
 
 export interface ScreenCustomerInput {
