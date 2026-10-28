@@ -210,7 +210,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
 | `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
-| `CustomerAdvisorBranchGateway` | gateway | `InProcessCustomerAdvisorBranchGateway` |
+| `CustomerAdvisorBranchGateway` | external | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
@@ -227,7 +227,6 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
-| `NoAdvisorBranch` | `forApplicant` | `NO_ADVISOR_BRANCH` | none |
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
@@ -237,6 +236,5 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Gateway | Upstream | Adapters |
 |---|---|---|
-| `CustomerAdvisorBranchGateway` | `branch-network` | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerIdentityGateway` | `customer-due-diligence` | `InProcessCustomerIdentityGateway` |
 <!-- /ddd-ts-kit:reference -->

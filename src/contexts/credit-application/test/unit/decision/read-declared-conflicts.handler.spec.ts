@@ -81,6 +81,7 @@ async function arrange() {
       amount: Money.ofCents(1234567),
       durationMonths: 60,
       registeredAt,
+      branchId: 'branch-1',
     }),
   );
 

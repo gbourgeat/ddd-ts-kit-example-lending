@@ -10,6 +10,7 @@ import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/d
 import { SubmitApplicationCommand } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.command';
 import { SubmitApplicationHandler } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.handler';
 import { FakeCreditApplicationRepository } from '@/contexts/credit-application/test/fakes/credit-application.repository.fake';
+import { FakeCustomerAdvisorBranchGateway } from '@/contexts/credit-application/test/fakes/customer-advisor-branch-gateway.fake';
 
 const ada = anActor().named('ada').build();
 
@@ -31,7 +32,26 @@ describe('Submit application', () => {
       applicantId: 'ada',
       amount: Money.ofCents(1234567),
       durationMonths: 60,
+      branchId: 'branch-1',
     });
+  });
+
+  it('records the branch of the advisor whose portfolio holds the applicant, and never one the client posts', async () => {
+    const { commandBus, creditApplicationRepository } = await arrange();
+
+    const id = await commandBus.execute(new SubmitApplicationCommand(ada, 1234567, 60));
+    const stored = await creditApplicationRepository.findById(id);
+
+    expect(stored?.branchId).toBe('branch-1');
+  });
+
+  it('submits an applicant no advisor holds on no branch, the empty one', async () => {
+    const { commandBus, creditApplicationRepository } = await arrange({ holdingAdvisor: false });
+
+    const id = await commandBus.execute(new SubmitApplicationCommand(ada, 1234567, 60));
+    const stored = await creditApplicationRepository.findById(id);
+
+    expect(stored?.branchId).toBe('');
   });
 
   it.each([0, -1, 12.5])(
@@ -76,8 +96,14 @@ describe('Submit application', () => {
 });
 
 /** The customer `ada` holds `self` on her own customer record: the schema derives application.submit from it. */
-async function arrange() {
+async function arrange({ holdingAdvisor = true }: { holdingAdvisor?: boolean } = {}) {
   const { commandBus, clock, ids, dispatching, domainEvents } = createTestBuses({ idPrefix: 'credit-application' });
+  const customerAdvisorBranch = new FakeCustomerAdvisorBranchGateway();
+
+  if (holdingAdvisor) {
+    customerAdvisorBranch.answerBranchOf('ada', 'branch-1');
+  }
+
   const creditApplicationRepository = dispatching(new FakeCreditApplicationRepository());
   const announced: unknown[] = [];
 
@@ -98,7 +124,7 @@ async function arrange() {
     ),
   });
 
-  const handler = new SubmitApplicationHandler(creditApplicationRepository, ids, clock);
+  const handler = new SubmitApplicationHandler(creditApplicationRepository, ids, clock, customerAdvisorBranch);
 
   commandBus.use(holders).register(SubmitApplicationCommand, handler);
 

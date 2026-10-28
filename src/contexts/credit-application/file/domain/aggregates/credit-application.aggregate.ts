@@ -29,7 +29,7 @@ export interface CreditApplicationState {
   readonly amount: Money;
   readonly durationMonths: number;
   readonly registeredAt: Date;
-  /** The branch the application was submitted on: empty for an application submitted before the branch was recorded. */
+  /** The branch the application was submitted on: empty when no advisor holds the applicant, or when it was submitted before the branch was recorded. */
   readonly branchId: string;
   readonly accountConsent: AccountConsentState | undefined;
   readonly coBorrowerIds: readonly string[];

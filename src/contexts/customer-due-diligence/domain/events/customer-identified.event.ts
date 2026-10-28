@@ -14,11 +14,21 @@ export interface PersonIdentity {
   readonly addressProofDatedOn: Date;
 }
 
+/**
+ * The name and the birth date the screening checked the person against, kept as the anti-money-laundering
+ * record of the identification: personal data, sealed by the customer's subject.
+ */
+export interface IdentifiedPerson {
+  readonly name: string;
+  readonly birthDate: Date;
+}
+
 export class CustomerIdentified extends NamedDomainEvent('customer-due-diligence.customer.identified') {
   constructor(
     readonly aggregateId: string,
     readonly occurredAt: Date,
     readonly identity?: PersonIdentity,
+    readonly person?: IdentifiedPerson,
   ) {
     super();
   }

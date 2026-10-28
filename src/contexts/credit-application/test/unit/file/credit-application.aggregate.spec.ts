@@ -6,7 +6,7 @@ import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/d
 import { aCreditApplication } from '@/contexts/credit-application/test/builders/credit-application.builder';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
-const request = { amount: Money.ofCents(1234567), durationMonths: 60, registeredAt: bornAt };
+const request = { amount: Money.ofCents(1234567), durationMonths: 60, registeredAt: bornAt, branchId: 'branch-1' };
 
 describe('CreditApplication', () => {
   it('records its submission, and holds the applicant, the requested amount, the duration and the day it was registered', () => {
@@ -18,7 +18,14 @@ describe('CreditApplication', () => {
     expect(born.registeredAt).toEqual(bornAt);
 
     expect(born.pullEvents()).toEqual([
-      new CreditApplicationSubmitted('credit-application-7', 'customer-1', Money.ofCents(1234567), 60, bornAt),
+      new CreditApplicationSubmitted(
+        'credit-application-7',
+        'customer-1',
+        Money.ofCents(1234567),
+        60,
+        bornAt,
+        'branch-1',
+      ),
     ]);
   });
 
@@ -39,7 +46,16 @@ describe('CreditApplication', () => {
   it('is rebuilt from its history, recording nothing', () => {
     givenEvents(
       (id, history) => CreditApplication.rehydrate(id, history),
-      [new CreditApplicationSubmitted('credit-application-7', 'customer-1', Money.ofCents(1234567), 60, bornAt)],
+      [
+        new CreditApplicationSubmitted(
+          'credit-application-7',
+          'customer-1',
+          Money.ofCents(1234567),
+          60,
+          bornAt,
+          'branch-1',
+        ),
+      ],
     )
       .when((loaded) => loaded.toState())
       .thenNoEvent()

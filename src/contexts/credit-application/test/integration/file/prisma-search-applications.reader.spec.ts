@@ -145,7 +145,7 @@ function readerIn(tenantId: string): PrismaSearchApplicationsReader {
 }
 
 function submitted(id: string, applicantId: string): CreditApplicationSubmitted {
-  return new CreditApplicationSubmitted(id, applicantId, Money.ofCents(1234567), 60, submittedAt);
+  return new CreditApplicationSubmitted(id, applicantId, Money.ofCents(1234567), 60, submittedAt, 'branch-1');
 }
 
 function workOf(tenantId: string): FixedExecutionScope {

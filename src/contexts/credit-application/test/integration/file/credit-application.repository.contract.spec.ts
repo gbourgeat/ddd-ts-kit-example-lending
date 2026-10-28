@@ -20,6 +20,7 @@ const expectations = {
       amount: Money.ofCents(1234567),
       durationMonths: 60,
       registeredAt: bornAt,
+      branchId: 'branch-1',
     });
   },
   // TODO(domain): add `mutate: (changed: CreditApplication) => changed.<a business method that records an event>(...)`, so that the suite proves an update is stored and a stale save is refused; the case stays pending until then.

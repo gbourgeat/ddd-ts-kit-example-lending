@@ -9,6 +9,7 @@ interface CreditApplicationIngredients {
   readonly amount: Money;
   readonly durationMonths: number;
   readonly bornAt: Date;
+  readonly branchId: string;
 }
 
 /** Builds CreditApplication the way a load does: by replaying a history of events. */
@@ -33,6 +34,10 @@ export class CreditApplicationBuilder extends Builder<CreditApplicationIngredien
     return this.with('bornAt', instant);
   }
 
+  onBranch(branchId: string): this {
+    return this.with('branchId', branchId);
+  }
+
   protected defaults(): Defaults<CreditApplicationIngredients> {
     return {
       id: sequence('credit-application'),
@@ -40,6 +45,7 @@ export class CreditApplicationBuilder extends Builder<CreditApplicationIngredien
       amount: Money.ofCents(1234567),
       durationMonths: 60,
       bornAt: new Date('2026-01-01T00:00:00.000Z'),
+      branchId: 'branch-1',
     };
   }
 
@@ -52,6 +58,7 @@ export class CreditApplicationBuilder extends Builder<CreditApplicationIngredien
           ingredients.amount,
           ingredients.durationMonths,
           ingredients.bornAt,
+          ingredients.branchId,
         ),
       ],
     });

@@ -55,6 +55,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Flag | The bank marks a due diligence whose refresh is past its date as overdue, once |  |
 | Calendar | The dates a due diligence falls due and is overdue, by the risk rating of the customer |  |
 | All | every customer the bank knows, at once, rather than one named customer |  |
+| Validity | whether the identity facts the bank checked still hold on the day: the document valid, the proof of address recent |  |
 
 ## Aggregates
 

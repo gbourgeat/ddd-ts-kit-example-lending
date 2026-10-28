@@ -28,6 +28,7 @@ export class IdentifyCustomerHandler implements CommandHandler<IdentifyCustomerC
         addressProofDatedOn: command.addressProofDatedOn,
       },
       now,
+      { name: command.name, birthDate: command.birthDate },
     );
 
     if (possibleMatch) {

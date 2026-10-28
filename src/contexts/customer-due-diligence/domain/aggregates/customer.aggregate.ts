@@ -1,12 +1,14 @@
 import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@ddd-ts-kit/kernel';
-import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
+import {
+  CustomerIdentified,
+  type IdentifiedPerson,
+} from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 import { BusinessAlreadyRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-already-registered.error';
 import { BusinessNotRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-not-registered.error';
-import { IdentityDocumentExpired } from '@/contexts/customer-due-diligence/domain/errors/identity-document-expired.error';
 import { MissingReason } from '@/contexts/customer-due-diligence/domain/errors/missing-reason.error';
 import { NoPossibleMatch } from '@/contexts/customer-due-diligence/domain/errors/no-possible-match.error';
-import { ProofOfAddressTooOld } from '@/contexts/customer-due-diligence/domain/errors/proof-of-address-too-old.error';
+import { IdentityValidityService } from '@/contexts/customer-due-diligence/domain/services/identity-validity.service';
 import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
 import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
@@ -22,12 +24,10 @@ import { DueDiligenceCalendarService } from '@/contexts/customer-due-diligence/d
 import { CustomerDueDiligenceFlaggedOverdue } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-flagged-overdue.event';
 
 const dueDiligenceCalendar = new DueDiligenceCalendarService();
+const identityValidity = new IdentityValidityService();
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
-
-/** A proof of address is accepted for this many months after its date. */
-const PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS = 3;
 
 export type CustomerEvent =
   | CustomerIdentified
@@ -59,6 +59,7 @@ export interface DeclaredOwners {
 
 export interface CustomerState {
   readonly registeredAt: Date;
+  readonly identifiedPerson?: IdentifiedPerson;
   readonly business?: BusinessRegistration;
   readonly ownersDeclaredAt?: Date;
   readonly advisorId?: string;
@@ -81,12 +82,12 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   /** Identifies a person: refused when the document is expired on the day, or the proof of address too old. */
-  static create(id: string, identity: PersonIdentity, now: Date): Customer {
-    Customer.checkIdentity(id, identity, now);
+  static create(id: string, identity: PersonIdentity, now: Date, person?: IdentifiedPerson): Customer {
+    identityValidity.check(id, identity, now);
 
     const created = new Customer(id);
 
-    created.record(new CustomerIdentified(id, now, identity));
+    created.record(new CustomerIdentified(id, now, identity, person));
 
     return created;
   }
@@ -126,7 +127,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     }
 
     for (const person of [...owners.directors, ...owners.beneficialOwners]) {
-      Customer.checkIdentity(this.id, person, now);
+      identityValidity.check(this.id, person, now);
     }
 
     this.record(new CustomerDirectorsAndOwnersDeclared(this.id, now, owners.directors, owners.beneficialOwners));
@@ -244,20 +245,6 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     };
   }
 
-  private static checkIdentity(id: string, identity: PersonIdentity, now: Date): void {
-    if (identity.documentExpiresOn.getTime() < now.getTime()) {
-      throw IdentityDocumentExpired.forCustomer(id);
-    }
-
-    const oldestAcceptedProof = new Date(now.getTime());
-
-    oldestAcceptedProof.setUTCMonth(oldestAcceptedProof.getUTCMonth() - PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS);
-
-    if (identity.addressProofDatedOn.getTime() < oldestAcceptedProof.getTime()) {
-      throw ProofOfAddressTooOld.forCustomer(id);
-    }
-  }
-
   private restore(state: CustomerState): void {
     this.state = state;
   }
@@ -267,7 +254,11 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       return;
     }
 
-    this.state = { ...this.state, registeredAt: event.occurredAt };
+    this.state = {
+      ...this.state,
+      registeredAt: event.occurredAt,
+      ...(event.person === undefined ? {} : { identifiedPerson: event.person }),
+    };
   }
 
   private applyBusinessRegistered(event: CustomerBusinessRegistered): void {
