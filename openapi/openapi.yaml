@@ -3101,6 +3101,77 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - VALIDATION_FAILED
+  /deciders/{staffMemberId}/level:
+    get:
+      operationId: readDeciderLevel
+      summary: Read decider level
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: staffMemberId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  staffMemberId:
+                    type: string
+                  branchId:
+                    type: string
+                  level:
+                    type: string
+                type: object
+                required:
+                  - staffMemberId
+                  - branchId
+                  - level
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_DECIDER_LEVEL, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_DECIDER_LEVEL
+            - VALIDATION_FAILED
   /delegation-table:
     put:
       operationId: setDelegationTable

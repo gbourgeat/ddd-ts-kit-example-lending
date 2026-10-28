@@ -239,6 +239,12 @@ export interface Client {
    */
   requestPersonalDataCopyLink(input: operations.RequestPersonalDataCopyLinkInput, options?: CallOptions): Promise<operations.RequestPersonalDataCopyLinkResult>;
   /**
+   * Read decider level: `GET /deciders/{staffMemberId}/level`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DECIDER_LEVEL (422), VALIDATION_FAILED (422).
+   */
+  readDeciderLevel(input: operations.ReadDeciderLevelInput, options?: CallOptions): Promise<operations.ReadDeciderLevelResult>;
+  /**
    * Set delegation table: `PUT /delegation-table`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
@@ -419,6 +425,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
+    readDeciderLevel: (input, call) => operations.readDeciderLevel(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     readDelegationTable: (input, call) => operations.readDelegationTable(connection, input, call),
     flagAllOverdueDueDiligence: (input, call) => operations.flagAllOverdueDueDiligence(connection, input, call),

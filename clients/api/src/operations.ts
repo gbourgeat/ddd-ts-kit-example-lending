@@ -1415,6 +1415,43 @@ export function requestPersonalDataCopyLink(
   return send<RequestPersonalDataCopyLinkResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadDeciderLevelInput {
+  readonly path: {
+    readonly staffMemberId: string;
+  };
+}
+
+export type ReadDeciderLevelResult =
+  | Success<200, {
+    staffMemberId: string;
+    branchId: string;
+    level: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_DECIDER_LEVEL' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read decider level: `GET /deciders/{staffMemberId}/level`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DECIDER_LEVEL (422), VALIDATION_FAILED (422).
+ */
+export function readDeciderLevel(
+  connection: Connection,
+  input: ReadDeciderLevelInput,
+  options: CallOptions = {},
+): Promise<ReadDeciderLevelResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/deciders/{staffMemberId}/level',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDeciderLevelResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetDelegationTableInput {
   readonly body: {
     effectiveFrom: string;
