@@ -468,6 +468,10 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-28 Conductor, wave 8, US14.06: the command bus audits every command, whoever sends it (a middleware of the platform, not a per-command line); the proof is `test/e2e/audit-every-command.e2e.spec.ts`, one command for each of the ten contexts that has commands (reporting has none), and, for the per-tenant jobs, `expectJobAuditedFor` (`test/e2e/support/job-audit.ts`) in each spec that runs one: the run must reach an open bank (`runJob` of `start-application.ts` refuses to run with none) and the entry is read by its tenant and the system actor of the job (conductor, owner brief, to confirm)
 ## For the owner
 
+- Wave 8, open business questions raised by the workers (decided under the owner brief, to confirm): the fee of an early repayment is recorded but not collected as a movement; after a partial early repayment the schedule is not recomputed; a withdrawal before the payout is a no-op; a rescheduling for an application with no loan fails and is retried by the outbox; the late payment of an unpaid instalment is accepted for any amount; the portfolio at risk of reporting divides by the capital paid out (reporting holds no repayment data) while the glossary says outstanding amount; the CSV columns of the reports are the property names of the answer.
+- Wave 8, the account of a staff member: `portfolio.advisor` and `customer.conflicted` tuples name the staff member's identifier, the decider levels and declared conflicts of credit-application name the account; unify on the account.
+- Wave 8, the debit of an instalment runs inside the unit of work of the event that notes it due: a rollback after an accepted debit would leave money taken and not recorded.
+- Wave 8, `Decided` does not record the limit of the decider nor the conflicts checked; the decision view shows what the file stored.
 - Wave 8: the portfolio of an advisor and the assignment of a customer name the staff member's identifier, while a member of staff signs in with their account: the relationships of the portfolio (`portfolio.advisor`, `customer.conflicted`) and the decider levels (keyed by account) are not the same subject. To unify: the portfolio and the conflict relationships should name the account. No postal address of a borrower exists in any context: servicing seals an empty address until the owner names the source (the application form or the identification proof).
 - Wave 8, US7.13: `Decided` does not record the limit of the decider nor the conflicts checked; a version 3 with its upcaster would let the decision view show exactly what the decider saw (close 4). Migration of wave 8: `credit_application.offers.issued_at` nullable (US8.08), `credit_application.offers` terms (US8.05), the erasure of US13.06 and the broker tuple need none beyond those listed in the wave 7 section.
 - Wave 6c, migrations to generate (`npm run db:generate working-<what>`, the owner): `branch-network` `staff_members.level` (text, default '', US1.15); `credit-application` `delegation_tables` (US7.01, once its store is generated). No other row of this wave changed a table.
@@ -529,6 +533,25 @@ Blocked, each with its reason (see Decisions): US8.05 (Offer holds no terms; nee
 Migrations to generate (owner, `npm run db:generate working-<what>`): `credit_application.product_terms` (US6.19) and `credit_application.broker_registrations` (US6.13), both in `prisma/schema/credit-application.prisma`. No other table changed.
 
 Left to the owner: the `broker` tuple on `context:credit-application` when a broker registers; who holds `application.decide` in production (deciders are looked up by staff member id = account id in the specs); `application.review-refusal`, `application.assess`, `application.bring` are derived (operators; brokers for `bring`). `npm run verify`: green on `wave7`.
+
+## Wave 8, state at the end of the run (conductor, 2026-10-28)
+
+Branch `wave8`, not pushed. Proven end to end by the spec named (`test/e2e/`):
+
+- Decider and broker relations, no tuple written by a spec: `decide-application` (a member of staff appointed to a level decides), `appoint-staff-member-level`, `keep-decider-level`, `bring-application` (a registered broker brings, a lapsed one is refused).
+- Credit-application: US7.07 `request-exception`, US7.08 `decide-exception`, US7.09 `request-human-review`, US7.10 `contest-decision`, US7.11 `decide-rescheduling`, US7.13 `show-decision-view`, US7.14 `publish-reschedule-decided`, US8.05 `draft-offer`, US8.08 `issue-offer`, US8.09 `accept-offer`, US8.10 `withdraw-loan`, US8.11 and US8.13 `publish-payout-and-withdrawal`, US8.12 `authorize-payout`, US14.04 `explain-refusal`, `explain-refusal-broker`, `explain-refusal-conflict`, US13.06 `erase-refused-application-data`.
+- Servicing: US9.05 `record-payout`, US9.06 `compute-due-instalments`, US9.07 `compute-due-instalments-collection`, US9.08 and US9.09 `publish-loan-paid-out` and the payment spec, US9.11 `repay-early*`, US9.12 `reschedule-loan`, US9.13 `write-off-loan` and `reverse-write-off`, US9.14 `record-withdrawal-repayment`, US9.15 `get-loan-statement`, US9.16 `get-loan-statement-snapshot`, US9.17 and US13.07 `journey-loan-retention`, US10.03 `classify-arrears`, US10.04 (unit spec of the handler; the sent messages are not reachable from the started application), US10.05 and US10.06 `journey-repayment-incident`, US10.07 `declare-default`, US10.08 `publish-arrears`, US10.09 `read-portfolio-at-risk` (the rebuild from zero is proven in `test/integration/arrears/portfolio-at-risk.rebuild.spec.ts`, not through the started application).
+- Reporting and financial crime: US11.05 `journey-watch-repayments`, US12.02 `journey-decisions-per-branch`, US12.03 `journey-portfolio-at-risk`, US12.04 `journey-defaulted-loans`, US12.05 `journey-monthly-report`, US12.06 `journey-monthly-report-csv`, US12.07 `journey-defaults-list-csv`.
+- Platform: US14.06 `audit-every-command` plus `expectJobAuditedFor` in each spec that runs a per-tenant job; US15.01 (contracts current) and US15.02 `docs/compliance/traceability.md`.
+
+Blocked, each with its reason:
+- US9.10 (late fee, capped by the law): the legal cap is data of the bank with a date of effect (owner brief) and no context publishes it; building its store and its publication is a row of its own (credit-policy).
+- US15.03 (a recorded real run with docker compose) and US15.04 (one trace crossing the API and servicing): they need `npm run infra:up` and a network the session does not have.
+- US15.05 follows from them: `npm run verify` is green, but the close line of the owner needs the two rows above.
+
+Migrations to generate (owner, `npm run db:generate working-<what>`): `credit_application.offers` gets `issued_at` and `signed_at` (nullable, US8.08, US8.09) and its terms (US8.05); `reporting.portfolio_at_risk`, `reporting.loan_principals`, `reporting.defaulted_loans` (US12.03, US12.04); `servicing.portfolio_at_risk` and the schema `servicing` (US10.09); the earlier ones of the wave 6e and 7 sections.
+
+Frictions: see `docs/tooling/frictions.md` (the heap of `test:e2e`, `events/consumer-idempotent` with several module files).
 
 ## Open questions
 
