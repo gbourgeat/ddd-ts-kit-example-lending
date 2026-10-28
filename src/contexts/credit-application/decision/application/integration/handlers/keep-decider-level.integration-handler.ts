@@ -11,7 +11,12 @@ export class KeepDeciderLevelIntegrationHandler {
 
   constructor(private readonly commands: CommandBus) {}
 
+  /** A member of staff with no account signs in as nobody: they decide nothing, and no decider is kept for them. */
   async handle(event: StaffMemberAppointedV2): Promise<void> {
+    if (event.payload.accountId === '') {
+      return;
+    }
+
     await this.commands.execute(
       new KeepDeciderLevelCommand(this.actor, deciderLevelRowOf(event.payload), stampOf(event)),
     );

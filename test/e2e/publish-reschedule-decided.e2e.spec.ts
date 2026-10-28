@@ -6,6 +6,7 @@ import {
   keepDecisionReads,
   publishDelegationTable,
 } from '$test/e2e/support/credit-application/decision-world';
+import { storePaidOutLoan } from '$test/e2e/support/servicing/paid-out-loan';
 import { approvedApplicationOf } from '$test/e2e/support/credit-application/rescheduling-world';
 
 const rescheduleDecided = 'credit-application.credit-application.reschedule-decided';
@@ -30,6 +31,9 @@ describe('Publish the rescheduling decided for servicing, end to end', () => {
   it('publishes the new duration and the outstanding capital of the application rescheduled', async () => {
     const received = collectEvents(application.events, [rescheduleDecided]);
     const applicationId = await approvedApplicationOf(application);
+
+    // Servicing reschedules the loan of the application: it exists, paid out under the identifier of the application.
+    await storePaidOutLoan(application, applicationId, new Date('2026-01-10T00:00:00.000Z'));
     const advisor = await deciderOf(application, 'advisor');
 
     expectStatus(

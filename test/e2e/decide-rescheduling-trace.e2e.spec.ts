@@ -39,28 +39,40 @@ describe('Decide a rescheduling, one trace end to end', () => {
       expectStatus(await advisor.post(`/applications/${applicationId}/rescheduling-decision`, rescheduling), 204);
     });
 
-    // Exact on names and structure: the reads of the handler, its save, then the event in the before-commit phase.
-    expectSpanTree(storyOf(trace), [
+    expectSpanTree(storyOf(trace), reschedulingTrace);
+  });
+});
+
+/** The spans of the request, exact on names and structure: the reads of the handler, its save, then the event in the before-commit phase. */
+const reschedulingTrace = [
+  {
+    name: 'POST /applications/:id/rescheduling-decision',
+    kind: 'SERVER',
+    children: [
       {
-        name: 'POST /applications/:id/rescheduling-decision',
-        kind: 'SERVER',
+        name: 'command DecideReschedulingCommand',
         children: [
+          { name: 'repository CreditApplicationRepository.findById' },
+          { name: 'repository DeciderLevels.get' },
+          { name: 'repository DelegationTables.search' },
+          { name: 'repository DeclaredConflictsStore.searchOfCustomer' },
+          { name: 'repository CreditApplicationRepository.save' },
           {
-            name: 'command DecideReschedulingCommand',
+            name: 'unit-of-work before-commit',
             children: [
-              { name: 'repository CreditApplicationRepository.findById' },
-              { name: 'repository DeciderLevels.get' },
-              { name: 'repository DelegationTables.search' },
-              { name: 'repository DeclaredConflictsStore.searchOfCustomer' },
-              { name: 'repository CreditApplicationRepository.save' },
               {
-                name: 'unit-of-work before-commit',
-                children: [{ name: 'domain-event credit-application.credit-application.reschedule-decided' }],
+                name: 'domain-event credit-application.credit-application.reschedule-decided',
+                children: [
+                  {
+                    name: 'handler CreditApplicationRescheduleDecidedPublisher',
+                    children: [{ name: 'outbox append credit-application.credit-application.reschedule-decided' }],
+                  },
+                ],
               },
             ],
           },
         ],
       },
-    ]);
-  });
-});
+    ],
+  },
+];
