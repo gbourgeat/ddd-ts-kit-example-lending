@@ -50,6 +50,21 @@ export class EventStoreLoanRepository implements LoanRepository {
     return found;
   }
 
+  /** The store keeps no index of the open loans either: each loan stream is read once, then tested on its own state. */
+  async findOpen(): Promise<readonly Loan[]> {
+    const open: Loan[] = [];
+
+    for (const id of await this.loanIds()) {
+      const loan = await this.findById(id);
+
+      if (loan !== undefined && loan.closedAt === undefined) {
+        open.push(loan);
+      }
+    }
+
+    return open;
+  }
+
   save(saved: Loan): Promise<void> {
     return this.streams.save(saved);
   }

@@ -50,6 +50,8 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Loan read | The view of a loan the borrower's application reaches: its status, amount, duration and instalments, never its personal data |  |
 | Loan schedule | The amount, rate, duration and instalments of a loan, computed at its payout from the signed offer |  |
 | Compute | Work out each night which instalments of the schedule of a loan have fallen due |  |
+| Due date | The day an instalment falls due: its number of calendar months after the payout, on the payout day or the last day of a shorter month, in UTC |  |
+| Noted | The ledger records that an instalment fell due, once, with its number, its due date and its amount |  |
 
 ## Modules
 

@@ -95,6 +95,9 @@
   "servicing.loan.closed": {
     "1": "sha256:733dac3b56fba725"
   },
+  "servicing.loan.instalment-due-noted": {
+    "1": "sha256:93c79aef0844a567"
+  },
   "servicing.loan.paid-out": {
     "1": "sha256:733dac3b56fba725",
     "2": "sha256:a1d9654655ebb58f"

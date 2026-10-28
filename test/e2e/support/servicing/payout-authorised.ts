@@ -19,7 +19,7 @@ export async function borrowerOf(
 /** Publishes the payout authorisation of an application, as credit-application's relay would, and settles the work it starts. */
 export async function publishPayoutAuthorised(
   application: RunningApplication,
-  payout: { readonly applicationId: string; readonly customerId: string },
+  payout: { readonly applicationId: string; readonly customerId: string; readonly occurredAt?: string },
 ): Promise<void> {
   await application.publish([
     {
@@ -32,7 +32,10 @@ export async function publishPayoutAuthorised(
           durationMonths: 12,
           rateBasisPoints: 500,
         },
-        { id: `payout-authorised-${payout.applicationId}`, occurredAt: '2026-03-01T00:00:00.000Z' },
+        {
+          id: `payout-authorised-${payout.applicationId}`,
+          occurredAt: payout.occurredAt ?? '2026-03-01T00:00:00.000Z',
+        },
       ),
       tenantId: PAYOUT_TENANT,
     },

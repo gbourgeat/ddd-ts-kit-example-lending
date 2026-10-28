@@ -23,4 +23,8 @@ export class FakeLoanRepository implements LoanRepository {
   findClosedOnOrBefore(instant: Date): Promise<readonly Loan[]> {
     return this.adapter.findClosedOnOrBefore(instant);
   }
+
+  findOpen(): Promise<readonly Loan[]> {
+    return this.adapter.findOpen();
+  }
 }

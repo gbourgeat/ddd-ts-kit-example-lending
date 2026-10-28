@@ -24,4 +24,8 @@ export class ReadLoanAnswer {
   /** The constant monthly instalments, in cents, in order. */
   @IsInt({ each: true })
   instalmentsCents: number[] = [];
+
+  /** The numbers, counted from one, of the instalments due by the last nightly computation. */
+  @IsInt({ each: true })
+  instalmentsDue: number[] = [];
 }

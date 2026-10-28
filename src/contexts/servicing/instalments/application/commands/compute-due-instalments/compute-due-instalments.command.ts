@@ -1,6 +1,14 @@
-import { AuthorizedCommand } from '@ddd-ts-kit/kernel';
+import { AuthorizedCommand, type Actor } from '@ddd-ts-kit/kernel';
 
+/**
+ * Computes the instalments due in the bank of the command, at the instant `asOf` the run is for. It is about every open
+ * loan of the bank, so the bank is the resource its permission is held on, not one loan.
+ */
 export class ComputeDueInstalmentsCommand extends AuthorizedCommand<void> {
-  // TODO(domain): name the loan this command is about, `{ type: 'loan', id: command.loanId }`, once its constructor declares it, and derive 'loan.compute-due' on that type in the relationship schema; the context is the resource of a use case on no element.
-  // TODO(domain): declare the input of "compute due instalments" as a constructor with the actor first, then readonly primitives and ids, for example `constructor(actor: Actor, readonly customerId: string) { super(actor); }`; the handler turns them into value objects.
+  constructor(
+    actor: Actor,
+    readonly asOf: Date,
+  ) {
+    super(actor);
+  }
 }

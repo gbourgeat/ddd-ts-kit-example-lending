@@ -12,6 +12,14 @@ import { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borro
 import { LoanScheduled } from '@/contexts/servicing/ledger/domain/events/loan-scheduled.event';
 import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
 import { Money } from '@/shared-kernel/money.vo';
+import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
+
+/** An instalment noted as due: its number in the schedule, its due date as text and its amount, in whole cents. */
+interface LoanInstalmentDueNotedData {
+  readonly number: number;
+  readonly dueOn: string;
+  readonly amountCents: number;
+}
 
 /** The schedule of the loan, in whole cents: no personal value, so it is kept as it is. */
 interface LoanScheduledData {
@@ -77,6 +85,22 @@ export const loanEvents: StoredEventTypes<LoanEvent> = {
           durationMonths: data.number('durationMonths'),
           instalments: data.records('instalments').map((instalment) => Money.ofCents(instalment.number('cents'))),
         }),
+      ),
+  }),
+  [LoanInstalmentDueNoted.eventName]: defineStoredEvent(LoanInstalmentDueNoted, {
+    version: 1,
+    encode: (event): LoanInstalmentDueNotedData => ({
+      number: event.number,
+      dueOn: event.dueOn.toISOString(),
+      amountCents: event.amount.cents,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanInstalmentDueNoted(
+        aggregateId,
+        occurredAt,
+        data.number('number'),
+        new Date(data.text('dueOn')),
+        Money.ofCents(data.number('amountCents')),
       ),
   }),
 };

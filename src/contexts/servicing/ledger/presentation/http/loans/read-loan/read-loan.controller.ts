@@ -27,6 +27,7 @@ export class ReadLoanController {
       annualRateBasisPoints: loan.annualRateBasisPoints,
       durationMonths: loan.durationMonths,
       instalmentsCents: [...loan.instalmentsCents],
+      instalmentsDue: [...loan.instalmentsDue],
     };
   }
 }

@@ -5097,6 +5097,10 @@ paths:
                     items:
                       type: integer
                     type: array
+                  instalmentsDue:
+                    items:
+                      type: integer
+                    type: array
                 type: object
                 required:
                   - loanId
@@ -5105,6 +5109,7 @@ paths:
                   - annualRateBasisPoints
                   - durationMonths
                   - instalmentsCents
+                  - instalmentsDue
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:

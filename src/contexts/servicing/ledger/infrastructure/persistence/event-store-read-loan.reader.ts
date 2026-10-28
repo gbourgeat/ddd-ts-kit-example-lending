@@ -24,6 +24,7 @@ export class EventStoreReadLoanReader implements ReadLoanReader {
       annualRateBasisPoints: schedule.annualRateBasisPoints,
       durationMonths: schedule.durationMonths,
       instalmentsCents: schedule.instalments.map((instalment) => instalment.cents),
+      instalmentsDue: [...loan.instalmentsDue],
     };
   }
 }
