@@ -21,6 +21,7 @@ import { CreditApplicationExceptionDecided } from '@/contexts/credit-application
 import { CreditApplicationContested } from '@/contexts/credit-application/file/domain/events/credit-application-contested.event';
 import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
 import { creditApplicationRescheduleDecidedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-reschedule-decided.mapper';
+import { creditApplicationContestedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-contested.mapper';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -111,11 +112,6 @@ interface CreditApplicationExceptionDecidedData {
   readonly outcome: string;
   readonly deciderId: string;
   readonly reasons: string;
-}
-
-interface CreditApplicationContestedData {
-  readonly requesterId: string;
-  readonly reason: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -341,10 +337,5 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
       ),
   }),
   [CreditApplicationRescheduleDecided.eventName]: creditApplicationRescheduleDecidedStored,
-  [CreditApplicationContested.eventName]: defineStoredEvent(CreditApplicationContested, {
-    version: 1,
-    encode: (event): CreditApplicationContestedData => ({ requesterId: event.requesterId, reason: event.reason }),
-    decode: (data, { aggregateId, occurredAt }) =>
-      new CreditApplicationContested(aggregateId, occurredAt, data.text('requesterId'), data.text('reason')),
-  }),
+  [CreditApplicationContested.eventName]: creditApplicationContestedStored,
 };

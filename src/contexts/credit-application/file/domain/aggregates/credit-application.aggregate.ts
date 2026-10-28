@@ -1,5 +1,6 @@
 import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@ddd-ts-kit/kernel';
-import { Money } from '@/shared-kernel/money.vo';
+import type { Money } from '@/shared-kernel/money.vo';
+import { initialCreditApplicationState } from '@/contexts/credit-application/file/domain/values/initial-credit-application-state';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
@@ -41,30 +42,7 @@ import { ReschedulingCheckService } from '@/contexts/credit-application/file/dom
 import type { ReschedulingInput } from '@/contexts/credit-application/file/domain/values/rescheduling-input';
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
-  private state: CreditApplicationState = {
-    applicantId: '',
-    amount: Money.ofCents(0),
-    durationMonths: 0,
-    registeredAt: new Date(0),
-    branchId: '',
-    productId: '',
-    productTermsFindings: [],
-    accountConsent: undefined,
-    coBorrowerIds: [],
-    guarantorIds: [],
-    entryCount: 0,
-    correctedEntryIds: [],
-    documentKeys: [],
-    listedPartyCount: undefined,
-    lastAssessment: undefined,
-    refusalReviewConclusion: undefined,
-    refusalReviewerId: '',
-    decision: undefined,
-    exception: undefined,
-    humanReview: undefined,
-    exceptionDecision: undefined,
-    contestation: undefined,
-  };
+  private state: CreditApplicationState = initialCreditApplicationState();
 
   private constructor(id: string) {
     super(id);
