@@ -70,6 +70,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Declared | stated by the staff member themself, as opposed to found by a check |  |
 | Conflicts | the declared conflicts of interest of staff members on a customer, each one barring that staff member from deciding the customer's application |  |
 | Decide | the decider's act of choosing the outcome of an application, within the decider's limit | Decision: the choice itself |
+| Attach | to add a document to the application file, as an entry of it, its content stored in the object store |  |
+| Document attached | a document of the application was stored in the object store and recorded in the file |  |
 
 ## Modules
 
@@ -109,6 +111,7 @@ No personal data declared.
 - `credit-application:application.name-party`
 - `credit-application:application.correct`
 - `credit-application:application.decide`
+- `credit-application:application.attach-document`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -159,6 +162,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `AttachDocument` | command | `application.attach-document` |
 | `CorrectEntry` | command | `application.correct` |
 | `GiveAccountConsent` | command | `application.consent` |
 | `NameCoBorrower` | command | `application.name-party` |
@@ -177,6 +181,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | `application.decide` | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 
 ### Publishers

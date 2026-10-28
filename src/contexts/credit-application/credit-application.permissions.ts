@@ -8,5 +8,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.name-party': { description: 'Name co borrower' },
   'application.correct': { description: 'Correct entry' },
   'application.decide': { description: 'Decide an application: read its declared conflicts first' },
+  'application.attach-document': { description: 'Attach document' },
   // /ddd-ts-kit:permissions
 });
