@@ -124,7 +124,7 @@ and the residual income minimums are data of the bank with dates of effect" (eve
 | US4.02 | brokerage | skeleton | Intermediaries register (port and fake adapter) | `port brokerage IntermediariesRegister`; `adapter brokerage IntermediariesRegister --kind external` | | conductor | done |
 | US4.03 | brokerage | slice | Register a broker with the intermediaries register | `command brokerage RegisterBroker --permission broker.register --aggregate Broker`; `route brokerage RegisterBroker --method POST --path /brokers --command` | US4.01 | brokerage | done |
 | US4.04 | brokerage | slice | Check the registrations each day; a lapsed one is marked | `command brokerage CheckRegistration --permission broker.check --aggregate Broker`; `job brokerage CheckRegistration --cron "0 6 * * *" --time-zone Europe/Paris --command CheckRegistration` | US4.02, US4.03 | brokerage | done |
-| US4.05 | brokerage | contract | Broker registered and registration lapsed, published | `integration-event brokerage Broker Registered --version 1`; `integration-event brokerage Broker RegistrationLapsed --version 1` | US4.04 | conductor | todo |
+| US4.05 | brokerage | contract | Broker registered and registration lapsed, published | `integration-event brokerage Broker Registered --version 1`; `integration-event brokerage Broker RegistrationLapsed --version 1` | US4.04 | conductor | done |
 
 Serves: "Brokers" (rows 5, 6: US4.03, US4.04; row 17 through US6.12 and US6.13); "A broker whose registration
 lapsed can no longer bring one" (US6.12 refused on the day, with the projection of US6.13).

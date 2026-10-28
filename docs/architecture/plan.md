@@ -429,6 +429,8 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-28 Owner, wave 6e, US7.01, US7.02, US8.06, US8.07: the handler of each projection acts as a system actor of its context, granted the projection's own permission in the relationship schema (as the system actor of the advisor assignment, `relateSystemActors`), never a human role's permission. Each store is generated on the trunk (`generate projection`), the worker fills it; each proven through its read route (owner)
 - 2026-10-28 Owner, wave 6e, US2.18 (answer): proven by the US6.08 consult. `test/e2e/consult-repayment-incident-register.e2e.spec.ts` asserts that the name and birth date the register receives are the identified customer's (owner)
 - 2026-10-28 Owner, wave 6e, US4.05: its proof moves into a spec through the shared support (`test/e2e/support/start-application.ts`), asserting the `brokerage.broker.registration-lapsed` publish (owner)
+- 2026-10-28 Owner, wave 6f, US4.05: the daily check runs per bank, as the nightly erasure does (the platform fans a `per-tenant` job out over the organisations); the lapse event carries the tenant of its bank. Proven through the shared support by `test/e2e/register-broker-daily-check.e2e.spec.ts`: the publish of `brokerage.broker.registration-lapsed` with its tenant and broker, and no publish for a valid broker (owner)
+- 2026-10-28 Conductor, wave 6f, shared support: `start-application.ts` binds the identity provider fake and grants the system actors at start and after each reset, so a spec that opens a bank can settle (conductor, owner brief)
 
 ## For the owner
 
