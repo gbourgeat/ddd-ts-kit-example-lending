@@ -10,6 +10,7 @@ import type { LoanPaymentReceived } from '@/contexts/servicing/instalments/domai
 import type { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 import type { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
 import type { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-defaulted.event';
+import type { LoanRepaymentIncidentDeclared } from '@/contexts/servicing/arrears/domain/events/loan-repayment-incident-declared.event';
 import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 
 /**
@@ -75,4 +76,14 @@ export const loanStateChanges = {
   }),
 
   defaulted: (state: LoanState, event: LoanDefaulted): LoanState => ({ ...state, defaultedAt: event.occurredAt }),
+
+  repaymentIncidentDeclared: (state: LoanState, event: LoanRepaymentIncidentDeclared): LoanState => ({
+    ...state,
+    repaymentIncidentDeclaredAt: event.occurredAt,
+  }),
+
+  repaymentIncidentWithdrawn: (state: LoanState): LoanState => ({ ...state, repaymentIncidentDeclaredAt: undefined }),
+
+  /** The arrears are paid: the loan carries no unpaid instalment any more, and no state moves here. */
+  arrearsCleared: (state: LoanState): LoanState => state,
 };

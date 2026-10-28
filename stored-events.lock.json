@@ -95,6 +95,9 @@
   "servicing.loan.arrears-bucket-entered": {
     "1": "sha256:0206b5a57d44af0d"
   },
+  "servicing.loan.arrears-cleared": {
+    "1": "sha256:733dac3b56fba725"
+  },
   "servicing.loan.closed": {
     "1": "sha256:733dac3b56fba725"
   },
@@ -116,6 +119,12 @@
   },
   "servicing.loan.payment-received": {
     "1": "sha256:4f15b4764949ab3f"
+  },
+  "servicing.loan.repayment-incident-declared": {
+    "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.repayment-incident-withdrawn": {
+    "1": "sha256:733dac3b56fba725"
   },
   "servicing.loan.rescheduled": {
     "1": "sha256:4914db0ac40c6f51"

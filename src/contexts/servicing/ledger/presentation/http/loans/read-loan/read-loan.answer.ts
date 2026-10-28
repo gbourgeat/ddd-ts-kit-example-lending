@@ -45,4 +45,8 @@ export class ReadLoanAnswer {
   /** Declared in default, 90 days past due, and handed to collections. */
   @IsBoolean()
   defaulted = false;
+
+  /** Declared to the repayment incident register, and not withdrawn since. */
+  @IsBoolean()
+  incidentDeclared = false;
 }

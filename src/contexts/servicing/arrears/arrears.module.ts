@@ -2,6 +2,9 @@ import type { UseCaseDeclaration } from '@ddd-ts-kit/auth';
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { DeclareRepaymentIncidentCommand } from '@/contexts/servicing/arrears/application/commands/declare-repayment-incident/declare-repayment-incident.command';
+import { DeclareRepaymentIncidentHandler } from '@/contexts/servicing/arrears/application/commands/declare-repayment-incident/declare-repayment-incident.handler';
+import { SimulatedRepaymentIncidentRegister } from '@/contexts/servicing/arrears/infrastructure/external/simulated-repayment-incident-register.adapter';
 import { ClassifyArrearsCommand } from '@/contexts/servicing/arrears/application/commands/classify-arrears/classify-arrears.command';
 import { ClassifyArrearsHandler } from '@/contexts/servicing/arrears/application/commands/classify-arrears/classify-arrears.handler';
 import { ClassifyArrearsJob } from '@/contexts/servicing/arrears/application/scheduling/classify-arrears.job';
@@ -15,6 +18,8 @@ import { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-d
 import { requires } from '@ddd-ts-kit/auth';
 import { servicingPermissions } from '@/contexts/servicing/servicing.permissions';
 import type { LoanRepository } from '@/contexts/servicing/ledger/domain/repositories/loan.repository';
+import { DeclareIncidentAfterTwoUnpaidEventHandler } from '@/contexts/servicing/arrears/application/event-handlers/declare-incident-after-two-unpaid.event-handler';
+import { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 // /ddd-ts-kit:imports
 
 /** What the module arrears of the model registers; servicing.module.ts composes it with the rest of the context. */
@@ -23,6 +28,17 @@ export const arrearsModule = {
   registerHandlers(platform: Platform, given: { readonly loanRepository: LoanRepository }): void {
     // ddd-ts-kit:handlers
     const { loanRepository } = given;
+
+    const repaymentIncidentRegister = platform.adapter(new SimulatedRepaymentIncidentRegister(), {
+      kind: 'external',
+      context: 'servicing',
+    });
+
+    platform.commands.register(
+      DeclareRepaymentIncidentCommand,
+      new DeclareRepaymentIncidentHandler(loanRepository, repaymentIncidentRegister, platform.clock),
+      { context: 'servicing' },
+    );
 
     platform.commands.register(ClassifyArrearsCommand, new ClassifyArrearsHandler(loanRepository), {
       context: 'servicing',
@@ -56,6 +72,17 @@ export const arrearsModule = {
     platform.domainEvents.on(LoanDefaulted.eventName, async (event) => {
       if (event instanceof LoanDefaulted) {
         await loanDefaultedPublisher.handle(event);
+      }
+    });
+
+    const declareIncidentAfterTwoUnpaidEventHandler = platform.adapter(
+      new DeclareIncidentAfterTwoUnpaidEventHandler(platform.commands),
+      { kind: 'domain-event-handler', context: 'servicing' },
+    );
+
+    platform.domainEvents.on(LoanInstalmentMarkedUnpaid.eventName, async (event) => {
+      if (event instanceof LoanInstalmentMarkedUnpaid) {
+        await declareIncidentAfterTwoUnpaidEventHandler.handle(event);
       }
     });
     // /ddd-ts-kit:reactions
@@ -92,6 +119,9 @@ export const arrearsModule = {
         resource: () => ({ type: 'context', id: 'servicing' }),
       }),
       requires(DeclareDefaultCommand, servicingPermissions['loan.declare-default'], {
+        resource: () => ({ type: 'context', id: 'servicing' }),
+      }),
+      requires(DeclareRepaymentIncidentCommand, servicingPermissions['loan.declare-incident'], {
         resource: () => ({ type: 'context', id: 'servicing' }),
       }),
       // /ddd-ts-kit:authorization

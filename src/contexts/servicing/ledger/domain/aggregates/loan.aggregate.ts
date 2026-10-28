@@ -31,6 +31,10 @@ import { ArrearsBucketService } from '@/contexts/servicing/ledger/domain/service
 import { DaysPastDueService } from '@/contexts/servicing/ledger/domain/services/days-past-due.service';
 import { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-defaulted.event';
 import { DefaultDecisionService } from '@/contexts/servicing/ledger/domain/services/default-decision.service';
+import { LoanRepaymentIncidentDeclared } from '@/contexts/servicing/arrears/domain/events/loan-repayment-incident-declared.event';
+import { LoanRepaymentIncidentWithdrawn } from '@/contexts/servicing/arrears/domain/events/loan-repayment-incident-withdrawn.event';
+import { LoanArrearsCleared } from '@/contexts/servicing/arrears/domain/events/loan-arrears-cleared.event';
+import { UnpaidInstalmentsService } from '@/contexts/servicing/arrears/domain/services/unpaid-instalments.service';
 
 export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
   private state: LoanState = initialLoanState();
@@ -208,6 +212,47 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
     }
   }
 
+  /** Declares the loan to the repayment incident register once two consecutive instalments are unpaid: once only. */
+  declareRepaymentIncident(now: Date): boolean {
+    const unpaidInstalments = new UnpaidInstalmentsService();
+    const unpaid = unpaidInstalments.unpaidOf(this.state.instalmentsUnpaid, this.state.instalmentsPaid);
+
+    if (this.state.repaymentIncidentDeclaredAt !== undefined || !unpaidInstalments.hasTwoConsecutive(unpaid)) {
+      return false;
+    }
+
+    this.record(new LoanRepaymentIncidentDeclared(this.id, now));
+
+    return true;
+  }
+
+  /** Withdraws the declaration once the arrears are paid: a loan not declared records nothing. */
+  withdrawRepaymentIncident(now: Date): boolean {
+    if (this.state.repaymentIncidentDeclaredAt === undefined) {
+      return false;
+    }
+
+    this.record(new LoanRepaymentIncidentWithdrawn(this.id, now));
+
+    return true;
+  }
+
+  /** Receives the money of an instalment marked unpaid, late: the arrears are cleared once no unpaid instalment remains. */
+  recordLatePayment(number: number, amount: Money, now: Date): void {
+    const unpaidInstalments = new UnpaidInstalmentsService();
+    const { instalmentsUnpaid, instalmentsPaid } = this.state;
+
+    if (!unpaidInstalments.unpaidOf(instalmentsUnpaid, instalmentsPaid).includes(number)) {
+      return;
+    }
+
+    this.record(new LoanPaymentReceived(this.id, now, number, amount));
+
+    if (unpaidInstalments.unpaidOf(instalmentsUnpaid, [...instalmentsPaid, number]).length === 0) {
+      this.record(new LoanArrearsCleared(this.id, now));
+    }
+  }
+
   /** The capital still owed: the principal, less what the noted instalments repaid, the early repayments and the write-off. */
   get outstandingCapital(): Money {
     return new OutstandingCapitalService().ofLoan(this.state);
@@ -271,6 +316,11 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
       [LoanArrearsBucketEntered.eventName]: (event) =>
         this.restore(loanStateChanges.arrearsBucketEntered(this.state, event)),
       [LoanDefaulted.eventName]: (event) => this.restore(loanStateChanges.defaulted(this.state, event)),
+      [LoanRepaymentIncidentDeclared.eventName]: (event) =>
+        this.restore(loanStateChanges.repaymentIncidentDeclared(this.state, event)),
+      [LoanRepaymentIncidentWithdrawn.eventName]: () =>
+        this.restore(loanStateChanges.repaymentIncidentWithdrawn(this.state)),
+      [LoanArrearsCleared.eventName]: () => this.restore(loanStateChanges.arrearsCleared(this.state)),
     };
   }
 

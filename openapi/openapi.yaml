@@ -5113,6 +5113,8 @@ paths:
                     type: string
                   defaulted:
                     type: boolean
+                  incidentDeclared:
+                    type: boolean
                 type: object
                 required:
                   - loanId
@@ -5126,6 +5128,7 @@ paths:
                   - instalmentsUnpaid
                   - arrearsBucket
                   - defaulted
+                  - incidentDeclared
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:

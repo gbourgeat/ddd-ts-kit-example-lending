@@ -2370,6 +2370,7 @@ export type ReadLoanResult =
     instalmentsUnpaid: Array<number>;
     arrearsBucket: string;
     defaulted: boolean;
+    incidentDeclared: boolean;
   }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>

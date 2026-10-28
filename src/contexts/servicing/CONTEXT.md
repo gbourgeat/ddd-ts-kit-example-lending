@@ -73,6 +73,10 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Classify | Place a loan in the arrears bucket its days past due put it in |  |
 | Declare | State to the register or to collections that a loan is in default |  |
 | Entered | the loan was placed in an arrears bucket by a classification of its days past due |  |
+| Incident | A repayment incident: the report of a loan with two consecutive unpaid instalments to the register, withdrawn when the arrears are paid |  |
+| After | Once the event has happened, a reaction of the loan answers it |  |
+| Two | The number of consecutive instalments whose arrears declare a repayment incident |  |
+| Cleared | The arrears of a loan are paid: no unpaid instalment remains unpaid |  |
 
 ## Modules
 
@@ -118,6 +122,7 @@ No personal data declared.
 - `servicing:loan.collect`
 - `servicing:loan.classify-arrears`
 - `servicing:loan.declare-default`
+- `servicing:loan.declare-incident`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -177,6 +182,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CollectInstalment` | command | `loan.collect` |
 | `ComputeDueInstalments` | command | `loan.compute-due` |
 | `DeclareDefault` | command | `loan.declare-default` |
+| `DeclareRepaymentIncident` | command | `loan.declare-incident` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `GetLoanStatement` | query | `loan.read` |
 | `ReadLoan` | query | `loan.read` |
