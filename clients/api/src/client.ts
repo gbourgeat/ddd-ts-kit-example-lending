@@ -377,6 +377,12 @@ export interface Client {
    */
   closeLoan(input: operations.CloseLoanInput, options?: CallOptions): Promise<operations.CloseLoanResult>;
   /**
+   * Accept offer: `POST /offers/{id}/acceptance`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ALREADY_ACCEPTED (422), OFFER_EXPIRED (422), OFFER_NOT_ISSUED (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+   */
+  acceptOffer(input: operations.AcceptOfferInput, options?: CallOptions): Promise<operations.AcceptOfferResult>;
+  /**
    * Read pre contractual sheet: `GET /offers/{id}/pre-contractual-sheet`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
@@ -562,6 +568,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
     readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
     closeLoan: (input, call) => operations.closeLoan(connection, input, call),
+    acceptOffer: (input, call) => operations.acceptOffer(connection, input, call),
     readPreContractualSheet: (input, call) => operations.readPreContractualSheet(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
     grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),

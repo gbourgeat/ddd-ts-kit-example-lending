@@ -46,6 +46,9 @@ export const CreditApplicationCodes = {
   NotCreditCommittee: 'NOT_CREDIT_COMMITTEE',
   ContestAlreadyRecorded: 'CONTEST_ALREADY_RECORDED',
   ContestNotDecided: 'CONTEST_NOT_DECIDED',
+  OfferNotIssued: 'OFFER_NOT_ISSUED',
+  OfferAlreadyAccepted: 'OFFER_ALREADY_ACCEPTED',
+  OfferExpired: 'OFFER_EXPIRED',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

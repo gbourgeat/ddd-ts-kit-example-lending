@@ -57,6 +57,13 @@ const elements: SchemaDefinition = {
       },
     },
   },
+  offer: {
+    relations: { application: ['application'] },
+    derived: {
+      // The applicant accepts the offer drafted for their application, as they consent to it.
+      'credit-application:offer.accept': via('application', 'credit-application:application.consent'),
+    },
+  },
   loan: {
     relations: { application: ['application'] },
     derived: {
