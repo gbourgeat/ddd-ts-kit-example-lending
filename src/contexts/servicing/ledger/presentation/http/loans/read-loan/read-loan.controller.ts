@@ -31,6 +31,7 @@ export class ReadLoanController {
       instalmentsPaid: [...loan.instalmentsPaid],
       instalmentsUnpaid: [...loan.instalmentsUnpaid],
       arrearsBucket: loan.arrearsBucket,
+      defaulted: loan.defaulted,
     };
   }
 }

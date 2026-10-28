@@ -1,5 +1,5 @@
 import { ArrearsBucket } from '@/contexts/servicing/arrears/domain/vocabularies/arrears-bucket.vocabulary';
-import { IsInt, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsString } from 'class-validator';
 
 /** The loan as its borrower reads it: no personal data is part of it. */
 export class ReadLoanAnswer {
@@ -41,4 +41,8 @@ export class ReadLoanAnswer {
   /** The arrears bucket of the last classification: none, or one of the buckets of the arrears. */
   @IsString()
   arrearsBucket: ArrearsBucket = ArrearsBucket.None;
+
+  /** Declared in default, 90 days past due, and handed to collections. */
+  @IsBoolean()
+  defaulted = false;
 }

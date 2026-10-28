@@ -16,4 +16,6 @@ export interface ReadLoanResult {
   readonly instalmentsUnpaid: readonly number[];
   /** The arrears bucket of the last classification: none while the loan is not past due. */
   readonly arrearsBucket: ArrearsBucket;
+  /** Declared in default: 90 days past due, and handed to collections. */
+  readonly defaulted: boolean;
 }

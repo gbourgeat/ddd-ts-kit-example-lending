@@ -23,9 +23,23 @@ describe('Declare default, when its time comes', () => {
     expect(sent[0]).toMatchObject({ actor: { id: 'system:servicing.declare-default', type: 'system' } });
   });
 
-  // TODO(domain): replace each entry below by a test of what "declare default" asks of the use case: the period it names from `scheduledAt`, and that a second run of the same occurrence changes nothing.
-  it.todo('names the period of the occurrence, never the instant it really runs');
-  it.todo('has the same outcome when the same occurrence runs twice');
+  it('names the day of the occurrence, never the instant it really runs', async () => {
+    const { job, sent } = arrange();
+
+    await job.run(occurrence);
+
+    expect(sent[0]).toMatchObject({ asOf: occurrence.scheduledAt });
+  });
+
+  it('sends the same declaration when the same occurrence runs twice', async () => {
+    const { job, sent } = arrange();
+
+    await job.run(occurrence);
+    await job.run(occurrence);
+
+    expect(sent).toHaveLength(2);
+    expect(sent[1]).toMatchObject({ asOf: occurrence.scheduledAt });
+  });
 });
 
 function arrange() {

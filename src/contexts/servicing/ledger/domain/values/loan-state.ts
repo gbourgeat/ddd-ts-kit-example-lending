@@ -26,4 +26,6 @@ export interface LoanState {
   readonly instalmentsUnpaid: readonly number[];
   /** The arrears bucket the last classification placed the loan in: none until a classification finds it past due. */
   readonly arrearsBucket: ArrearsBucket;
+  /** The instant the loan was declared in default, 90 days past due: undefined until then. */
+  readonly defaultedAt: Date | undefined;
 }

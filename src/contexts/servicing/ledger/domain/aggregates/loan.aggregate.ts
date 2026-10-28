@@ -28,6 +28,8 @@ import { initialLoanState } from '@/contexts/servicing/ledger/domain/values/init
 import { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
 import { ArrearsBucketService } from '@/contexts/servicing/ledger/domain/services/arrears-bucket.service';
 import { DaysPastDueService } from '@/contexts/servicing/ledger/domain/services/days-past-due.service';
+import { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-defaulted.event';
+import { DefaultDecisionService } from '@/contexts/servicing/ledger/domain/services/default-decision.service';
 
 export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
   private state: LoanState = initialLoanState();
@@ -198,6 +200,13 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
     }
   }
 
+  /** Declares the loan in default once its days past due reach the limit: handed to collections, and declared once. */
+  declareDefault(now: Date): void {
+    if (new DefaultDecisionService().isDeclaredAt(this.state, now)) {
+      this.record(new LoanDefaulted(this.id, now));
+    }
+  }
+
   /** The capital still owed: the principal, less what the noted instalments repaid, the early repayments and the write-off. */
   get outstandingCapital(): Money {
     return new OutstandingCapitalService().ofLoan(this.state);
@@ -254,6 +263,7 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
       [LoanPaymentReceived.eventName]: (event) => this.applyPaymentReceived(event),
       [LoanInstalmentMarkedUnpaid.eventName]: (event) => this.applyInstalmentMarkedUnpaid(event),
       [LoanArrearsBucketEntered.eventName]: (event) => this.applyArrearsBucketEntered(event),
+      [LoanDefaulted.eventName]: (event) => this.applyDefaulted(event),
     };
   }
 
@@ -324,6 +334,10 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
 
   private applyArrearsBucketEntered(event: LoanArrearsBucketEntered): void {
     this.state = { ...this.state, arrearsBucket: event.bucket };
+  }
+
+  private applyDefaulted(event: LoanDefaulted): void {
+    this.state = { ...this.state, defaultedAt: event.occurredAt };
   }
 
   /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves here. */

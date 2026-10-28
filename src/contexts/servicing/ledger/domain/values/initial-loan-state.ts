@@ -17,5 +17,6 @@ export function initialLoanState(): LoanState {
     instalmentsPaid: [],
     instalmentsUnpaid: [],
     arrearsBucket: ArrearsBucket.None,
+    defaultedAt: undefined,
   };
 }

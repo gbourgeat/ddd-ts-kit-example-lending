@@ -267,6 +267,7 @@ interface LoanSnapshotData {
   readonly instalmentsPaid: { readonly number: number }[];
   readonly instalmentsUnpaid: { readonly number: number }[];
   readonly arrearsBucket: string;
+  readonly defaultedAt: { readonly at: string }[];
 }
 
 /**
@@ -275,7 +276,7 @@ interface LoanSnapshotData {
  * ignored (the stream is then replayed from its start).
  */
 export const loanSnapshots = {
-  version: 2,
+  version: 3,
   encode: (loan: Loan): LoanSnapshotData => snapshotDataOf(loan.id, loan.toState()),
   decode: (data: StoredEventData): LoanState => stateOf(data),
 };
@@ -298,6 +299,7 @@ function snapshotDataOf(subject: string, state: LoanState): LoanSnapshotData {
     instalmentsPaid: state.instalmentsPaid.map((number) => ({ number })),
     instalmentsUnpaid: state.instalmentsUnpaid.map((number) => ({ number })),
     arrearsBucket: state.arrearsBucket,
+    defaultedAt: optionalPart.listOf(state.defaultedAt, (at) => ({ at: at.toISOString() })),
   };
 }
 
@@ -321,5 +323,6 @@ function stateOf(data: StoredEventData): LoanState {
     instalmentsPaid: data.records('instalmentsPaid').map((record) => record.number('number')),
     instalmentsUnpaid: data.records('instalmentsUnpaid').map((record) => record.number('number')),
     arrearsBucket: arrearsBucketOf(data.text('arrearsBucket')),
+    defaultedAt: optionalPart.atMostOne(data.records('defaultedAt'), (record) => record.instant('at')),
   };
 }
