@@ -8,11 +8,22 @@ import { consume, subscribeAll } from '@ddd-ts-kit/events';
 import {
   creditApplicationDecidedV1 as decisionDefinition,
   creditApplicationSubmittedV2 as applicationCountDefinition,
+  creditApplicationPayoutAuthorisedV1 as loanPrincipalDefinition,
 } from '@/contexts/credit-application/published-language';
 import { ApplicationCountProjection } from '@/contexts/reporting/application/projections/application-count.projection';
 import { PrismaApplicationCounts } from '@/contexts/reporting/infrastructure/persistence/prisma-application-counts.repository';
 import { DecisionProjection } from '@/contexts/reporting/application/projections/decision.projection';
 import { PrismaDecisionCounts } from '@/contexts/reporting/infrastructure/persistence/prisma-decision-counts.repository';
+import { loanArrearsBucketEnteredV1 as portfolioAtRiskDefinition } from '@/contexts/servicing/published-language';
+import { PortfolioAtRiskProjection } from '@/contexts/reporting/application/projections/portfolio-at-risk.projection';
+import { LoanPrincipalProjection } from '@/contexts/reporting/application/projections/loan-principal.projection';
+import { PrismaPortfolioAtRisk } from '@/contexts/reporting/infrastructure/persistence/prisma-portfolio-at-risk.repository';
+import { PrismaLoanPrincipal } from '@/contexts/reporting/infrastructure/persistence/prisma-loan-principal.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { reportingPermissions } from '@/contexts/reporting/reporting.permissions';
+import { PortfolioAtRiskPerBranchHandler } from '@/contexts/reporting/application/queries/portfolio-at-risk-per-branch/portfolio-at-risk-per-branch.handler';
+import { PortfolioAtRiskPerBranchQuery } from '@/contexts/reporting/application/queries/portfolio-at-risk-per-branch/portfolio-at-risk-per-branch.query';
+import { PrismaPortfolioAtRiskPerBranchReader } from '@/contexts/reporting/infrastructure/persistence/prisma-portfolio-at-risk-per-branch.reader';
 // /ddd-ts-kit:imports
 
 export interface ReportingWiring {
@@ -39,6 +50,16 @@ export function reportingModule(platform: Platform): ReportingWiring {
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
+  const portfolioAtRiskPerBranchReader = platform.adapter(
+    new PrismaPortfolioAtRiskPerBranchReader(platform.persistence.database, platform.scope),
+    { kind: 'repository', context: 'reporting' },
+  );
+
+  platform.queries.register(
+    PortfolioAtRiskPerBranchQuery,
+    new PortfolioAtRiskPerBranchHandler(portfolioAtRiskPerBranchReader),
+    { context: 'reporting' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -80,6 +101,42 @@ function registerReactions(platform: Platform): void {
       },
     ),
   ]);
+
+  const portfolioAtRisk = new PrismaPortfolioAtRisk(platform.persistence.database, platform.scope);
+  const portfolioAtRiskProjection = new PortfolioAtRiskProjection(portfolioAtRisk);
+
+  subscribeAll(platform.subscriberFor('reporting'), [
+    consume(
+      portfolioAtRiskDefinition,
+      {
+        consumer: 'reporting.portfolio-at-risk',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      async (event) => {
+        await portfolioAtRiskProjection.arrearsBucketEntered(event);
+      },
+    ),
+  ]);
+
+  const loanPrincipal = new PrismaLoanPrincipal(platform.persistence.database, platform.scope);
+  const loanPrincipalProjection = new LoanPrincipalProjection(loanPrincipal);
+
+  subscribeAll(platform.subscriberFor('reporting'), [
+    consume(
+      loanPrincipalDefinition,
+      {
+        consumer: 'reporting.loan-principal',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      async (event) => {
+        await loanPrincipalProjection.payoutAuthorised(event);
+      },
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 
@@ -93,6 +150,9 @@ function registerJobs(platform: Platform): void {
 function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
+    requires(PortfolioAtRiskPerBranchQuery, reportingPermissions['report.portfolio-at-risk'], {
+      resource: () => ({ type: 'context', id: 'reporting' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }

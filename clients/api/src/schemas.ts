@@ -75,6 +75,17 @@ export type InvitationToken = {
   token: string;
 };
 
+export type PortfolioAtRiskBranchAnswer = {
+  branchId: string;
+  paidOutCents: number;
+  oneToThirtyDaysCents: number;
+  thirtyOneToSixtyDaysCents: number;
+  sixtyOneToNinetyDaysCents: number;
+  overNinetyDaysCents: number;
+  atRiskCents: number;
+  portfolioAtRiskBasisPoints: number;
+};
+
 /** Problem details (RFC 9457) with a stable machine-readable code. */
 export type Problem = {
   /** URI identifying the kind of problem. */

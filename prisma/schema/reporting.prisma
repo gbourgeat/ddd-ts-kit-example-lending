@@ -35,3 +35,36 @@ model ReportingDecisionCount {
   @@map("decision_counts")
   @@schema("reporting")
 }
+
+/// The arrears bucket each loan is in, as servicing last announced it: one row per tenant and loan.
+model ReportingPortfolioAtRisk {
+  key              String   @id
+  tenantId         String   @map("tenant_id")
+  loanId           String   @map("loan_id")
+  bucket           String   @map("bucket")
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+
+  @@index([tenantId], map: "portfolio_at_risk_tenant_idx")
+  @@map("portfolio_at_risk")
+  @@schema("reporting")
+}
+
+/// The branch and the amount paid out to each loan: one row per tenant and loan.
+model ReportingLoanPrincipal {
+  key              String   @id
+  tenantId         String   @map("tenant_id")
+  loanId           String   @map("loan_id")
+  branchId         String   @map("branch_id")
+  principalCents   Int      @map("principal_cents")
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+
+  @@index([tenantId, branchId], map: "loan_principals_tenant_idx")
+  @@map("loan_principals")
+  @@schema("reporting")
+}

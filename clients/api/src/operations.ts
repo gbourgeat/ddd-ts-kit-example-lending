@@ -3240,6 +3240,36 @@ export function readRateGrid(
   return send<ReadRateGridResult>(connection, operation, { ...input, ...options });
 }
 
+export type PortfolioAtRiskPerBranchInput = Record<string, never>;
+
+export type PortfolioAtRiskPerBranchResult =
+  | Success<200, {
+    branches: Array<Schemas.PortfolioAtRiskBranchAnswer>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>;
+
+/**
+ * Portfolio at risk per branch: `GET /reports/portfolio-at-risk`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+ */
+export function portfolioAtRiskPerBranch(
+  connection: Connection,
+  input: PortfolioAtRiskPerBranchInput = {},
+  options: CallOptions = {},
+): Promise<PortfolioAtRiskPerBranchResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/reports/portfolio-at-risk',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json' },
+  };
+
+  return send<PortfolioAtRiskPerBranchResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetResidualIncomeMinimumInput {
   readonly body: {
     perAdultInCents: number;

@@ -13,6 +13,7 @@ tags:
   - name: data-protection
   - name: financial-crime
   - name: identity
+  - name: reporting
   - name: servicing
 paths:
   /accounts/me:
@@ -6984,6 +6985,58 @@ paths:
           x-error-codes:
             - UNKNOWN_RATE_GRID
             - VALIDATION_FAILED
+  /reports/portfolio-at-risk:
+    get:
+      operationId: portfolioAtRiskPerBranch
+      summary: Portfolio at risk per branch
+      tags:
+        - reporting
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  branches:
+                    items:
+                      $ref: '#/components/schemas/PortfolioAtRiskBranchAnswer'
+                    type: array
+                type: object
+                required:
+                  - branches
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
   /residual-income-minimums:
     put:
       operationId: setResidualIncomeMinimum
@@ -7516,6 +7569,34 @@ components:
       type: object
       required:
         - token
+    PortfolioAtRiskBranchAnswer:
+      properties:
+        branchId:
+          type: string
+        paidOutCents:
+          type: integer
+        oneToThirtyDaysCents:
+          type: integer
+        thirtyOneToSixtyDaysCents:
+          type: integer
+        sixtyOneToNinetyDaysCents:
+          type: integer
+        overNinetyDaysCents:
+          type: integer
+        atRiskCents:
+          type: integer
+        portfolioAtRiskBasisPoints:
+          type: integer
+      type: object
+      required:
+        - branchId
+        - paidOutCents
+        - oneToThirtyDaysCents
+        - thirtyOneToSixtyDaysCents
+        - sixtyOneToNinetyDaysCents
+        - overNinetyDaysCents
+        - atRiskCents
+        - portfolioAtRiskBasisPoints
     Problem:
       type: object
       description: Problem details (RFC 9457) with a stable machine-readable code.

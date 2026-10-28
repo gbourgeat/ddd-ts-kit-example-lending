@@ -533,6 +533,12 @@ export interface Client {
    */
   readRateGrid(input: operations.ReadRateGridInput, options?: CallOptions): Promise<operations.ReadRateGridResult>;
   /**
+   * Portfolio at risk per branch: `GET /reports/portfolio-at-risk`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  portfolioAtRiskPerBranch(input?: operations.PortfolioAtRiskPerBranchInput, options?: CallOptions): Promise<operations.PortfolioAtRiskPerBranchResult>;
+  /**
    * Set residual income minimum: `PUT /residual-income-minimums`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
@@ -648,6 +654,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
+    portfolioAtRiskPerBranch: (input, call) => operations.portfolioAtRiskPerBranch(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
     scoreApplicant: (input, call) => operations.scoreApplicant(connection, input, call),
     publishScoringModelVersion: (input, call) => operations.publishScoringModelVersion(connection, input, call),
