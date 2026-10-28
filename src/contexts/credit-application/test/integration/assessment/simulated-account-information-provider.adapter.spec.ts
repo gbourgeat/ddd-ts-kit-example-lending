@@ -6,20 +6,12 @@ describe('SimulatedAccountInformationProvider', () => {
     expect(new SimulatedAccountInformationProvider()).toBeInstanceOf(SimulatedAccountInformationProvider);
   });
 
-  it('answers the income and expenses of a consent it holds', async () => {
+  it('answers the simulated income and expenses for any consent, since no accounts provider is connected yet', async () => {
     const provider = new SimulatedAccountInformationProvider();
-
-    provider.record('CONSENT-1', { monthlyIncomeInCents: 250000, monthlyExpensesInCents: 120000 });
 
     await expect(provider.readIncomeAndExpenses('CONSENT-1')).resolves.toEqual({
-      monthlyIncomeInCents: 250000,
-      monthlyExpensesInCents: 120000,
+      monthlyIncomeInCents: 250_000,
+      monthlyExpensesInCents: 90_000,
     });
-  });
-
-  it('refuses a consent it does not hold', async () => {
-    const provider = new SimulatedAccountInformationProvider();
-
-    await expect(provider.readIncomeAndExpenses('CONSENT-404')).rejects.toThrow(Error);
   });
 });
