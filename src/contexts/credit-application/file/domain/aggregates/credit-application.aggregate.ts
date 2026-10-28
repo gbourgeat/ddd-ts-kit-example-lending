@@ -12,6 +12,11 @@ import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/do
 import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
+import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
+import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
+import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
+import type { ProductLimits } from '@/contexts/credit-application/file/domain/values/product-limits';
+import type { ProductTermsFinding } from '@/contexts/credit-application/file/domain/values/product-terms-finding';
 import {
   AccountConsent,
   type AccountConsentState,
@@ -24,7 +29,9 @@ export type CreditApplicationEvent =
   | CreditApplicationGuarantorNamed
   | CreditApplicationEntryCorrected
   | CreditApplicationDocumentAttached
-  | CreditApplicationRegisterConsulted;
+  | CreditApplicationRegisterConsulted
+  | CreditApplicationRequestFoundOutsideProductTerms
+  | CreditApplicationRequestCheckedWithUnknownProductTerms;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -33,6 +40,10 @@ export interface CreditApplicationState {
   readonly registeredAt: Date;
   /** The branch the application was submitted on: empty when no advisor holds the applicant, or when it was submitted before the branch was recorded. */
   readonly branchId: string;
+  /** The product the application is for: empty when none was given. */
+  readonly productId: string;
+  /** What the checks against the product found: a limit the request breaks, or terms not known. */
+  readonly productTermsFindings: readonly ProductTermsFinding[];
   readonly accountConsent: AccountConsentState | undefined;
   readonly coBorrowerIds: readonly string[];
   readonly guarantorIds: readonly string[];
@@ -50,6 +61,7 @@ export interface LoanRequest {
   readonly durationMonths: number;
   readonly registeredAt: Date;
   readonly branchId: string;
+  readonly productId?: string;
 }
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
@@ -59,6 +71,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     durationMonths: 0,
     registeredAt: new Date(0),
     branchId: '',
+    productId: '',
+    productTermsFindings: [],
     accountConsent: undefined,
     coBorrowerIds: [],
     guarantorIds: [],
@@ -90,6 +104,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
         request.durationMonths,
         request.registeredAt,
         request.branchId,
+        request.productId ?? '',
       ),
     );
 
@@ -157,6 +172,19 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationRegisterConsulted(this.id, consultedAt, parties));
   }
 
+  /**
+   * The check of the application against the limits of its product: each limit the request breaks is kept as a finding,
+   * or, when the terms of the product are not known, that they are not. The application is never refused by a check.
+   */
+  checkAgainstProductTerms(limits: ProductLimits | undefined, checkedAt: Date): void {
+    const { productId, amount, durationMonths } = this.state;
+    const facts = { aggregateId: this.id, checkedAt, productId, amountCents: amount.cents, durationMonths };
+
+    for (const event of new ProductTermsCheckService().eventsOf(facts, limits)) {
+      this.record(event);
+    }
+  }
+
   /** Whether the applicant's consent to read the accounts is given and not yet expired at `instant`. */
   hasValidAccountConsentAt(instant: Date): boolean {
     if (this.state.accountConsent === undefined) {
@@ -212,6 +240,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationEntryCorrected.eventName]: (event) => this.applyEntryCorrected(event),
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
       [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
+      [CreditApplicationRequestFoundOutsideProductTerms.eventName]: (event) =>
+        this.applyRequestFoundOutsideProductTerms(event),
+      [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: (event) =>
+        this.applyRequestCheckedWithUnknownProductTerms(event),
     };
   }
 
@@ -245,6 +277,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       durationMonths: event.durationMonths,
       registeredAt: event.occurredAt,
       branchId: event.branchId,
+      productId: event.productId,
       entryCount: this.state.entryCount + 1,
     };
   }
@@ -292,6 +325,24 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   private applyRegisterConsulted(_event: CreditApplicationRegisterConsulted): void {
     this.state = {
       ...this.state,
+      entryCount: this.state.entryCount + 1,
+    };
+  }
+
+  private applyRequestFoundOutsideProductTerms(event: CreditApplicationRequestFoundOutsideProductTerms): void {
+    this.state = {
+      ...this.state,
+      productTermsFindings: [...this.state.productTermsFindings, event.finding],
+      entryCount: this.state.entryCount + 1,
+    };
+  }
+
+  private applyRequestCheckedWithUnknownProductTerms(
+    event: CreditApplicationRequestCheckedWithUnknownProductTerms,
+  ): void {
+    this.state = {
+      ...this.state,
+      productTermsFindings: [...this.state.productTermsFindings, { kind: 'terms-unknown', productId: event.productId }],
       entryCount: this.state.entryCount + 1,
     };
   }

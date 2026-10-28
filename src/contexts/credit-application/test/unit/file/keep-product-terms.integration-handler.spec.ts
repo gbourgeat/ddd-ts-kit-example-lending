@@ -1,27 +1,34 @@
 import { describe, expect, it } from '@jest/globals';
-import { InMemoryCommandBus } from '@ddd-ts-kit/kernel';
+import { createTestBuses } from '@ddd-ts-kit/testing';
 import { productDefinedV2 } from '@/contexts/credit-policy/published-language';
 import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
+import { KeepProductTermsCommand } from '@/contexts/credit-application/file/application/commands/keep-product-terms/keep-product-terms.command';
+import { KeepProductTermsHandler } from '@/contexts/credit-application/file/application/commands/keep-product-terms/keep-product-terms.handler';
+import { FakeProductTerms } from '@/contexts/credit-application/test/fakes/product-terms.fake';
 
 describe('When credit-policy publishes credit-policy.product.defined', () => {
   it('listens to the type credit-policy publishes', () => {
-    const handler = new KeepProductTermsIntegrationHandler(new InMemoryCommandBus());
+    const { commandBus } = createTestBuses();
+    const handler = new KeepProductTermsIntegrationHandler(commandBus);
 
     expect(handler).toBeInstanceOf(KeepProductTermsIntegrationHandler);
     expect(KeepProductTermsIntegrationHandler.eventType).toBe('credit-policy.product.defined');
   });
 
   it('acts as a system actor named after its consumer name', () => {
-    const handler = new KeepProductTermsIntegrationHandler(new InMemoryCommandBus());
+    const { commandBus } = createTestBuses();
+    const handler = new KeepProductTermsIntegrationHandler(commandBus);
 
     expect(handler.actor).toMatchObject({ id: 'system:credit-application.keep-product-terms', type: 'system' });
   });
 
-  it('receives the event as credit-policy publishes it', async () => {
-    const handler = new KeepProductTermsIntegrationHandler(new InMemoryCommandBus());
-    const meta = { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' };
+  it('keeps the terms of the product as credit-policy defined them, and has the same outcome when delivered twice', async () => {
+    const { commandBus } = createTestBuses();
+    const terms = new FakeProductTerms();
 
-    // TODO(domain): give the payload every field credit-policy declares, register the command the handler executes and assert what credit-application did.
+    commandBus.register(KeepProductTermsCommand, new KeepProductTermsHandler(terms));
+    const handler = new KeepProductTermsIntegrationHandler(commandBus);
+
     const event = productDefinedV2.create(
       {
         productId: 'product-1',
@@ -32,13 +39,12 @@ describe('When credit-policy publishes credit-policy.product.defined', () => {
         arrangementFeeCents: 4_500,
         insuranceMandatory: true,
       },
-      meta,
+      { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
     );
 
-    await expect(handler.handle(event)).resolves.toBeUndefined();
-  });
+    await handler.handle(event);
+    await handler.handle(event);
 
-  // TODO(domain): replace each entry below by a test that hands the handler an event built from the upstream declaration and asserts what credit-application did, through a real command bus with the handler and its fakes.
-  it.todo('executes the command that follows the upstream fact');
-  it.todo('has the same outcome when the same event is delivered twice');
+    expect(await terms.get('product-1')).toMatchObject({ productId: 'product-1', insuranceMandatory: true });
+  });
 });

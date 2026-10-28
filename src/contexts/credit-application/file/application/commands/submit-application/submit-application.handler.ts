@@ -22,6 +22,7 @@ export class SubmitApplicationHandler implements CommandHandler<SubmitApplicatio
       durationMonths: command.durationMonths,
       registeredAt: this.clock.now(),
       branchId,
+      productId: command.productId,
     });
 
     await this.creditApplicationRepository.save(creditApplication);
