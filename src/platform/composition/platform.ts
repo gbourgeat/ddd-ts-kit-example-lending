@@ -27,7 +27,10 @@ import type { RetentionPeriods } from '@/platform/config/read-retention-periods'
 import type { EventSourcing } from '@/platform/event-sourcing/create-event-sourcing';
 import type { Files } from '@/platform/files/create-files';
 import type { CustomerAdvisorBranchContract } from '@/contexts/branch-network/published-language';
-import type { CustomerIdentityContract } from '@/contexts/customer-due-diligence/published-language';
+import type {
+  CustomerDiligenceContract,
+  CustomerIdentityContract,
+} from '@/contexts/customer-due-diligence/published-language';
 import type { BackgroundJobs } from '@/platform/jobs/background-jobs';
 
 /** Wraps an adapter from outside: a span for its kind and, for what leaves the process, the default policy unless it states its own. */
@@ -59,6 +62,8 @@ export interface Platform {
   readonly customerAdvisorBranch: CustomerAdvisorBranchContract;
   /** The identity of an identified customer, answered by customer-due-diligence: what a context reaches through its port, never the module of another context. */
   readonly customerIdentity: CustomerIdentityContract;
+  /** Whether a customer may be lent to on a day: the payout gate reads it synchronously. */
+  readonly customerDiligence: CustomerDiligenceContract;
   /** Asks the policies about one element, then the authorizer: for the rules that need loaded state. */
   readonly access: Access;
   /**

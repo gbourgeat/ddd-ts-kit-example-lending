@@ -12,7 +12,11 @@ import type { TracedApplication } from '@ddd-ts-kit/tracing';
 import type { CustomerAdvisorBranchContract } from '@/contexts/branch-network/published-language';
 import { CustomerAdvisorBranchAnswer } from '@/contexts/branch-network/infrastructure/external/customer-advisor-branch.answer';
 import { PrismaPortfolioRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-portfolio.repository';
-import type { CustomerIdentityContract } from '@/contexts/customer-due-diligence/published-language';
+import type {
+  CustomerDiligenceContract,
+  CustomerIdentityContract,
+} from '@/contexts/customer-due-diligence/published-language';
+import { CreditEligibilityAnswer } from '@/contexts/customer-due-diligence/infrastructure/external/credit-eligibility.answer';
 import { CustomerIdentityAnswer } from '@/contexts/customer-due-diligence/infrastructure/external/customer-identity.answer';
 import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
 import { accessPolicies } from '@/platform/auth/authorization/access-policies';
@@ -65,6 +69,7 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
     relations,
     customerAdvisorBranch: customerAdvisorBranchOf(persistence, relations, foundations),
     customerIdentity: customerIdentityOf(foundations),
+    customerDiligence: customerDiligenceOf(foundations),
     access: new PolicyAccess({ authorizer, clock, policies: accessPolicies, onDecision: foundations.audit.decisions }),
     actors: new ScopedActorContext(scope, foundations.ids),
     adapter,
@@ -98,6 +103,11 @@ function customerIdentityOf({ eventSourcing }: Foundations): CustomerIdentityCon
   const customers = new EventStoreCustomerRepository(eventSourcing.events, eventSourcing.cipher);
 
   return new CustomerIdentityAnswer(customers);
+}
+
+/** Whether a customer may be lent to, answered from the customer streams of customer-due-diligence. */
+function customerDiligenceOf({ eventSourcing }: Foundations): CustomerDiligenceContract {
+  return new CreditEligibilityAnswer(new EventStoreCustomerRepository(eventSourcing.events, eventSourcing.cipher));
 }
 
 /** Where the content of files lives: the storage of `main.ts`; left out (the tools, the tests), the memory of the process. */

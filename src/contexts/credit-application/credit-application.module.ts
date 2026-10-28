@@ -56,6 +56,7 @@ import { registerNightlyJobs } from '@/contexts/credit-application/composition/r
 import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
 import { registerFileReactions } from '@/contexts/credit-application/composition/register-file-reactions.module';
 import { registerFileHandlers } from '@/contexts/credit-application/composition/register-file-handlers.module';
+import { InProcessCustomerDiligenceGateway } from '@/contexts/credit-application/offer/infrastructure/external/in-process-customer-diligence.gateway';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -77,6 +78,12 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
   );
 
   const customerAdvisorBranch = registerGateways(platform);
+
+  platform.adapter(new InProcessCustomerDiligenceGateway(platform.customerDiligence), {
+    kind: 'gateway',
+    context: 'credit-application',
+    token: 'CustomerDiligenceGateway',
+  });
 
   registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
   registerReactions(platform, declaredConflicts);
