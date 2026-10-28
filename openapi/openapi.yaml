@@ -1038,6 +1038,77 @@ paths:
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
+  /applications/{id}/register-consultations:
+    post:
+      operationId: consultRepaymentIncidentRegister
+      summary: Consult repayment incident register
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  applicationId:
+                    type: string
+                  parties:
+                    items:
+                      $ref: '#/components/schemas/ConsultedPartyLine'
+                    type: array
+                type: object
+                required:
+                  - applicationId
+                  - parties
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNIDENTIFIED_PARTY, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNIDENTIFIED_PARTY
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /audit/entries:
     get:
       operationId: searchAuditEntries
@@ -4530,6 +4601,22 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    ConsultedPartyLine:
+      properties:
+        customerId:
+          type: string
+        name:
+          type: string
+        birthDate:
+          type: string
+        listed:
+          type: boolean
+      type: object
+      required:
+        - customerId
+        - name
+        - birthDate
+        - listed
     DeclaredConflictLine:
       properties:
         conflictOfInterestId:

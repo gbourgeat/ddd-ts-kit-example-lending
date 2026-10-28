@@ -477,6 +477,42 @@ export function nameGuarantor(
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ConsultRepaymentIncidentRegisterInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ConsultRepaymentIncidentRegisterResult =
+  | Success<201, {
+    applicationId: string;
+    parties: Array<Schemas.ConsultedPartyLine>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNIDENTIFIED_PARTY' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Consult repayment incident register: `POST /applications/{id}/register-consultations`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNIDENTIFIED_PARTY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function consultRepaymentIncidentRegister(
+  connection: Connection,
+  input: ConsultRepaymentIncidentRegisterInput,
+  options: CallOptions = {},
+): Promise<ConsultRepaymentIncidentRegisterResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/register-consultations',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ConsultRepaymentIncidentRegisterResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SearchAuditEntriesInput {
   readonly query?: {
     /** Size of the page. */

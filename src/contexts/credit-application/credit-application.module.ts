@@ -39,6 +39,10 @@ import { AttachDocumentHandler } from '@/contexts/credit-application/file/applic
 import { ReadAccountInformationCommand } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.command';
 import { ReadAccountInformationHandler } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.handler';
 import { SimulatedAccountInformationProvider } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-account-information-provider.adapter';
+import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
+import { ConsultRepaymentIncidentRegisterHandler } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.handler';
+import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-customer-identity.gateway';
+import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -165,6 +169,25 @@ function registerHandlers(
     ),
     { context: 'credit-application' },
   );
+
+  platform.commands.register(
+    ConsultRepaymentIncidentRegisterCommand,
+    new ConsultRepaymentIncidentRegisterHandler(
+      creditApplicationRepository,
+      platform.adapter(new InProcessCustomerIdentityGateway(platform.customerIdentity), {
+        kind: 'gateway',
+        context: 'credit-application',
+        token: 'CustomerIdentityGateway',
+      }),
+      platform.adapter(new SimulatedRepaymentIncidentRegister(), {
+        kind: 'external',
+        context: 'credit-application',
+        token: 'RepaymentIncidentRegister',
+      }),
+      platform.clock,
+    ),
+    { context: 'credit-application' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -251,6 +274,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(ReadAccountInformationCommand, creditApplicationPermissions['application.read-accounts'], {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
+    requires(ConsultRepaymentIncidentRegisterCommand, creditApplicationPermissions['application.consult-register'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     // /ddd-ts-kit:authorization
   ];

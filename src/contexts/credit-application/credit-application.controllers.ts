@@ -2,6 +2,7 @@
 import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
+import { ConsultRepaymentIncidentRegisterController } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.controller';
 import { ReadAccountInformationController } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.controller';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
 import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
@@ -11,6 +12,8 @@ import { NameCoBorrowerController } from '@/contexts/credit-application/file/pre
 import { NameGuarantorController } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.controller';
 import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
+import { ConsultRepaymentIncidentRegisterParams } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.params';
+import { ConsultRepaymentIncidentRegisterAnswer } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.answer';
 import { ReadAccountInformationParams } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.params';
 import { ReadAccountInformationBody } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
@@ -27,6 +30,12 @@ import { SubmitApplicationBody } from '@/contexts/credit-application/file/presen
 
 /** The Nest controllers of credit-application, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const creditApplicationControllers: readonly Type<unknown>[] = [
+  withSignatures(ConsultRepaymentIncidentRegisterController, {
+    consultRepaymentIncidentRegister: {
+      params: ConsultRepaymentIncidentRegisterParams,
+      answer: ConsultRepaymentIncidentRegisterAnswer,
+    },
+  }),
   withSignatures(ReadAccountInformationController, {
     readAccountInformation: {
       params: ReadAccountInformationParams,

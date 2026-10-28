@@ -7,6 +7,7 @@ import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/
 import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/file/domain/events/credit-application-guarantor-named.event';
 import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
+import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -36,6 +37,11 @@ interface CreditApplicationDocumentAttachedData {
   readonly documentKey: string;
   readonly mediaType: string;
   readonly sizeBytes: number;
+}
+
+interface CreditApplicationRegisterConsultedData {
+  /** The answers as JSON text: the customer identifiers and whether each one is listed, never a name or a birth date. */
+  readonly parties: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -103,6 +109,16 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.text('documentKey'),
         data.text('mediaType'),
         data.number('sizeBytes'),
+      ),
+  }),
+  [CreditApplicationRegisterConsulted.eventName]: defineStoredEvent(CreditApplicationRegisterConsulted, {
+    version: 1,
+    encode: (event): CreditApplicationRegisterConsultedData => ({ parties: JSON.stringify(event.parties) }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationRegisterConsulted(
+        aggregateId,
+        occurredAt,
+        JSON.parse(data.text('parties')) as { customerId: string; listed: boolean }[],
       ),
   }),
 };
