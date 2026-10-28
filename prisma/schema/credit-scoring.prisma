@@ -4,7 +4,7 @@
 model CreditScoringScoringModel {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
-  // TODO(domain): add one field per field of ScoringModelState, with the type and the constraints the storage must enforce; then run `npm run db:client` and `npm run db:generate <what-it-does>`.
+  versions     Json     @default("[]") @db.JsonB
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)

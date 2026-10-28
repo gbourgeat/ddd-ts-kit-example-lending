@@ -1,8 +1,11 @@
 import { AggregateRoot } from '@ddd-ts-kit/kernel';
+import { ScoringModelPublished } from '@/contexts/credit-scoring/domain/events/scoring-model-published.event';
+import type { RiskLevel } from '@/contexts/credit-scoring/domain/vocabularies/risk-level.vocabulary';
+import { ScoringModelVersion } from '@/contexts/credit-scoring/domain/entities/scoring-model-version.entity';
 
 export interface ScoringModelState {
   readonly registeredAt: Date;
-  // TODO(domain): declare the rest of the state of ScoringModel with value objects (a Money, a Period), not primitives.
+  readonly versions: readonly ScoringModelVersion[];
 }
 
 export class ScoringModel extends AggregateRoot<string> {
@@ -14,24 +17,37 @@ export class ScoringModel extends AggregateRoot<string> {
   }
 
   static create(id: string, now: Date): ScoringModel {
-    // TODO(domain): take the facts known at birth as parameters, check each birth invariant and throw the refusal named after it when one is violated: `throw <Refusal>.for<Fact>(...)`, written with `ddd-ts-kit generate error credit-scoring <Refusal> <factory>`.
-    const created = new ScoringModel(id, { registeredAt: now });
-
-    // TODO(domain): record the birth fact with `created.record(new ScoringModelCreated(id, now))` after `ddd-ts-kit generate domain-event credit-scoring ScoringModel Created`.
-    return created;
+    return new ScoringModel(id, { registeredAt: now, versions: [] });
   }
 
   static rehydrate(id: string, state: ScoringModelState): ScoringModel {
     return new ScoringModel(id, state);
   }
 
-  // TODO(domain): add one method per business intention (issue, cancel, ...): each guards its invariants, replaces `this.state` and records the event of what happened.
+  /** Publishes the next version of the model: its number is the next integer of the model, from 1. */
+  publish(versionId: string, modelRisk: RiskLevel, label: string, now: Date): ScoringModelVersion {
+    const version = ScoringModelVersion.create(versionId, {
+      number: this.state.versions.length + 1,
+      modelRisk,
+      label,
+      publishedAt: now,
+    });
+
+    this.state = { ...this.state, versions: [...this.state.versions, version] };
+    this.record(new ScoringModelPublished(this.id, now, versionId, version.number, modelRisk, label));
+
+    return version;
+  }
 
   get registeredAt(): Date {
     return this.state.registeredAt;
   }
 
+  get versions(): readonly ScoringModelVersion[] {
+    return [...this.state.versions];
+  }
+
   toState(): ScoringModelState {
-    return { ...this.state };
+    return { ...this.state, versions: [...this.state.versions] };
   }
 }
