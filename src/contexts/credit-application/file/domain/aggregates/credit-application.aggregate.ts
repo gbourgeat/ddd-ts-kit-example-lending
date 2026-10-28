@@ -9,11 +9,17 @@ import { InvalidAmount } from '@/contexts/credit-application/file/domain/errors/
 import { InvalidDuration } from '@/contexts/credit-application/file/domain/errors/invalid-duration.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
-import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
+import {
+  CreditApplicationAssessed,
+  type ProposedOutcome,
+} from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
+import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
+import type { RefusalConclusion } from '@/contexts/credit-application/file/domain/values/refusal-conclusion';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
 import { EntryCorrectionService } from '@/contexts/credit-application/file/domain/services/entry-correction.service';
+import { RefusalReviewService } from '@/contexts/credit-application/file/domain/services/refusal-review.service';
 import type { ProductLimits } from '@/contexts/credit-application/file/domain/values/product-limits';
 import type { ProductTermsFinding } from '@/contexts/credit-application/file/domain/values/product-terms-finding';
 import {
@@ -31,7 +37,8 @@ export type CreditApplicationEvent =
   | CreditApplicationRegisterConsulted
   | CreditApplicationAssessed
   | CreditApplicationRequestFoundOutsideProductTerms
-  | CreditApplicationRequestCheckedWithUnknownProductTerms;
+  | CreditApplicationRequestCheckedWithUnknownProductTerms
+  | CreditApplicationRefusalReviewed;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -55,6 +62,10 @@ export interface CreditApplicationState {
   readonly documentKeys: readonly string[];
   /** How many parties the last consultation of the register found listed: undefined until the register is consulted. */
   readonly listedPartyCount: number | undefined;
+  /** The last assessment: the outcome it proposed and the person who ran it, undefined until the application is assessed. */
+  readonly lastAssessment: { readonly proposedOutcome: ProposedOutcome; readonly assessorId: string } | undefined;
+  /** The conclusion of the review of the last assessment, undefined until a person reviews it. */
+  readonly refusalReviewConclusion: RefusalConclusion | undefined;
 }
 
 /** What the applicant asks for, and the instant the application is registered. */
@@ -82,6 +93,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     correctedEntryIds: [],
     documentKeys: [],
     listedPartyCount: undefined,
+    lastAssessment: undefined,
+    refusalReviewConclusion: undefined,
   };
 
   private constructor(id: string) {
@@ -163,9 +176,22 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationRegisterConsulted(this.id, consultedAt, parties));
   }
 
-  /** The application is assessed: what it rests on and the outcome proposed are kept in the file, with the instant of the assessment. */
-  assess(assessment: CreditApplicationAssessed['assessment'], assessedAt: Date): void {
-    this.record(new CreditApplicationAssessed(this.id, assessedAt, assessment));
+  /** The application is assessed: what it rests on and the outcome proposed are kept in the file, with the instant and the person of the assessment. */
+  assess(assessment: CreditApplicationAssessed['assessment'], assessedAt: Date, assessorId: string): void {
+    this.record(new CreditApplicationAssessed(this.id, assessedAt, assessment, assessorId));
+  }
+
+  /**
+   * A person reviews the refusal the last assessment proposed: the conclusion is kept with the reviewer, the instant and
+   * the reason. The machine never refuses alone, and the assessor never reviews its own assessment.
+   */
+  reviewProposedRefusal(review: {
+    reviewerId: string;
+    conclusion: RefusalConclusion;
+    reason: string;
+    reviewedAt: Date;
+  }): void {
+    this.record(new RefusalReviewService().eventOf(this.id, this.state, review));
   }
 
   /**
@@ -246,6 +272,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
         this.applyRequestFoundOutsideProductTerms(event),
       [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: (event) =>
         this.applyRequestCheckedWithUnknownProductTerms(event),
+      [CreditApplicationRefusalReviewed.eventName]: (event) => this.applyRefusalReviewed(event),
     };
   }
 
@@ -293,8 +320,12 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.applyEntryAppended({ listedPartyCount: event.parties.filter((party) => party.listed).length });
   }
 
-  private applyAssessed(_event: CreditApplicationAssessed): void {
-    this.applyEntryAppended({});
+  /** A new assessment replaces the last one, and its proposal is not reviewed yet. */
+  private applyAssessed(event: CreditApplicationAssessed): void {
+    this.applyEntryAppended({
+      lastAssessment: { proposedOutcome: event.assessment.proposedOutcome, assessorId: event.assessorId },
+      refusalReviewConclusion: undefined,
+    });
   }
 
   private applyRequestFoundOutsideProductTerms(event: CreditApplicationRequestFoundOutsideProductTerms): void {
@@ -309,5 +340,9 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
 
   private applyFinding(finding: ProductTermsFinding): void {
     this.applyEntryAppended({ productTermsFindings: [...this.state.productTermsFindings, finding] });
+  }
+
+  private applyRefusalReviewed(event: CreditApplicationRefusalReviewed): void {
+    this.applyEntryAppended({ refusalReviewConclusion: event.conclusion });
   }
 }

@@ -5,6 +5,7 @@ import type { Type } from '@nestjs/common';
 import { AssessApplicationController } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.controller';
 import { ConsultRepaymentIncidentRegisterController } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.controller';
 import { ReadAccountInformationController } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.controller';
+import { ReviewProposedRefusalController } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.controller';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
 import { ReadDeciderLevelController } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.controller';
 import { ReadDelegationTableController } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.controller';
@@ -27,6 +28,8 @@ import { ConsultRepaymentIncidentRegisterParams } from '@/contexts/credit-applic
 import { ConsultRepaymentIncidentRegisterAnswer } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.answer';
 import { ReadAccountInformationParams } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.params';
 import { ReadAccountInformationBody } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.body';
+import { ReviewProposedRefusalParams } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.params';
+import { ReviewProposedRefusalBody } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
 import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.answer';
 import { ReadDeciderLevelParams } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.params';
@@ -69,6 +72,13 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
     readAccountInformation: {
       params: ReadAccountInformationParams,
       body: ReadAccountInformationBody,
+      answer: acceptedSchema,
+    },
+  }),
+  withSignatures(ReviewProposedRefusalController, {
+    reviewProposedRefusal: {
+      params: ReviewProposedRefusalParams,
+      body: ReviewProposedRefusalBody,
       answer: acceptedSchema,
     },
   }),

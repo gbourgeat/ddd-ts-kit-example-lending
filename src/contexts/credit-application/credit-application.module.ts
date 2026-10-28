@@ -74,6 +74,7 @@ import { KeepDeciderLevelIntegrationHandler } from '@/contexts/credit-applicatio
 import { KeepDelegationTableIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-delegation-table.integration-handler';
 import { KeepLegalMaximumRateIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-legal-maximum-rate.integration-handler';
 import { KeepRateGridIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-rate-grid.integration-handler';
+import { ReviewProposedRefusalCommand } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.command';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -203,7 +204,6 @@ function registerHandlers(
   const brokerRegistrations = readModel(platform, 'BrokerRegistrations', PrismaBrokerRegistrations);
 
   registerBrokerRegistrationHandlers(platform, brokerRegistrations);
-
   // /ddd-ts-kit:handlers
 }
 
@@ -327,6 +327,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     ...declareFileReferenceUseCases(),
+    requires(ReviewProposedRefusalCommand, creditApplicationPermissions['application.review-refusal'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }

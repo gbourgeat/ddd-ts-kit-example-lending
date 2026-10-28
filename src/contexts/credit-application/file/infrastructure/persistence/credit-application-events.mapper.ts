@@ -11,6 +11,7 @@ import { CreditApplicationRegisterConsulted } from '@/contexts/credit-applicatio
 import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
+import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -51,6 +52,7 @@ interface CreditApplicationRegisterConsultedData {
 interface CreditApplicationAssessedData {
   /** The assessment as JSON text: its inputs, its model version, its score, its band, its factors and the outcome proposed. */
   readonly assessment: string;
+  readonly assessorId: string;
 }
 
 interface CreditApplicationRequestFoundOutsideProductTermsData {
@@ -63,6 +65,12 @@ interface CreditApplicationRequestFoundOutsideProductTermsData {
 
 interface CreditApplicationRequestCheckedWithUnknownProductTermsData {
   readonly productId: string;
+}
+
+interface CreditApplicationRefusalReviewedData {
+  readonly reviewerId: string;
+  readonly conclusion: 'confirm' | 'overturn';
+  readonly reason: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -147,13 +155,21 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
       ),
   }),
   [CreditApplicationAssessed.eventName]: defineStoredEvent(CreditApplicationAssessed, {
-    version: 1,
-    encode: (event): CreditApplicationAssessedData => ({ assessment: JSON.stringify(event.assessment) }),
+    version: 2,
+    upcasters: {
+      // An assessment of version 1 recorded no assessor: it is read with an empty one, which no version 2 carries.
+      1: () => ({ assessorId: '' }),
+    },
+    encode: (event): CreditApplicationAssessedData => ({
+      assessment: JSON.stringify(event.assessment),
+      assessorId: event.assessorId,
+    }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationAssessed(
         aggregateId,
         occurredAt,
         JSON.parse(data.text('assessment')) as CreditApplicationAssessed['assessment'],
+        data.text('assessorId'),
       ),
   }),
   [CreditApplicationRequestFoundOutsideProductTerms.eventName]: defineStoredEvent(
@@ -189,4 +205,20 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         new CreditApplicationRequestCheckedWithUnknownProductTerms(aggregateId, occurredAt, data.text('productId')),
     },
   ),
+  [CreditApplicationRefusalReviewed.eventName]: defineStoredEvent(CreditApplicationRefusalReviewed, {
+    version: 1,
+    encode: (event): CreditApplicationRefusalReviewedData => ({
+      reviewerId: event.reviewerId,
+      conclusion: event.conclusion,
+      reason: event.reason,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationRefusalReviewed(
+        aggregateId,
+        occurredAt,
+        data.text('reviewerId'),
+        data.text('conclusion') as 'confirm' | 'overturn',
+        data.text('reason'),
+      ),
+  }),
 };

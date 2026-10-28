@@ -15,12 +15,13 @@ export type AssessmentRecord = {
   readonly proposedOutcome: ProposedOutcome;
 };
 
-/** The application was assessed: what it rests on is recorded in the file, with the outcome proposed. */
+/** The application was assessed: what it rests on is recorded in the file, with the outcome proposed and the person who ran the assessment. */
 export class CreditApplicationAssessed extends NamedDomainEvent('credit-application.credit-application.assessed') {
   constructor(
     readonly aggregateId: string,
     readonly occurredAt: Date,
     readonly assessment: AssessmentRecord,
+    readonly assessorId: string,
   ) {
     super();
   }
