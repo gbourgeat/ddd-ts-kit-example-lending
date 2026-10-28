@@ -287,6 +287,12 @@ export interface Client {
    */
   publishLegalMaximumRate(input: operations.PublishLegalMaximumRateInput, options?: CallOptions): Promise<operations.PublishLegalMaximumRateResult>;
   /**
+   * Read legal maximum rate: `GET /legal-maximum-rates/{legalMaximumRateId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+   */
+  readLegalMaximumRate(input: operations.ReadLegalMaximumRateInput, options?: CallOptions): Promise<operations.ReadLegalMaximumRateResult>;
+  /**
    * Open an organisation: `POST /organisations`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), INVALID_ORGANISATION_NAME (422), INVALID_ORGANISATION_SLUG (422), ORGANISATION_SLUG_TAKEN (422), VALIDATION_FAILED (422).
@@ -439,6 +445,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
+    readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
     grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),
     revokeDelegation: (input, call) => operations.revokeDelegation(connection, input, call),
