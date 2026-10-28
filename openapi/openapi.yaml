@@ -7112,6 +7112,73 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - NOT_ACCEPTABLE
+  /reports/defaults:
+    get:
+      operationId: defaultsList
+      summary: Defaults list
+      tags:
+        - reporting
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+            Vary:
+              description: The request headers this answer depends on, besides the URL.
+              schema:
+                type: string
+                const: accept
+          content:
+            application/json:
+              schema:
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/DefaultedLoanAnswer'
+                    type: array
+                type: object
+                required:
+                  - items
+            text/csv:
+              schema:
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/DefaultedLoanAnswer'
+                    type: array
+                type: object
+                required:
+                  - items
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
   /reports/monthly:
     get:
       operationId: monthlyReport
@@ -7169,8 +7236,73 @@ paths:
               schema:
                 type: string
                 const: no-store
+            Vary:
+              description: The request headers this answer depends on, besides the URL.
+              schema:
+                type: string
+                const: accept
           content:
             application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      properties:
+                        branchId:
+                          type: string
+                        month:
+                          type: string
+                        applicationCount:
+                          minimum: 0
+                          type: integer
+                        applicationAmountCents:
+                          minimum: 0
+                          type: integer
+                        decisionCount:
+                          minimum: 0
+                          type: integer
+                        approvalCount:
+                          minimum: 0
+                          type: integer
+                        exceptionCount:
+                          minimum: 0
+                          type: integer
+                        approvalRateBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                        exceptionShareBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                        portfolioAtRiskBasisPoints:
+                          maximum: 10000
+                          type: integer
+                          minimum: 0
+                      type: object
+                      required:
+                        - branchId
+                        - month
+                        - applicationCount
+                        - applicationAmountCents
+                        - decisionCount
+                        - approvalCount
+                        - exceptionCount
+                        - approvalRateBasisPoints
+                        - exceptionShareBasisPoints
+                        - portfolioAtRiskBasisPoints
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: Present when it is cheap to count.
+                  nextCursor:
+                    type: string
+                    description: Present when more items follow.
+            text/csv:
               schema:
                 type: object
                 required:

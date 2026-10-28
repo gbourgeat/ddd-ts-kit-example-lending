@@ -35,6 +35,9 @@ import { PrismaDefaultedLoansReader } from '@/contexts/reporting/infrastructure/
 import { MonthlyReportHandler } from '@/contexts/reporting/application/queries/monthly-report/monthly-report.handler';
 import { MonthlyReportQuery } from '@/contexts/reporting/application/queries/monthly-report/monthly-report.query';
 import { PrismaMonthlyReportReader } from '@/contexts/reporting/infrastructure/persistence/prisma-monthly-report.reader';
+import { DefaultsListHandler } from '@/contexts/reporting/application/queries/defaults-list/defaults-list.handler';
+import { DefaultsListQuery } from '@/contexts/reporting/application/queries/defaults-list/defaults-list.query';
+import { DefaultsListFromDefaultedLoansReader } from '@/contexts/reporting/infrastructure/persistence/defaults-list-from-defaulted-loans.reader';
 // /ddd-ts-kit:imports
 
 export interface ReportingWiring {
@@ -89,6 +92,13 @@ function registerHandlers(platform: Platform): void {
   platform.queries.register(MonthlyReportQuery, new MonthlyReportHandler(monthlyReportReader, platform.access), {
     context: 'reporting',
   });
+
+  const defaultsListReader = platform.adapter(new DefaultsListFromDefaultedLoansReader(defaultedLoansReader), {
+    kind: 'repository',
+    context: 'reporting',
+  });
+
+  platform.queries.register(DefaultsListQuery, new DefaultsListHandler(defaultsListReader), { context: 'reporting' });
   // /ddd-ts-kit:handlers
 }
 
@@ -204,6 +214,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'reporting' }),
     }),
     requires(MonthlyReportQuery, reportingPermissions['report.monthly'], {
+      resource: () => ({ type: 'context', id: 'reporting' }),
+    }),
+    requires(DefaultsListQuery, reportingPermissions['report.defaults'], {
       resource: () => ({ type: 'context', id: 'reporting' }),
     }),
     // /ddd-ts-kit:authorization

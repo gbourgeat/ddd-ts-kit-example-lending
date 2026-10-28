@@ -95,6 +95,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `DefaultedLoans` | query | `report.defaults` |
+| `DefaultsList` | query | `report.defaults` |
 | `MonthlyReport` | query | `report.monthly` |
 | `PortfolioAtRiskPerBranch` | query | `report.portfolio-at-risk` |
 
@@ -103,6 +104,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | GET | `/reports/defaulted-loans` | `defaultedLoans` | `ReportsRoutes` | `Authenticated` | `DefaultedLoans` | `report.defaults` |  | 200: `DefaultedLoansAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
+| GET | `/reports/defaults` | `defaultsList` | `ReportsRoutes` | `Authenticated` | `DefaultsList` | `report.defaults` |  | 200: `DefaultsListAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 | GET | `/reports/monthly` | `monthlyReport` | `ReportsRoutes` | `Authenticated` | `MonthlyReport` | `report.monthly` | query | 200: `page of MonthlyReportLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | GET | `/reports/portfolio-at-risk` | `portfolioAtRiskPerBranch` | `ReportsRoutes` | `Authenticated` | `PortfolioAtRiskPerBranch` | `report.portfolio-at-risk` |  | 200: `PortfolioAtRiskPerBranchAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 
@@ -125,6 +127,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DecisionCounts` | not bound |  |
 | `DefaultedLoan` | not bound |  |
 | `DefaultedLoansReader` | repository | `PrismaDefaultedLoansReader` |
+| `DefaultsListReader` | repository | `DefaultsListFromDefaultedLoansReader` |
 | `LoanPrincipal` | not bound |  |
 | `MonthlyReportReader` | repository | `PrismaMonthlyReportReader` |
 | `PortfolioAtRisk` | not bound |  |
