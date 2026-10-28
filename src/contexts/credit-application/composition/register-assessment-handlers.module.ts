@@ -2,6 +2,11 @@ import { ReadAccountInformationCommand } from '@/contexts/credit-application/ass
 import { ReadAccountInformationHandler } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.handler';
 import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
 import { ConsultRepaymentIncidentRegisterHandler } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.handler';
+import { AssessApplicationCommand } from '@/contexts/credit-application/assessment/application/commands/assess-application/assess-application.command';
+import { AssessApplicationHandler } from '@/contexts/credit-application/assessment/application/commands/assess-application/assess-application.handler';
+import { ReviewProposedRefusalCommand } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.command';
+import { ReviewProposedRefusalHandler } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.handler';
+import type { ScoringGateway } from '@/contexts/credit-application/assessment/application/ports/scoring-gateway.port';
 import type { AccountInformationProvider } from '@/contexts/credit-application/assessment/application/ports/account-information-provider.port';
 import type { CustomerIdentityGateway } from '@/contexts/credit-application/assessment/application/ports/customer-identity-gateway.port';
 import type { RepaymentIncidentRegister } from '@/contexts/credit-application/assessment/application/ports/repayment-incident-register.port';
@@ -14,6 +19,7 @@ export interface AssessmentDependencies {
   readonly accounts: AccountInformationProvider;
   readonly identities: CustomerIdentityGateway;
   readonly register: RepaymentIncidentRegister;
+  readonly scoring: ScoringGateway;
 }
 
 /** The commands of the assessment module: the account information and the register of repayment incidents. */
@@ -27,6 +33,18 @@ export function registerAssessmentHandlers(platform: Platform, given: Assessment
   platform.commands.register(
     ConsultRepaymentIncidentRegisterCommand,
     new ConsultRepaymentIncidentRegisterHandler(given.repository, given.identities, given.register, platform.clock),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    AssessApplicationCommand,
+    new AssessApplicationHandler(given.repository, platform.files.storage, given.scoring, platform.clock),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    ReviewProposedRefusalCommand,
+    new ReviewProposedRefusalHandler(given.repository, platform.clock),
     { context: 'credit-application' },
   );
 }

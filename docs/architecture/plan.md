@@ -1,6 +1,19 @@
 # Architecture plan
 
-Next: 7 build - wave 4 is on branch `wave4` and `verify` is green there: the owner decides the blocked rows of `## For the owner` (US1.09, US1.13, US2.06, US2.16, US13.04, US14.06) and the migrations once a database answers, then the rows left in `slices.md`
+Next: 7 build - wave 4 is on branch `wave4` and `verify` is green there: the owner decides the blocked rows of `
+- 2026-10-28 Conductor, wave 7, US6.03: the contract `ScoringContract.scoreOf(inputs)` scores an applicant with the latest published model version (undefined while none is published); answered in process by `ScoringAnswer` (credit-scoring) and bound as `platform.scoring`, read by credit-application through `ScoringGateway` (conductor)
+- 2026-10-28 Conductor, wave 7, US13.07 blocked: a `Loan` holds no personal data (the payout event carries the id and the instant) and has no closing event; the borrower data arrives with US9.05 (waits US8.13) and no row defines what closes a loan. Needs: `repository servicing Loan --personal ...` by the conductor once the payout carries the borrower, and a closing row (full early repayment, write-off) (conductor, owner brief)
+- 2026-10-28 Conductor, wave 7, US8.05 blocked: the `Offer` aggregate holds only its registration instant (no application, amount, rate, state); the owner's answer (draft from an approved application, `POST /applications/:id/offers`) needs the decision US7.04 and a `DraftOffer` row (rate by product, risk class and duration is not on a contract: `rate-grid.published` v2 carries no rate). Left to after US7.04 (conductor, owner brief, to confirm)
+- 2026-10-28 Conductor, wave 7, US6.20: an application is for a product (`productId` joins the submission and the `Submitted` event, version 3 with its upcaster); the check runs in the transaction of the submission and never refuses it: a limit broken, or terms not known, is kept as a finding of the file, read by `GET /applications/:id/product-terms-findings` with `application.read` (conductor, owner brief, to confirm)
+- 2026-10-28 Conductor, wave 7, US6.10: the assessment proposes `approve` only for a green band and a positive residual income, else `refuse` (proposed, reviewed by a person, US6.11); repayments are the monthly expenses of the account information, the instalment of the new loan is not computed yet (open question) (conductor, owner brief, to confirm)
+- 2026-10-28 Conductor, wave 7: `events/consumer-idempotent` reads the `consume(...)` of an `integration/handlers/*.integration-handler.ts` only in `<context>.module.ts` (not in `composition/`), so the seven consumers of credit-application stay in the module and the module is kept under 350 lines by `readModel(...)` and by the use-case policies (`declare-*-use-cases.policy.ts`) spread into `declaredUseCases` (conductor)
+- 2026-10-28 Conductor, wave 7, US14.06: left todo; a command sent by a job as a system actor (servicing erase) writes no `audit_entries` row in the started application, so the servicing case of the audit spec cannot be proven; the other contexts keep their case in `test/e2e/audit-every-command.e2e.spec.ts` (conductor, owner brief)
+- 2026-10-28 Conductor, wave 7, US13.06 not started: a refused application is decidable only since US7.04 and the file keeps no personal value to erase beyond ids and the documents already covered by the retention of US13.04; the row needs the refusal date and the personal fields of the file declared first (conductor, owner brief)
+- 2026-10-28 Conductor, wave 7, US6.12: a brought application records `CreditApplicationBrought` (v1) after `Submitted`, which keeps its shape; the broker holds `application.bring` through a `broker` relation on `context:credit-application` (relationship schema), but no code writes that tuple when a broker registers: to decide with the owner (conductor, owner brief, to confirm)
+- 2026-10-28 Conductor, wave 7, US7.12: `Decided` is stored at version 2 (branch and exception flag, upcaster for version 1), published as `credit-application.credit-application.decided` v1 with the outcome, the exception flag (false until US7.07), the branch and the amount approved (conductor)
+- 2026-10-28 Conductor, wave 7: ADR 0004 declares `domain/values` an extra directory of credit-application (plain types shared by the aggregate and its services); the decision module's `DeciderLimitReader` lives in `decision/application/projections/` (conductor)
+
+## For the owner` (US1.09, US1.13, US2.06, US2.16, US13.04, US14.06) and the migrations once a database answers, then the rows left in `slices.md`
 
 The `Next:` line above is read by tools at the start of every session: keep it on one line,
 `Next: <step number> <skill> - <first thing to do>`, and `Next: done` at the end.
@@ -489,6 +502,16 @@ Verify on the trunk: `npm run test:e2e`, `depcruise`, `deadcode` and `docs:check
 Migrations to generate (owner, `npm run db:generate working-<what>`): `reporting` application counts table (`prisma/schema/reporting.prisma`, US12.01); `data_protection` `impact_assessments` with `scoring_model_version` and `month` (US13.08). `stored-events.lock.json` now records `credit-application.register-consulted` version 1.
 
 Decisions taken under the owner brief in this part are under `## Decisions` (dated 2026-10-28, wave 6e).
+
+## Wave 7, state at the end of the run (conductor, 2026-10-28)
+
+Branch `wave7`, not pushed. Proven end to end by the spec named (`test/e2e/`): US6.03 and US6.10 `assess-application` (the proposed refusal case through `application.incidents`, newly exposed by `start-application.ts`), US6.11 `review-proposed-refusal`, US6.12 `bring-application`, US6.13 `keep-broker-registration`, US6.19 `journey-product-terms`, US6.20 `journey-check-request-against-product`, US7.04 `decide-application`, US7.05 `decide-application-limits`, US7.06 `decide-application-conflict`, US7.12 `publish-decided`.
+
+Blocked, each with its reason (see Decisions): US8.05 (Offer holds no terms; needs a `DraftOffer` row and a rate source), US13.07 (a Loan holds no personal data and has no closing event), US13.06 (see Decisions), US14.06 (a command sent by a job writes no audit row in the started application). Not started for want of time: US6.17 (the `Assessed` event is already at version 2 with its upcaster, the factors were already in version 1; the row needs an e2e that reads a version 1 stream), US7.07 to US7.11, US7.13, US7.14, US8.08, US12.02 and the waves after.
+
+Migrations to generate (owner, `npm run db:generate working-<what>`): `credit_application.product_terms` (US6.19) and `credit_application.broker_registrations` (US6.13), both in `prisma/schema/credit-application.prisma`. No other table changed.
+
+Left to the owner: the `broker` tuple on `context:credit-application` when a broker registers; who holds `application.decide` in production (deciders are looked up by staff member id = account id in the specs); `application.review-refusal`, `application.assess`, `application.bring` are derived (operators; brokers for `bring`). `npm run verify`: green on `wave7`.
 
 ## Open questions
 

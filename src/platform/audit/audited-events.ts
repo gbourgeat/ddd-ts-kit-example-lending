@@ -12,6 +12,7 @@ import {
 import {
   creditApplicationSubmittedV1,
   creditApplicationSubmittedV2,
+  creditApplicationDecidedV1,
 } from '@/contexts/credit-application/published-language';
 import {
   conflictOfInterestDeclaredV1,
@@ -61,5 +62,6 @@ export const auditedEvents = createEventRegistry([
   rateGridPublishedV2,
   creditApplicationSubmittedV2,
   productDefinedV2,
+  creditApplicationDecidedV1,
   // /ddd-ts-kit:events
 ]);

@@ -59,11 +59,23 @@ export interface Client {
    */
   submitApplication(input: operations.SubmitApplicationInput, options?: CallOptions): Promise<operations.SubmitApplicationResult>;
   /**
+   * Bring application: `POST /applications/bring`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BROKER_REGISTRATION_LAPSED (422), INVALID_AMOUNT (422), INVALID_DURATION (422), VALIDATION_FAILED (422).
+   */
+  bringApplication(input: operations.BringApplicationInput, options?: CallOptions): Promise<operations.BringApplicationResult>;
+  /**
    * Read account information: `POST /applications/{id}/account-information`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), MISSING_ACCOUNT_CONSENT (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
    */
   readAccountInformation(input: operations.ReadAccountInformationInput, options?: CallOptions): Promise<operations.ReadAccountInformationResult>;
+  /**
+   * Assess application: `POST /applications/{id}/assessment`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), MISSING_ACCOUNT_INFORMATION (422), NO_SCORE_AVAILABLE (422), REGISTER_NOT_CONSULTED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  assessApplication(input: operations.AssessApplicationInput, options?: CallOptions): Promise<operations.AssessApplicationResult>;
   /**
    * Name co borrower: `POST /applications/{id}/co-borrowers`.
    *
@@ -82,6 +94,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CORRECTION_ALREADY_RECORDED (422), INVALID_CORRECTION_REASON (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
    */
   correctEntry(input: operations.CorrectEntryInput, options?: CallOptions): Promise<operations.CorrectEntryResult>;
+  /**
+   * Decide application: `POST /applications/{id}/decision`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), DECISION_ABOVE_LIMIT (422), INVALID_DECISION_CONDITIONS (422), INVALID_DECISION_REASONS (422), NOT_ASSESSED (422), PREPARER_CANNOT_DECIDE (422), REFUSAL_NOT_REVIEWED (422), REFUSAL_PROPOSAL_STANDS (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  decideApplication(input: operations.DecideApplicationInput, options?: CallOptions): Promise<operations.DecideApplicationResult>;
   /**
    * Read declared conflicts: `GET /applications/{id}/declared-conflicts`.
    *
@@ -106,6 +124,18 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
    */
   nameGuarantor(input: operations.NameGuarantorInput, options?: CallOptions): Promise<operations.NameGuarantorResult>;
+  /**
+   * Read what the check of an application against its product found: `GET /applications/{id}/product-terms-findings`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  readProductTermsFindings(input: operations.ReadProductTermsFindingsInput, options?: CallOptions): Promise<operations.ReadProductTermsFindingsResult>;
+  /**
+   * Review proposed refusal: `POST /applications/{id}/refusal-review`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_REVIEW_REASON (422), NO_REFUSAL_TO_REVIEW (422), REFUSAL_ALREADY_REVIEWED (422), REVIEWER_CANNOT_BE_ASSESSOR (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  reviewProposedRefusal(input: operations.ReviewProposedRefusalInput, options?: CallOptions): Promise<operations.ReviewProposedRefusalResult>;
   /**
    * Consult repayment incident register: `POST /applications/{id}/register-consultations`.
    *
@@ -136,6 +166,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
    */
   registerBroker(input: operations.RegisterBrokerInput, options?: CallOptions): Promise<operations.RegisterBrokerResult>;
+  /**
+   * Read broker registration: `GET /brokers/{brokerId}/registration`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+   */
+  readBrokerRegistration(input: operations.ReadBrokerRegistrationInput, options?: CallOptions): Promise<operations.ReadBrokerRegistrationResult>;
   /**
    * Register the business of a customer: `POST /businesses`.
    *
@@ -359,6 +395,12 @@ export interface Client {
    */
   searchPortfolioCustomers(input: operations.SearchPortfolioCustomersInput, options?: CallOptions): Promise<operations.SearchPortfolioCustomersResult>;
   /**
+   * Read product terms: `GET /product-terms/{productId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PRODUCT_TERMS (422), VALIDATION_FAILED (422).
+   */
+  readProductTerms(input: operations.ReadProductTermsInput, options?: CallOptions): Promise<operations.ReadProductTermsResult>;
+  /**
    * Define product: `POST /products`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
@@ -413,19 +455,25 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     fileSuspiciousActivityReport: (input, call) => operations.fileSuspiciousActivityReport(connection, input, call),
     searchApplications: (input, call) => operations.searchApplications(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
+    bringApplication: (input, call) => operations.bringApplication(connection, input, call),
     readAccountInformation: (input, call) => operations.readAccountInformation(connection, input, call),
+    assessApplication: (input, call) => operations.assessApplication(connection, input, call),
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
+    decideApplication: (input, call) => operations.decideApplication(connection, input, call),
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     readDocument: (input, call) => operations.readDocument(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
+    readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),
+    reviewProposedRefusal: (input, call) => operations.reviewProposedRefusal(connection, input, call),
     consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
     registerBroker: (input, call) => operations.registerBroker(connection, input, call),
+    readBrokerRegistration: (input, call) => operations.readBrokerRegistration(connection, input, call),
     registerBusiness: (input, call) => operations.registerBusiness(connection, input, call),
     declareConflictOfInterest: (input, call) => operations.declareConflictOfInterest(connection, input, call),
     getCustomerFile: (input, call) => operations.getCustomerFile(connection, input, call),
@@ -463,6 +511,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     erasePersonalDataPastRetention: (input, call) => operations.erasePersonalDataPastRetention(connection, input, call),
     searchAdvisorPortfolios: (input, call) => operations.searchAdvisorPortfolios(connection, input, call),
     searchPortfolioCustomers: (input, call) => operations.searchPortfolioCustomers(connection, input, call),
+    readProductTerms: (input, call) => operations.readProductTerms(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),

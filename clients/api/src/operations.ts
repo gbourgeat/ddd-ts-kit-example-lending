@@ -275,6 +275,43 @@ export function submitApplication(
   return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface BringApplicationInput {
+  readonly body: {
+    customerId: string;
+    productId: string;
+    amount: Schemas.RequestedAmountBody;
+    durationMonths: number;
+  };
+}
+
+export type BringApplicationResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'BROKER_REGISTRATION_LAPSED' | 'INVALID_AMOUNT' | 'INVALID_DURATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Bring application: `POST /applications/bring`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BROKER_REGISTRATION_LAPSED (422), INVALID_AMOUNT (422), INVALID_DURATION (422), VALIDATION_FAILED (422).
+ */
+export function bringApplication(
+  connection: Connection,
+  input: BringApplicationInput,
+  options: CallOptions = {},
+): Promise<BringApplicationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/bring',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<BringApplicationResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadAccountInformationInput {
   readonly path: {
     readonly id: string;
@@ -308,6 +345,49 @@ export function readAccountInformation(
   };
 
   return send<ReadAccountInformationResult>(connection, operation, { ...input, ...options });
+}
+
+export interface AssessApplicationInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type AssessApplicationResult =
+  | Success<201, {
+    applicationId: string;
+    modelVersion: string;
+    debtToIncomePercent: number;
+    repaymentIncidents: number;
+    residualIncomeCents: number;
+    score: number;
+    band: string;
+    factors: Array<string>;
+    proposedOutcome: 'approve' | 'refuse';
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'MISSING_ACCOUNT_INFORMATION' | 'NO_SCORE_AVAILABLE' | 'REGISTER_NOT_CONSULTED' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Assess application: `POST /applications/{id}/assessment`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), MISSING_ACCOUNT_INFORMATION (422), NO_SCORE_AVAILABLE (422), REGISTER_NOT_CONSULTED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function assessApplication(
+  connection: Connection,
+  input: AssessApplicationInput,
+  options: CallOptions = {},
+): Promise<AssessApplicationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/assessment',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<AssessApplicationResult>(connection, operation, { ...input, ...options });
 }
 
 export interface NameCoBorrowerInput {
@@ -418,6 +498,46 @@ export function correctEntry(
   };
 
   return send<CorrectEntryResult>(connection, operation, { ...input, ...options });
+}
+
+export interface DecideApplicationInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    outcome: 'approve' | 'approve-with-conditions' | 'refuse';
+    reasons: string;
+    conditions: string;
+    approvedAmountCents: number;
+  };
+}
+
+export type DecideApplicationResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ALREADY_DECIDED' | 'DECISION_ABOVE_LIMIT' | 'INVALID_DECISION_CONDITIONS' | 'INVALID_DECISION_REASONS' | 'NOT_ASSESSED' | 'PREPARER_CANNOT_DECIDE' | 'REFUSAL_NOT_REVIEWED' | 'REFUSAL_PROPOSAL_STANDS' | 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_DECIDER_LEVEL' | 'UNKNOWN_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Decide application: `POST /applications/{id}/decision`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), DECISION_ABOVE_LIMIT (422), INVALID_DECISION_CONDITIONS (422), INVALID_DECISION_REASONS (422), NOT_ASSESSED (422), PREPARER_CANNOT_DECIDE (422), REFUSAL_NOT_REVIEWED (422), REFUSAL_PROPOSAL_STANDS (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+ */
+export function decideApplication(
+  connection: Connection,
+  input: DecideApplicationInput,
+  options: CallOptions = {},
+): Promise<DecideApplicationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/decision',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DecideApplicationResult>(connection, operation, { ...input, ...options });
 }
 
 export interface ReadDeclaredConflictsInput {
@@ -561,6 +681,77 @@ export function nameGuarantor(
   };
 
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadProductTermsFindingsInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ReadProductTermsFindingsResult =
+  | Success<200, Record<string, unknown>>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read what the check of an application against its product found: `GET /applications/{id}/product-terms-findings`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function readProductTermsFindings(
+  connection: Connection,
+  input: ReadProductTermsFindingsInput,
+  options: CallOptions = {},
+): Promise<ReadProductTermsFindingsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/product-terms-findings',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadProductTermsFindingsResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReviewProposedRefusalInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    conclusion: 'confirm' | 'overturn';
+    reason: string;
+  };
+}
+
+export type ReviewProposedRefusalResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_REVIEW_REASON' | 'NO_REFUSAL_TO_REVIEW' | 'REFUSAL_ALREADY_REVIEWED' | 'REVIEWER_CANNOT_BE_ASSESSOR' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Review proposed refusal: `POST /applications/{id}/refusal-review`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_REVIEW_REASON (422), NO_REFUSAL_TO_REVIEW (422), REFUSAL_ALREADY_REVIEWED (422), REVIEWER_CANNOT_BE_ASSESSOR (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function reviewProposedRefusal(
+  connection: Connection,
+  input: ReviewProposedRefusalInput,
+  options: CallOptions = {},
+): Promise<ReviewProposedRefusalResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/refusal-review',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ReviewProposedRefusalResult>(connection, operation, { ...input, ...options });
 }
 
 export interface ConsultRepaymentIncidentRegisterInput {
@@ -777,6 +968,44 @@ export function registerBroker(
   };
 
   return send<RegisterBrokerResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadBrokerRegistrationInput {
+  readonly path: {
+    readonly brokerId: string;
+  };
+}
+
+export type ReadBrokerRegistrationResult =
+  | Success<200, {
+    brokerId: string;
+    inForce: boolean;
+    since?: string;
+    until?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_BROKER_REGISTRATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read broker registration: `GET /brokers/{brokerId}/registration`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+ */
+export function readBrokerRegistration(
+  connection: Connection,
+  input: ReadBrokerRegistrationInput,
+  options: CallOptions = {},
+): Promise<ReadBrokerRegistrationResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/brokers/{brokerId}/registration',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadBrokerRegistrationResult>(connection, operation, { ...input, ...options });
 }
 
 export interface RegisterBusinessInput {
@@ -2159,6 +2388,47 @@ export function searchPortfolioCustomers(
   };
 
   return send<SearchPortfolioCustomersResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadProductTermsInput {
+  readonly path: {
+    readonly productId: string;
+  };
+}
+
+export type ReadProductTermsResult =
+  | Success<200, {
+    productId: string;
+    amountMinimumCents: number;
+    amountMaximumCents: number;
+    durationMinimumMonths: number;
+    durationMaximumMonths: number;
+    arrangementFeeCents: number;
+    insuranceMandatory: boolean;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_PRODUCT_TERMS' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read product terms: `GET /product-terms/{productId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PRODUCT_TERMS (422), VALIDATION_FAILED (422).
+ */
+export function readProductTerms(
+  connection: Connection,
+  input: ReadProductTermsInput,
+  options: CallOptions = {},
+): Promise<ReadProductTermsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/product-terms/{productId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadProductTermsResult>(connection, operation, { ...input, ...options });
 }
 
 export interface DefineProductInput {

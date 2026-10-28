@@ -2,8 +2,19 @@
   "credit-application.credit-application.account-consent-given": {
     "1": "sha256:9feb13a63258d925"
   },
+  "credit-application.credit-application.assessed": {
+    "1": "sha256:5ce47a15db6c1e75",
+    "2": "sha256:2e23f4655111a819"
+  },
+  "credit-application.credit-application.brought": {
+    "1": "sha256:2d377a28d1535bcb"
+  },
   "credit-application.credit-application.co-borrower-named": {
     "1": "sha256:a3b8eb43c397ea60"
+  },
+  "credit-application.credit-application.decided": {
+    "1": "sha256:6f4c0bca797a9304",
+    "2": "sha256:c82e5b7a35a32bb7"
   },
   "credit-application.credit-application.document-attached": {
     "1": "sha256:147596fb8d97663a"
@@ -14,12 +25,22 @@
   "credit-application.credit-application.guarantor-named": {
     "1": "sha256:25dd58ec9a66b312"
   },
+  "credit-application.credit-application.refusal-reviewed": {
+    "1": "sha256:7bed8c0c6650bb3d"
+  },
   "credit-application.credit-application.register-consulted": {
     "1": "sha256:dab8fd9bc1d3cb5d"
   },
+  "credit-application.credit-application.request-checked-with-unknown-product-terms": {
+    "1": "sha256:06a6fe205129635e"
+  },
+  "credit-application.credit-application.request-found-outside-product-terms": {
+    "1": "sha256:a519ea2460e121af"
+  },
   "credit-application.credit-application.submitted": {
     "1": "sha256:9fc1a08288528135",
-    "2": "sha256:d4b0bb9444e9d615"
+    "2": "sha256:d4b0bb9444e9d615",
+    "3": "sha256:d129893cc5223771"
   },
   "customer-due-diligence.customer.advisor-assigned": {
     "1": "sha256:bfc471f16ecf58e3"

@@ -67,6 +67,22 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 
 ## credit-application
 
+### credit-application.credit-application.decided
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.decided` | 1 | A decider approved, approved with conditions or refused a credit application: the outcome, whether it is an exception, the branch and the amount approved. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
+| `outcome` | string | yes |  |
+| `exception` | boolean | yes |  |
+| `branchId` | string | yes |  |
+| `approvedAmountCents` | integer | yes |  |
+
 ### credit-application.credit-application.submitted
 
 | Type | Version | Description | Deprecated |

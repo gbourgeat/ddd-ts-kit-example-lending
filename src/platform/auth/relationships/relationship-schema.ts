@@ -76,7 +76,7 @@ export const relationshipSchema = defineSchema({
   user: {},
   system: {},
   context: {
-    relations: { operator: ['user', 'system'], eraser: ['system'], keeper: ['system'] },
+    relations: { operator: ['user', 'system'], eraser: ['system'], keeper: ['system'], broker: ['user'] },
     derived: {
       ...Object.fromEntries(
         permissions
@@ -92,6 +92,7 @@ export const relationshipSchema = defineSchema({
       'credit-application:product-terms.keep': 'keeper',
       'credit-application:broker-registration.keep': 'keeper',
       'credit-application:broker-registration.lapse': 'keeper',
+      'credit-application:application.bring': 'broker',
       'data-protection:data-subject.request-copy': 'operator',
       'data-protection:impact-assessment.record': 'operator',
     },

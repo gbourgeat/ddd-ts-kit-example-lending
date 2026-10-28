@@ -602,6 +602,92 @@ paths:
             - INVALID_AMOUNT
             - INVALID_DURATION
             - VALIDATION_FAILED
+  /applications/bring:
+    post:
+      operationId: bringApplication
+      summary: Bring application
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                customerId:
+                  type: string
+                productId:
+                  type: string
+                amount:
+                  $ref: '#/components/schemas/RequestedAmountBody'
+                  not:
+                    type: 'null'
+                durationMonths:
+                  type: number
+              type: object
+              required:
+                - customerId
+                - productId
+                - amount
+                - durationMonths
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: BROKER_REGISTRATION_LAPSED, INVALID_AMOUNT, INVALID_DURATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - BROKER_REGISTRATION_LAPSED
+            - INVALID_AMOUNT
+            - INVALID_DURATION
+            - VALIDATION_FAILED
   /applications/{id}/account-information:
     post:
       operationId: readAccountInformation
@@ -675,6 +761,103 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - MISSING_ACCOUNT_CONSENT
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/assessment:
+    post:
+      operationId: assessApplication
+      summary: Assess application
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  applicationId:
+                    type: string
+                  modelVersion:
+                    type: string
+                  debtToIncomePercent:
+                    type: integer
+                  repaymentIncidents:
+                    type: integer
+                  residualIncomeCents:
+                    type: integer
+                  score:
+                    type: integer
+                  band:
+                    type: string
+                  factors:
+                    items:
+                      type: string
+                    type: array
+                  proposedOutcome:
+                    type: string
+                    enum:
+                      - approve
+                      - refuse
+                type: object
+                required:
+                  - applicationId
+                  - modelVersion
+                  - debtToIncomePercent
+                  - repaymentIncidents
+                  - residualIncomeCents
+                  - score
+                  - band
+                  - factors
+                  - proposedOutcome
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: MISSING_ACCOUNT_INFORMATION, NO_SCORE_AVAILABLE, REGISTER_NOT_CONSULTED, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - MISSING_ACCOUNT_INFORMATION
+            - NO_SCORE_AVAILABLE
+            - REGISTER_NOT_CONSULTED
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
   /applications/{id}/co-borrowers:
@@ -914,6 +1097,109 @@ paths:
             - INVALID_CORRECTION_REASON
             - UNKNOWN_CREDIT_APPLICATION
             - UNKNOWN_ENTRY
+            - VALIDATION_FAILED
+  /applications/{id}/decision:
+    post:
+      operationId: decideApplication
+      summary: Decide application
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                outcome:
+                  type: string
+                  enum:
+                    - approve
+                    - approve-with-conditions
+                    - refuse
+                reasons:
+                  type: string
+                conditions:
+                  type: string
+                approvedAmountCents:
+                  minimum: 0
+                  type: integer
+              type: object
+              required:
+                - outcome
+                - reasons
+                - conditions
+                - approvedAmountCents
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ALREADY_DECIDED, DECISION_ABOVE_LIMIT, INVALID_DECISION_CONDITIONS, INVALID_DECISION_REASONS, NOT_ASSESSED, PREPARER_CANNOT_DECIDE, REFUSAL_NOT_REVIEWED, REFUSAL_PROPOSAL_STANDS, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_DECIDER_LEVEL, UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ALREADY_DECIDED
+            - DECISION_ABOVE_LIMIT
+            - INVALID_DECISION_CONDITIONS
+            - INVALID_DECISION_REASONS
+            - NOT_ASSESSED
+            - PREPARER_CANNOT_DECIDE
+            - REFUSAL_NOT_REVIEWED
+            - REFUSAL_PROPOSAL_STANDS
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_DECIDER_LEVEL
+            - UNKNOWN_DELEGATION_TABLE
             - VALIDATION_FAILED
   /applications/{id}/declared-conflicts:
     get:
@@ -1237,6 +1523,155 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/product-terms-findings:
+    get:
+      operationId: readProductTermsFindings
+      summary: Read what the check of an application against its product found
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/refusal-review:
+    post:
+      operationId: reviewProposedRefusal
+      summary: Review proposed refusal
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                conclusion:
+                  type: string
+                  enum:
+                    - confirm
+                    - overturn
+                reason:
+                  type: string
+              type: object
+              required:
+                - conclusion
+                - reason
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: INVALID_REVIEW_REASON, NO_REFUSAL_TO_REVIEW, REFUSAL_ALREADY_REVIEWED, REVIEWER_CANNOT_BE_ASSESSOR, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - INVALID_REVIEW_REASON
+            - NO_REFUSAL_TO_REVIEW
+            - REFUSAL_ALREADY_REVIEWED
+            - REVIEWER_CANNOT_BE_ASSESSOR
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
   /applications/{id}/register-consultations:
@@ -1732,6 +2167,80 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - INVALID_BROKER_REGISTRATION
+            - VALIDATION_FAILED
+  /brokers/{brokerId}/registration:
+    get:
+      operationId: readBrokerRegistration
+      summary: Read broker registration
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: brokerId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  brokerId:
+                    type: string
+                  inForce:
+                    type: boolean
+                  since:
+                    pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                    type: string
+                  until:
+                    pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                    type: string
+                type: object
+                required:
+                  - brokerId
+                  - inForce
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_BROKER_REGISTRATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_BROKER_REGISTRATION
             - VALIDATION_FAILED
   /businesses:
     post:
@@ -4750,6 +5259,89 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - UNKNOWN_PORTFOLIO
+            - VALIDATION_FAILED
+  /product-terms/{productId}:
+    get:
+      operationId: readProductTerms
+      summary: Read product terms
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  productId:
+                    type: string
+                  amountMinimumCents:
+                    type: integer
+                  amountMaximumCents:
+                    type: integer
+                  durationMinimumMonths:
+                    type: integer
+                  durationMaximumMonths:
+                    type: integer
+                  arrangementFeeCents:
+                    type: integer
+                  insuranceMandatory:
+                    type: boolean
+                type: object
+                required:
+                  - productId
+                  - amountMinimumCents
+                  - amountMaximumCents
+                  - durationMinimumMonths
+                  - durationMaximumMonths
+                  - arrangementFeeCents
+                  - insuranceMandatory
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_PRODUCT_TERMS, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_PRODUCT_TERMS
             - VALIDATION_FAILED
   /products:
     post:

@@ -128,7 +128,7 @@
           "relationship": "conformist"
         }
       ],
-      "extraDirectories": ["composition"],
+      "extraDirectories": ["composition", "domain/values"],
       "modules": {
         "file": {},
         "assessment": {},
@@ -224,6 +224,11 @@
       "what": "contexts.customer-due-diligence.extraDirectories.composition",
       "adr": "0003",
       "reason": "The context module reached the 350-line limit; the nightly jobs move to composition/register-nightly-jobs.module.ts, called by the context module (owner, wave 6f, no raise of the limit)"
+    },
+    {
+      "what": "contexts.credit-application.extraDirectories.domain/values",
+      "adr": "0004",
+      "reason": "Types and rules of the file module that are not value objects live in domain values"
     }
   ]
 }

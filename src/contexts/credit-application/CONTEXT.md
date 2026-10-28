@@ -85,6 +85,28 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Erase personal data past retention | Destroy the key of the personal values of every application refused six months ago, so that the file can no longer be read | Delete an application |
 | Product | A credit offer of the bank, with the amounts, durations, fee and insurance it is sold with | Offer |
 | Terms | The amounts, durations, arrangement fee and insurance a product is sold with | Condition |
+| Assess | To make the assessment of an application: its ratios, its register answer and its score, then a proposal of approve or refuse |  |
+| No score available | the scoring of the application cannot be made: no scoring model version is published |  |
+| Proposal | the outcome an assessment proposes: approve, or a refusal that a person reviews |  |
+| Broker | An outside intermediary who brings applications; not a staff member | Advisor |
+| Registration | The broker's registration with the intermediaries register, in force from its registration until it lapses | Repayment incident register |
+| Lapsed | The registration of a broker that is no longer valid: the broker may no longer bring applications | Refusal |
+| Check | The verification that a submitted request lies within the limits of its product, recorded as a finding when it does not | Assessment |
+| Against | Compared with the limits the product sets: its minimum and maximum amount and duration |  |
+| Outside | Beyond the limit that a product sets: a request that is not within it | Inside |
+| Found | A finding: a fact noticed by a check and kept in the file | Founded |
+| Unknown | Not known: the terms of a product that have not been kept yet | Unidentified |
+| Checked | A check was run and its answer is kept in the file | Checking |
+| Findings | What the checks of an application against its product found, kept in its file | Results |
+| Reviewer | the staff member who reviews a proposed refusal; never the one who ran its assessment |  |
+| Cannot | not permitted; part of a refusal name only |  |
+| Be | to exist as; part of a refusal name only |  |
+| Assessor | the staff member who ran the assessment of an application |  |
+| Stands | the proposed refusal, once confirmed by a review, is the outcome of the application, a decision to approve cannot overturn it |  |
+| Above | beyond the amount a level may approve |  |
+| Limit | the most a level of staff may approve, the amount of its delegation |  |
+| Force | in effect on a day: the table of the latest date of effect not after that day |  |
+| Brought | an application a broker brings on behalf of a customer, recorded with the broker who brought it |  |
 
 ## Modules
 
@@ -105,6 +127,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `credit-application.credit-application.decided` (version 1)
 - `credit-application.credit-application.submitted` (version 1)
 - `credit-application.credit-application.submitted` (version 2)
 <!-- /ddd-ts-kit:events -->
@@ -132,6 +155,11 @@ No personal data declared.
 - `credit-application:decider-level.keep`
 - `credit-application:rate-grid.keep`
 - `credit-application:legal-maximum-rate.keep`
+- `credit-application:application.assess`
+- `credit-application:product-terms.keep`
+- `credit-application:broker-registration.keep`
+- `credit-application:application.review-refusal`
+- `credit-application:application.bring`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -184,24 +212,34 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `AssessApplication` | command | `application.assess` |
 | `AttachDocument` | command | `application.attach-document` |
+| `BringApplication` | command | not read |
+| `CheckRequestAgainstProduct` | command | not read |
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
+| `DecideApplication` | command | not read |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
-| `KeepDeciderLevel` | command | `decider-level.keep` |
-| `KeepDelegationTable` | command | `delegation-table.keep` |
+| `KeepBrokerRegistration` | command | not read |
+| `KeepDeciderLevel` | command | not read |
+| `KeepDelegationTable` | command | not read |
 | `KeepLegalMaximumRate` | command | not read |
+| `KeepProductTerms` | command | not read |
 | `KeepRateGrid` | command | not read |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
 | `ReadAccountInformation` | command | `application.read-accounts` |
-| `ReadDeciderLevel` | query | `application.decide` |
-| `ReadDeclaredConflicts` | query | `application.decide` |
-| `ReadDelegationTable` | query | `application.decide` |
+| `ReadBrokerRegistration` | query | not read |
+| `ReadDeciderLevel` | query | not read |
+| `ReadDeclaredConflicts` | query | not read |
+| `ReadDelegationTable` | query | not read |
 | `ReadDocument` | query | `application.read` |
 | `ReadLegalMaximumRate` | query | not read |
+| `ReadProductTerms` | query | not read |
+| `ReadProductTermsFindings` | query | not read |
 | `ReadRateGrid` | query | not read |
+| `ReviewProposedRefusal` | command | `application.review-refusal` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
 
@@ -212,23 +250,32 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications` | `searchApplications` | `ApplicationsRoutes` | `Authenticated` | `SearchApplications` | `public` | query | 200: `page of SearchApplicationsLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
 | POST | `/applications/:id/account-information` | `readAccountInformation` | `ApplicationsRoutes` | `Authenticated` | `ReadAccountInformation` | `application.read-accounts` | params: `ReadAccountInformationParams`, body: `ReadAccountInformationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.MissingAccountConsent`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/assessment` | `assessApplication` | `ApplicationsRoutes` | `Authenticated` | `AssessApplication` | `application.assess` | params: `AssessApplicationParams` | 201: `AssessApplicationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.MissingAccountInformation`, `CreditApplicationCodes.RegisterNotConsulted`, `CreditApplicationCodes.NoScoreAvailable` |
 | POST | `/applications/:id/co-borrowers` | `nameCoBorrower` | `ApplicationsRoutes` | `Authenticated` | `NameCoBorrower` | `application.name-party` | params: `NameCoBorrowerParams`, body: `NameCoBorrowerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
-| GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | `application.decide` | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/decision` | `decideApplication` | `ApplicationsRoutes` | `Authenticated` | `DecideApplication` | not read | params: `DecideApplicationParams`, body: `DecideApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotAssessed`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.RefusalNotReviewed`, `CreditApplicationCodes.RefusalProposalStands`, `CreditApplicationCodes.InvalidDecisionReasons`, `CreditApplicationCodes.InvalidDecisionConditions`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable`, `CreditApplicationCodes.DecisionAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide` |
+| GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | not read | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/refusal-review` | `reviewProposedRefusal` | `ApplicationsRoutes` | `Authenticated` | `ReviewProposedRefusal` | `application.review-refusal` | params: `ReviewProposedRefusalParams`, body: `ReviewProposedRefusalBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.InvalidReviewReason`, `CreditApplicationCodes.NoRefusalToReview`, `CreditApplicationCodes.RefusalAlreadyReviewed`, `CreditApplicationCodes.ReviewerCannotBeAssessor` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
-| GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | `application.decide` | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
-| GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | `application.decide` | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
+| POST | `/applications/bring` | `bringApplication` | `ApplicationsRoutes` | `Authenticated` | `BringApplication` | not read | body: `BringApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.BrokerRegistrationLapsed`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
+| GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | not read | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
+| GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | not read | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
+| GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | not read | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 | GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
+| GET | `/product-terms/:productId` | `readProductTerms` | `ProductTermsRoutes` | `Authenticated` | `ReadProductTerms` | not read | params: `ReadProductTermsParams` | 200: `ReadProductTermsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownProductTerms` |
 | GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | not read | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
 
 ### Consumed events
 
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepBrokerRegistrationIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepBrokerRegistrationLapsedIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | `credit-application.keep-delegation-table` |
@@ -239,15 +286,19 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Versions | Publisher |
 |---|---|---|
+| `credit-application.credit-application.decided` | 1 | `CreditApplicationDecidedPublisher` |
 | `credit-application.credit-application.submitted` | 1, 2 | `CreditApplicationSubmittedPublisher` |
 
 ### Projections
 
 | Projection | Class | Applies |
 |---|---|---|
-| not read | `ProductTermsProjection` |  |
 | not read | not read |  |
 | not read | not read |  |
+| not read | not read |  |
+| not read | not read |  |
+| not read | not read |  |
+| not read | `DeciderLimitReader` |  |
 | not read | `DeclaredConflictRow` |  |
 | not read | `DeclaredConflictsProjection` |  |
 | not read | not read |  |
@@ -262,40 +313,64 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
-| `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
+| `ApplicationListProjection` | external | `PrismaApplicationListProjection` |
+| `BrokerRegistrations` | not bound |  |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
 | `CustomerAdvisorBranchGateway` | external | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerDiligenceGateway` | gateway | `InProcessCustomerDiligenceGateway` |
 | `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeciderLevels` | not bound |  |
-| `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
+| `DeclaredConflictsStore` | external | `PrismaDeclaredConflictsStore` |
 | `DelegationTables` | not bound |  |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `LegalMaximumRates` | not bound |  |
 | `OfferRepository` | external | `PrismaOfferRepository` |
+| `ProductTerms` | not bound |  |
 | `RateGrids` | not bound |  |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
-| `SearchApplicationsReader` | repository | `PrismaSearchApplicationsReader` |
+| `ScoringGateway` | gateway | `InProcessScoringGateway` |
+| `SearchApplicationsReader` | external | `PrismaSearchApplicationsReader` |
 
 ### Policies
 
 | Policy | Permission |
 |---|---|
+| `DeclareFileReferenceUseCases` | `broker-registration.keep` |
+| `DeclareDecisionUseCases` | `application.decide` |
 | `DeclareOfferUseCases` | `rate-grid.keep` |
 
 ### Errors
 
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
+| `AlreadyDecided` | `forAlreadyDecided` | `ALREADY_DECIDED` | none |
+| `BrokerRegistrationLapsed` | `forBroker` | `BROKER_REGISTRATION_LAPSED` | `brokerId` |
 | `CorrectionAlreadyRecorded` | `forEntry` | `CORRECTION_ALREADY_RECORDED` | none |
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
+| `InvalidDecisionConditions` | `forConditions` | `INVALID_DECISION_CONDITIONS` | none |
+| `InvalidDecisionReasons` | `forReasons` | `INVALID_DECISION_REASONS` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
+| `InvalidReviewReason` | `forReason` | `INVALID_REVIEW_REASON` | none |
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
+| `NoRefusalToReview` | `forApplication` | `NO_REFUSAL_TO_REVIEW` | none |
+| `NotAssessed` | `forNotAssessed` | `NOT_ASSESSED` | none |
+| `RefusalAlreadyReviewed` | `forApplication` | `REFUSAL_ALREADY_REVIEWED` | none |
+| `RefusalNotReviewed` | `forApplication` | `REFUSAL_NOT_REVIEWED` | none |
+| `RefusalProposalStands` | `forApplication` | `REFUSAL_PROPOSAL_STANDS` | none |
+| `ReviewerCannotBeAssessor` | `forApplication` | `REVIEWER_CANNOT_BE_ASSESSOR` | none |
+| `UnknownBrokerRegistration` | `forUnknownBrokerRegistration` | `UNKNOWN_BROKER_REGISTRATION` | none |
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
+| `UnknownProductTerms` | `forUnknownProductTerms` | `UNKNOWN_PRODUCT_TERMS` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
+| `MissingAccountInformation` | `forApplication` | `MISSING_ACCOUNT_INFORMATION` | none |
+| `NoScoreAvailable` | `forScore` | `NO_SCORE_AVAILABLE` | none |
+| `RegisterNotConsulted` | `forApplication` | `REGISTER_NOT_CONSULTED` | none |
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
+| `ConflictedDecider` | `forConflictedDecider` | `CONFLICTED_DECIDER` | none |
+| `DecisionAboveLimit` | `forAboveLimit` | `DECISION_ABOVE_LIMIT` | `levelNeeded` |
+| `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
@@ -308,4 +383,5 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `CustomerDiligenceGateway` | `customer-due-diligence` | `InProcessCustomerDiligenceGateway` |
 | `CustomerIdentityGateway` | `customer-due-diligence` | `InProcessCustomerIdentityGateway` |
+| `ScoringGateway` | `credit-scoring` | `InProcessScoringGateway` |
 <!-- /ddd-ts-kit:reference -->

@@ -12,6 +12,9 @@ import type { TracedApplication } from '@ddd-ts-kit/tracing';
 import type { CustomerAdvisorBranchContract } from '@/contexts/branch-network/published-language';
 import { CustomerAdvisorBranchAnswer } from '@/contexts/branch-network/infrastructure/external/customer-advisor-branch.answer';
 import { PrismaPortfolioRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-portfolio.repository';
+import type { ScoringContract } from '@/contexts/credit-scoring/published-language';
+import { ScoringAnswer } from '@/contexts/credit-scoring/infrastructure/external/scoring.answer';
+import { PrismaScoringModelRepository } from '@/contexts/credit-scoring/infrastructure/persistence/prisma-scoring-model.repository';
 import type {
   CustomerDiligenceContract,
   CustomerIdentityContract,
@@ -93,6 +96,7 @@ function contractsBetweenContexts(persistence: Persistence, relations: RelationT
     customerAdvisorBranch: customerAdvisorBranchOf(persistence, relations, foundations),
     customerIdentity: customerIdentityOf(foundations),
     customerDiligence: customerDiligenceOf(foundations),
+    scoring: scoringOf(persistence, foundations),
   };
 }
 
@@ -110,6 +114,11 @@ function customerIdentityOf({ eventSourcing }: Foundations): CustomerIdentityCon
   const customers = new EventStoreCustomerRepository(eventSourcing.events, eventSourcing.cipher);
 
   return new CustomerIdentityAnswer(customers);
+}
+
+/** The score of an applicant, answered from the scoring model of credit-scoring. */
+function scoringOf(persistence: Persistence, { scope, clock }: Foundations): ScoringContract {
+  return new ScoringAnswer(new PrismaScoringModelRepository(persistence.database, scope, clock));
 }
 
 /** Whether a customer may be lent to, answered from the customer streams of customer-due-diligence. */

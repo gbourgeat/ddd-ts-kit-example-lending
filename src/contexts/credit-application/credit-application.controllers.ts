@@ -2,25 +2,38 @@
 import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
+import { AssessApplicationController } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.controller';
 import { ConsultRepaymentIncidentRegisterController } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.controller';
 import { ReadAccountInformationController } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.controller';
+import { ReviewProposedRefusalController } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.controller';
+import { DecideApplicationController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.controller';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
 import { ReadDeciderLevelController } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.controller';
 import { ReadDelegationTableController } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.controller';
 import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
+import { BringApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.controller';
 import { CorrectEntryController } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.controller';
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
 import { NameGuarantorController } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.controller';
 import { ReadDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/read-document/read-document.controller';
+import { ReadProductTermsFindingsController } from '@/contexts/credit-application/file/presentation/http/applications/read-product-terms-findings/read-product-terms-findings.controller';
 import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
+import { ReadBrokerRegistrationController } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.controller';
+import { ReadProductTermsController } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.controller';
 import { ReadLegalMaximumRateController } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.controller';
 import { ReadRateGridController } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.controller';
+import { AssessApplicationParams } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.params';
+import { AssessApplicationAnswer } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.answer';
 import { ConsultRepaymentIncidentRegisterParams } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.params';
 import { ConsultRepaymentIncidentRegisterAnswer } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.answer';
 import { ReadAccountInformationParams } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.params';
 import { ReadAccountInformationBody } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.body';
+import { ReviewProposedRefusalParams } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.params';
+import { ReviewProposedRefusalBody } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.body';
+import { DecideApplicationParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.params';
+import { DecideApplicationBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
 import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.answer';
 import { ReadDeciderLevelParams } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.params';
@@ -28,6 +41,7 @@ import { ReadDeciderLevelAnswer } from '@/contexts/credit-application/decision/p
 import { ReadDelegationTableParams } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.params';
 import { ReadDelegationTableAnswer } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.answer';
 import { AttachDocumentAnswer } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.answer';
+import { BringApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.body';
 import { CorrectEntryParams } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.params';
 import { CorrectEntryBody } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.body';
 import { GiveAccountConsentParams } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.params';
@@ -36,7 +50,13 @@ import { NameCoBorrowerParams } from '@/contexts/credit-application/file/present
 import { NameCoBorrowerBody } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.body';
 import { NameGuarantorParams } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.params';
 import { NameGuarantorBody } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.body';
+import { ReadProductTermsFindingsParams } from '@/contexts/credit-application/file/presentation/http/applications/read-product-terms-findings/read-product-terms-findings.params';
+import { ReadProductTermsFindingsAnswer } from '@/contexts/credit-application/file/presentation/http/applications/read-product-terms-findings/read-product-terms-findings.answer';
 import { SubmitApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.body';
+import { ReadBrokerRegistrationParams } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.params';
+import { ReadBrokerRegistrationAnswer } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.answer';
+import { ReadProductTermsParams } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.params';
+import { ReadProductTermsAnswer } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.answer';
 import { ReadLegalMaximumRateParams } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.params';
 import { ReadLegalMaximumRateAnswer } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.answer';
 import { ReadRateGridParams } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.params';
@@ -44,6 +64,9 @@ import { ReadRateGridAnswer } from '@/contexts/credit-application/offer/presenta
 
 /** The Nest controllers of credit-application, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const creditApplicationControllers: readonly Type<unknown>[] = [
+  withSignatures(AssessApplicationController, {
+    assessApplication: { params: AssessApplicationParams, answer: AssessApplicationAnswer },
+  }),
   withSignatures(ConsultRepaymentIncidentRegisterController, {
     consultRepaymentIncidentRegister: {
       params: ConsultRepaymentIncidentRegisterParams,
@@ -57,6 +80,16 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
       answer: acceptedSchema,
     },
   }),
+  withSignatures(ReviewProposedRefusalController, {
+    reviewProposedRefusal: {
+      params: ReviewProposedRefusalParams,
+      body: ReviewProposedRefusalBody,
+      answer: acceptedSchema,
+    },
+  }),
+  withSignatures(DecideApplicationController, {
+    decideApplication: { params: DecideApplicationParams, body: DecideApplicationBody, answer: acceptedSchema },
+  }),
   withSignatures(ReadDeclaredConflictsController, {
     readDeclaredConflicts: { params: ReadDeclaredConflictsParams, answer: ReadDeclaredConflictsAnswer },
   }),
@@ -67,6 +100,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
     readDelegationTable: { params: ReadDelegationTableParams, answer: ReadDelegationTableAnswer },
   }),
   withSignatures(AttachDocumentController, { attachDocument: { answer: AttachDocumentAnswer } }),
+  withSignatures(BringApplicationController, {
+    bringApplication: { body: BringApplicationBody, answer: acceptedSchema },
+  }),
   withSignatures(CorrectEntryController, {
     correctEntry: { params: CorrectEntryParams, body: CorrectEntryBody, answer: acceptedSchema },
   }),
@@ -80,8 +116,17 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
     nameGuarantor: { params: NameGuarantorParams, body: NameGuarantorBody, answer: acceptedSchema },
   }),
   withSignatures(ReadDocumentController, {}),
+  withSignatures(ReadProductTermsFindingsController, {
+    readProductTermsFindings: { params: ReadProductTermsFindingsParams, answer: ReadProductTermsFindingsAnswer },
+  }),
   withSignatures(SearchApplicationsController, {}),
   withSignatures(SubmitApplicationController, { submitApplication: { body: SubmitApplicationBody } }),
+  withSignatures(ReadBrokerRegistrationController, {
+    readBrokerRegistration: { params: ReadBrokerRegistrationParams, answer: ReadBrokerRegistrationAnswer },
+  }),
+  withSignatures(ReadProductTermsController, {
+    readProductTerms: { params: ReadProductTermsParams, answer: ReadProductTermsAnswer },
+  }),
   withSignatures(ReadLegalMaximumRateController, {
     readLegalMaximumRate: { params: ReadLegalMaximumRateParams, answer: ReadLegalMaximumRateAnswer },
   }),
