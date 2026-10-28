@@ -37,21 +37,12 @@ import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/event
 import { LoanPaymentReceivedPublisher } from '@/contexts/servicing/instalments/application/integration/publishers/loan-payment-received.publisher';
 import { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
 import { GetLoanStatementQuery } from '@/contexts/servicing/ledger/application/queries/get-loan-statement/get-loan-statement.query';
-import { ClassifyArrearsCommand } from '@/contexts/servicing/arrears/application/commands/classify-arrears/classify-arrears.command';
-import { ClassifyArrearsHandler } from '@/contexts/servicing/arrears/application/commands/classify-arrears/classify-arrears.handler';
-import { ClassifyArrearsJob } from '@/contexts/servicing/arrears/application/scheduling/classify-arrears.job';
-import { DeclareDefaultCommand } from '@/contexts/servicing/arrears/application/commands/declare-default/declare-default.command';
-import { DeclareDefaultHandler } from '@/contexts/servicing/arrears/application/commands/declare-default/declare-default.handler';
-import { DeclareDefaultJob } from '@/contexts/servicing/arrears/application/scheduling/declare-default.job';
 import { registerLoanHandlers } from '@/contexts/servicing/composition/register-loan-handlers.module';
 import { RemotePersonalDataErasure } from '@/contexts/servicing/ledger/infrastructure/external/remote-personal-data-erasure.adapter';
 import { EventStoreReadLoanReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-read-loan.reader';
 import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infrastructure/external/simulated-payment-provider.adapter';
 import { EventStoreGetLoanStatementReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-get-loan-statement.reader';
-import { LoanArrearsBucketEnteredPublisher } from '@/contexts/servicing/arrears/application/integration/publishers/loan-arrears-bucket-entered.publisher';
-import { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
-import { LoanDefaultedPublisher } from '@/contexts/servicing/arrears/application/integration/publishers/loan-defaulted.publisher';
-import { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-defaulted.event';
+import { arrearsModule } from '@/contexts/servicing/arrears/arrears.module';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -117,13 +108,7 @@ function registerHandlers(platform: Platform): void {
     paymentProvider,
   });
 
-  platform.commands.register(ClassifyArrearsCommand, new ClassifyArrearsHandler(loanRepository), {
-    context: 'servicing',
-  });
-
-  platform.commands.register(DeclareDefaultCommand, new DeclareDefaultHandler(loanRepository), {
-    context: 'servicing',
-  });
+  arrearsModule.registerHandlers(platform, { loanRepository });
   // /ddd-ts-kit:handlers
 }
 
@@ -217,27 +202,7 @@ function registerReactions(platform: Platform): void {
     }
   });
 
-  const loanArrearsBucketEnteredPublisher = platform.adapter(
-    new LoanArrearsBucketEnteredPublisher(platform.publisher, platform.ids),
-    { kind: 'domain-event-handler', context: 'servicing' },
-  );
-
-  platform.domainEvents.on(LoanArrearsBucketEntered.eventName, async (event) => {
-    if (event instanceof LoanArrearsBucketEntered) {
-      await loanArrearsBucketEnteredPublisher.handle(event);
-    }
-  });
-
-  const loanDefaultedPublisher = platform.adapter(new LoanDefaultedPublisher(platform.publisher, platform.ids), {
-    kind: 'domain-event-handler',
-    context: 'servicing',
-  });
-
-  platform.domainEvents.on(LoanDefaulted.eventName, async (event) => {
-    if (event instanceof LoanDefaulted) {
-      await loanDefaultedPublisher.handle(event);
-    }
-  });
+  arrearsModule.registerReactions(platform);
   // /ddd-ts-kit:reactions
 }
 
@@ -262,23 +227,7 @@ function registerJobs(platform: Platform): void {
     run: (execution) => computeDueInstalmentsJob.run(execution),
   });
 
-  const classifyArrearsJob = new ClassifyArrearsJob(platform.commands);
-
-  platform.jobs.register({
-    name: 'servicing.classify-arrears',
-    schedule: { cron: '0 2 * * *', timeZone: 'Europe/Paris' },
-    tenancy: 'per-tenant',
-    run: (execution) => classifyArrearsJob.run(execution),
-  });
-
-  const declareDefaultJob = new DeclareDefaultJob(platform.commands);
-
-  platform.jobs.register({
-    name: 'servicing.declare-default',
-    schedule: { cron: '0 2 * * *', timeZone: 'Europe/Paris' },
-    tenancy: 'per-tenant',
-    run: (execution) => declareDefaultJob.run(execution),
-  });
+  arrearsModule.registerJobs(platform);
   // /ddd-ts-kit:jobs
 }
 
@@ -322,12 +271,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(GetLoanStatementQuery, servicingPermissions['loan.read'], {
       resource: (query) => ({ type: 'loan', id: query.loanId }),
     }),
-    requires(ClassifyArrearsCommand, servicingPermissions['loan.classify-arrears'], {
-      resource: () => ({ type: 'context', id: 'servicing' }),
-    }),
-    requires(DeclareDefaultCommand, servicingPermissions['loan.declare-default'], {
-      resource: () => ({ type: 'context', id: 'servicing' }),
-    }),
+    ...arrearsModule.useCases(),
     // /ddd-ts-kit:authorization
   ];
 }
@@ -336,6 +280,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
 function routesOf(platform: Platform): Route[] {
   return [
     // ddd-ts-kit:routes
+    ...arrearsModule.routes(platform),
     // /ddd-ts-kit:routes
   ];
 }

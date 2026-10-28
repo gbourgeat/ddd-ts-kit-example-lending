@@ -8,6 +8,16 @@ import type { RelationTuple, RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 const systemRelationships: readonly RelationTuple[] = [
   // ddd-ts-kit:system-grants
   {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:DeclareIncidentAfterTwoUnpaidEventHandler',
+  },
+  {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:WithdrawIncidentWhenPaidEventHandler',
+  },
+  {
     object: 'context:financial-crime',
     relation: 'operator',
     subject: 'system:system:financial-crime.watch-repayments',

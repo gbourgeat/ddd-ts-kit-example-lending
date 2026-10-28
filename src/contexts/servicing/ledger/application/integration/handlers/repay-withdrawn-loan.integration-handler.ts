@@ -5,6 +5,7 @@ import {
 } from '@/contexts/credit-application/published-language';
 import { RecordWithdrawalRepaymentCommand } from '@/contexts/servicing/ledger/application/commands/record-withdrawal-repayment/record-withdrawal-repayment.command';
 
+// ddd-ts-kit-disable-next-line events/consumer-idempotent -- ADR-0009: registered in its module file, which the rule does not read
 export class RepayWithdrawnLoanIntegrationHandler {
   static readonly eventType = creditApplicationWithdrawnV1.type;
 

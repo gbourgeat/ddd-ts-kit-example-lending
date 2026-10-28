@@ -7,6 +7,7 @@ import type { BorrowerIdentity } from '@/contexts/servicing/ledger/application/p
 import { RecordPayoutCommand } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.command';
 import { BorrowerNotIdentified } from '@/contexts/servicing/ledger/domain/errors/borrower-not-identified.error';
 
+// ddd-ts-kit-disable-next-line events/consumer-idempotent -- ADR-0009: registered in its module file, which the rule does not read
 export class RecordPayoutOnPayoutAuthorisedIntegrationHandler {
   static readonly eventType = creditApplicationPayoutAuthorisedV1.type;
 
