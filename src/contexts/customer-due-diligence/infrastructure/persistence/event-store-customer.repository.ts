@@ -40,22 +40,32 @@ export class EventStoreCustomerRepository implements CustomerRepository {
   }
 
   /** The store keeps no index of due dates: each customer stream is read once, then tested on its own state. */
-  async findDueBefore(instant: Date): Promise<readonly Customer[]> {
+  findDueBefore(instant: Date): Promise<readonly Customer[]> {
+    return this.matching((customer) => customer.isDueBefore(instant));
+  }
+
+  /** The store keeps no index of relationship ends either: each customer stream is read once, then tested on its own state. */
+  findEndedOnOrBefore(instant: Date): Promise<readonly Customer[]> {
+    return this.matching((customer) => customer.hasEndedOnOrBefore(instant));
+  }
+
+  save(saved: Customer): Promise<void> {
+    return this.streams.save(saved);
+  }
+
+  /** The customers whose state the test accepts, each stream read once. */
+  private async matching(test: (customer: Customer) => boolean): Promise<readonly Customer[]> {
     const found: Customer[] = [];
 
     for (const id of await this.customerIds()) {
       const customer = await this.findById(id);
 
-      if (customer?.isDueBefore(instant)) {
+      if (customer !== undefined && test(customer)) {
         found.push(customer);
       }
     }
 
     return found;
-  }
-
-  save(saved: Customer): Promise<void> {
-    return this.streams.save(saved);
   }
 
   /** The identifiers of the customer streams, read from the whole store in the order its appends committed. */

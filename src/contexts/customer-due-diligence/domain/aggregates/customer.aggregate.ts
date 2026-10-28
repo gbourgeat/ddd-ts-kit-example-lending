@@ -224,6 +224,13 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     return dueOn !== undefined && dueOn.getTime() < instant.getTime();
   }
 
+  /** Whether the business relationship ended on or before the instant: the personal data is erased past its retention. */
+  hasEndedOnOrBefore(instant: Date): boolean {
+    const endedAt = this.state.relationshipEndedAt;
+
+    return endedAt !== undefined && endedAt.getTime() <= instant.getTime();
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
