@@ -10,7 +10,7 @@ import { LoanAlreadyClosed } from '@/contexts/servicing/ledger/domain/errors/loa
 import { InvalidRepayment } from '@/contexts/servicing/ledger/domain/errors/invalid-repayment.error';
 import { EarlyRepaymentTooHigh } from '@/contexts/servicing/ledger/domain/errors/early-repayment-too-high.error';
 import { LoanNotWrittenOff } from '@/contexts/servicing/ledger/domain/errors/loan-not-written-off.error';
-import { InstalmentDueDateService } from '@/contexts/servicing/ledger/domain/services/instalment-due-date.service';
+import { DueInstalmentsService } from '@/contexts/servicing/ledger/domain/services/due-instalments.service';
 import { EarlyRepaymentFeeService } from '@/contexts/servicing/ledger/domain/services/early-repayment-fee.service';
 import { MonthsRemainingService } from '@/contexts/servicing/ledger/domain/services/months-remaining.service';
 import { OutstandingCapitalService } from '@/contexts/servicing/ledger/domain/services/outstanding-capital.service';
@@ -24,21 +24,10 @@ import { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/eve
 import { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
 import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
+import { initialLoanState } from '@/contexts/servicing/ledger/domain/values/initial-loan-state';
 
 export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
-  private state: LoanState = {
-    registeredAt: new Date(0),
-    closedAt: undefined,
-    borrower: undefined,
-    schedule: undefined,
-    rescheduling: undefined,
-    rescheduledBy: [],
-    instalmentsDue: [],
-    earlyRepaid: Money.ofCents(0),
-    writtenOff: undefined,
-    instalmentsPaid: [],
-    instalmentsUnpaid: [],
-  };
+  private state: LoanState = initialLoanState();
 
   private constructor(id: string) {
     super(id);
@@ -65,17 +54,12 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
 
   /** Closes the loan: its ledger is over, and it can be closed once. */
   close(now: Date): void {
-    if (this.state.closedAt !== undefined) {
-      throw LoanAlreadyClosed.forLoan(this.id);
-    }
+    this.assertOpen();
 
     this.record(new LoanClosed(this.id, now));
   }
 
-  /**
-   * Records each instalment of the schedule that has fallen due by `now` and is not recorded as due yet. Running it
-   * again records nothing new; a closed loan has no instalment left to fall due.
-   */
+  /** Records each instalment of the schedule fallen due by `now` and not yet recorded: running it again records nothing new. */
   computeDueInstalments(now: Date): void {
     const schedule = this.currentSchedule;
 
@@ -83,24 +67,21 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
       return;
     }
 
-    for (const [index, amount] of schedule.instalments.entries()) {
-      const number = this.notedBefore + index + 1;
-      const dueOn = new InstalmentDueDateService().dueOn(this.state.registeredAt, number);
+    const facts = {
+      paidOutAt: this.state.registeredAt,
+      notedBefore: this.notedBefore,
+      alreadyDue: this.state.instalmentsDue,
+    };
 
-      if (dueOn.getTime() <= now.getTime() && !this.state.instalmentsDue.includes(number)) {
-        this.record(new LoanInstalmentDueNoted(this.id, now, number, dueOn, amount));
-      }
+    for (const due of new DueInstalmentsService().of(schedule, facts, now)) {
+      this.record(new LoanInstalmentDueNoted(this.id, now, due.number, due.dueOn, due.amount));
     }
   }
 
-  /**
-   * Repays capital early at `now`: the fee is charged on the capital, and repaying the whole outstanding capital closes
-   * the loan in the same ledger entry sequence. A repayment above the outstanding capital is refused.
-   */
+  /** Repays capital early at `now`: the fee is charged on the capital, and repaying the whole outstanding capital closes
+the loan in the same ledger entry sequence. A repayment above the outstanding capital is refused. */
   repayEarly(capital: Money, now: Date): void {
-    if (this.state.closedAt !== undefined) {
-      throw LoanAlreadyClosed.forLoan(this.id);
-    }
+    this.assertOpen();
 
     if (capital.cents <= 0) {
       throw InvalidRepayment.forAmount(capital.cents);
@@ -123,9 +104,7 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
 
   /** Writes off the outstanding capital at `now`: the loan ends, until the write-off is reversed. */
   writeOff(now: Date): void {
-    if (this.state.closedAt !== undefined) {
-      throw LoanAlreadyClosed.forLoan(this.id);
-    }
+    this.assertOpen();
 
     this.record(new LoanWrittenOff(this.id, now, this.outstandingCapital));
   }
@@ -139,10 +118,8 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     this.record(new LoanWriteOffReversed(this.id, now, this.state.writtenOff));
   }
 
-  /**
-   * Reschedules the outstanding capital over the new duration, at the rate of the loan. The instalments noted due keep
-   * their record; the earlier schedule stays in the ledger. A decision already recorded is not recorded again.
-   */
+  /** Reschedules the outstanding capital over the new duration, at the rate of the loan. The instalments noted due keep
+their record; the earlier schedule stays in the ledger. A decision already recorded is not recorded again. */
   reschedule(
     decision: { readonly id: string; readonly capital: Money; readonly durationMonths: number },
     now: Date,
@@ -151,9 +128,7 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
       return;
     }
 
-    if (this.state.closedAt !== undefined) {
-      throw LoanAlreadyClosed.forLoan(this.id);
-    }
+    this.assertOpen();
 
     const rate = this.state.schedule?.annualRateBasisPoints ?? 0;
     const schedule = LoanSchedule.of(decision.capital, rate, decision.durationMonths);
@@ -161,10 +136,8 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     this.record(new LoanRescheduled(this.id, now, decision.id, schedule));
   }
 
-  /**
-   * Repays the loan on the withdrawal of its application: the capital as paid out, and the interest accrued since the
-   * payout, then closes it. A loan already closed has nothing left to repay, so a delivery seen again records nothing.
-   */
+  /** Repays the loan on the withdrawal of its application: the capital as paid out, and the interest accrued since the
+payout, then closes it. A loan already closed has nothing left to repay, so a delivery seen again records nothing. */
   repayOnWithdrawal(withdrawnAt: Date): void {
     const schedule = this.state.schedule;
 
@@ -279,6 +252,13 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
 
   private restore(state: LoanState): void {
     this.state = state;
+  }
+
+  /** A closed loan takes no more movements. */
+  private assertOpen(): void {
+    if (this.state.closedAt !== undefined) {
+      throw LoanAlreadyClosed.forLoan(this.id);
+    }
   }
 
   /** The instalments noted due before the schedule in force: its instalments are numbered after them. */

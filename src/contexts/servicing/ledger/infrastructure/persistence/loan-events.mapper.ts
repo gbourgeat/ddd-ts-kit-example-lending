@@ -22,6 +22,7 @@ import { LoanWrittenOff } from '@/contexts/servicing/ledger/domain/events/loan-w
 import { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/loan-write-off-reversed.event';
 import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
 import { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
+import { optionalPart } from '@/contexts/servicing/ledger/infrastructure/persistence/optional-part.mapper';
 
 /** The capital repaid on the withdrawal and the interest accrued to it, in whole cents. */
 interface LoanWithdrawalRepaymentRecordedData {
@@ -278,10 +279,10 @@ export const loanSnapshots = {
 function snapshotDataOf(subject: string, state: LoanState): LoanSnapshotData {
   return {
     registeredAt: state.registeredAt.toISOString(),
-    closedAt: listOf(state.closedAt, (at) => ({ at: at.toISOString() })),
-    borrower: listOf(state.borrower, (borrower) => borrowerDataOf(subject, borrower)),
-    schedule: listOf(state.schedule, scheduleDataOf),
-    rescheduling: listOf(state.rescheduling, (rescheduling) => ({
+    closedAt: optionalPart.listOf(state.closedAt, (at) => ({ at: at.toISOString() })),
+    borrower: optionalPart.listOf(state.borrower, (borrower) => borrowerDataOf(subject, borrower)),
+    schedule: optionalPart.listOf(state.schedule, scheduleDataOf),
+    rescheduling: optionalPart.listOf(state.rescheduling, (rescheduling) => ({
       schedule: scheduleDataOf(rescheduling.schedule),
       notedBefore: rescheduling.notedBefore,
       earlyRepaidBeforeCents: rescheduling.earlyRepaidBefore.cents,
@@ -289,7 +290,7 @@ function snapshotDataOf(subject: string, state: LoanState): LoanSnapshotData {
     rescheduledBy: state.rescheduledBy.map((decisionId) => ({ decisionId })),
     instalmentsDue: state.instalmentsDue.map((number) => ({ number })),
     earlyRepaidCents: state.earlyRepaid.cents,
-    writtenOff: listOf(state.writtenOff, (amount) => ({ amountCents: amount.cents })),
+    writtenOff: optionalPart.listOf(state.writtenOff, (amount) => ({ amountCents: amount.cents })),
     instalmentsPaid: state.instalmentsPaid.map((number) => ({ number })),
     instalmentsUnpaid: state.instalmentsUnpaid.map((number) => ({ number })),
   };
@@ -298,10 +299,10 @@ function snapshotDataOf(subject: string, state: LoanState): LoanSnapshotData {
 function stateOf(data: StoredEventData): LoanState {
   return {
     registeredAt: data.instant('registeredAt'),
-    closedAt: atMostOne(data.records('closedAt'), (closed) => closed.instant('at')),
-    borrower: atMostOne(data.records('borrower'), borrowerOf),
-    schedule: atMostOne(data.records('schedule'), scheduleOf),
-    rescheduling: atMostOne(data.records('rescheduling'), (rescheduling) => ({
+    closedAt: optionalPart.atMostOne(data.records('closedAt'), (closed) => closed.instant('at')),
+    borrower: optionalPart.atMostOne(data.records('borrower'), borrowerOf),
+    schedule: optionalPart.atMostOne(data.records('schedule'), scheduleOf),
+    rescheduling: optionalPart.atMostOne(data.records('rescheduling'), (rescheduling) => ({
       schedule: scheduleOf(rescheduling.record('schedule')),
       notedBefore: rescheduling.number('notedBefore'),
       earlyRepaidBefore: Money.ofCents(rescheduling.number('earlyRepaidBeforeCents')),
@@ -309,20 +310,10 @@ function stateOf(data: StoredEventData): LoanState {
     rescheduledBy: data.records('rescheduledBy').map((record) => record.text('decisionId')),
     instalmentsDue: data.records('instalmentsDue').map((record) => record.number('number')),
     earlyRepaid: Money.ofCents(data.number('earlyRepaidCents')),
-    writtenOff: atMostOne(data.records('writtenOff'), (record) => Money.ofCents(record.number('amountCents'))),
+    writtenOff: optionalPart.atMostOne(data.records('writtenOff'), (record) =>
+      Money.ofCents(record.number('amountCents')),
+    ),
     instalmentsPaid: data.records('instalmentsPaid').map((record) => record.number('number')),
     instalmentsUnpaid: data.records('instalmentsUnpaid').map((record) => record.number('number')),
   };
-}
-
-/** The entry of a list holding the optional part, read by `read`; undefined when the part is absent. */
-function atMostOne<T, R>(entries: readonly T[], read: (entry: T) => R): R | undefined {
-  const [entry] = entries;
-
-  return entry === undefined ? undefined : read(entry);
-}
-
-/** The list holding the optional part, or no entry when it is absent. */
-function listOf<T, R>(part: T | undefined, encode: (part: T) => R): R[] {
-  return part === undefined ? [] : [encode(part)];
 }
