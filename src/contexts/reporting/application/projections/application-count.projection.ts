@@ -1,6 +1,7 @@
 import { stampOf, type ReadModelWrite } from '@ddd-ts-kit/kernel';
 import type { CreditApplicationSubmittedV2 } from '@/contexts/credit-application/published-language';
 import type { ApplicationCounts } from '@/contexts/reporting/application/ports/application-counts.port';
+import { ApplicationCount } from '@/contexts/reporting/domain/errors/application-count.error';
 
 /** The length of `YYYY-MM`, the month of a submission in UTC. */
 const YEAR_AND_MONTH_LENGTH = 7;
@@ -10,7 +11,12 @@ export class ApplicationCountProjection {
   constructor(private readonly counts: ApplicationCounts) {}
 
   async submitted(event: CreditApplicationSubmittedV2): Promise<ReadModelWrite> {
-    const tenantId = event.tenantId ?? '';
+    const tenantId = event.tenantId;
+
+    if (tenantId === undefined) {
+      throw ApplicationCount.forSubmissionWithoutTenant(event.payload.creditApplicationId);
+    }
+
     const { branchId, requestedAmountCents } = event.payload;
     const month = this.monthOf(stampOf(event).occurredAt);
     const key = `${tenantId}:${branchId}:${month}`;

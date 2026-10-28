@@ -15,6 +15,12 @@ import { CloseAlertHandler } from '@/contexts/financial-crime/application/comman
 import { PrismaSuspiciousActivityReportRepository } from '@/contexts/financial-crime/infrastructure/persistence/prisma-suspicious-activity-report.repository';
 import { FileSuspiciousActivityReportCommand } from '@/contexts/financial-crime/application/commands/file-suspicious-activity-report/file-suspicious-activity-report.command';
 import { FileSuspiciousActivityReportHandler } from '@/contexts/financial-crime/application/commands/file-suspicious-activity-report/file-suspicious-activity-report.handler';
+import { SearchAlertsHandler } from '@/contexts/financial-crime/application/queries/search-alerts/search-alerts.handler';
+import { SearchAlertsQuery } from '@/contexts/financial-crime/application/queries/search-alerts/search-alerts.query';
+import { PrismaSearchAlertsReader } from '@/contexts/financial-crime/infrastructure/persistence/prisma-search-alerts.reader';
+import { GetSuspiciousActivityReportHandler } from '@/contexts/financial-crime/application/queries/get-suspicious-activity-report/get-suspicious-activity-report.handler';
+import { GetSuspiciousActivityReportQuery } from '@/contexts/financial-crime/application/queries/get-suspicious-activity-report/get-suspicious-activity-report.query';
+import { PrismaGetSuspiciousActivityReportReader } from '@/contexts/financial-crime/infrastructure/persistence/prisma-get-suspicious-activity-report.reader';
 // /ddd-ts-kit:imports
 
 export interface FinancialCrimeWiring {
@@ -75,6 +81,32 @@ function registerHandlers(platform: Platform): void {
     ),
     { context: 'financial-crime' },
   );
+
+  const searchAlertsReader = platform.adapter(
+    new PrismaSearchAlertsReader(platform.persistence.database, platform.scope),
+    {
+      kind: 'repository',
+      context: 'financial-crime',
+    },
+  );
+
+  platform.queries.register(SearchAlertsQuery, new SearchAlertsHandler(searchAlertsReader, platform.access), {
+    context: 'financial-crime',
+  });
+
+  const getSuspiciousActivityReportReader = platform.adapter(
+    new PrismaGetSuspiciousActivityReportReader(platform.persistence.database, platform.scope),
+    {
+      kind: 'repository',
+      context: 'financial-crime',
+    },
+  );
+
+  platform.queries.register(
+    GetSuspiciousActivityReportQuery,
+    new GetSuspiciousActivityReportHandler(getSuspiciousActivityReportReader, platform.access),
+    { context: 'financial-crime' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -101,6 +133,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'financial-crime' }),
     }),
     requires(FileSuspiciousActivityReportCommand, financialCrimePermissions['report.file'], {
+      resource: () => ({ type: 'context', id: 'financial-crime' }),
+    }),
+    requires(SearchAlertsQuery, financialCrimePermissions['alert.read'], {
+      resource: () => ({ type: 'context', id: 'financial-crime' }),
+    }),
+    requires(GetSuspiciousActivityReportQuery, financialCrimePermissions['report.read'], {
       resource: () => ({ type: 'context', id: 'financial-crime' }),
     }),
     // /ddd-ts-kit:authorization

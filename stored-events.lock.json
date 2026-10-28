@@ -14,6 +14,9 @@
   "credit-application.credit-application.guarantor-named": {
     "1": "sha256:25dd58ec9a66b312"
   },
+  "credit-application.credit-application.register-consulted": {
+    "1": "sha256:dab8fd9bc1d3cb5d"
+  },
   "credit-application.credit-application.submitted": {
     "1": "sha256:9fc1a08288528135",
     "2": "sha256:d4b0bb9444e9d615"

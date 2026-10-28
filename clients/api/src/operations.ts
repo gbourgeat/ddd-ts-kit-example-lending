@@ -66,6 +66,55 @@ export function deactivateAccount(
   return send<DeactivateAccountResult>(connection, operation, { ...input, ...options });
 }
 
+export interface SearchAlertsInput {
+  readonly query?: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: id. */
+    readonly sort?: string;
+  };
+}
+
+export type SearchAlertsResult =
+  | Success<200, {
+    items: Array<{
+      id: string;
+      repaymentReference: string;
+    }>;
+    /** Present when it is cheap to count. */
+    total?: number;
+    /** Present when more items follow. */
+    nextCursor?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Search alerts: `GET /alerts`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function searchAlerts(
+  connection: Connection,
+  input: SearchAlertsInput = {},
+  options: CallOptions = {},
+): Promise<SearchAlertsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/alerts',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<SearchAlertsResult>(connection, operation, { ...input, ...options });
+}
+
 export interface CloseAlertInput {
   readonly path: {
     readonly id: string;
@@ -1400,6 +1449,41 @@ export function flagAllOverdueDueDiligence(
   return send<FlagAllOverdueDueDiligenceResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RecordScoringImpactAssessmentInput {
+  readonly body: {
+    scoringModelVersion: string;
+    month: string;
+  };
+}
+
+export type RecordScoringImpactAssessmentResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'IMPACT_ASSESSMENT_ALREADY_RECORDED' | 'INVALID_SCORING_MODEL_VERSION' | 'INVALID_YEAR_MONTH' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Record scoring impact assessment: `POST /impact-assessments`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IMPACT_ASSESSMENT_ALREADY_RECORDED (422), INVALID_SCORING_MODEL_VERSION (422), INVALID_YEAR_MONTH (422), VALIDATION_FAILED (422).
+ */
+export function recordScoringImpactAssessment(
+  connection: Connection,
+  input: RecordScoringImpactAssessmentInput,
+  options: CallOptions = {},
+): Promise<RecordScoringImpactAssessmentResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/impact-assessments',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RecordScoringImpactAssessmentResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AcceptInvitationInput {
   readonly body: Schemas.InvitationToken;
 }
@@ -2076,4 +2160,39 @@ export function publishScoringModelVersion(
   };
 
   return send<PublishScoringModelVersionResult>(connection, operation, { ...input, ...options });
+}
+
+export interface GetSuspiciousActivityReportInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type GetSuspiciousActivityReportResult =
+  | Success<200, {
+    id: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_SUSPICIOUS_ACTIVITY_REPORT' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Get suspicious activity report: `GET /suspicious-activity-reports/{id}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_SUSPICIOUS_ACTIVITY_REPORT (422), VALIDATION_FAILED (422).
+ */
+export function getSuspiciousActivityReport(
+  connection: Connection,
+  input: GetSuspiciousActivityReportInput,
+  options: CallOptions = {},
+): Promise<GetSuspiciousActivityReportResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/suspicious-activity-reports/{id}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<GetSuspiciousActivityReportResult>(connection, operation, { ...input, ...options });
 }

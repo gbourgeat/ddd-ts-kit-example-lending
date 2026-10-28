@@ -84,6 +84,31 @@ describe('Consult repayment incident register', () => {
     ).rejects.toMatchObject({ code: 'UNIDENTIFIED_PARTY' });
   });
 
+  it('keeps the file of the application unchanged when a party is not identified', async () => {
+    const { commandBus, identities, creditApplicationRepository } = await arrange();
+
+    identities.answerIdentityOf('customer-1', { name: 'Ada Lovelace', birthDate: '1980-05-01T00:00:00.000Z' });
+    const before = (await creditApplicationRepository.findById('application-1'))?.toState().entryCount;
+
+    await expect(
+      commandBus.execute(new ConsultRepaymentIncidentRegisterCommand(holder, 'application-1')),
+    ).rejects.toMatchObject({ code: 'UNIDENTIFIED_PARTY' });
+
+    const after = (await creditApplicationRepository.findById('application-1'))?.toState().entryCount;
+
+    expect(after).toBe(before);
+  });
+
+  it('asks the register about nobody when the application does not exist', async () => {
+    const { commandBus, register } = await arrange();
+
+    await expect(
+      commandBus.execute(new ConsultRepaymentIncidentRegisterCommand(holder, 'unknown-application')),
+    ).rejects.toMatchObject({ code: 'UNKNOWN_CREDIT_APPLICATION' });
+
+    expect(register.asked).toEqual([]);
+  });
+
   it('is refused to an actor who does not hold the permission application.consult-register', async () => {
     const { commandBus } = await arrange();
     const command = new ConsultRepaymentIncidentRegisterCommand(anActor().build(), 'application-1');

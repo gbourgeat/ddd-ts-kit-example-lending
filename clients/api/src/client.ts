@@ -29,6 +29,12 @@ export interface Client {
    */
   deactivateAccount(input?: operations.DeactivateAccountInput, options?: CallOptions): Promise<operations.DeactivateAccountResult>;
   /**
+   * Search alerts: `GET /alerts`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  searchAlerts(input?: operations.SearchAlertsInput, options?: CallOptions): Promise<operations.SearchAlertsResult>;
+  /**
    * Close alert: `POST /alerts/{id}/closure`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ALERT_ALREADY_CLOSED (422), CLOSURE_REASON_MISSING (422), UNKNOWN_ALERT (422), VALIDATION_FAILED (422).
@@ -239,6 +245,12 @@ export interface Client {
    */
   flagAllOverdueDueDiligence(input: operations.FlagAllOverdueDueDiligenceInput, options?: CallOptions): Promise<operations.FlagAllOverdueDueDiligenceResult>;
   /**
+   * Record scoring impact assessment: `POST /impact-assessments`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IMPACT_ASSESSMENT_ALREADY_RECORDED (422), INVALID_SCORING_MODEL_VERSION (422), INVALID_YEAR_MONTH (422), VALIDATION_FAILED (422).
+   */
+  recordScoringImpactAssessment(input: operations.RecordScoringImpactAssessmentInput, options?: CallOptions): Promise<operations.RecordScoringImpactAssessmentResult>;
+  /**
    * Accept an invitation: `POST /invitations/acceptance`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), ALREADY_MEMBER (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
@@ -346,6 +358,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), SCORING_MODEL_LABEL_REQUIRED (422), VALIDATION_FAILED (422).
    */
   publishScoringModelVersion(input: operations.PublishScoringModelVersionInput, options?: CallOptions): Promise<operations.PublishScoringModelVersionResult>;
+  /**
+   * Get suspicious activity report: `GET /suspicious-activity-reports/{id}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_SUSPICIOUS_ACTIVITY_REPORT (422), VALIDATION_FAILED (422).
+   */
+  getSuspiciousActivityReport(input: operations.GetSuspiciousActivityReportInput, options?: CallOptions): Promise<operations.GetSuspiciousActivityReportResult>;
 }
 
 export function createClient(options: ClientOptions<SchemeName>): Client {
@@ -354,6 +372,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
   return {
     provisionAccount: (input, call) => operations.provisionAccount(connection, input, call),
     deactivateAccount: (input, call) => operations.deactivateAccount(connection, input, call),
+    searchAlerts: (input, call) => operations.searchAlerts(connection, input, call),
     closeAlert: (input, call) => operations.closeAlert(connection, input, call),
     fileSuspiciousActivityReport: (input, call) => operations.fileSuspiciousActivityReport(connection, input, call),
     searchApplications: (input, call) => operations.searchApplications(connection, input, call),
@@ -389,6 +408,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     flagAllOverdueDueDiligence: (input, call) => operations.flagAllOverdueDueDiligence(connection, input, call),
+    recordScoringImpactAssessment: (input, call) => operations.recordScoringImpactAssessment(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
@@ -407,5 +427,6 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
     publishScoringModelVersion: (input, call) => operations.publishScoringModelVersion(connection, input, call),
+    getSuspiciousActivityReport: (input, call) => operations.getSuspiciousActivityReport(connection, input, call),
   };
 }
