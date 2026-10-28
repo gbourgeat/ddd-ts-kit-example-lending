@@ -10,7 +10,6 @@ import type { CustomerAdvisorBranchGateway } from '@/contexts/credit-application
 import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { SubmitApplicationCommand } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.command';
-import { SubmitApplicationHandler } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.handler';
 import { GiveAccountConsentCommand } from '@/contexts/credit-application/file/application/commands/give-account-consent/give-account-consent.command';
 import { SearchApplicationsHandler } from '@/contexts/credit-application/file/application/queries/search-applications/search-applications.handler';
 import { SearchApplicationsQuery } from '@/contexts/credit-application/file/application/queries/search-applications/search-applications.query';
@@ -22,24 +21,12 @@ import { NameGuarantorCommand } from '@/contexts/credit-application/file/applica
 import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-declared-conflicts-store.repository';
-import { ReadDeclaredConflictsHandler } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.handler';
+import { registerSubmissionAndConflictsHandlers } from '@/contexts/credit-application/composition/register-submission-and-conflicts-handlers.module';
 import { ReadDeclaredConflictsQuery } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.query';
 import { AttachDocumentCommand } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.command';
 import { registerDocumentRetentionHandlers } from '@/contexts/credit-application/composition/register-document-retention-handlers.module';
 import { ReadDocumentQuery } from '@/contexts/credit-application/file/application/queries/read-document/read-document.query';
 import { registerDecisionReactions } from '@/contexts/credit-application/composition/register-decision-reactions.module';
-import { consume, subscribeAll } from '@ddd-ts-kit/events';
-import { staffMemberAppointedV2 as deciderLevelDefinition } from '@/contexts/branch-network/published-language';
-import {
-  delegationTablePublishedV2 as delegationTableDefinition,
-  legalMaximumRatePublishedV2 as legalMaximumRateDefinition,
-  rateGridPublishedV2 as rateGridDefinition,
-  productDefinedV2 as keepProductTermsDefinition,
-} from '@/contexts/credit-policy/published-language';
-import { KeepDeciderLevelIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-decider-level.integration-handler';
-import { KeepDelegationTableIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-delegation-table.integration-handler';
-import { KeepLegalMaximumRateIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-legal-maximum-rate.integration-handler';
-import { KeepRateGridIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-rate-grid.integration-handler';
 import { registerAssessmentHandlers } from '@/contexts/credit-application/composition/register-assessment-handlers.module';
 import { ReadAccountInformationCommand } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.command';
 import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
@@ -48,8 +35,6 @@ import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/
 import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/credit-application/file/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
 import { registerNightlyJobs } from '@/contexts/credit-application/composition/register-nightly-jobs.module';
-import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
-import { registerFileReactions } from '@/contexts/credit-application/composition/register-file-reactions.module';
 import { registerFileHandlers } from '@/contexts/credit-application/composition/register-file-handlers.module';
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { registerDelegationTableHandlers } from '@/contexts/credit-application/composition/register-delegation-table-handlers.module';
@@ -61,6 +46,7 @@ import { ReadDeciderLevelQuery } from '@/contexts/credit-application/decision/ap
 import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-decider-levels.repository';
 import { registerDeciderLevelHandlers } from '@/contexts/credit-application/composition/register-decider-level-handlers.module';
 import { registerSubmissionReactions } from '@/contexts/credit-application/composition/register-submission-reactions.module';
+import { declareFileReferenceUseCases } from '@/contexts/credit-application/file/application/authorization/declare-file-reference-use-cases.policy';
 import { declareOfferUseCases } from '@/contexts/credit-application/offer/application/authorization/declare-offer-use-cases.policy';
 import { PrismaRateGrids } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-rate-grids.repository';
 import { registerRateGridHandlers } from '@/contexts/credit-application/composition/register-rate-grid-handlers.module';
@@ -68,6 +54,26 @@ import { PrismaLegalMaximumRates } from '@/contexts/credit-application/offer/inf
 import { registerLegalMaximumRateHandlers } from '@/contexts/credit-application/composition/register-legal-maximum-rate-handlers.module';
 import { AssessApplicationCommand } from '@/contexts/credit-application/assessment/application/commands/assess-application/assess-application.command';
 import { InProcessScoringGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-scoring.gateway';
+import { PrismaProductTerms } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-product-terms.repository';
+import { registerProductTermsHandlers } from '@/contexts/credit-application/composition/register-product-terms-handlers.module';
+import { PrismaBrokerRegistrations } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-broker-registrations.repository';
+import { registerBrokerRegistrationHandlers } from '@/contexts/credit-application/composition/register-broker-registration-handlers.module';
+import { consume, subscribeAll } from '@ddd-ts-kit/events';
+import { brokerRegisteredV1, brokerRegistrationLapsedV1 } from '@/contexts/brokerage/published-language';
+import { staffMemberAppointedV2 as deciderLevelV2 } from '@/contexts/branch-network/published-language';
+import {
+  delegationTablePublishedV2 as delegationTableV2,
+  legalMaximumRatePublishedV2 as legalMaximumRateV2,
+  productDefinedV2,
+  rateGridPublishedV2 as rateGridV2,
+} from '@/contexts/credit-policy/published-language';
+import { KeepBrokerRegistrationIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-broker-registration.integration-handler';
+import { KeepBrokerRegistrationLapsedIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-broker-registration-lapsed.integration-handler';
+import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
+import { KeepDeciderLevelIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-decider-level.integration-handler';
+import { KeepDelegationTableIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-delegation-table.integration-handler';
+import { KeepLegalMaximumRateIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-legal-maximum-rate.integration-handler';
+import { KeepRateGridIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-rate-grid.integration-handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -79,20 +85,9 @@ export interface CreditApplicationWiring {
 }
 
 export function creditApplicationModule(platform: Platform): CreditApplicationWiring {
-  const declaredConflicts = platform.adapter(
-    new PrismaDeclaredConflictsStore(platform.persistence.database, platform.scope),
-    {
-      kind: 'repository',
-      context: 'credit-application',
-      token: 'DeclaredConflictsStore',
-    },
-  );
+  const declaredConflicts = readModel(platform, 'DeclaredConflictsStore', PrismaDeclaredConflictsStore);
 
-  const delegationTables = platform.adapter(new PrismaDelegationTables(platform.persistence.database, platform.scope), {
-    kind: 'repository',
-    context: 'credit-application',
-    token: 'DelegationTables',
-  });
+  const delegationTables = readModel(platform, 'DelegationTables', PrismaDelegationTables);
 
   const customerAdvisorBranch = registerGateways(platform);
 
@@ -105,11 +100,7 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
   registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
   registerDelegationTableHandlers(platform, delegationTables);
 
-  const deciderLevels = platform.adapter(new PrismaDeciderLevels(platform.persistence.database, platform.scope), {
-    kind: 'repository',
-    context: 'credit-application',
-    token: 'DeciderLevels',
-  });
+  const deciderLevels = readModel(platform, 'DeciderLevels', PrismaDeciderLevels);
 
   registerDeciderLevelHandlers(platform, deciderLevels);
   registerReactions(platform, declaredConflicts);
@@ -121,6 +112,17 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     routes: routesOf(platform),
     controllers: creditApplicationControllers,
   };
+}
+
+/** Binds a read model of the context, built on the database and the scope of the work, to its token. */
+function readModel<T extends object>(
+  platform: Platform,
+  token: string,
+  Model: new (database: Platform['persistence']['database'], scope: Platform['scope']) => T,
+): T {
+  const instance = new Model(platform.persistence.database, platform.scope);
+
+  return platform.adapter(instance, { kind: 'repository', context: 'credit-application', token });
 }
 
 /** The gateways to the other contexts: the branch of an advisor is answered by branch-network, bound by the platform. */
@@ -144,18 +146,9 @@ function registerHandlers(
     { kind: 'repository', context: 'credit-application', token: 'CreditApplicationRepository' },
   );
 
-  platform.commands.register(
-    SubmitApplicationCommand,
-    new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock, customerAdvisorBranch),
-    { context: 'credit-application' },
-  );
-
   registerFileHandlers(platform, creditApplicationRepository);
 
-  const searchApplicationsReader = platform.adapter(
-    new PrismaSearchApplicationsReader(platform.persistence.database, platform.scope),
-    { kind: 'repository', context: 'credit-application', token: 'SearchApplicationsReader' },
-  );
+  const searchApplicationsReader = readModel(platform, 'SearchApplicationsReader', PrismaSearchApplicationsReader);
 
   platform.queries.register(
     SearchApplicationsQuery,
@@ -163,13 +156,11 @@ function registerHandlers(
     { context: 'credit-application' },
   );
 
-  platform.queries.register(
-    ReadDeclaredConflictsQuery,
-    new ReadDeclaredConflictsHandler(declaredConflicts, creditApplicationRepository),
-    {
-      context: 'credit-application',
-    },
-  );
+  registerSubmissionAndConflictsHandlers(platform, {
+    repository: creditApplicationRepository,
+    declaredConflicts,
+    customerAdvisorBranch,
+  });
 
   registerAssessmentHandlers(platform, {
     repository: creditApplicationRepository,
@@ -197,20 +188,22 @@ function registerHandlers(
 
   registerDocumentRetentionHandlers(platform, creditApplicationRepository);
 
-  const rateGrids = platform.adapter(new PrismaRateGrids(platform.persistence.database, platform.scope), {
-    kind: 'repository',
-    context: 'credit-application',
-    token: 'RateGrids',
-  });
+  const rateGrids = readModel(platform, 'RateGrids', PrismaRateGrids);
 
   registerRateGridHandlers(platform, rateGrids);
 
-  const legalMaximumRates = platform.adapter(
-    new PrismaLegalMaximumRates(platform.persistence.database, platform.scope),
-    { kind: 'repository', context: 'credit-application', token: 'LegalMaximumRates' },
-  );
+  const legalMaximumRates = readModel(platform, 'LegalMaximumRates', PrismaLegalMaximumRates);
 
   registerLegalMaximumRateHandlers(platform, legalMaximumRates);
+
+  const productTerms = readModel(platform, 'ProductTerms', PrismaProductTerms);
+
+  registerProductTermsHandlers(platform, productTerms, creditApplicationRepository);
+
+  const brokerRegistrations = readModel(platform, 'BrokerRegistrations', PrismaBrokerRegistrations);
+
+  registerBrokerRegistrationHandlers(platform, brokerRegistrations);
+
   // /ddd-ts-kit:handlers
 }
 
@@ -219,56 +212,54 @@ function registerReactions(platform: Platform, declaredConflicts: DeclaredConfli
   // ddd-ts-kit:reactions
   registerSubmissionReactions(
     platform,
-    platform.adapter(new PrismaApplicationListProjection(platform.persistence.database, platform.scope), {
-      kind: 'repository',
-      context: 'credit-application',
-      token: 'ApplicationListProjection',
-    }),
+    readModel(platform, 'ApplicationListProjection', PrismaApplicationListProjection),
   );
 
   registerDecisionReactions(platform, declaredConflicts);
 
   keepReferenceData(platform);
 
-  registerFileReactions(platform);
   // /ddd-ts-kit:reactions
 }
 
-/** The integration handlers that keep the reference data of credit-policy and the level of each decider. */
+/** The integration handlers that keep the reference data of the other contexts: each consumer is named here, where the rule reads it. */
 function keepReferenceData(platform: Platform): void {
-  const keepDelegationTableIntegrationHandler = new KeepDelegationTableIntegrationHandler(platform.commands);
-  const keepDeciderLevelIntegrationHandler = new KeepDeciderLevelIntegrationHandler(platform.commands);
-  const keepRateGridIntegrationHandler = new KeepRateGridIntegrationHandler(platform.commands);
-  const keepLegalMaximumRateIntegrationHandler = new KeepLegalMaximumRateIntegrationHandler(platform.commands);
-  const keepProductTermsIntegrationHandler = new KeepProductTermsIntegrationHandler(platform.commands);
   const { processedEvents: processed, unitOfWork } = platform.persistence;
   const { scope } = platform;
 
   subscribeAll(platform.subscriberFor('credit-application'), [
     consume(
-      delegationTableDefinition,
+      delegationTableV2,
       { consumer: 'credit-application.keep-delegation-table', processed, unitOfWork, scope },
-      (event) => keepDelegationTableIntegrationHandler.handle(event),
+      (event) => new KeepDelegationTableIntegrationHandler(platform.commands).handle(event),
     ),
     consume(
-      deciderLevelDefinition,
+      deciderLevelV2,
       { consumer: 'credit-application.keep-decider-level', processed, unitOfWork, scope },
-      (event) => keepDeciderLevelIntegrationHandler.handle(event),
+      (event) => new KeepDeciderLevelIntegrationHandler(platform.commands).handle(event),
+    ),
+    consume(rateGridV2, { consumer: 'credit-application.keep-rate-grid', processed, unitOfWork, scope }, (event) =>
+      new KeepRateGridIntegrationHandler(platform.commands).handle(event),
     ),
     consume(
-      rateGridDefinition,
-      { consumer: 'credit-application.keep-rate-grid', processed, unitOfWork, scope },
-      (event) => keepRateGridIntegrationHandler.handle(event),
-    ),
-    consume(
-      legalMaximumRateDefinition,
+      legalMaximumRateV2,
       { consumer: 'credit-application.keep-legal-maximum-rate', processed, unitOfWork, scope },
-      (event) => keepLegalMaximumRateIntegrationHandler.handle(event),
+      (event) => new KeepLegalMaximumRateIntegrationHandler(platform.commands).handle(event),
     ),
     consume(
-      keepProductTermsDefinition,
+      productDefinedV2,
       { consumer: 'credit-application.keep-product-terms', processed, unitOfWork, scope },
-      (event) => keepProductTermsIntegrationHandler.handle(event),
+      (event) => new KeepProductTermsIntegrationHandler(platform.commands).handle(event),
+    ),
+    consume(
+      brokerRegisteredV1,
+      { consumer: 'credit-application.broker-registered', processed, unitOfWork, scope },
+      (event) => new KeepBrokerRegistrationIntegrationHandler(platform.commands).handle(event),
+    ),
+    consume(
+      brokerRegistrationLapsedV1,
+      { consumer: 'credit-application.broker-registration-lapsed', processed, unitOfWork, scope },
+      (event) => new KeepBrokerRegistrationLapsedIntegrationHandler(platform.commands).handle(event),
     ),
   ]);
 }
@@ -335,6 +326,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(AssessApplicationCommand, creditApplicationPermissions['application.assess'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
+    ...declareFileReferenceUseCases(),
     // /ddd-ts-kit:authorization
   ];
 }

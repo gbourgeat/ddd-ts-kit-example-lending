@@ -24,6 +24,14 @@ const submissionTree: readonly ExpectedSpan[] = [
                 name: 'domain-event credit-application.credit-application.submitted',
                 children: [
                   {
+                    name: 'handler CheckRequestAgainstProductEventHandler',
+                    children: [
+                      { name: 'repository CreditApplicationRepository.findById' },
+                      { name: 'repository ProductTerms.get' },
+                      { name: 'repository CreditApplicationRepository.save' },
+                    ],
+                  },
+                  {
                     name: 'handler CreditApplicationSubmittedPublisher',
                     children: [{ name: 'outbox append credit-application.credit-application.submitted' }],
                   },
@@ -33,6 +41,12 @@ const submissionTree: readonly ExpectedSpan[] = [
                   },
                 ],
               },
+            ],
+          },
+          {
+            name: 'unit-of-work before-commit',
+            children: [
+              { name: 'domain-event credit-application.credit-application.request-checked-with-unknown-product-terms' },
             ],
           },
         ],

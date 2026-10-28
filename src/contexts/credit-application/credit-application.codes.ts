@@ -16,6 +16,8 @@ export const CreditApplicationCodes = {
   MissingAccountInformation: 'MISSING_ACCOUNT_INFORMATION',
   RegisterNotConsulted: 'REGISTER_NOT_CONSULTED',
   NoScoreAvailable: 'NO_SCORE_AVAILABLE',
+  UnknownProductTerms: 'UNKNOWN_PRODUCT_TERMS',
+  UnknownBrokerRegistration: 'UNKNOWN_BROKER_REGISTRATION',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

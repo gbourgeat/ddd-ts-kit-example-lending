@@ -606,6 +606,39 @@ export function nameGuarantor(
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadProductTermsFindingsInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ReadProductTermsFindingsResult =
+  | Success<200, Record<string, unknown>>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read what the check of an application against its product found: `GET /applications/{id}/product-terms-findings`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function readProductTermsFindings(
+  connection: Connection,
+  input: ReadProductTermsFindingsInput,
+  options: CallOptions = {},
+): Promise<ReadProductTermsFindingsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/product-terms-findings',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadProductTermsFindingsResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ConsultRepaymentIncidentRegisterInput {
   readonly path: {
     readonly id: string;
@@ -820,6 +853,44 @@ export function registerBroker(
   };
 
   return send<RegisterBrokerResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadBrokerRegistrationInput {
+  readonly path: {
+    readonly brokerId: string;
+  };
+}
+
+export type ReadBrokerRegistrationResult =
+  | Success<200, {
+    brokerId: string;
+    inForce: boolean;
+    since?: string;
+    until?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_BROKER_REGISTRATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read broker registration: `GET /brokers/{brokerId}/registration`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+ */
+export function readBrokerRegistration(
+  connection: Connection,
+  input: ReadBrokerRegistrationInput,
+  options: CallOptions = {},
+): Promise<ReadBrokerRegistrationResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/brokers/{brokerId}/registration',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadBrokerRegistrationResult>(connection, operation, { ...input, ...options });
 }
 
 export interface RegisterBusinessInput {
@@ -2202,6 +2273,47 @@ export function searchPortfolioCustomers(
   };
 
   return send<SearchPortfolioCustomersResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadProductTermsInput {
+  readonly path: {
+    readonly productId: string;
+  };
+}
+
+export type ReadProductTermsResult =
+  | Success<200, {
+    productId: string;
+    amountMinimumCents: number;
+    amountMaximumCents: number;
+    durationMinimumMonths: number;
+    durationMaximumMonths: number;
+    arrangementFeeCents: number;
+    insuranceMandatory: boolean;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_PRODUCT_TERMS' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read product terms: `GET /product-terms/{productId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PRODUCT_TERMS (422), VALIDATION_FAILED (422).
+ */
+export function readProductTerms(
+  connection: Connection,
+  input: ReadProductTermsInput,
+  options: CallOptions = {},
+): Promise<ReadProductTermsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/product-terms/{productId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadProductTermsResult>(connection, operation, { ...input, ...options });
 }
 
 export interface DefineProductInput {

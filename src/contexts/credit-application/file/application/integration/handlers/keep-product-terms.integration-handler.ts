@@ -1,5 +1,7 @@
-import { systemActor, type CommandBus } from '@ddd-ts-kit/kernel';
+import { stampOf, systemActor, type CommandBus } from '@ddd-ts-kit/kernel';
 import { productDefinedV2, type ProductDefinedV2 } from '@/contexts/credit-policy/published-language';
+import { KeepProductTermsCommand } from '@/contexts/credit-application/file/application/commands/keep-product-terms/keep-product-terms.command';
+import { productTermsRowOf } from '@/contexts/credit-application/file/application/projections/product-terms-row-of.projection';
 
 export class KeepProductTermsIntegrationHandler {
   static readonly eventType = productDefinedV2.type;
@@ -9,6 +11,8 @@ export class KeepProductTermsIntegrationHandler {
   constructor(private readonly commands: CommandBus) {}
 
   async handle(event: ProductDefinedV2): Promise<void> {
-    // TODO(domain): translate `event.payload` (the language of credit-policy) into a command of credit-application, built with `this.actor` (nobody is calling: the handler acts as a system actor the authorization model has to grant), and execute it with `this.commands.execute(...)`; delivery is at least once, so the command has to be safe to repeat.
+    await this.commands.execute(
+      new KeepProductTermsCommand(this.actor, productTermsRowOf(event.payload), stampOf(event)),
+    );
   }
 }

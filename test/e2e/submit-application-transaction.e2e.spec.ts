@@ -25,7 +25,7 @@ describe('Submit application, recorded with its integration event or not at all'
       await environment.reset();
     });
 
-    it('commits the application and its event together: one event in its stream, one outbox row', async () => {
+    it('commits the application, its check against the product and its event together: two events in its stream, one outbox row', async () => {
       await environment.relate(customerRelation);
       const customer = await environment.as({ id: 'customer-1', tenantId: 'bank-1' });
 
@@ -35,7 +35,7 @@ describe('Submit application, recorded with its integration event or not at all'
       const stored = await events.readStream(`credit-application.credit-application-${id}`);
       const outbox = await environment.persistence.outbox.stats();
 
-      expect(stored).toHaveLength(1);
+      expect(stored).toHaveLength(2);
       expect(outbox.pending).toBe(1);
     });
   });

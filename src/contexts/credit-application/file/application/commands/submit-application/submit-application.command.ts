@@ -6,6 +6,8 @@ export class SubmitApplicationCommand extends AuthorizedCommand<string> {
     actor: Actor,
     readonly amountInCents: number,
     readonly durationMonths: number,
+    /** The product the application is for: empty when none is given. */
+    readonly productId = '',
   ) {
     super(actor);
   }

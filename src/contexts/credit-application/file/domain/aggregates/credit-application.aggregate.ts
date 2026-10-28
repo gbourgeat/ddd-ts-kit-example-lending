@@ -13,6 +13,11 @@ import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/u
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
 import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
+import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
+import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
+import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
+import type { ProductLimits } from '@/contexts/credit-application/file/domain/values/product-limits';
+import type { ProductTermsFinding } from '@/contexts/credit-application/file/domain/values/product-terms-finding';
 import {
   AccountConsent,
   type AccountConsentState,
@@ -26,7 +31,9 @@ export type CreditApplicationEvent =
   | CreditApplicationEntryCorrected
   | CreditApplicationDocumentAttached
   | CreditApplicationRegisterConsulted
-  | CreditApplicationAssessed;
+  | CreditApplicationAssessed
+  | CreditApplicationRequestFoundOutsideProductTerms
+  | CreditApplicationRequestCheckedWithUnknownProductTerms;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -35,6 +42,10 @@ export interface CreditApplicationState {
   readonly registeredAt: Date;
   /** The branch the application was submitted on: empty when no advisor holds the applicant, or when it was submitted before the branch was recorded. */
   readonly branchId: string;
+  /** The product the application is for: empty when none was given. */
+  readonly productId: string;
+  /** What the checks against the product found: a limit the request breaks, or terms not known. */
+  readonly productTermsFindings: readonly ProductTermsFinding[];
   readonly accountConsent: AccountConsentState | undefined;
   readonly coBorrowerIds: readonly string[];
   readonly guarantorIds: readonly string[];
@@ -54,6 +65,7 @@ export interface LoanRequest {
   readonly durationMonths: number;
   readonly registeredAt: Date;
   readonly branchId: string;
+  readonly productId?: string;
 }
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
@@ -63,6 +75,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     durationMonths: 0,
     registeredAt: new Date(0),
     branchId: '',
+    productId: '',
+    productTermsFindings: [],
     accountConsent: undefined,
     coBorrowerIds: [],
     guarantorIds: [],
@@ -95,6 +109,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
         request.durationMonths,
         request.registeredAt,
         request.branchId,
+        request.productId ?? '',
       ),
     );
 
@@ -167,6 +182,19 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationAssessed(this.id, assessedAt, assessment));
   }
 
+  /**
+   * The check of the application against the limits of its product: each limit the request breaks is kept as a finding,
+   * or, when the terms of the product are not known, that they are not. The application is never refused by a check.
+   */
+  checkAgainstProductTerms(limits: ProductLimits | undefined, checkedAt: Date): void {
+    const { productId, amount, durationMonths } = this.state;
+    const facts = { aggregateId: this.id, checkedAt, productId, amountCents: amount.cents, durationMonths };
+
+    for (const event of new ProductTermsCheckService().eventsOf(facts, limits)) {
+      this.record(event);
+    }
+  }
+
   /** Whether the applicant's consent to read the accounts is given and not yet expired at `instant`. */
   hasValidAccountConsentAt(instant: Date): boolean {
     if (this.state.accountConsent === undefined) {
@@ -228,6 +256,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
       [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
       [CreditApplicationAssessed.eventName]: (event) => this.applyAssessed(event),
+      [CreditApplicationRequestFoundOutsideProductTerms.eventName]: (event) =>
+        this.applyRequestFoundOutsideProductTerms(event),
+      [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: (event) =>
+        this.applyRequestCheckedWithUnknownProductTerms(event),
     };
   }
 
@@ -254,69 +286,60 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   }
 
   private applySubmitted(event: CreditApplicationSubmitted): void {
-    this.state = {
-      ...this.state,
+    this.applyEntryAppended({
       applicantId: event.applicantId,
       amount: event.amount,
       durationMonths: event.durationMonths,
       registeredAt: event.occurredAt,
       branchId: event.branchId,
-      entryCount: this.state.entryCount + 1,
-    };
+      productId: event.productId,
+    });
+  }
+
+  /** A fact is appended to the file: the state takes what it changes, and the file holds one entry more. */
+  private applyEntryAppended(changes: Partial<CreditApplicationState>): void {
+    this.state = { ...this.state, ...changes, entryCount: this.state.entryCount + 1 };
   }
 
   private applyAccountConsentGiven(event: CreditApplicationAccountConsentGiven): void {
-    this.state = {
-      ...this.state,
-      accountConsent: { givenAt: event.occurredAt, expiresAt: event.expiresAt },
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ accountConsent: { givenAt: event.occurredAt, expiresAt: event.expiresAt } });
   }
 
   private applyCoBorrowerNamed(event: CreditApplicationCoBorrowerNamed): void {
-    this.state = {
-      ...this.state,
-      coBorrowerIds: [...this.state.coBorrowerIds, event.coBorrowerId],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ coBorrowerIds: [...this.state.coBorrowerIds, event.coBorrowerId] });
   }
 
   private applyGuarantorNamed(event: CreditApplicationGuarantorNamed): void {
-    this.state = {
-      ...this.state,
-      guarantorIds: [...this.state.guarantorIds, event.guarantorId],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ guarantorIds: [...this.state.guarantorIds, event.guarantorId] });
   }
 
   private applyEntryCorrected(event: CreditApplicationEntryCorrected): void {
-    this.state = {
-      ...this.state,
-      correctedEntryIds: [...this.state.correctedEntryIds, event.correctedEntryId],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ correctedEntryIds: [...this.state.correctedEntryIds, event.correctedEntryId] });
   }
 
   private applyDocumentAttached(event: CreditApplicationDocumentAttached): void {
-    this.state = {
-      ...this.state,
-      documentKeys: [...this.state.documentKeys, event.documentKey],
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ documentKeys: [...this.state.documentKeys, event.documentKey] });
   }
 
   private applyRegisterConsulted(event: CreditApplicationRegisterConsulted): void {
-    this.state = {
-      ...this.state,
-      listedPartyCount: event.parties.filter((party) => party.listed).length,
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({ listedPartyCount: event.parties.filter((party) => party.listed).length });
   }
 
   private applyAssessed(_event: CreditApplicationAssessed): void {
-    this.state = {
-      ...this.state,
-      entryCount: this.state.entryCount + 1,
-    };
+    this.applyEntryAppended({});
+  }
+
+  private applyRequestFoundOutsideProductTerms(event: CreditApplicationRequestFoundOutsideProductTerms): void {
+    this.applyFinding(event.finding);
+  }
+
+  private applyRequestCheckedWithUnknownProductTerms(
+    event: CreditApplicationRequestCheckedWithUnknownProductTerms,
+  ): void {
+    this.applyFinding({ kind: 'terms-unknown', productId: event.productId });
+  }
+
+  private applyFinding(finding: ProductTermsFinding): void {
+    this.applyEntryAppended({ productTermsFindings: [...this.state.productTermsFindings, finding] });
   }
 }

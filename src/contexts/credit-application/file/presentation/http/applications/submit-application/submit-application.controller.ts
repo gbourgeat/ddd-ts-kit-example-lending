@@ -26,7 +26,9 @@ export class SubmitApplicationController {
     @Body() body: SubmitApplicationBody,
     @CurrentActor() actor: Actor,
   ): Promise<{ body: ApplicationSubmittedBody; headers: { Location: string } }> {
-    const id = await this.commands.execute(new SubmitApplicationCommand(actor, body.amount.cents, body.durationMonths));
+    const id = await this.commands.execute(
+      new SubmitApplicationCommand(actor, body.amount.cents, body.durationMonths, body.productId),
+    );
 
     return {
       body: { id, amount: { cents: body.amount.cents, currency: 'EUR' } },

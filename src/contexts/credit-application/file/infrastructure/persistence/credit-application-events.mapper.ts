@@ -9,12 +9,15 @@ import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/f
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
 import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
+import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
+import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
   readonly amountInCents: number;
   readonly durationMonths: number;
   readonly branchId: string;
+  readonly productId: string;
 }
 
 interface CreditApplicationAccountConsentGivenData {
@@ -50,19 +53,34 @@ interface CreditApplicationAssessedData {
   readonly assessment: string;
 }
 
+interface CreditApplicationRequestFoundOutsideProductTermsData {
+  readonly productId: string;
+  readonly term: string;
+  readonly bound: string;
+  readonly requested: number;
+  readonly limit: number;
+}
+
+interface CreditApplicationRequestCheckedWithUnknownProductTermsData {
+  readonly productId: string;
+}
+
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
 export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> = {
   [CreditApplicationSubmitted.eventName]: defineStoredEvent(CreditApplicationSubmitted, {
-    version: 2,
+    version: 3,
     upcasters: {
       // A submission of version 1 recorded no branch: it is read with an empty one, which no version 2 carries.
       1: () => ({ branchId: '' }),
+      // A submission of version 2 recorded no product: it is read with an empty one, which no version 3 carries.
+      2: () => ({ productId: '' }),
     },
     encode: (event): CreditApplicationSubmittedData => ({
       applicantId: event.applicantId,
       amountInCents: event.amount.cents,
       durationMonths: event.durationMonths,
       branchId: event.branchId,
+      productId: event.productId,
     }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationSubmitted(
@@ -72,6 +90,7 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.number('durationMonths'),
         occurredAt,
         data.text('branchId'),
+        data.text('productId'),
       ),
   }),
   [CreditApplicationAccountConsentGiven.eventName]: defineStoredEvent(CreditApplicationAccountConsentGiven, {
@@ -137,4 +156,37 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         JSON.parse(data.text('assessment')) as CreditApplicationAssessed['assessment'],
       ),
   }),
+  [CreditApplicationRequestFoundOutsideProductTerms.eventName]: defineStoredEvent(
+    CreditApplicationRequestFoundOutsideProductTerms,
+    {
+      version: 1,
+      encode: (event): CreditApplicationRequestFoundOutsideProductTermsData => ({
+        productId: event.finding.productId,
+        term: event.finding.term,
+        bound: event.finding.bound,
+        requested: event.finding.requested,
+        limit: event.finding.limit,
+      }),
+      decode: (data, { aggregateId, occurredAt }) =>
+        new CreditApplicationRequestFoundOutsideProductTerms(aggregateId, occurredAt, {
+          kind: 'outside-limit',
+          productId: data.text('productId'),
+          term: data.text('term') as 'amount' | 'duration',
+          bound: data.text('bound') as 'maximum' | 'minimum',
+          requested: data.number('requested'),
+          limit: data.number('limit'),
+        }),
+    },
+  ),
+  [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: defineStoredEvent(
+    CreditApplicationRequestCheckedWithUnknownProductTerms,
+    {
+      version: 1,
+      encode: (event): CreditApplicationRequestCheckedWithUnknownProductTermsData => ({
+        productId: event.productId,
+      }),
+      decode: (data, { aggregateId, occurredAt }) =>
+        new CreditApplicationRequestCheckedWithUnknownProductTerms(aggregateId, occurredAt, data.text('productId')),
+    },
+  ),
 };
