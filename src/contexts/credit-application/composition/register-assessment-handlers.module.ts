@@ -4,6 +4,8 @@ import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-appli
 import { ConsultRepaymentIncidentRegisterHandler } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.handler';
 import { AssessApplicationCommand } from '@/contexts/credit-application/assessment/application/commands/assess-application/assess-application.command';
 import { AssessApplicationHandler } from '@/contexts/credit-application/assessment/application/commands/assess-application/assess-application.handler';
+import { ReviewProposedRefusalCommand } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.command';
+import { ReviewProposedRefusalHandler } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.handler';
 import type { ScoringGateway } from '@/contexts/credit-application/assessment/application/ports/scoring-gateway.port';
 import type { AccountInformationProvider } from '@/contexts/credit-application/assessment/application/ports/account-information-provider.port';
 import type { CustomerIdentityGateway } from '@/contexts/credit-application/assessment/application/ports/customer-identity-gateway.port';
@@ -37,6 +39,12 @@ export function registerAssessmentHandlers(platform: Platform, given: Assessment
   platform.commands.register(
     AssessApplicationCommand,
     new AssessApplicationHandler(given.repository, platform.files.storage, given.scoring, platform.clock),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    ReviewProposedRefusalCommand,
+    new ReviewProposedRefusalHandler(given.repository, platform.clock),
     { context: 'credit-application' },
   );
 }

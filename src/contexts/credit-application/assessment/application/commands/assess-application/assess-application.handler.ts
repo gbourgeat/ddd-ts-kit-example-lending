@@ -46,7 +46,7 @@ export class AssessApplicationHandler implements CommandHandler<AssessApplicatio
 
     const assessment = await this.assessmentOf(creditApplication);
 
-    creditApplication.assess(assessment, this.clock.now());
+    creditApplication.assess(assessment, this.clock.now(), command.actor.id);
 
     await this.creditApplicationRepository.save(creditApplication);
 

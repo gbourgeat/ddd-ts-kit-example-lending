@@ -18,6 +18,10 @@ export const CreditApplicationCodes = {
   NoScoreAvailable: 'NO_SCORE_AVAILABLE',
   UnknownProductTerms: 'UNKNOWN_PRODUCT_TERMS',
   UnknownBrokerRegistration: 'UNKNOWN_BROKER_REGISTRATION',
+  NoRefusalToReview: 'NO_REFUSAL_TO_REVIEW',
+  RefusalAlreadyReviewed: 'REFUSAL_ALREADY_REVIEWED',
+  InvalidReviewReason: 'INVALID_REVIEW_REASON',
+  ReviewerCannotBeAssessor: 'REVIEWER_CANNOT_BE_ASSESSOR',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

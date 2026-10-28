@@ -639,6 +639,44 @@ export function readProductTermsFindings(
   return send<ReadProductTermsFindingsResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReviewProposedRefusalInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    conclusion: 'confirm' | 'overturn';
+    reason: string;
+  };
+}
+
+export type ReviewProposedRefusalResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'INVALID_REVIEW_REASON' | 'NO_REFUSAL_TO_REVIEW' | 'REFUSAL_ALREADY_REVIEWED' | 'REVIEWER_CANNOT_BE_ASSESSOR' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Review proposed refusal: `POST /applications/{id}/refusal-review`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_REVIEW_REASON (422), NO_REFUSAL_TO_REVIEW (422), REFUSAL_ALREADY_REVIEWED (422), REVIEWER_CANNOT_BE_ASSESSOR (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function reviewProposedRefusal(
+  connection: Connection,
+  input: ReviewProposedRefusalInput,
+  options: CallOptions = {},
+): Promise<ReviewProposedRefusalResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/refusal-review',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ReviewProposedRefusalResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ConsultRepaymentIncidentRegisterInput {
   readonly path: {
     readonly id: string;

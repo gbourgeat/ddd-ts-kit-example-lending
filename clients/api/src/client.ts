@@ -119,6 +119,12 @@ export interface Client {
    */
   readProductTermsFindings(input: operations.ReadProductTermsFindingsInput, options?: CallOptions): Promise<operations.ReadProductTermsFindingsResult>;
   /**
+   * Review proposed refusal: `POST /applications/{id}/refusal-review`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_REVIEW_REASON (422), NO_REFUSAL_TO_REVIEW (422), REFUSAL_ALREADY_REVIEWED (422), REVIEWER_CANNOT_BE_ASSESSOR (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  reviewProposedRefusal(input: operations.ReviewProposedRefusalInput, options?: CallOptions): Promise<operations.ReviewProposedRefusalResult>;
+  /**
    * Consult repayment incident register: `POST /applications/{id}/register-consultations`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNIDENTIFIED_PARTY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -447,6 +453,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readDocument: (input, call) => operations.readDocument(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),
+    reviewProposedRefusal: (input, call) => operations.reviewProposedRefusal(connection, input, call),
     consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),

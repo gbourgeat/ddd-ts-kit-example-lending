@@ -98,6 +98,10 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Unknown | Not known: the terms of a product that have not been kept yet | Unidentified |
 | Checked | A check was run and its answer is kept in the file | Checking |
 | Findings | What the checks of an application against its product found, kept in its file | Results |
+| Reviewer | the staff member who reviews a proposed refusal; never the one who ran its assessment |  |
+| Cannot | not permitted; part of a refusal name only |  |
+| Be | to exist as; part of a refusal name only |  |
+| Assessor | the staff member who ran the assessment of an application |  |
 
 ## Modules
 
@@ -148,6 +152,7 @@ No personal data declared.
 - `credit-application:application.assess`
 - `credit-application:product-terms.keep`
 - `credit-application:broker-registration.keep`
+- `credit-application:application.review-refusal`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -225,6 +230,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadProductTerms` | query | not read |
 | `ReadProductTermsFindings` | query | not read |
 | `ReadRateGrid` | query | not read |
+| `ReviewProposedRefusal` | command | `application.review-refusal` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
 
@@ -244,6 +250,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/refusal-review` | `reviewProposedRefusal` | `ApplicationsRoutes` | `Authenticated` | `ReviewProposedRefusal` | `application.review-refusal` | params: `ReviewProposedRefusalParams`, body: `ReviewProposedRefusalBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.InvalidReviewReason`, `CreditApplicationCodes.NoRefusalToReview`, `CreditApplicationCodes.RefusalAlreadyReviewed`, `CreditApplicationCodes.ReviewerCannotBeAssessor` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
 | GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | not read | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | `application.decide` | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
@@ -326,7 +333,11 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
+| `InvalidReviewReason` | `forReason` | `INVALID_REVIEW_REASON` | none |
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
+| `NoRefusalToReview` | `forApplication` | `NO_REFUSAL_TO_REVIEW` | none |
+| `RefusalAlreadyReviewed` | `forApplication` | `REFUSAL_ALREADY_REVIEWED` | none |
+| `ReviewerCannotBeAssessor` | `forApplication` | `REVIEWER_CANNOT_BE_ASSESSOR` | none |
 | `UnknownBrokerRegistration` | `forUnknownBrokerRegistration` | `UNKNOWN_BROKER_REGISTRATION` | none |
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
