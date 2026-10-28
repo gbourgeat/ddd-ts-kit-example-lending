@@ -13,6 +13,7 @@ import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/dom
 import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
 import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
 import { CustomerDueDiligenceRefreshed } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-refreshed.event';
+import { CustomerHighRiskApproved } from '@/contexts/customer-due-diligence/domain/events/customer-high-risk-approved.event';
 
 interface CustomerBusinessRegisteredData {
   readonly legalName: string;
@@ -46,6 +47,8 @@ interface CustomerDueDiligenceRefreshedData {
   readonly riskRated: boolean;
   readonly riskRating?: RiskRatingData;
 }
+
+type CustomerHighRiskApprovedData = Record<string, never>;
 
 /** The stored shape of the risk rating: its word of the vocabulary, read back by `ratingOf`. */
 interface RiskRatingData {
@@ -172,6 +175,11 @@ export const customerEvents: StoredEventTypes<CustomerEvent> = {
         data.instant('nextDueOn'),
         data.flag('riskRated') ? ratingOf(data.record('riskRating').text('code')) : undefined,
       ),
+  }),
+  [CustomerHighRiskApproved.eventName]: defineStoredEvent(CustomerHighRiskApproved, {
+    version: 1,
+    encode: (): CustomerHighRiskApprovedData => ({}),
+    decode: (_data, { aggregateId, occurredAt }) => new CustomerHighRiskApproved(aggregateId, occurredAt),
   }),
 };
 

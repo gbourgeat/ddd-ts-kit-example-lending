@@ -16,6 +16,8 @@ import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligenc
 import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
 import { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
 import { CustomerDueDiligenceRefreshed } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-refreshed.event';
+import { CustomerNotHighRisk } from '@/contexts/customer-due-diligence/domain/errors/customer-not-high-risk.error';
+import { CustomerHighRiskApproved } from '@/contexts/customer-due-diligence/domain/events/customer-high-risk-approved.event';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
@@ -43,7 +45,8 @@ export type CustomerEvent =
   | CustomerRelationshipEnded
   | CustomerPossibleMatchDismissed
   | CustomerRiskRated
-  | CustomerDueDiligenceRefreshed;
+  | CustomerDueDiligenceRefreshed
+  | CustomerHighRiskApproved;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -71,6 +74,7 @@ export interface CustomerState {
   readonly riskRating?: RiskRating;
   readonly dueDiligenceRefreshedAt?: Date;
   readonly dueDiligenceDueOn?: Date;
+  readonly highRiskApprovedAt?: Date | undefined;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -178,6 +182,15 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerRiskRated(this.id, now, rating));
   }
 
+  /** Compliance approves a customer rated high risk; a customer not rated high is refused, a rating never given included. */
+  approveHighRisk(now: Date): void {
+    if (this.state.riskRating !== RiskRating.High) {
+      throw CustomerNotHighRisk.forCustomer(this.id);
+    }
+
+    this.record(new CustomerHighRiskApproved(this.id, now));
+  }
+
   /** Refreshes the due diligence: the screening outcome is recorded, a possible match goes to review, the risk rating is restated only when the customer has one. */
   refreshDueDiligence(screening: 'clear' | 'possible-match', now: Date): void {
     const possibleMatch = screening === 'possible-match';
@@ -214,6 +227,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerPossibleMatchDismissed.eventName]: (event) => this.applyPossibleMatchDismissed(event),
       [CustomerRiskRated.eventName]: (event) => this.applyRiskRated(event),
       [CustomerDueDiligenceRefreshed.eventName]: (event) => this.applyDueDiligenceRefreshed(event),
+      [CustomerHighRiskApproved.eventName]: (event) => this.applyHighRiskApproved(event),
     };
   }
 
@@ -299,8 +313,9 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.state = { ...this.state, possibleMatchDismissedAt: event.occurredAt };
   }
 
+  /** A re-rating, whatever it is, clears an earlier approval of high risk: the customer must be approved again. */
   private applyRiskRated(event: CustomerRiskRated): void {
-    this.state = { ...this.state, riskRating: event.rating };
+    this.state = { ...this.state, riskRating: event.rating, highRiskApprovedAt: undefined };
   }
 
   private applyDueDiligenceRefreshed(event: CustomerDueDiligenceRefreshed): void {
@@ -310,5 +325,9 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       dueDiligenceDueOn: event.nextDueOn,
       ...(event.riskRating === undefined ? {} : { riskRating: event.riskRating }),
     };
+  }
+
+  private applyHighRiskApproved(event: CustomerHighRiskApproved): void {
+    this.state = { ...this.state, highRiskApprovedAt: event.occurredAt };
   }
 }

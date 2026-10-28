@@ -46,6 +46,8 @@ import { RefreshDueDiligenceHandler } from '@/contexts/customer-due-diligence/ap
 import { GetCustomerDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-due-diligence/get-customer-due-diligence.handler';
 import { GetCustomerDueDiligenceQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-due-diligence/get-customer-due-diligence.query';
 import { EventStoreGetCustomerDueDiligenceReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-get-customer-due-diligence.reader';
+import { ApproveHighRiskCustomerCommand } from '@/contexts/customer-due-diligence/application/commands/approve-high-risk-customer/approve-high-risk-customer.command';
+import { ApproveHighRiskCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/approve-high-risk-customer/approve-high-risk-customer.handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -173,6 +175,12 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new GetCustomerDueDiligenceHandler(getCustomerDueDiligenceReader, platform.access),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    ApproveHighRiskCustomerCommand,
+    new ApproveHighRiskCustomerHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -281,6 +289,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(GetCustomerDueDiligenceQuery, customerDueDiligencePermissions['due-diligence.read'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(ApproveHighRiskCustomerCommand, customerDueDiligencePermissions['customer.approve-high-risk'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

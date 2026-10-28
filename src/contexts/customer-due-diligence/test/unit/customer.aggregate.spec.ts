@@ -7,6 +7,7 @@ import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/do
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
+import { CustomerHighRiskApproved } from '@/contexts/customer-due-diligence/domain/events/customer-high-risk-approved.event';
 import { aCustomer, aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
@@ -188,5 +189,46 @@ describe('Customer, once its screening found a possible match, and when its rela
 
     expectRefusal(() => confirmed.confirmSanctionsMatch(registeredOn), 'NO_POSSIBLE_MATCH');
     expect(confirmed.pullEvents()).toEqual([]);
+  });
+});
+
+describe('Customer, once compliance approves a high risk customer', () => {
+  const ratedAt = new Date('2026-03-02T00:00:00.000Z');
+  const approvedAt = new Date('2026-03-03T00:00:00.000Z');
+
+  it('records the approval of a customer rated high risk', () => {
+    const customer = aCustomer().build();
+
+    customer.rateRisk('high', ratedAt);
+    customer.pullEvents();
+
+    customer.approveHighRisk(approvedAt);
+
+    expect(customer.pullEvents()).toEqual([new CustomerHighRiskApproved(customer.id, approvedAt)]);
+  });
+
+  it('refuses the approval of a customer rated medium risk, with CUSTOMER_NOT_HIGH_RISK', () => {
+    const customer = aCustomer().build();
+
+    customer.rateRisk('medium', ratedAt);
+
+    expectRefusal(() => customer.approveHighRisk(approvedAt), 'CUSTOMER_NOT_HIGH_RISK');
+  });
+
+  it('refuses the approval of a customer never rated, with CUSTOMER_NOT_HIGH_RISK', () => {
+    const customer = aCustomer().build();
+
+    expectRefusal(() => customer.approveHighRisk(approvedAt), 'CUSTOMER_NOT_HIGH_RISK');
+  });
+
+  it('clears the approval when the customer is rated again, so it must be approved again', () => {
+    const customer = aCustomer().build();
+
+    customer.rateRisk('high', ratedAt);
+    customer.approveHighRisk(approvedAt);
+
+    customer.rateRisk('high', approvedAt);
+
+    expect(customer.toState().highRiskApprovedAt).toBeUndefined();
   });
 });
