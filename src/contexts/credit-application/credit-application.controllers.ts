@@ -18,6 +18,7 @@ import { ReadDelegationTableController } from '@/contexts/credit-application/dec
 import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
 import { BringApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.controller';
 import { CorrectEntryController } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.controller';
+import { ExplainRefusalController } from '@/contexts/credit-application/file/presentation/http/applications/explain-refusal/explain-refusal.controller';
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
 import { NameGuarantorController } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.controller';
@@ -62,6 +63,8 @@ import { AttachDocumentAnswer } from '@/contexts/credit-application/file/present
 import { BringApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.body';
 import { CorrectEntryParams } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.params';
 import { CorrectEntryBody } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.body';
+import { ExplainRefusalParams } from '@/contexts/credit-application/file/presentation/http/applications/explain-refusal/explain-refusal.params';
+import { ExplainRefusalAnswer } from '@/contexts/credit-application/file/presentation/http/applications/explain-refusal/explain-refusal.answer';
 import { GiveAccountConsentParams } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.params';
 import { GiveAccountConsentBody } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.body';
 import { NameCoBorrowerParams } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.params';
@@ -146,6 +149,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(CorrectEntryController, {
     correctEntry: { params: CorrectEntryParams, body: CorrectEntryBody, answer: acceptedSchema },
+  }),
+  withSignatures(ExplainRefusalController, {
+    explainRefusal: { params: ExplainRefusalParams, answer: ExplainRefusalAnswer },
   }),
   withSignatures(GiveAccountConsentController, {
     giveAccountConsent: { params: GiveAccountConsentParams, body: GiveAccountConsentBody, answer: acceptedSchema },
