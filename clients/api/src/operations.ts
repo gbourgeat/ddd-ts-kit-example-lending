@@ -462,9 +462,12 @@ export interface AttachDocumentInput {
 }
 
 export type AttachDocumentResult =
-  | Success<201, undefined>
+  | Success<201, {
+    key: string;
+  }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
   | Failure<413, 'FILE_TOO_LARGE', Schemas.Problem>
   | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
   | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
@@ -472,7 +475,7 @@ export type AttachDocumentResult =
 /**
  * Attach document: `POST /applications/{id}/documents`.
  *
- * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
  */
 export function attachDocument(
   connection: Connection,
@@ -483,10 +486,44 @@ export function attachDocument(
     method: 'POST',
     path: '/applications/{id}/documents',
     security: [['bearer']],
-    responses: { 201: 'none', 401: 'json', 403: 'json', 413: 'json', 415: 'json', 422: 'json' },
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 413: 'json', 415: 'json', 422: 'json' },
   };
 
   return send<AttachDocumentResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadDocumentInput {
+  readonly path: {
+    readonly id: string;
+    readonly documentKey: string;
+  };
+}
+
+export type ReadDocumentResult =
+  | Success<200, string>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_ENTRY' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read a document of an application back: `GET /applications/{id}/documents/{documentKey}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
+ */
+export function readDocument(
+  connection: Connection,
+  input: ReadDocumentInput,
+  options: CallOptions = {},
+): Promise<ReadDocumentResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/documents/{documentKey}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDocumentResult>(connection, operation, { ...input, ...options });
 }
 
 export interface NameGuarantorInput {

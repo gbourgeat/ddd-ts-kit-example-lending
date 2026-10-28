@@ -4,10 +4,10 @@ import {
   startDocumentEnvironment,
   type DocumentEnvironment,
 } from '$test/e2e/support/credit-application/document-environment';
+import { multipartFile } from '$test/e2e/support/credit-application/multipart-file';
 
 const request = { productId: 'personal-loan', amount: { cents: 1234567, currency: 'EUR' }, durationMonths: 60 };
 const PDF = '%PDF-1.7\n%%EOF\n';
-const BOUNDARY = 'ddd-ts-kit-document-boundary';
 
 describe('Attach document, end to end', () => {
   let application: DocumentEnvironment;
@@ -74,18 +74,3 @@ describe('Attach document, end to end', () => {
     });
   });
 });
-
-/** The body of a multipart request carrying the file under the field `file` the route declares. */
-function multipartFile(fileName: string, mediaType: string, content: string): { body: string; contentType: string } {
-  const body = [
-    `--${BOUNDARY}`,
-    `Content-Disposition: form-data; name="file"; filename="${fileName}"`,
-    `Content-Type: ${mediaType}`,
-    '',
-    content,
-    `--${BOUNDARY}--`,
-    '',
-  ].join('\r\n');
-
-  return { body, contentType: `multipart/form-data; boundary=${BOUNDARY}` };
-}

@@ -190,6 +190,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     return this.state.coBorrowerIds;
   }
 
+  /** The keys of the documents stored for the file, in the order they were attached. */
+  get documentKeys(): readonly string[] {
+    return this.state.documentKeys;
+  }
+
   get guarantorIds(): readonly string[] {
     return this.state.guarantorIds;
   }

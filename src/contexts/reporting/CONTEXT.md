@@ -89,6 +89,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Projection | Class | Applies |
 |---|---|---|
+| not read | not read |  |
 | not read | `ApplicationCountProjection` |  |
 
 ### Ports
