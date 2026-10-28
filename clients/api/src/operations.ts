@@ -1962,6 +1962,40 @@ export function readLegalMaximumRate(
   return send<ReadLegalMaximumRateResult>(connection, operation, { ...input, ...options });
 }
 
+export interface CloseLoanInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type CloseLoanResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'LOAN_ALREADY_CLOSED' | 'UNKNOWN_LOAN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Close loan: `POST /loans/{id}/closure`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+ */
+export function closeLoan(
+  connection: Connection,
+  input: CloseLoanInput,
+  options: CallOptions = {},
+): Promise<CloseLoanResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/loans/{id}/closure',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<CloseLoanResult>(connection, operation, { ...input, ...options });
+}
+
 export interface OpenOrganisationInput {
   readonly body: {
     slug: string;

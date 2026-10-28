@@ -10,6 +10,8 @@ import { servicingPermissions } from '@/contexts/servicing/servicing.permissions
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/servicing/ledger/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
 import { ErasePersonalDataPastRetentionHandler } from '@/contexts/servicing/ledger/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
 import { ErasePersonalDataPastRetentionJob } from '@/contexts/servicing/ledger/application/scheduling/erase-personal-data-past-retention.job';
+import { CloseLoanCommand } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.command';
+import { CloseLoanHandler } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.handler';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -36,13 +38,16 @@ export function servicingModule(platform: Platform): ServicingWiring {
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
-  platform.adapter(new EventStoreLoanRepository(platform.eventSourcing.events, platform.eventSourcing.cipher), {
-    kind: 'repository',
-    context: 'servicing',
-    token: 'LoanRepository',
-  });
+  const loanRepository = platform.adapter(
+    new EventStoreLoanRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
+    { kind: 'repository', context: 'servicing', token: 'LoanRepository' },
+  );
 
   platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
+    context: 'servicing',
+  });
+
+  platform.commands.register(CloseLoanCommand, new CloseLoanHandler(loanRepository, platform.clock), {
     context: 'servicing',
   });
   // /ddd-ts-kit:handlers
@@ -73,6 +78,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(ErasePersonalDataPastRetentionCommand, servicingPermissions['loan.erase-past-retention'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(CloseLoanCommand, servicingPermissions['loan.close'], {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     // /ddd-ts-kit:authorization

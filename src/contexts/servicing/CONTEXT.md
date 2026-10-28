@@ -42,6 +42,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Instalments | Direct debits and rejected debits. |  |
 | Paid out | The loan has been paid to the borrower and its schedule has started | Paid off, the loan repaid in full |
 | Erase personal data past retention | Destroy the key of the personal values of every loan closed ten years ago, so that the ledger can no longer be read | Delete a loan |
+| Closed loan | A loan whose schedule has ended, paid in full or repaid early: its ledger is kept for ten years, then its personal data is erased | Loan |
 
 ## Modules
 
@@ -72,6 +73,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `servicing:loan.erase-past-retention`
+- `servicing:loan.close`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -122,7 +124,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `CloseLoan` | command | `loan.close` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| POST | `/loans/:id/closure` | `closeLoan` | `LoansRoutes` | `Authenticated` | `CloseLoan` | `loan.close` | params: `CloseLoanParams`, body: `CloseLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
 
 ### Ports
 
@@ -138,4 +147,6 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
 | `InvalidSchedule` | `forInvalidTerms` | `INVALID_SCHEDULE` | none |
+| `LoanAlreadyClosed` | `forLoan` | `LOAN_ALREADY_CLOSED` | none |
+| `UnknownLoan` | `forLoan` | `UNKNOWN_LOAN` | none |
 <!-- /ddd-ts-kit:reference -->
