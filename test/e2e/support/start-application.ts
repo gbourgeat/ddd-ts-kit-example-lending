@@ -247,7 +247,6 @@ function creditApplicationWithIncidents(incidents: SimulatedRepaymentIncidentReg
   };
 }
 
-/** The identity context as the application wires it, except that its identity provider is the fake (no Keycloak answers in a test). */
 /** The outbox relay of the application: what it stores is published, and the handlers it reaches run. */
 function relayOf(database: TestDatabase, application: ReturnType<typeof composeApplication>) {
   return startOutboxRelay({
@@ -258,6 +257,7 @@ function relayOf(database: TestDatabase, application: ReturnType<typeof composeA
   });
 }
 
+/** The identity context as the application wires it, except that its identity provider is the fake (no Keycloak answers in a test). */
 function identityWithProviderFake(provider: FakeIdentityProviderAdmin) {
   return (platform: Platform): ReturnType<typeof identityModule> => {
     const adapter: Platform['adapter'] = (instance, info) => {
