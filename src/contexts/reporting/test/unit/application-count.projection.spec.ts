@@ -74,6 +74,99 @@ describe('Application count, kept from what credit-application announces', () =>
   });
 });
 
+describe('Application count, one line per branch and month', () => {
+  it('adds the applications of a branch and month one after another', async () => {
+    const counts = new FakeApplicationCounts();
+    const projection = new ApplicationCountProjection(counts);
+
+    await projection.submitted(
+      submitted({
+        id: 'credit-application-1',
+        branchId: 'branch-1',
+        requestedAmountCents: 1000,
+        occurredAt: '2026-03-14T09:00:00.000Z',
+      }),
+    );
+
+    await projection.submitted(
+      submitted({
+        id: 'credit-application-2',
+        branchId: 'branch-1',
+        requestedAmountCents: 2500,
+        occurredAt: '2026-03-20T09:00:00.000Z',
+      }),
+    );
+
+    const line = await counts.get('acme-bank:branch-1:2026-03');
+
+    expect(line).toMatchObject({ applicationCount: 2, amountCents: 3500 });
+  });
+
+  it('keeps the applications of another branch on its own line', async () => {
+    const counts = new FakeApplicationCounts();
+    const projection = new ApplicationCountProjection(counts);
+
+    await projection.submitted(
+      submitted({
+        id: 'credit-application-1',
+        branchId: 'branch-1',
+        requestedAmountCents: 1000,
+        occurredAt: '2026-03-14T09:00:00.000Z',
+      }),
+    );
+
+    await projection.submitted(
+      submitted({
+        id: 'credit-application-2',
+        branchId: 'branch-2',
+        requestedAmountCents: 700,
+        occurredAt: '2026-03-14T09:00:00.000Z',
+      }),
+    );
+
+    const other = await counts.get('acme-bank:branch-2:2026-03');
+
+    expect(other).toMatchObject({ branchId: 'branch-2', applicationCount: 1, amountCents: 700 });
+  });
+
+  it('counts a submission on the month of its instant in UTC', async () => {
+    const counts = new FakeApplicationCounts();
+    const projection = new ApplicationCountProjection(counts);
+
+    await projection.submitted(
+      submitted({
+        id: 'credit-application-1',
+        branchId: 'branch-1',
+        requestedAmountCents: 1000,
+        occurredAt: '2026-03-31T23:30:00.000Z',
+      }),
+    );
+
+    const line = await counts.get('acme-bank:branch-1:2026-03');
+
+    expect(line).toMatchObject({ month: '2026-03', applicationCount: 1 });
+  });
+
+  it('refuses a submission without its tenant, and counts nothing under no tenant', async () => {
+    const counts = new FakeApplicationCounts();
+    const projection = new ApplicationCountProjection(counts);
+
+    const tenantless = {
+      ...submitted({
+        id: 'credit-application-9',
+        branchId: 'branch-1',
+        requestedAmountCents: 1000,
+        occurredAt: '2026-03-14T09:00:00.000Z',
+      }),
+      tenantId: undefined,
+    };
+
+    await expect(projection.submitted(tenantless)).rejects.toMatchObject({ code: 'APPLICATION_COUNT' });
+
+    expect(await counts.get(':branch-1:2026-03')).toBeUndefined();
+  });
+});
+
 interface SubmittedFact {
   readonly id: string;
   readonly branchId: string;
