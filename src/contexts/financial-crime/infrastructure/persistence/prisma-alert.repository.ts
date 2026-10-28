@@ -32,6 +32,14 @@ export class PrismaAlertRepository implements AlertRepository {
     });
   }
 
+  async findByRepaymentReference(repaymentReference: string): Promise<Alert | undefined> {
+    const row = await this.database.client().financialCrimeAlert.findFirst({
+      where: { repaymentReference, ...tenantWhere(this.scope) },
+    });
+
+    return row === null ? undefined : AlertMapper.toDomain(row);
+  }
+
   /** The row is written in the tenant of the work: `tenantScopeOf` names it, `tenantWhere` finds it again. */
   private insert(state: VersionedAlert): Promise<{ count: number }> {
     const row = { ...state, ...tenantScopeOf(this.scope), ...stampCreation(this.scope, this.clock) };

@@ -442,6 +442,8 @@ Consumers: `identity`
 | --- | --- | --- | --- |
 | `servicing.loan.payment-received` | 1 | The instalment of a loan is received by direct debit: its number in the schedule and the amount collected, for those who watch the repayments. | no |
 
+Consumers: `financial-crime`
+
 #### Payload of version 1
 
 | Field | Type | Required | Description |
