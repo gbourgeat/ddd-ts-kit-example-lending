@@ -45,6 +45,7 @@ const elements: SchemaDefinition = {
       'credit-application:application.name-party': via('customer', 'self'),
       'credit-application:application.correct': via('customer', 'self'),
       'credit-application:application.attach-document': via('customer', 'self'),
+      'credit-application:application.read-accounts': via('customer', 'self'),
       'credit-application:application.read': {
         anyOf: [via('customer', 'advisor'), 'co-borrower', 'broker'],
         butNot: [via('customer', 'conflicted')],
