@@ -212,7 +212,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(AttachDocumentCommand, creditApplicationPermissions['application.attach-document'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
     // /ddd-ts-kit:authorization
   ];
