@@ -1415,6 +1415,43 @@ export function requestPersonalDataCopyLink(
   return send<RequestPersonalDataCopyLinkResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadDeciderLevelInput {
+  readonly path: {
+    readonly staffMemberId: string;
+  };
+}
+
+export type ReadDeciderLevelResult =
+  | Success<200, {
+    staffMemberId: string;
+    branchId: string;
+    level: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_DECIDER_LEVEL' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read decider level: `GET /deciders/{staffMemberId}/level`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DECIDER_LEVEL (422), VALIDATION_FAILED (422).
+ */
+export function readDeciderLevel(
+  connection: Connection,
+  input: ReadDeciderLevelInput,
+  options: CallOptions = {},
+): Promise<ReadDeciderLevelResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/deciders/{staffMemberId}/level',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDeciderLevelResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetDelegationTableInput {
   readonly body: {
     effectiveFrom: string;
@@ -1451,6 +1488,43 @@ export function setDelegationTable(
   };
 
   return send<SetDelegationTableResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadDelegationTableInput {
+  readonly path: {
+    readonly delegationTableId: string;
+  };
+}
+
+export type ReadDelegationTableResult =
+  | Success<200, {
+    delegationTableId: string;
+    effectiveFrom: string;
+    levels: Array<Schemas.DelegationTableLevelAnswer>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read delegation table: `GET /delegation-tables/{delegationTableId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+ */
+export function readDelegationTable(
+  connection: Connection,
+  input: ReadDelegationTableInput,
+  options: CallOptions = {},
+): Promise<ReadDelegationTableResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/delegation-tables/{delegationTableId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDelegationTableResult>(connection, operation, { ...input, ...options });
 }
 
 export interface FlagAllOverdueDueDiligenceInput {

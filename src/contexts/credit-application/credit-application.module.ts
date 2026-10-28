@@ -56,7 +56,15 @@ import { registerNightlyJobs } from '@/contexts/credit-application/composition/r
 import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
 import { registerFileReactions } from '@/contexts/credit-application/composition/register-file-reactions.module';
 import { registerFileHandlers } from '@/contexts/credit-application/composition/register-file-handlers.module';
+import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
+import { registerDelegationTableHandlers } from '@/contexts/credit-application/composition/register-delegation-table-handlers.module';
 import { InProcessCustomerDiligenceGateway } from '@/contexts/credit-application/offer/infrastructure/external/in-process-customer-diligence.gateway';
+import { KeepDelegationTableCommand } from '@/contexts/credit-application/decision/application/commands/keep-delegation-table/keep-delegation-table.command';
+import { ReadDelegationTableQuery } from '@/contexts/credit-application/decision/application/queries/read-delegation-table/read-delegation-table.query';
+import { KeepDeciderLevelCommand } from '@/contexts/credit-application/decision/application/commands/keep-decider-level/keep-decider-level.command';
+import { ReadDeciderLevelQuery } from '@/contexts/credit-application/decision/application/queries/read-decider-level/read-decider-level.query';
+import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-decider-levels.repository';
+import { registerDeciderLevelHandlers } from '@/contexts/credit-application/composition/register-decider-level-handlers.module';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -77,6 +85,12 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     },
   );
 
+  const delegationTables = platform.adapter(new PrismaDelegationTables(platform.persistence.database, platform.scope), {
+    kind: 'repository',
+    context: 'credit-application',
+    token: 'DelegationTables',
+  });
+
   const customerAdvisorBranch = registerGateways(platform);
 
   platform.adapter(new InProcessCustomerDiligenceGateway(platform.customerDiligence), {
@@ -86,6 +100,15 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
   });
 
   registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
+  registerDelegationTableHandlers(platform, delegationTables);
+
+  const deciderLevels = platform.adapter(new PrismaDeciderLevels(platform.persistence.database, platform.scope), {
+    kind: 'repository',
+    context: 'credit-application',
+    token: 'DeciderLevels',
+  });
+
+  registerDeciderLevelHandlers(platform, deciderLevels);
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 
@@ -173,6 +196,7 @@ function registerHandlers(
   platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
     context: 'credit-application',
   });
+
   // /ddd-ts-kit:handlers
 }
 
@@ -284,6 +308,18 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
     requires(ReadDeclaredConflictsQuery, creditApplicationPermissions['application.decide'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(KeepDelegationTableCommand, creditApplicationPermissions['delegation-table.keep'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(ReadDelegationTableQuery, creditApplicationPermissions['application.decide'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(KeepDeciderLevelCommand, creditApplicationPermissions['decider-level.keep'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(ReadDeciderLevelQuery, creditApplicationPermissions['application.decide'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(AttachDocumentCommand, creditApplicationPermissions['application.attach-document'], {
