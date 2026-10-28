@@ -58,6 +58,10 @@ import { PrismaApplicationListProjection } from '@/contexts/credit-application/f
 import { PrismaBrokerRegistrations } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-broker-registrations.repository';
 import { PrismaProductTerms } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-product-terms.repository';
 import { PrismaSearchApplicationsReader } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-search-applications.reader';
+
+import { ExplainRefusalHandler } from '@/contexts/credit-application/file/application/queries/explain-refusal/explain-refusal.handler';
+import { ExplainRefusalQuery } from '@/contexts/credit-application/file/application/queries/explain-refusal/explain-refusal.query';
+import { RemoteAccessExplanations } from '@/contexts/credit-application/file/infrastructure/external/remote-access-explanations.adapter';
 // /ddd-ts-kit:imports
 
 /** What the module file of the model registers; credit-application.module.ts composes it with the rest of the context. */
@@ -74,6 +78,16 @@ export const fileModule = {
     registerDocumentRetentionHandlers(platform, repository);
     registerProductTermsHandlers(platform, repository);
     registerBrokerRegistrationHandlers(platform, brokerRegistrations);
+
+    const accessExplanations = platform.adapter(new RemoteAccessExplanations(platform.accessExplainer), {
+      kind: 'gateway',
+      context: 'credit-application',
+      token: 'AccessExplanations',
+    });
+
+    platform.queries.register(ExplainRefusalQuery, new ExplainRefusalHandler(platform.access, accessExplanations), {
+      context: 'credit-application',
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -117,8 +131,8 @@ export const fileModule = {
       requires(CorrectEntryCommand, creditApplicationPermissions['application.correct'], {
         resource: (command) => ({ type: 'application', id: command.applicationId }),
       }),
-      ...documentUseCases(),
       ...declareFileReferenceUseCases(),
+      publicUseCase(ExplainRefusalQuery),
       // /ddd-ts-kit:authorization
     ];
   },
@@ -131,21 +145,6 @@ export const fileModule = {
     ];
   },
 };
-
-/** What the use cases on the documents of an application and on the retention of its personal data require. */
-function documentUseCases(): UseCaseDeclaration[] {
-  return [
-    requires(AttachDocumentCommand, creditApplicationPermissions['application.attach-document'], {
-      resource: (command) => ({ type: 'application', id: command.applicationId }),
-    }),
-    requires(ReadDocumentQuery, creditApplicationPermissions['application.read'], {
-      resource: (query) => ({ type: 'application', id: query.applicationId }),
-    }),
-    requires(ErasePersonalDataPastRetentionCommand, creditApplicationPermissions['application.erase-past-retention'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
-    }),
-  ];
-}
 
 /** Binds a read model of the context, built on the database and the scope of the work, to its token. */
 function readModel<T extends object>(

@@ -312,6 +312,41 @@ export function bringApplication(
   return send<BringApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ExplainRefusalInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ExplainRefusalResult =
+  | Success<200, {
+    outcome: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'APPLICATION_NOT_VISIBLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Explain refusal: `GET /applications/{id}/access-explanation`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), APPLICATION_NOT_VISIBLE (422), VALIDATION_FAILED (422).
+ */
+export function explainRefusal(
+  connection: Connection,
+  input: ExplainRefusalInput,
+  options: CallOptions = {},
+): Promise<ExplainRefusalResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/access-explanation',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ExplainRefusalResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadAccountInformationInput {
   readonly path: {
     readonly id: string;

@@ -65,6 +65,12 @@ export interface Client {
    */
   bringApplication(input: operations.BringApplicationInput, options?: CallOptions): Promise<operations.BringApplicationResult>;
   /**
+   * Explain refusal: `GET /applications/{id}/access-explanation`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), APPLICATION_NOT_VISIBLE (422), VALIDATION_FAILED (422).
+   */
+  explainRefusal(input: operations.ExplainRefusalInput, options?: CallOptions): Promise<operations.ExplainRefusalResult>;
+  /**
    * Read account information: `POST /applications/{id}/account-information`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), MISSING_ACCOUNT_CONSENT (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -534,6 +540,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchApplications: (input, call) => operations.searchApplications(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
     bringApplication: (input, call) => operations.bringApplication(connection, input, call),
+    explainRefusal: (input, call) => operations.explainRefusal(connection, input, call),
     readAccountInformation: (input, call) => operations.readAccountInformation(connection, input, call),
     assessApplication: (input, call) => operations.assessApplication(connection, input, call),
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),

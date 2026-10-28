@@ -117,6 +117,7 @@ function registerHandlers(platform: Platform): void {
       staffMemberRepository,
       platform.ids,
       platform.clock,
+      platform.relations,
     ),
     { context: 'branch-network' },
   );

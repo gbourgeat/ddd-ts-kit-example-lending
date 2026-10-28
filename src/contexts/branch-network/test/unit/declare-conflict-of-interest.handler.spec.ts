@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { anActor } from '@ddd-ts-kit/auth/testing';
 import { type Actor } from '@ddd-ts-kit/kernel';
 import { createTestBuses } from '@ddd-ts-kit/testing';
@@ -33,6 +34,18 @@ describe('Declare conflict of interest', () => {
     expect(id).toBe('conflict-of-interest-1');
     expect(stored?.staffMemberId).toBe('staff-member-1');
     expect(stored?.customerId).toBe('customer-2');
+  });
+
+  it('excludes the declarer from the customer file, as the relationship the authorizer reads', async () => {
+    const { commandBus, relations, staffMemberRepository } = arrange();
+
+    await staffMemberRepository.save(aStaffMember().identifiedBy('staff-member-1').signedInAs('account-ada').build());
+
+    await commandBus.execute(new DeclareConflictOfInterestCommand(ada, 'customer-2'));
+
+    expect(await relations.readByObject('customer:customer-2', 'conflicted')).toEqual([
+      expect.objectContaining({ subject: 'user:staff-member-1' }),
+    ]);
   });
 
   it('announces the declaration once it is saved', async () => {
@@ -108,9 +121,17 @@ function arrange() {
   const conflictOfInterestRepository = dispatching(new FakeConflictOfInterestRepository());
   const staffMemberRepository = new FakeStaffMemberRepository();
 
-  const handler = new DeclareConflictOfInterestHandler(conflictOfInterestRepository, staffMemberRepository, ids, clock);
+  const relations = new InMemoryRelationTupleStore();
+
+  const handler = new DeclareConflictOfInterestHandler(
+    conflictOfInterestRepository,
+    staffMemberRepository,
+    ids,
+    clock,
+    relations,
+  );
 
   commandBus.use(holders).register(DeclareConflictOfInterestCommand, handler);
 
-  return { commandBus, conflictOfInterestRepository, domainEvents, staffMemberRepository };
+  return { commandBus, conflictOfInterestRepository, domainEvents, relations, staffMemberRepository };
 }

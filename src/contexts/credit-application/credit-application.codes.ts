@@ -49,6 +49,7 @@ export const CreditApplicationCodes = {
   OfferNotIssued: 'OFFER_NOT_ISSUED',
   OfferAlreadyAccepted: 'OFFER_ALREADY_ACCEPTED',
   OfferExpired: 'OFFER_EXPIRED',
+  ApplicationNotVisible: 'APPLICATION_NOT_VISIBLE',
   ReschedulingNotApproved: 'RESCHEDULING_NOT_APPROVED',
   PayoutTooEarly: 'PAYOUT_TOO_EARLY',
   WithdrawalExpired: 'WITHDRAWAL_EXPIRED',
