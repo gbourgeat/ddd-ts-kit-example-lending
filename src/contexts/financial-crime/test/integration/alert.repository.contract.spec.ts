@@ -64,6 +64,19 @@ describe('PrismaAlertRepository, tenant by tenant', () => {
 
     expect(await repository.findById(saved.id)).toBeUndefined();
   });
+
+  it('finds the alert raised on a repayment, and no other alert of the tenant', async () => {
+    await database.reset();
+
+    const scope = new FixedExecutionScope(workOf('acme'));
+    const repository = new PrismaAlertRepository(database.persistence.database, scope, clock);
+    const saved = anAlert().ofRepayment('repayment-42').build();
+
+    await repository.save(saved);
+
+    expect((await repository.findByRepaymentReference('repayment-42'))?.id).toBe(saved.id);
+    expect(await repository.findByRepaymentReference('repayment-43')).toBeUndefined();
+  });
 });
 
 function workOf(tenantId: string): ExecutionContext {

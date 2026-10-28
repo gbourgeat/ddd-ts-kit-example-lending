@@ -11,4 +11,8 @@ export class FakeAlertRepository extends InMemoryRepository<Alert> implements Al
       }),
     );
   }
+
+  async findByRepaymentReference(repaymentReference: string): Promise<Alert | undefined> {
+    return this.all().find((alert) => alert.repaymentReference === repaymentReference);
+  }
 }

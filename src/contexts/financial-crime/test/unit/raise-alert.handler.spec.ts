@@ -42,6 +42,21 @@ describe('Raise alert', () => {
     expect((await alertRepository.findById(id ?? ''))?.repaymentReference).toBe('repayment-10');
   });
 
+  it('answers the alert already raised on the same repayment, without saving a second one', async () => {
+    const { commandBus, alertRepository } = arrange();
+
+    const first = await commandBus.execute(
+      new RaiseAlertCommand(holder, 'repayment-14', aRepayment({ payerAccount: 'stranger' })),
+    );
+
+    const second = await commandBus.execute(
+      new RaiseAlertCommand(holder, 'repayment-14', aRepayment({ payerAccount: 'stranger' })),
+    );
+
+    expect(second).toBe(first);
+    expect(alertRepository.count()).toBe(1);
+  });
+
   it('announces the alert raised with the save', async () => {
     const { commandBus, announced } = arrange();
 
