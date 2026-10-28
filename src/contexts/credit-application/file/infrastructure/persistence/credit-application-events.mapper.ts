@@ -6,6 +6,7 @@ import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-applicat
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
 import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/file/domain/events/credit-application-guarantor-named.event';
 import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
+import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -28,6 +29,12 @@ interface CreditApplicationGuarantorNamedData {
 interface CreditApplicationEntryCorrectedData {
   readonly correctedEntryId: string;
   readonly reason: string;
+}
+
+interface CreditApplicationDocumentAttachedData {
+  readonly documentKey: string;
+  readonly mediaType: string;
+  readonly sizeBytes: number;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -74,5 +81,21 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationEntryCorrected(aggregateId, occurredAt, data.text('correctedEntryId'), data.text('reason')),
+  }),
+  [CreditApplicationDocumentAttached.eventName]: defineStoredEvent(CreditApplicationDocumentAttached, {
+    version: 1,
+    encode: (event): CreditApplicationDocumentAttachedData => ({
+      documentKey: event.documentKey,
+      mediaType: event.mediaType,
+      sizeBytes: event.sizeBytes,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationDocumentAttached(
+        aggregateId,
+        occurredAt,
+        data.text('documentKey'),
+        data.text('mediaType'),
+        data.number('sizeBytes'),
+      ),
   }),
 };

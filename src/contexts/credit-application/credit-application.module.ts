@@ -32,6 +32,8 @@ import { DeclaredConflictsProjection } from '@/contexts/credit-application/decis
 import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-declared-conflicts-store.repository';
 import { ReadDeclaredConflictsHandler } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.handler';
 import { ReadDeclaredConflictsQuery } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.query';
+import { AttachDocumentCommand } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.command';
+import { AttachDocumentHandler } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -120,6 +122,14 @@ function registerHandlers(platform: Platform, declaredConflicts: DeclaredConflic
       context: 'credit-application',
     },
   );
+
+  platform.commands.register(
+    AttachDocumentCommand,
+    new AttachDocumentHandler(creditApplicationRepository, platform.clock, platform.files.staging),
+    {
+      context: 'credit-application',
+    },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -200,6 +210,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(ReadDeclaredConflictsQuery, creditApplicationPermissions['application.decide'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(AttachDocumentCommand, creditApplicationPermissions['application.attach-document'], {
+      resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
     // /ddd-ts-kit:authorization
   ];

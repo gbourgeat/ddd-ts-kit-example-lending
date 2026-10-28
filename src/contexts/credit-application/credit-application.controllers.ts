@@ -3,6 +3,7 @@ import { acceptedSchema } from '@ddd-ts-kit/http';
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
+import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
 import { CorrectEntryController } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.controller';
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
@@ -26,6 +27,7 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(ReadDeclaredConflictsController, {
     readDeclaredConflicts: { params: ReadDeclaredConflictsParams, answer: ReadDeclaredConflictsAnswer },
   }),
+  withSignatures(AttachDocumentController, { attachDocument: { answer: null } }),
   withSignatures(CorrectEntryController, {
     correctEntry: { params: CorrectEntryParams, body: CorrectEntryBody, answer: acceptedSchema },
   }),
