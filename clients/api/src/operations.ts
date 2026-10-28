@@ -1331,6 +1331,39 @@ export function setDelegationTable(
   return send<SetDelegationTableResult>(connection, operation, { ...input, ...options });
 }
 
+export interface FlagAllOverdueDueDiligenceInput {
+  readonly body: {
+    dueBefore: string;
+  };
+}
+
+export type FlagAllOverdueDueDiligenceResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Flag overdue every due diligence that falls due before the instant, for all customers: `POST /due-diligence/flag-overdue`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function flagAllOverdueDueDiligence(
+  connection: Connection,
+  input: FlagAllOverdueDueDiligenceInput,
+  options: CallOptions = {},
+): Promise<FlagAllOverdueDueDiligenceResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/due-diligence/flag-overdue',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<FlagAllOverdueDueDiligenceResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AcceptInvitationInput {
   readonly body: Schemas.InvitationToken;
 }

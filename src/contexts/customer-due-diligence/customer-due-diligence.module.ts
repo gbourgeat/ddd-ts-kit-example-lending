@@ -50,6 +50,8 @@ import { ApproveHighRiskCustomerCommand } from '@/contexts/customer-due-diligenc
 import { ApproveHighRiskCustomerHandler } from '@/contexts/customer-due-diligence/application/commands/approve-high-risk-customer/approve-high-risk-customer.handler';
 import { FlagOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-overdue-due-diligence/flag-overdue-due-diligence.command';
 import { FlagOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-overdue-due-diligence/flag-overdue-due-diligence.handler';
+import { FlagAllOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.command';
+import { FlagAllOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -189,6 +191,12 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new FlagOverdueDueDiligenceHandler(customerRepository, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    FlagAllOverdueDueDiligenceCommand,
+    new FlagAllOverdueDueDiligenceHandler(customerRepository, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -303,6 +311,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(FlagOverdueDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.flag-overdue'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(FlagAllOverdueDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.flag-overdue'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

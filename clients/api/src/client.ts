@@ -227,6 +227,12 @@ export interface Client {
    */
   setDelegationTable(input: operations.SetDelegationTableInput, options?: CallOptions): Promise<operations.SetDelegationTableResult>;
   /**
+   * Flag overdue every due diligence that falls due before the instant, for all customers: `POST /due-diligence/flag-overdue`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  flagAllOverdueDueDiligence(input: operations.FlagAllOverdueDueDiligenceInput, options?: CallOptions): Promise<operations.FlagAllOverdueDueDiligenceResult>;
+  /**
    * Accept an invitation: `POST /invitations/acceptance`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), ALREADY_MEMBER (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
@@ -369,6 +375,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
+    flagAllOverdueDueDiligence: (input, call) => operations.flagAllOverdueDueDiligence(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
