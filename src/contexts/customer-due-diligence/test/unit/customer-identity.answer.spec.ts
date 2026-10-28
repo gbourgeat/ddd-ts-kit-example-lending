@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { Customer } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
-import { CustomerIdentityAnswer } from '@/contexts/customer-due-diligence/application/contracts/customer-identity.answer';
+import { CustomerIdentityAnswer } from '@/contexts/customer-due-diligence/infrastructure/external/customer-identity.answer';
 import { FakeCustomerRepository } from '@/contexts/customer-due-diligence/test/fakes/customer.repository.fake';
 import { aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 
