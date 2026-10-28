@@ -253,7 +253,7 @@ Notes:
 | US9.07 | servicing | slice | Collect each due instalment by direct debit; a rejected debit makes it unpaid | `domain-event servicing Loan PaymentReceived --module instalments`; `command servicing CollectInstalment --permission loan.collect --aggregate Loan --module instalments`; `event-handler servicing Loan InstalmentDue --name CollectDueInstalment --module instalments` | US9.03, US9.06 | servicing | done |
 | US9.08 | servicing | contract | Payment received, published (financial crime watches it) | `integration-event servicing Loan PaymentReceived --version 1 --module instalments` | US9.07 | conductor | done |
 | US9.09 | servicing | contract | Loan paid out, published (reporting) | `integration-event servicing Loan PaidOut --version 1 --module ledger` | US9.05 | conductor | done |
-| US9.10 | servicing | slice | Late fee, capped by the law | `command servicing ChargeLateFee --permission loan.charge-fee --aggregate Loan --module ledger` | US9.07 | servicing | todo |
+| US9.10 | servicing | slice | Late fee, capped by the law | `command servicing ChargeLateFee --permission loan.charge-fee --aggregate Loan --module ledger` | US9.07 | servicing | blocked |
 | US9.11 | servicing | slice | Early repayment, with its fee (1 percent with more than a year left, 0.5 percent otherwise) | `command servicing RepayEarly --permission loan.repay-early --aggregate Loan --module ledger`; `domain-service servicing EarlyRepaymentFee --module ledger`; `route servicing RepayEarly --method POST --path /loans/:id/early-repayments --command --module ledger` | US9.05 | servicing | done |
 | US9.12 | servicing | slice | Execute a rescheduling decided by credit-application | `integration-handler servicing credit-application credit-application.credit-application.reschedule-decided --name RescheduleOnDecision --module ledger`; `command servicing RescheduleLoan --permission loan.reschedule --aggregate Loan --module ledger` | US7.14, US9.05 | servicing | done |
 | US9.13 | servicing | slice | Write off a loan, with an entry of opposite effect for any error | `command servicing WriteOffLoan --permission loan.write-off --aggregate Loan --module ledger` | US9.05 | servicing | done |
@@ -381,11 +381,11 @@ Notes:
 
 | # | Context | Kind | Slice | Start with | Depends on | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| US15.01 | platform | slice | Contracts current: OpenAPI, AsyncAPI, SDK | `npm run regenerate` (after the contracts of US4.05, US5.04, US7.12, US7.14, US8.13, US9.08, US9.09, US10.08, US12.06) | US8.13, US9.08, US9.09, US10.08, US12.06, US12.07 | conductor | todo |
-| US15.02 | platform | slice | Traceability matrix from each need to its stories and specs | edit `docs/compliance/traceability.md` (no generator) | US15.01, US14.06 | conductor | todo |
-| US15.03 | platform | slice | A recorded real run with docker compose, a demo script from an application to a payout and a first instalment | `npm run infra:up`; `npm run dev`; the demo script under `scripts/` (no generator) | US9.07, US8.12, US15.01 | conductor | todo |
-| US15.04 | platform | slice | One trace crossing the API and servicing | the correlation id carried through the outbox (platform, no generator); spec on the trace of the demo | US15.03, US9.01 | conductor | todo |
-| US15.05 | platform | slice | Close: `ddd-ts-kit check` with zero finding, `npm run verify` green | `npx ddd-ts-kit check`; `npm run verify` | US15.02, US15.04 | conductor | todo |
+| US15.01 | platform | slice | Contracts current: OpenAPI, AsyncAPI, SDK | `npm run regenerate` (after the contracts of US4.05, US5.04, US7.12, US7.14, US8.13, US9.08, US9.09, US10.08, US12.06) | US8.13, US9.08, US9.09, US10.08, US12.06, US12.07 | conductor | done |
+| US15.02 | platform | slice | Traceability matrix from each need to its stories and specs | edit `docs/compliance/traceability.md` (no generator) | US15.01, US14.06 | conductor | done |
+| US15.03 | platform | slice | A recorded real run with docker compose, a demo script from an application to a payout and a first instalment | `npm run infra:up`; `npm run dev`; the demo script under `scripts/` (no generator) | US9.07, US8.12, US15.01 | conductor | blocked |
+| US15.04 | platform | slice | One trace crossing the API and servicing | the correlation id carried through the outbox (platform, no generator); spec on the trace of the demo | US15.03, US9.01 | conductor | blocked |
+| US15.05 | platform | slice | Close: `ddd-ts-kit check` with zero finding, `npm run verify` green | `npx ddd-ts-kit check`; `npm run verify` | US15.02, US15.04 | conductor | blocked |
 
 Serves: close 1 (US15.05); close 13 (US15.01); close 15 (US15.03, US15.04); close 16 (US15.02); the story of
 close 14 is US8.
