@@ -13,6 +13,8 @@ import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/do
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
+import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
+import type { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
@@ -28,7 +30,8 @@ export type CustomerEvent =
   | CustomerPossibleMatchFound
   | CustomerSanctionsMatchConfirmed
   | CustomerRelationshipEnded
-  | CustomerPossibleMatchDismissed;
+  | CustomerPossibleMatchDismissed
+  | CustomerRiskRated;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -53,6 +56,7 @@ export interface CustomerState {
   readonly possibleMatchDismissedAt?: Date | undefined;
   readonly sanctionsMatchConfirmedAt?: Date;
   readonly relationshipEndedAt?: Date;
+  readonly riskRating?: RiskRating;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -155,6 +159,11 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerRelationshipEnded(this.id, now));
   }
 
+  /** Records the risk rating of the customer, low, medium or high; a later rating replaces the earlier one, which is kept in the events. */
+  rateRisk(rating: RiskRating, now: Date): void {
+    this.record(new CustomerRiskRated(this.id, now, rating));
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
@@ -169,6 +178,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerSanctionsMatchConfirmed.eventName]: (event) => this.applySanctionsMatchConfirmed(event),
       [CustomerRelationshipEnded.eventName]: (event) => this.applyRelationshipEnded(event),
       [CustomerPossibleMatchDismissed.eventName]: (event) => this.applyPossibleMatchDismissed(event),
+      [CustomerRiskRated.eventName]: (event) => this.applyRiskRated(event),
     };
   }
 
@@ -240,5 +250,9 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
 
   private applyPossibleMatchDismissed(event: CustomerPossibleMatchDismissed): void {
     this.state = { ...this.state, possibleMatchDismissedAt: event.occurredAt };
+  }
+
+  private applyRiskRated(event: CustomerRiskRated): void {
+    this.state = { ...this.state, riskRating: event.rating };
   }
 }

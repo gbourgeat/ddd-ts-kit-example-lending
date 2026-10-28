@@ -4,12 +4,14 @@ import type { CustomerEvent } from '@/contexts/customer-due-diligence/domain/agg
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 import { IdentityDocumentKind } from '@/contexts/customer-due-diligence/domain/vocabularies/identity-document-kind.vocabulary';
+import { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
 import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
 import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domain/events/customer-advisor-assigned.event';
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
+import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
 
 interface CustomerBusinessRegisteredData {
   readonly legalName: string;
@@ -35,6 +37,15 @@ type CustomerRelationshipEndedData = Record<string, never>;
 
 interface CustomerPossibleMatchDismissedData {
   readonly reason: string;
+}
+
+/** The stored shape of the risk rating: its word of the vocabulary, read back by `ratingOf`. */
+interface RiskRatingData {
+  readonly code: string;
+}
+
+interface CustomerRiskRatedData {
+  readonly rating: RiskRatingData;
 }
 
 /** The identity facts of version 2 of the birth; the document number and the address are personal, sealed by subject. */
@@ -131,6 +142,12 @@ export const customerEvents: StoredEventTypes<CustomerEvent> = {
     decode: (data, { aggregateId, occurredAt }) =>
       new CustomerPossibleMatchDismissed(aggregateId, occurredAt, data.text('reason')),
   }),
+  [CustomerRiskRated.eventName]: defineStoredEvent(CustomerRiskRated, {
+    version: 1,
+    encode: (event): CustomerRiskRatedData => ({ rating: { code: event.rating } }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CustomerRiskRated(aggregateId, occurredAt, ratingOf(data.record('rating').text('code'))),
+  }),
 };
 
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
@@ -155,6 +172,17 @@ function identityOf(data: StoredEventData): PersonIdentity {
     address: data.text('address'),
     addressProofDatedOn: data.instant('addressProofDatedOn'),
   };
+}
+
+/** The ratings the stream may hold: a stored rating outside the vocabulary is a corrupted stream. */
+function ratingOf(raw: string): RiskRating {
+  const rating = Object.values(RiskRating).find((known) => known === raw);
+
+  if (rating === undefined) {
+    throw new Error(`Unknown risk rating in the stream: ${raw}`);
+  }
+
+  return rating;
 }
 
 /** The kinds of identity document the stream may hold: a stored kind outside this list is a corrupted stream. */

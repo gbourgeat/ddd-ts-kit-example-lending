@@ -36,6 +36,11 @@ import { EndRelationshipOnSanctionsMatchEventHandler } from '@/contexts/customer
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { DismissMatchCommand } from '@/contexts/customer-due-diligence/application/commands/dismiss-match/dismiss-match.command';
 import { DismissMatchHandler } from '@/contexts/customer-due-diligence/application/commands/dismiss-match/dismiss-match.handler';
+import { RateCustomerRiskCommand } from '@/contexts/customer-due-diligence/application/commands/rate-customer-risk/rate-customer-risk.command';
+import { RateCustomerRiskHandler } from '@/contexts/customer-due-diligence/application/commands/rate-customer-risk/rate-customer-risk.handler';
+import { GetCustomerRiskRatingHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-risk-rating/get-customer-risk-rating.handler';
+import { GetCustomerRiskRatingQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-risk-rating/get-customer-risk-rating.query';
+import { EventStoreGetCustomerRiskRatingReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-get-customer-risk-rating.reader';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -128,6 +133,21 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
   platform.commands.register(DismissMatchCommand, new DismissMatchHandler(customerRepository, platform.clock), {
     context: 'customer-due-diligence',
   });
+
+  platform.commands.register(RateCustomerRiskCommand, new RateCustomerRiskHandler(customerRepository, platform.clock), {
+    context: 'customer-due-diligence',
+  });
+
+  const getCustomerRiskRatingReader = platform.adapter(new EventStoreGetCustomerRiskRatingReader(customerRepository), {
+    kind: 'repository',
+    context: 'customer-due-diligence',
+  });
+
+  platform.queries.register(
+    GetCustomerRiskRatingQuery,
+    new GetCustomerRiskRatingHandler(getCustomerRiskRatingReader, platform.access),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -224,6 +244,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(DismissMatchCommand, customerDueDiligencePermissions['match.dismiss'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(RateCustomerRiskCommand, customerDueDiligencePermissions['customer.rate-risk'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(GetCustomerRiskRatingQuery, customerDueDiligencePermissions['customer.read-risk'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization
