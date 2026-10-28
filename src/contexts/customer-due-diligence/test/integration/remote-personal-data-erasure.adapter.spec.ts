@@ -12,7 +12,7 @@ describe('RemotePersonalDataErasure', () => {
 
     await adapter.erase(customerId);
 
-    expect(await keys.find(key.keyId)).toBeUndefined();
+    expect(await keys.find(key.id)).toBeUndefined();
   });
 
   it('erases a customer again without failing when its key is already destroyed', async () => {

@@ -36,16 +36,15 @@ export function servicingModule(platform: Platform): ServicingWiring {
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
-  const loanRepository = platform.adapter(
-    new EventStoreLoanRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
-    { kind: 'repository', context: 'servicing', token: 'LoanRepository' },
-  );
+  platform.adapter(new EventStoreLoanRepository(platform.eventSourcing.events, platform.eventSourcing.cipher), {
+    kind: 'repository',
+    context: 'servicing',
+    token: 'LoanRepository',
+  });
 
-  platform.commands.register(
-    ErasePersonalDataPastRetentionCommand,
-    new ErasePersonalDataPastRetentionHandler(loanRepository, platform.ids, platform.clock),
-    { context: 'servicing' },
-  );
+  platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
+    context: 'servicing',
+  });
   // /ddd-ts-kit:handlers
 }
 
