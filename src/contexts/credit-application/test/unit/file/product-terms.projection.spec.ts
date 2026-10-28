@@ -8,7 +8,15 @@ describe('Product terms, kept from what credit-policy announces', () => {
 
     // TODO(domain): give the payload every field credit-policy declares, hand the projection the fake of its read model and assert the line it keeps.
     const event = productDefinedV2.create(
-      { productId: 'product-1' },
+      {
+        productId: 'product-1',
+        amountMinimumCents: 100_000,
+        amountMaximumCents: 2_500_000,
+        durationMinimumMonths: 12,
+        durationMaximumMonths: 84,
+        arrangementFeeCents: 4_500,
+        insuranceMandatory: true,
+      },
       { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
     );
 

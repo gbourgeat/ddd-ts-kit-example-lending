@@ -20,8 +20,20 @@ describe('When credit-policy publishes credit-policy.product.defined', () => {
   it('receives the event as credit-policy publishes it', async () => {
     const handler = new KeepProductTermsIntegrationHandler(new InMemoryCommandBus());
     const meta = { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' };
+
     // TODO(domain): give the payload every field credit-policy declares, register the command the handler executes and assert what credit-application did.
-    const event = productDefinedV2.create({ productId: 'product-1' }, meta);
+    const event = productDefinedV2.create(
+      {
+        productId: 'product-1',
+        amountMinimumCents: 100_000,
+        amountMaximumCents: 2_500_000,
+        durationMinimumMonths: 12,
+        durationMaximumMonths: 84,
+        arrangementFeeCents: 4_500,
+        insuranceMandatory: true,
+      },
+      meta,
+    );
 
     await expect(handler.handle(event)).resolves.toBeUndefined();
   });

@@ -163,11 +163,9 @@ function registerHandlers(
     { context: 'credit-application' },
   );
 
-  platform.commands.register(
-    ErasePersonalDataPastRetentionCommand,
-    new ErasePersonalDataPastRetentionHandler(creditApplicationRepository, platform.ids, platform.clock),
-    { context: 'credit-application' },
-  );
+  platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
+    context: 'credit-application',
+  });
   // /ddd-ts-kit:handlers
 }
 
