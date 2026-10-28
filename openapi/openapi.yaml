@@ -5056,6 +5056,88 @@ paths:
           x-error-codes:
             - UNKNOWN_LEGAL_MAXIMUM_RATE
             - VALIDATION_FAILED
+  /loans/{id}:
+    get:
+      operationId: readLoan
+      summary: Read loan
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  loanId:
+                    type: string
+                  status:
+                    type: string
+                  principalCents:
+                    type: integer
+                  annualRateBasisPoints:
+                    type: integer
+                  durationMonths:
+                    type: integer
+                  instalmentsCents:
+                    items:
+                      type: integer
+                    type: array
+                type: object
+                required:
+                  - loanId
+                  - status
+                  - principalCents
+                  - annualRateBasisPoints
+                  - durationMonths
+                  - instalmentsCents
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
   /loans/{id}/closure:
     post:
       operationId: closeLoan

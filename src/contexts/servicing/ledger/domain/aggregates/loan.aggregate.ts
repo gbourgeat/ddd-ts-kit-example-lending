@@ -1,30 +1,42 @@
 import { EventSourcedAggregate, type AggregateHistory, type Appliers } from '@ddd-ts-kit/kernel';
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
+import { LoanScheduled } from '@/contexts/servicing/ledger/domain/events/loan-scheduled.event';
 import { LoanClosed } from '@/contexts/servicing/ledger/domain/events/loan-closed.event';
 import { LoanAlreadyClosed } from '@/contexts/servicing/ledger/domain/errors/loan-already-closed.error';
 import type { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
+import type { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
 
-export type LoanEvent = LoanPaidOut | LoanClosed;
+export type LoanEvent = LoanPaidOut | LoanClosed | LoanScheduled;
 
 export interface LoanState {
   readonly registeredAt: Date;
   readonly closedAt: Date | undefined;
   readonly borrower: Borrower | undefined;
+  readonly schedule: LoanSchedule | undefined;
   // TODO(domain): declare the rest of the state of Loan with value objects (a Money, a Period), not primitives: what its commands need to decide, nothing more.
 }
 
 export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
-  private state: LoanState = { registeredAt: new Date(0), closedAt: undefined, borrower: undefined };
+  private state: LoanState = {
+    registeredAt: new Date(0),
+    closedAt: undefined,
+    borrower: undefined,
+    schedule: undefined,
+  };
 
   private constructor(id: string) {
     super(id);
   }
 
-  /** Gives birth to the loan at its payout, to its borrower. */
-  static create(id: string, paidOutAt: Date, borrower: Borrower): Loan {
+  /** Gives birth to the loan at its payout, to its borrower, with the schedule of its instalments. */
+  static create(
+    id: string,
+    payout: { readonly paidOutAt: Date; readonly borrower: Borrower; readonly schedule: LoanSchedule },
+  ): Loan {
     const created = new Loan(id);
 
-    created.record(new LoanPaidOut(id, paidOutAt, borrower));
+    created.record(new LoanPaidOut(id, payout.paidOutAt, payout.borrower));
+    created.record(new LoanScheduled(id, payout.paidOutAt, payout.schedule));
 
     return created;
   }
@@ -49,7 +61,7 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     return this.state.closedAt !== undefined && this.state.closedAt.getTime() <= instant.getTime();
   }
 
-  // TODO(domain): add one method per remaining business intention (payout schedule, instalments, payments, early repayment): it checks its invariants on `this.state`, then records what it decided, `this.record(new Loan<Fact>(this.id, now, ...))`, after `ddd-ts-kit generate domain-event servicing Loan <Fact>` added the event and its apply method. It never writes the state itself (event-sourcing/state-in-apply).
+  // TODO(domain): add one method per remaining business intention (instalments, payments, early repayment): it checks its invariants on `this.state`, then records what it decided, `this.record(new Loan<Fact>(this.id, now, ...))`, after `ddd-ts-kit generate domain-event servicing Loan <Fact>` added the event and its apply method. It never writes the state itself (event-sourcing/state-in-apply).
 
   get registeredAt(): Date {
     return this.state.registeredAt;
@@ -63,6 +75,10 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     return this.state.borrower;
   }
 
+  get schedule(): LoanSchedule | undefined {
+    return this.state.schedule;
+  }
+
   toState(): LoanState {
     return { ...this.state };
   }
@@ -70,6 +86,7 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
   protected appliers(): Appliers<LoanEvent> {
     return {
       [LoanPaidOut.eventName]: (event) => this.applyPaidOut(event),
+      [LoanScheduled.eventName]: (event) => this.applyScheduled(event),
       [LoanClosed.eventName]: (event) => this.applyClosed(event),
     };
   }
@@ -80,6 +97,10 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
 
   private applyPaidOut(event: LoanPaidOut): void {
     this.state = { ...this.state, registeredAt: event.occurredAt, borrower: event.borrower };
+  }
+
+  private applyScheduled(event: LoanScheduled): void {
+    this.state = { ...this.state, schedule: event.schedule };
   }
 
   private applyClosed(event: LoanClosed): void {

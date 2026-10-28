@@ -13,6 +13,15 @@ import { ErasePersonalDataPastRetentionJob } from '@/contexts/servicing/ledger/a
 import { RemotePersonalDataErasure } from '@/contexts/servicing/ledger/infrastructure/external/remote-personal-data-erasure.adapter';
 import { CloseLoanCommand } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.command';
 import { CloseLoanHandler } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.handler';
+import { consume, subscribeAll } from '@ddd-ts-kit/events';
+import { creditApplicationPayoutAuthorisedV1 as recordPayoutOnPayoutAuthorisedDefinition } from '@/contexts/credit-application/published-language';
+import { RecordPayoutOnPayoutAuthorisedIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/record-payout-on-payout-authorised.integration-handler';
+import { RecordPayoutCommand } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.command';
+import { RecordPayoutHandler } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.handler';
+import { ReadLoanHandler } from '@/contexts/servicing/ledger/application/queries/read-loan/read-loan.handler';
+import { ReadLoanQuery } from '@/contexts/servicing/ledger/application/queries/read-loan/read-loan.query';
+import { EventStoreReadLoanReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-read-loan.reader';
+import { RemoteBorrowerIdentity } from '@/contexts/servicing/ledger/infrastructure/external/remote-borrower-identity.adapter';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -59,12 +68,48 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(CloseLoanCommand, new CloseLoanHandler(loanRepository, platform.clock), {
     context: 'servicing',
   });
+
+  platform.commands.register(
+    RecordPayoutCommand,
+    new RecordPayoutHandler(loanRepository, { clock: platform.clock, relations: platform.relations }),
+    { context: 'servicing' },
+  );
+
+  const readLoanReader = platform.adapter(new EventStoreReadLoanReader(loanRepository), {
+    kind: 'repository',
+    context: 'servicing',
+  });
+
+  platform.queries.register(ReadLoanQuery, new ReadLoanHandler(readLoanReader), { context: 'servicing' });
   // /ddd-ts-kit:handlers
 }
 
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
+  const borrowers = platform.adapter(new RemoteBorrowerIdentity(platform.customerIdentity), {
+    kind: 'gateway',
+    context: 'servicing',
+    token: 'BorrowerIdentity',
+  });
+
+  const recordPayoutOnPayoutAuthorisedIntegrationHandler = new RecordPayoutOnPayoutAuthorisedIntegrationHandler(
+    platform.commands,
+    borrowers,
+  );
+
+  subscribeAll(platform.subscriberFor('servicing'), [
+    consume(
+      recordPayoutOnPayoutAuthorisedDefinition,
+      {
+        consumer: 'servicing.record-payout-on-payout-authorised',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      (event) => recordPayoutOnPayoutAuthorisedIntegrationHandler.handle(event),
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 
@@ -91,6 +136,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(CloseLoanCommand, servicingPermissions['loan.close'], {
       resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(RecordPayoutCommand, servicingPermissions['loan.record-payout'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(ReadLoanQuery, servicingPermissions['loan.read'], {
+      resource: (query) => ({ type: 'loan', id: query.loanId }),
     }),
     // /ddd-ts-kit:authorization
   ];

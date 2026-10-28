@@ -395,6 +395,12 @@ export interface Client {
    */
   readLegalMaximumRate(input: operations.ReadLegalMaximumRateInput, options?: CallOptions): Promise<operations.ReadLegalMaximumRateResult>;
   /**
+   * Read loan: `GET /loans/{id}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  readLoan(input: operations.ReadLoanInput, options?: CallOptions): Promise<operations.ReadLoanResult>;
+  /**
    * Close loan: `POST /loans/{id}/closure`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
@@ -595,6 +601,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
     readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
+    readLoan: (input, call) => operations.readLoan(connection, input, call),
     closeLoan: (input, call) => operations.closeLoan(connection, input, call),
     acceptOffer: (input, call) => operations.acceptOffer(connection, input, call),
     readPreContractualSheet: (input, call) => operations.readPreContractualSheet(connection, input, call),

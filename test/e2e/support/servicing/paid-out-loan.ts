@@ -1,4 +1,11 @@
 import { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
+import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
+import { Money } from '@/shared-kernel/money.vo';
+
+const ONE_THOUSAND_EUROS_IN_CENTS = 100_000;
+const ANNUAL_RATE_BASIS_POINTS = 500;
+const DURATION_MONTHS = 12;
+
 import { executionContext, FixedExecutionScope, PersonalDataCipher, type Actor } from '@ddd-ts-kit/kernel';
 import type { HttpClient } from '@ddd-ts-kit/testing/e2e';
 import { Loan } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
@@ -13,7 +20,15 @@ export async function storePaidOutLoan(application: RunningApplication, id: stri
   const stores = application.persistence.eventSourcing(seedingScope());
   const loans = new EventStoreLoanRepository(stores.events, new PersonalDataCipher(stores.subjectKeys));
 
-  await loans.save(Loan.create(id, paidOutAt, Borrower.create('Ada Lovelace', '1 rue de la Paix, 75002 Paris')));
+  const borrower = Borrower.create('Ada Lovelace', '1 rue de la Paix, 75002 Paris');
+
+  const schedule = LoanSchedule.of(
+    Money.ofCents(ONE_THOUSAND_EUROS_IN_CENTS),
+    ANNUAL_RATE_BASIS_POINTS,
+    DURATION_MONTHS,
+  );
+
+  await loans.save(Loan.create(id, { paidOutAt, borrower, schedule }));
 }
 
 /** A signed-in person who operates the context servicing, as the operators of the context are granted. */

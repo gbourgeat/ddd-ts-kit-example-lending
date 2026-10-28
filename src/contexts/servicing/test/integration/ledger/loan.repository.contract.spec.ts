@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import { InMemoryEventStore, InMemorySubjectKeyStore, PersonalDataCipher } from '@ddd-ts-kit/kernel';
 import { repositoryContract } from '@ddd-ts-kit/testing/contracts';
 import { Loan } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
+import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
+import { Money } from '@/shared-kernel/money.vo';
 import { EventStoreLoanRepository } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-loan.repository';
 import { FakeLoanRepository } from '@/contexts/servicing/test/fakes/loan.repository.fake';
 
@@ -16,7 +18,11 @@ const expectations = {
   createAggregate: () => {
     born += 1;
 
-    return Loan.create(`loan-${born}`, bornAt, Borrower.create('Ada Lovelace', '1 rue de la Paix, 75002 Paris'));
+    return Loan.create(`loan-${born}`, {
+      paidOutAt: bornAt,
+      borrower: Borrower.create('Ada Lovelace', '1 rue de la Paix, 75002 Paris'),
+      schedule: LoanSchedule.of(Money.ofCents(100_000), 500, 12),
+    });
   },
   // TODO(domain): add `mutate: (changed: Loan) => changed.<a business method that records an event>(...)`, so that the suite proves an update is stored and a stale save is refused; the case stays pending until then.
   idOf: (subject: Loan) => subject.id,

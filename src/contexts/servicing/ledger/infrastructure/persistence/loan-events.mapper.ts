@@ -9,6 +9,17 @@ import type { LoanEvent } from '@/contexts/servicing/ledger/domain/aggregates/lo
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 import { LoanClosed } from '@/contexts/servicing/ledger/domain/events/loan-closed.event';
 import { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
+import { LoanScheduled } from '@/contexts/servicing/ledger/domain/events/loan-scheduled.event';
+import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
+import { Money } from '@/shared-kernel/money.vo';
+
+/** The schedule of the loan, in whole cents: no personal value, so it is kept as it is. */
+interface LoanScheduledData {
+  readonly principalCents: number;
+  readonly annualRateBasisPoints: number;
+  readonly durationMonths: number;
+  readonly instalments: { readonly cents: number }[];
+}
 
 /** The borrower of the payout: its name and postal address are personal, sealed by the subject of the loan. */
 interface BorrowerData {
@@ -47,6 +58,26 @@ export const loanEvents: StoredEventTypes<LoanEvent> = {
     version: 1,
     encode: (): LoanClosedData => ({}),
     decode: (_data, { aggregateId, occurredAt }) => new LoanClosed(aggregateId, occurredAt),
+  }),
+  [LoanScheduled.eventName]: defineStoredEvent(LoanScheduled, {
+    version: 1,
+    encode: (event): LoanScheduledData => ({
+      principalCents: event.schedule.principal.cents,
+      annualRateBasisPoints: event.schedule.annualRateBasisPoints,
+      durationMonths: event.schedule.durationMonths,
+      instalments: event.schedule.instalments.map((instalment) => ({ cents: instalment.cents })),
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanScheduled(
+        aggregateId,
+        occurredAt,
+        LoanSchedule.recorded({
+          principal: Money.ofCents(data.number('principalCents')),
+          annualRateBasisPoints: data.number('annualRateBasisPoints'),
+          durationMonths: data.number('durationMonths'),
+          instalments: data.records('instalments').map((instalment) => Money.ofCents(instalment.number('cents'))),
+        }),
+      ),
   }),
 };
 

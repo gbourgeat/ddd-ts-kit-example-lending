@@ -2351,6 +2351,46 @@ export function readLegalMaximumRate(
   return send<ReadLegalMaximumRateResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadLoanInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ReadLoanResult =
+  | Success<200, {
+    loanId: string;
+    status: string;
+    principalCents: number;
+    annualRateBasisPoints: number;
+    durationMonths: number;
+    instalmentsCents: Array<number>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_LOAN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read loan: `GET /loans/{id}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+ */
+export function readLoan(
+  connection: Connection,
+  input: ReadLoanInput,
+  options: CallOptions = {},
+): Promise<ReadLoanResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/loans/{id}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadLoanResult>(connection, operation, { ...input, ...options });
+}
+
 export interface CloseLoanInput {
   readonly path: {
     readonly id: string;

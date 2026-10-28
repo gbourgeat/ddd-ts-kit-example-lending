@@ -2,10 +2,14 @@
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { CloseLoanController } from '@/contexts/servicing/ledger/presentation/http/loans/close-loan/close-loan.controller';
+import { ReadLoanController } from '@/contexts/servicing/ledger/presentation/http/loans/read-loan/read-loan.controller';
 import { CloseLoanParams } from '@/contexts/servicing/ledger/presentation/http/loans/close-loan/close-loan.params';
 import { CloseLoanBody } from '@/contexts/servicing/ledger/presentation/http/loans/close-loan/close-loan.body';
+import { ReadLoanParams } from '@/contexts/servicing/ledger/presentation/http/loans/read-loan/read-loan.params';
+import { ReadLoanAnswer } from '@/contexts/servicing/ledger/presentation/http/loans/read-loan/read-loan.answer';
 
 /** The Nest controllers of servicing, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const servicingControllers: readonly Type<unknown>[] = [
   withSignatures(CloseLoanController, { closeLoan: { params: CloseLoanParams, body: CloseLoanBody, answer: null } }),
+  withSignatures(ReadLoanController, { readLoan: { params: ReadLoanParams, answer: ReadLoanAnswer } }),
 ];

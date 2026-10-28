@@ -43,6 +43,12 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Paid out | The loan has been paid to the borrower and its schedule has started | Paid off, the loan repaid in full |
 | Erase personal data past retention | Destroy the key of the personal values of every loan closed ten years ago, so that the ledger can no longer be read | Delete a loan |
 | Closed loan | A loan whose schedule has ended, paid in full or repaid early: its ledger is kept for ten years, then its personal data is erased | Loan |
+| Record | Write the payout of a loan and its schedule into the ledger, the loan being then paid out |  |
+| Authorised | The payout of an application approved and signed by the borrower, as credit-application announces it |  |
+| Scheduled | The loan has its schedule: the constant monthly instalments computed from its amount, duration and rate at its payout |  |
+| Borrower identified | The customer whose name the loan records is known to customer-due-diligence |  |
+| Loan read | The view of a loan the borrower's application reaches: its status, amount, duration and instalments, never its personal data |  |
+| Loan schedule | The amount, rate, duration and instalments of a loan, computed at its payout from the signed offer |  |
 
 ## Modules
 
@@ -74,6 +80,8 @@ No personal data declared.
 <!-- ddd-ts-kit:permissions -->
 - `servicing:loan.erase-past-retention`
 - `servicing:loan.close`
+- `servicing:loan.record-payout`
+- `servicing:loan.read`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -127,29 +135,47 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `CloseLoan` | command | `loan.close` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
+| `ReadLoan` | query | `loan.read` |
+| `RecordPayout` | command | `loan.record-payout` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
+| GET | `/loans/:id` | `readLoan` | `LoansRoutes` | `Authenticated` | `ReadLoan` | `loan.read` | params: `ReadLoanParams` | 200: `ReadLoanAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | POST | `/loans/:id/closure` | `closeLoan` | `LoansRoutes` | `Authenticated` | `CloseLoan` | `loan.close` | params: `CloseLoanParams`, body: `CloseLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
+
+### Consumed events
+
+| Event | Version | From | Handler | Consumer |
+|---|---|---|---|---|
+| `credit-application.credit-application.payout-authorised` | 1 | `credit-application` | `RecordPayoutOnPayoutAuthorisedIntegrationHandler` | `servicing.record-payout-on-payout-authorised` |
 
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
+| `BorrowerIdentity` | gateway | `RemoteBorrowerIdentity` |
 | `BorrowerNotifier` | external | `SimulatedBorrowerNotifier` |
 | `LoanRepository` | repository | `EventStoreLoanRepository` |
 | `PaymentProvider` | external | `SimulatedPaymentProvider` |
 | `PersonalDataErasure` | external | `RemotePersonalDataErasure` |
+| `ReadLoanReader` | repository | `EventStoreReadLoanReader` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 
 ### Errors
 
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
+| `BorrowerNotIdentified` | `forCustomer` | `BORROWER_NOT_IDENTIFIED` | none |
 | `InvalidBorrower` | `forName` | `INVALID_BORROWER` | none |
 | `InvalidSchedule` | `forInvalidTerms` | `INVALID_SCHEDULE` | none |
 | `LoanAlreadyClosed` | `forLoan` | `LOAN_ALREADY_CLOSED` | none |
 | `UnknownLoan` | `forLoan` | `UNKNOWN_LOAN` | none |
+
+### Gateways
+
+| Gateway | Upstream | Adapters |
+|---|---|---|
+| `BorrowerIdentity` | `customer-due-diligence` | `RemoteBorrowerIdentity` |
 <!-- /ddd-ts-kit:reference -->

@@ -19,7 +19,7 @@ describe('A loan paid out to its borrower', () => {
   it('records its payout as the fact that opens its ledger, with its identifier and instant', () => {
     const loan = aLoan().identifiedBy('loan-1').bornAt(bornAt).build();
 
-    expect(loan.pullEvents()).toEqual([new LoanPaidOut('loan-1', bornAt, loan.borrower)]);
+    expect(loan.pullEvents()).toContainEqual(new LoanPaidOut('loan-1', bornAt, loan.borrower));
   });
 });
 
