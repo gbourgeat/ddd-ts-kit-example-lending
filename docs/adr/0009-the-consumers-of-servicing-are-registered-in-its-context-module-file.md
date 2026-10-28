@@ -10,19 +10,19 @@ servicing has a module file for its module `arrears` (`arrears/arrears.module.ts
 
 ## Decision
 
-Keep each registration in the module file of its module, and record the line suppression `events/consumer-idempotent` above the seven handler classes, each pointing to this record.
+Keep each registration where it is, and record the line suppression `events/consumer-idempotent` above the three handler classes, each pointing to this record.
 
 ## Consequences
 
-Seven suppressions appear in the count of `check`. The consumer names stay unique literals. A new integration handler of the context gets the same line until the kit reads every module file.
+Three suppressions appear in the count of `check`. The consumer names stay unique literals. A new integration handler of the context gets the same line until the kit reads every module file.
 
 ## Alternatives considered
 
-Registering all the consumers in `assessment.module.ts` (rejected: the file of a module would wire the events of the three others); registering them in `servicing.module.ts` (rejected: the rule does not read it either, and ADR-0003, which kept them there, no longer applies).
+Registering the consumers in `arrears.module.ts` (rejected: the file of a module would wire the events of the ledger); moving them to a module file of the ledger (rejected for this run: the ledger has no module file yet).
 
 ## Scope
 
-The seven `*.integration-handler.ts` of `src/contexts/servicing/{file,offer,decision}/application/integration/handlers/`.
+The three `*.integration-handler.ts` of `src/contexts/servicing/ledger/application/integration/handlers/`.
 
 ## Removal condition
 
