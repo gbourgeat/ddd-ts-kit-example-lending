@@ -4,6 +4,7 @@ export class RateGridPublished extends NamedDomainEvent('credit-policy.rate-grid
   constructor(
     readonly aggregateId: string,
     readonly occurredAt: Date,
+    readonly publication: { readonly productId: string; readonly effectiveFrom: Date },
   ) {
     super();
   }

@@ -4,6 +4,11 @@ export class LegalMaximumRatePublished extends NamedDomainEvent('credit-policy.l
   constructor(
     readonly aggregateId: string,
     readonly occurredAt: Date,
+    readonly publication: {
+      readonly category: string;
+      readonly rateBasisPoints: number;
+      readonly effectiveFrom: Date;
+    },
   ) {
     super();
   }

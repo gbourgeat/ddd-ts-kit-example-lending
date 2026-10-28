@@ -18,7 +18,12 @@ describe('DelegationTable', () => {
 
     const recorded = aDelegationTable().identifiedBy('delegation-table-7').bornAt(bornAt).build();
 
-    expect(recorded.pullEvents()).toEqual([new DelegationTablePublished('delegation-table-7', bornAt)]);
+    expect(recorded.pullEvents()).toEqual([
+      new DelegationTablePublished('delegation-table-7', bornAt, {
+        effectiveFrom: recorded.effectiveFrom,
+        levels: recorded.levels,
+      }),
+    ]);
   });
 
   it('is rehydrated in its stored state without recording a new fact', () => {
