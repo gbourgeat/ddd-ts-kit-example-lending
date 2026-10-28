@@ -252,19 +252,25 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
 
   protected appliers(): Appliers<LoanEvent> {
     return {
-      [LoanPaidOut.eventName]: (event) => this.applyPaidOut(event),
-      [LoanScheduled.eventName]: (event) => this.applyScheduled(event),
-      [LoanClosed.eventName]: (event) => this.applyClosed(event),
-      [LoanInstalmentDueNoted.eventName]: (event) => this.applyInstalmentDueNoted(event),
-      [LoanEarlyRepaymentRecorded.eventName]: (event) => this.applyEarlyRepaymentRecorded(event),
-      [LoanWrittenOff.eventName]: (event) => this.applyWrittenOff(event),
-      [LoanWriteOffReversed.eventName]: () => this.applyWriteOffReversed(),
-      [LoanRescheduled.eventName]: (event) => this.applyRescheduled(event),
-      [LoanWithdrawalRepaymentRecorded.eventName]: () => this.applyWithdrawalRepaymentRecorded(),
-      [LoanPaymentReceived.eventName]: (event) => this.applyPaymentReceived(event),
-      [LoanInstalmentMarkedUnpaid.eventName]: (event) => this.applyInstalmentMarkedUnpaid(event),
-      [LoanArrearsBucketEntered.eventName]: (event) => this.applyArrearsBucketEntered(event),
-      [LoanDefaulted.eventName]: (event) => this.applyDefaulted(event),
+      [LoanPaidOut.eventName]: (event) => this.restore(loanStateChanges.paidOut(this.state, event)),
+      [LoanScheduled.eventName]: (event) => this.restore(loanStateChanges.scheduled(this.state, event)),
+      [LoanClosed.eventName]: (event) => this.restore(loanStateChanges.closed(this.state, event)),
+      [LoanInstalmentDueNoted.eventName]: (event) =>
+        this.restore(loanStateChanges.instalmentDueNoted(this.state, event)),
+      [LoanEarlyRepaymentRecorded.eventName]: (event) =>
+        this.restore(loanStateChanges.earlyRepaymentRecorded(this.state, event)),
+      [LoanWrittenOff.eventName]: (event) => this.restore(loanStateChanges.writtenOff(this.state, event)),
+      [LoanWriteOffReversed.eventName]: () => this.restore(loanStateChanges.writeOffReversed(this.state)),
+      [LoanRescheduled.eventName]: (event) => this.restore(loanStateChanges.rescheduled(this.state, event)),
+      /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves. */
+      [LoanWithdrawalRepaymentRecorded.eventName]: () =>
+        this.restore(loanStateChanges.withdrawalRepaymentRecorded(this.state)),
+      [LoanPaymentReceived.eventName]: (event) => this.restore(loanStateChanges.paymentReceived(this.state, event)),
+      [LoanInstalmentMarkedUnpaid.eventName]: (event) =>
+        this.restore(loanStateChanges.instalmentMarkedUnpaid(this.state, event)),
+      [LoanArrearsBucketEntered.eventName]: (event) =>
+        this.restore(loanStateChanges.arrearsBucketEntered(this.state, event)),
+      [LoanDefaulted.eventName]: (event) => this.restore(loanStateChanges.defaulted(this.state, event)),
     };
   }
 
@@ -282,58 +288,5 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
   /** The instalments noted due before the schedule in force: its instalments are numbered after them. */
   private get notedBefore(): number {
     return this.state.rescheduling?.notedBefore ?? 0;
-  }
-
-  private applyPaidOut(event: LoanPaidOut): void {
-    this.state = loanStateChanges.paidOut(this.state, event);
-  }
-
-  private applyScheduled(event: LoanScheduled): void {
-    this.state = loanStateChanges.scheduled(this.state, event);
-  }
-
-  private applyClosed(event: LoanClosed): void {
-    this.state = loanStateChanges.closed(this.state, event);
-  }
-
-  private applyInstalmentDueNoted(event: LoanInstalmentDueNoted): void {
-    this.state = loanStateChanges.instalmentDueNoted(this.state, event);
-  }
-
-  private applyEarlyRepaymentRecorded(event: LoanEarlyRepaymentRecorded): void {
-    this.state = loanStateChanges.earlyRepaymentRecorded(this.state, event);
-  }
-
-  private applyWrittenOff(event: LoanWrittenOff): void {
-    this.state = loanStateChanges.writtenOff(this.state, event);
-  }
-
-  private applyWriteOffReversed(): void {
-    this.state = loanStateChanges.writeOffReversed(this.state);
-  }
-
-  private applyRescheduled(event: LoanRescheduled): void {
-    this.state = loanStateChanges.rescheduled(this.state, event);
-  }
-
-  /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves here. */
-  private applyWithdrawalRepaymentRecorded(): void {
-    this.state = loanStateChanges.withdrawalRepaymentRecorded(this.state);
-  }
-
-  private applyPaymentReceived(event: LoanPaymentReceived): void {
-    this.state = loanStateChanges.paymentReceived(this.state, event);
-  }
-
-  private applyInstalmentMarkedUnpaid(event: LoanInstalmentMarkedUnpaid): void {
-    this.state = loanStateChanges.instalmentMarkedUnpaid(this.state, event);
-  }
-
-  private applyArrearsBucketEntered(event: LoanArrearsBucketEntered): void {
-    this.state = loanStateChanges.arrearsBucketEntered(this.state, event);
-  }
-
-  private applyDefaulted(event: LoanDefaulted): void {
-    this.state = loanStateChanges.defaulted(this.state, event);
   }
 }
