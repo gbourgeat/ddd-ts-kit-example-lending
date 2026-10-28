@@ -1,6 +1,7 @@
 import type { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
 import type { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
 import type { Rescheduling } from '@/contexts/servicing/ledger/domain/values/rescheduling';
+import type { ArrearsBucket } from '@/contexts/servicing/arrears/domain/vocabularies/arrears-bucket.vocabulary';
 import type { Money } from '@/shared-kernel/money.vo';
 
 export interface LoanState {
@@ -23,4 +24,6 @@ export interface LoanState {
   readonly instalmentsPaid: readonly number[];
   /** The numbers of the instalments whose direct debit was rejected: unpaid, and not retried. */
   readonly instalmentsUnpaid: readonly number[];
+  /** The arrears bucket the last classification placed the loan in: none until a classification finds it past due. */
+  readonly arrearsBucket: ArrearsBucket;
 }

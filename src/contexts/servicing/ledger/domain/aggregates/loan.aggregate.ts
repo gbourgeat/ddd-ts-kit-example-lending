@@ -25,6 +25,9 @@ import { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/dom
 import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
 import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 import { initialLoanState } from '@/contexts/servicing/ledger/domain/values/initial-loan-state';
+import { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
+import { ArrearsBucketService } from '@/contexts/servicing/ledger/domain/services/arrears-bucket.service';
+import { DaysPastDueService } from '@/contexts/servicing/ledger/domain/services/days-past-due.service';
 
 export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
   private state: LoanState = initialLoanState();
@@ -182,6 +185,19 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
     }
   }
 
+  /** Places the loan in the arrears bucket its days past due put it in at `now`: recorded only when the bucket changed. */
+  classifyArrears(now: Date): void {
+    if (this.state.closedAt !== undefined) {
+      return;
+    }
+
+    const bucket = new ArrearsBucketService().of(new DaysPastDueService().of(this.state, now));
+
+    if (bucket !== this.state.arrearsBucket) {
+      this.record(new LoanArrearsBucketEntered(this.id, now, bucket));
+    }
+  }
+
   /** The capital still owed: the principal, less what the noted instalments repaid, the early repayments and the write-off. */
   get outstandingCapital(): Money {
     return new OutstandingCapitalService().ofLoan(this.state);
@@ -237,6 +253,7 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
       [LoanWithdrawalRepaymentRecorded.eventName]: (event) => this.applyWithdrawalRepaymentRecorded(event),
       [LoanPaymentReceived.eventName]: (event) => this.applyPaymentReceived(event),
       [LoanInstalmentMarkedUnpaid.eventName]: (event) => this.applyInstalmentMarkedUnpaid(event),
+      [LoanArrearsBucketEntered.eventName]: (event) => this.applyArrearsBucketEntered(event),
     };
   }
 
@@ -303,6 +320,10 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
 
   private applyInstalmentMarkedUnpaid(event: LoanInstalmentMarkedUnpaid): void {
     this.state = { ...this.state, instalmentsUnpaid: [...this.state.instalmentsUnpaid, event.number] };
+  }
+
+  private applyArrearsBucketEntered(event: LoanArrearsBucketEntered): void {
+    this.state = { ...this.state, arrearsBucket: event.bucket };
   }
 
   /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves here. */

@@ -1,3 +1,4 @@
+import { ArrearsBucket } from '@/contexts/servicing/arrears/domain/vocabularies/arrears-bucket.vocabulary';
 import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
 import { anActor } from '@ddd-ts-kit/auth/testing';
@@ -27,6 +28,7 @@ const loan: ReadLoanResult = {
   instalmentsDue: [1, 2],
   instalmentsPaid: [1],
   instalmentsUnpaid: [2],
+  arrearsBucket: ArrearsBucket.None,
 };
 
 describe('Read loan', () => {

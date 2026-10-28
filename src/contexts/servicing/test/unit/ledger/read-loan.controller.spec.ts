@@ -1,3 +1,4 @@
+import { ArrearsBucket } from '@/contexts/servicing/arrears/domain/vocabularies/arrears-bucket.vocabulary';
 import { describe, expect, it } from '@jest/globals';
 import { executeRoute } from '@ddd-ts-kit/http';
 import { nestControllerRoute } from '@ddd-ts-kit/http/nest';
@@ -22,6 +23,7 @@ describe('GET /loans/:id', () => {
         instalmentsDue: [1],
         instalmentsPaid: [1],
         instalmentsUnpaid: [],
+        arrearsBucket: ArrearsBucket.None,
       }),
     });
 

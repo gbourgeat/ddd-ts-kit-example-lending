@@ -72,6 +72,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Get | Read, the query of a view |  |
 | Classify | Place a loan in the arrears bucket its days past due put it in |  |
 | Declare | State to the register or to collections that a loan is in default |  |
+| Entered | the loan was placed in an arrears bucket by a classification of its days past due |  |
 
 ## Modules
 

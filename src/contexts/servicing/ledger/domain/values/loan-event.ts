@@ -9,6 +9,7 @@ import type { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/
 import type { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
 import type { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
 import type { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
+import type { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
 
 export type LoanEvent =
   | LoanPaidOut
@@ -21,4 +22,5 @@ export type LoanEvent =
   | LoanRescheduled
   | LoanWithdrawalRepaymentRecorded
   | LoanPaymentReceived
-  | LoanInstalmentMarkedUnpaid;
+  | LoanInstalmentMarkedUnpaid
+  | LoanArrearsBucketEntered;

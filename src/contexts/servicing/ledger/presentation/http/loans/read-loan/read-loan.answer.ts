@@ -1,3 +1,4 @@
+import { ArrearsBucket } from '@/contexts/servicing/arrears/domain/vocabularies/arrears-bucket.vocabulary';
 import { IsInt, IsString } from 'class-validator';
 
 /** The loan as its borrower reads it: no personal data is part of it. */
@@ -36,4 +37,8 @@ export class ReadLoanAnswer {
   /** The numbers, counted from one, of the instalments whose direct debit was rejected: unpaid. */
   @IsInt({ each: true })
   instalmentsUnpaid: number[] = [];
+
+  /** The arrears bucket of the last classification: none, or one of the buckets of the arrears. */
+  @IsString()
+  arrearsBucket: ArrearsBucket = ArrearsBucket.None;
 }

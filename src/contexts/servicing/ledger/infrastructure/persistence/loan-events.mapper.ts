@@ -23,6 +23,8 @@ import { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/
 import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
 import { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
 import { optionalPart } from '@/contexts/servicing/ledger/infrastructure/persistence/optional-part.mapper';
+import { arrearsEvents } from '@/contexts/servicing/ledger/infrastructure/persistence/arrears-events.mapper';
+import { arrearsBucketOf } from '@/contexts/servicing/ledger/infrastructure/persistence/arrears-bucket-of.mapper';
 
 /** The capital repaid on the withdrawal and the interest accrued to it, in whole cents. */
 interface LoanWithdrawalRepaymentRecordedData {
@@ -89,6 +91,7 @@ interface LoanInstalmentMarkedUnpaidData {
 
 /** How the events of Loan are kept in its stream: one entry per event, read back by `decode`. */
 export const loanEvents: StoredEventTypes<LoanEvent> = {
+  ...arrearsEvents,
   [LoanPaidOut.eventName]: defineStoredEvent(LoanPaidOut, {
     version: 2,
     upcasters: {
@@ -263,6 +266,7 @@ interface LoanSnapshotData {
   readonly writtenOff: { readonly amountCents: number }[];
   readonly instalmentsPaid: { readonly number: number }[];
   readonly instalmentsUnpaid: { readonly number: number }[];
+  readonly arrearsBucket: string;
 }
 
 /**
@@ -271,7 +275,7 @@ interface LoanSnapshotData {
  * ignored (the stream is then replayed from its start).
  */
 export const loanSnapshots = {
-  version: 1,
+  version: 2,
   encode: (loan: Loan): LoanSnapshotData => snapshotDataOf(loan.id, loan.toState()),
   decode: (data: StoredEventData): LoanState => stateOf(data),
 };
@@ -293,6 +297,7 @@ function snapshotDataOf(subject: string, state: LoanState): LoanSnapshotData {
     writtenOff: optionalPart.listOf(state.writtenOff, (amount) => ({ amountCents: amount.cents })),
     instalmentsPaid: state.instalmentsPaid.map((number) => ({ number })),
     instalmentsUnpaid: state.instalmentsUnpaid.map((number) => ({ number })),
+    arrearsBucket: state.arrearsBucket,
   };
 }
 
@@ -315,5 +320,6 @@ function stateOf(data: StoredEventData): LoanState {
     ),
     instalmentsPaid: data.records('instalmentsPaid').map((record) => record.number('number')),
     instalmentsUnpaid: data.records('instalmentsUnpaid').map((record) => record.number('number')),
+    arrearsBucket: arrearsBucketOf(data.text('arrearsBucket')),
   };
 }

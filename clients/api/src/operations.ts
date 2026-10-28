@@ -2368,6 +2368,7 @@ export type ReadLoanResult =
     instalmentsDue: Array<number>;
     instalmentsPaid: Array<number>;
     instalmentsUnpaid: Array<number>;
+    arrearsBucket: string;
   }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
