@@ -1,12 +1,3 @@
-import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
+import { PersonIdentityBody } from '@/contexts/customer-due-diligence/presentation/http/shared/person-identity.body';
 
-export class RefreshDueDiligenceBody {
-  /** The name of the person, as the screening lists spell it. */
-  @IsString()
-  @IsNotEmpty()
-  name = '';
-
-  /** The birth date of the person, as an ISO date. */
-  @IsDateString()
-  birthDate = '';
-}
+export class RefreshDueDiligenceBody extends PersonIdentityBody {}

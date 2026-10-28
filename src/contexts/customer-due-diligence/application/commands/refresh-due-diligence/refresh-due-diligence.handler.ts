@@ -20,7 +20,7 @@ export class RefreshDueDiligenceHandler implements CommandHandler<RefreshDueDili
 
     const { possibleMatch } = await this.screeningProvider.screen(command.name, command.birthDate);
 
-    customer.refreshDueDiligence(possibleMatch, this.clock.now());
+    customer.refreshDueDiligence(possibleMatch ? 'possible-match' : 'clear', this.clock.now());
 
     await this.customerRepository.save(customer);
 

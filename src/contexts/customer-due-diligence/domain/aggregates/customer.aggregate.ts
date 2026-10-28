@@ -179,7 +179,8 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   /** Refreshes the due diligence: the screening outcome is recorded, a possible match goes to review, the risk rating is restated only when the customer has one. */
-  refreshDueDiligence(possibleMatch: boolean, now: Date): void {
+  refreshDueDiligence(screening: 'clear' | 'possible-match', now: Date): void {
+    const possibleMatch = screening === 'possible-match';
     const riskRating = this.state.riskRating;
 
     this.record(
