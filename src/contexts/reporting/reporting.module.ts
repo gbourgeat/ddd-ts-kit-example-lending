@@ -4,6 +4,10 @@ import { reportingControllers } from '@/contexts/reporting/reporting.controllers
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { consume, subscribeAll } from '@ddd-ts-kit/events';
+import { creditApplicationSubmittedV2 as applicationCountDefinition } from '@/contexts/credit-application/published-language';
+import { ApplicationCountProjection } from '@/contexts/reporting/application/projections/application-count.projection';
+import { PrismaApplicationCounts } from '@/contexts/reporting/infrastructure/persistence/prisma-application-counts.repository';
 // /ddd-ts-kit:imports
 
 export interface ReportingWiring {
@@ -36,6 +40,23 @@ function registerHandlers(platform: Platform): void {
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform): void {
   // ddd-ts-kit:reactions
+  const applicationCounts = new PrismaApplicationCounts(platform.persistence.database, platform.scope);
+  const applicationCountProjection = new ApplicationCountProjection(applicationCounts);
+
+  subscribeAll(platform.subscriberFor('reporting'), [
+    consume(
+      applicationCountDefinition,
+      {
+        consumer: 'reporting.application-count',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      async (event) => {
+        await applicationCountProjection.submitted(event);
+      },
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 
