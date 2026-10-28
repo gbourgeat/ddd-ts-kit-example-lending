@@ -55,10 +55,12 @@ channels:
         $ref: '#/components/messages/credit-policy.legal-maximum-rate.published.v2'
   credit-policy.product.defined:
     address: credit-policy.product.defined
-    description: A product of the bank catalogue has been defined; the other contexts read its terms from credit-policy by its identifier.
+    description: A product was defined, with the amounts, durations, arrangement fee and insurance it is sold with.
     messages:
       v1:
         $ref: '#/components/messages/credit-policy.product.defined.v1'
+      v2:
+        $ref: '#/components/messages/credit-policy.product.defined.v2'
   credit-policy.rate-grid.published:
     address: credit-policy.rate-grid.published
     description: A rate grid of a product took effect, from its date of effect.
@@ -186,6 +188,7 @@ operations:
       $ref: '#/channels/credit-policy.product.defined'
     messages:
       - $ref: '#/channels/credit-policy.product.defined/messages/v1'
+      - $ref: '#/channels/credit-policy.product.defined/messages/v2'
   send.credit-policy.rate-grid.published:
     action: send
     channel:
@@ -794,6 +797,69 @@ components:
             type: object
             required:
               - productId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-policy.product.defined.v2:
+      name: credit-policy.product.defined
+      title: credit-policy.product.defined v2
+      summary: A product was defined, with the amounts, durations, arrangement fee and insurance it is sold with.
+      contentType: application/json
+      tags:
+        - name: credit-policy
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-policy.product.defined
+          version:
+            type: integer
+            const: 2
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              productId:
+                type: string
+              amountMinimumCents:
+                minimum: 0
+                type: integer
+              amountMaximumCents:
+                minimum: 0
+                type: integer
+              durationMinimumMonths:
+                minimum: 0
+                type: integer
+              durationMaximumMonths:
+                minimum: 0
+                type: integer
+              arrangementFeeCents:
+                minimum: 0
+                type: integer
+              insuranceMandatory:
+                type: boolean
+            type: object
+            required:
+              - productId
+              - amountMinimumCents
+              - amountMaximumCents
+              - durationMinimumMonths
+              - durationMaximumMonths
+              - arrangementFeeCents
+              - insuranceMandatory
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

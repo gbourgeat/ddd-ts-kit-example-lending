@@ -199,6 +199,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `GetCustomerDueDiligenceReader` | repository | `EventStoreGetCustomerDueDiligenceReader` |
 | `GetCustomerFileReader` | repository | `PrismaGetCustomerFileReader` |
 | `GetCustomerRiskRatingReader` | repository | `EventStoreGetCustomerRiskRatingReader` |
+| `PersonalDataErasure` | external | `RemotePersonalDataErasure` |
 | `ScreeningProvider` | external | `SimulatedScreeningProvider` |
 
 ### Errors
