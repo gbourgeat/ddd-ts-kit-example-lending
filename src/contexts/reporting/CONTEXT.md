@@ -96,4 +96,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `ApplicationCounts` | not bound |  |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `ApplicationCount` | `forSubmissionWithoutTenant` | `APPLICATION_COUNT` | none |
 <!-- /ddd-ts-kit:reference -->
