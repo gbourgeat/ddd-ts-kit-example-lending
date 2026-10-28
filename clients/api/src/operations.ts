@@ -683,6 +683,40 @@ export function nameGuarantor(
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
 }
 
+export interface IssueOfferInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type IssueOfferResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'OFFER_ABOVE_LEGAL_MAXIMUM' | 'UNKNOWN_LEGAL_MAXIMUM_RATE' | 'UNKNOWN_OFFER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Issue offer: `POST /applications/{id}/offer`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+ */
+export function issueOffer(
+  connection: Connection,
+  input: IssueOfferInput,
+  options: CallOptions = {},
+): Promise<IssueOfferResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/offer',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<IssueOfferResult>(connection, operation, { ...input, ...options });
+}
+
 export interface DraftOfferInput {
   readonly path: {
     readonly id: string;

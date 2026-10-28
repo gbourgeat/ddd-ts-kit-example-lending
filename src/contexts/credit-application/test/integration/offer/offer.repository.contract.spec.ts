@@ -17,7 +17,7 @@ const runner = { describe, it, expect, beforeEach, afterEach };
 
 const expectations = {
   createAggregate: () => anOffer().build(),
-  // TODO(domain): add `mutate: (changed: Offer) => changed.<a business method that records a change of state>(...)`, so that the suite proves an update is stored and a stale save is refused; the case stays pending until then.
+  mutate: (changed: Offer) => changed.issue(new Date('2026-04-01T00:00:00.000Z'), 1_250),
   idOf: (subject: Offer) => subject.id,
   stateOf: (subject: Offer) => subject.toState(),
 };
@@ -50,6 +50,36 @@ repositoryContract<Offer>(runner, {
     return new PrismaOfferRepository(database.persistence.database, scope, clock);
   },
 });
+
+describe('PrismaOfferRepository, the issue and the drafts of an application', () => {
+  it('keeps the day an offer was issued when it is loaded again', async () => {
+    await database.reset();
+
+    const repository = new PrismaOfferRepository(database.persistence.database, scopeOf('acme'), clock);
+    const offer = anOffer().identifiedBy('offer-1').build();
+    const issuedOn = new Date('2026-04-01T00:00:00.000Z');
+
+    offer.issue(issuedOn, 1_250);
+    await repository.save(offer);
+
+    expect((await repository.findById('offer-1'))?.issuedAt).toEqual(issuedOn);
+  });
+
+  it('finds the most recently drafted offer of an application', async () => {
+    await database.reset();
+
+    const repository = new PrismaOfferRepository(database.persistence.database, scopeOf('acme'), clock);
+
+    await repository.save(anOffer().identifiedBy('offer-1').bornAt(new Date('2026-01-01T00:00:00.000Z')).build());
+    await repository.save(anOffer().identifiedBy('offer-2').bornAt(new Date('2026-02-01T00:00:00.000Z')).build());
+
+    expect((await repository.findByApplicationId('application-1'))?.id).toBe('offer-2');
+  });
+});
+
+function scopeOf(tenantId: string): FixedExecutionScope {
+  return new FixedExecutionScope(workOf(tenantId));
+}
 
 describe('PrismaOfferRepository, tenant by tenant', () => {
   it('hides from a tenant what another tenant saved', async () => {

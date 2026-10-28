@@ -30,7 +30,11 @@ import { ReadPreContractualSheetHandler } from '@/contexts/credit-application/of
 import { ReadPreContractualSheetQuery } from '@/contexts/credit-application/offer/application/queries/read-pre-contractual-sheet/read-pre-contractual-sheet.query';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import { PrismaProductTerms } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-product-terms.repository';
+import type { OfferPricing } from '@/contexts/credit-application/offer/application/ports/offer-pricing.port';
+import type { OfferRepository } from '@/contexts/credit-application/offer/domain/repositories/offer.repository';
 import { PrismaOfferPricing } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-offer-pricing.repository';
+import { IssueOfferCommand } from '@/contexts/credit-application/offer/application/commands/issue-offer/issue-offer.command';
+import { IssueOfferHandler } from '@/contexts/credit-application/offer/application/commands/issue-offer/issue-offer.handler';
 // /ddd-ts-kit:imports
 
 /** What the module offer of the model registers; credit-application.module.ts composes it with the rest of the context. */
@@ -58,21 +62,7 @@ export const offerModule = {
       token: 'OfferPricing',
     });
 
-    platform.commands.register(
-      DraftOfferCommand,
-      new DraftOfferHandler(offerRepository, {
-        applications: given.repository,
-        pricing,
-        productTerms: new PrismaProductTerms(platform.persistence.database, platform.scope),
-        ids: platform.ids,
-        clock: platform.clock,
-      }),
-      { context: 'credit-application' },
-    );
-
-    platform.queries.register(ReadPreContractualSheetQuery, new ReadPreContractualSheetHandler(offerRepository), {
-      context: 'credit-application',
-    });
+    registerOfferCommands(platform, { offerRepository, pricing, applications: given.repository });
     // /ddd-ts-kit:handlers
   },
 
@@ -100,6 +90,9 @@ export const offerModule = {
       requires(ReadPreContractualSheetQuery, creditApplicationPermissions['offer.read-sheet'], {
         resource: () => ({ type: 'context', id: 'credit-application' }),
       }),
+      requires(IssueOfferCommand, creditApplicationPermissions['offer.issue'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },
@@ -112,6 +105,42 @@ export const offerModule = {
     ];
   },
 };
+
+/** The commands and the query of the offer: drafting, reading the pre-contractual sheet, and issuing the offer. */
+function registerOfferCommands(
+  platform: Platform,
+  given: {
+    readonly offerRepository: OfferRepository;
+    readonly pricing: OfferPricing;
+    readonly applications: CreditApplicationRepository;
+  },
+): void {
+  const { offerRepository, pricing } = given;
+
+  platform.commands.register(
+    DraftOfferCommand,
+    new DraftOfferHandler(offerRepository, {
+      applications: given.applications,
+      pricing,
+      productTerms: new PrismaProductTerms(platform.persistence.database, platform.scope),
+      ids: platform.ids,
+      clock: platform.clock,
+    }),
+    { context: 'credit-application' },
+  );
+
+  platform.queries.register(ReadPreContractualSheetQuery, new ReadPreContractualSheetHandler(offerRepository), {
+    context: 'credit-application',
+  });
+
+  platform.commands.register(
+    IssueOfferCommand,
+    new IssueOfferHandler(offerRepository, { pricing, clock: platform.clock }),
+    {
+      context: 'credit-application',
+    },
+  );
+}
 
 /** The command that keeps the rate grids and the query that reads them, over the read model the module binds. */
 function registerRateGridHandlers(platform: Platform): void {

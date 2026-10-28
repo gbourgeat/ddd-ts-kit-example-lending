@@ -8,6 +8,7 @@ export const OfferMapper = {
   toDomain(row: OfferRow): Offer {
     const loaded = Offer.rehydrate(row.id, {
       registeredAt: row.registeredAt,
+      issuedAt: row.issuedAt ?? undefined,
       terms: {
         applicationId: row.applicationId,
         amountCents: row.amountCents,
@@ -26,8 +27,8 @@ export const OfferMapper = {
   },
 
   toRow(saved: Offer): OfferColumns {
-    const { registeredAt, terms } = saved.toState();
+    const { registeredAt, issuedAt, terms } = saved.toState();
 
-    return { id: saved.id, registeredAt, ...terms };
+    return { id: saved.id, registeredAt, issuedAt: issuedAt ?? null, ...terms };
   },
 };
