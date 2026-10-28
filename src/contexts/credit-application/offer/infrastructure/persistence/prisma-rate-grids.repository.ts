@@ -18,6 +18,7 @@ export class PrismaRateGrids extends PrismaReadModelStore<RateGridRow, Prisma.Tr
         rateGridId: 'rate_grid_id',
         productId: 'product_id',
         effectiveFrom: 'effective_from',
+        rates: 'rates',
       },
       tenant: { scope },
     });

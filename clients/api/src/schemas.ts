@@ -71,6 +71,16 @@ export type Problem = {
   requestId: string;
 };
 
+export type RateBandAnswer = {
+  upToMonths: number;
+  rateBasisPoints: number;
+};
+
+export type RateBandBody = {
+  upToMonths: number;
+  rateBasisPoints: number;
+};
+
 export type RequestedAmountBody = {
   cents: number;
   currency: 'EUR';

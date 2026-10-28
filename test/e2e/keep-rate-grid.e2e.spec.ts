@@ -9,7 +9,14 @@ const rateGridPublished = 'credit-policy.rate-grid.published';
 /** The system actor of credit-application that keeps the rate grids: the reset of the database empties its relationships. */
 const keepRateGridSystemActor = 'system:system:credit-application.keep-rate-grid';
 
-const rateGrid = { productId: 'personal-loan', effectiveFrom: '2026-03-01' };
+const rateGrid = {
+  productId: 'personal-loan',
+  effectiveFrom: '2026-03-01',
+  rates: [
+    { upToMonths: 36, rateBasisPoints: 590 },
+    { upToMonths: 84, rateBasisPoints: 640 },
+  ],
+};
 
 describe('Keep rate grid, end to end', () => {
   let application: RunningApplication;
@@ -58,6 +65,7 @@ describe('Keep rate grid, end to end', () => {
       rateGridId,
       productId: 'personal-loan',
       effectiveFrom: '2026-03-01T00:00:00.000Z',
+      rates: rateGrid.rates,
     });
   });
 

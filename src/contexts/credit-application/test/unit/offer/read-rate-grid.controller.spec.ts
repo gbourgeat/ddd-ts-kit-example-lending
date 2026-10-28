@@ -16,6 +16,7 @@ describe('GET /rate-grids/:rateGridId', () => {
         rateGridId: 'rate-grid-id-1',
         productId: 'personal-loan',
         effectiveFrom: '2026-01-01T00:00:00.000Z',
+        rates: [{ upToMonths: 36, rateBasisPoints: 590 }],
       }),
     });
 
@@ -37,6 +38,7 @@ describe('GET /rate-grids/:rateGridId', () => {
       rateGridId: 'rate-grid-id-1',
       productId: 'personal-loan',
       effectiveFrom: '2026-01-01T00:00:00.000Z',
+      rates: [{ upToMonths: 36, rateBasisPoints: 590 }],
     });
 
     expect(route.path).toBe('/rate-grids/:rateGridId');

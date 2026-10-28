@@ -5,7 +5,11 @@ import { operatorOf } from '$test/e2e/support/credit-policy/operator-of';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { storyOf } from '$test/e2e/support/story-of';
 
-const rateGrid = { productId: 'personal-loan', effectiveFrom: '2026-03-01' };
+const rateGrid = {
+  productId: 'personal-loan',
+  effectiveFrom: '2026-03-01',
+  rates: [{ upToMonths: 60, rateBasisPoints: 610 }],
+};
 
 const EXPECTED_SPAN_TREE: Parameters<typeof expectSpanTree>[1] = [
   {
@@ -98,7 +102,12 @@ describe('Publish rate grid, end to end', () => {
     expect(recorder.received('credit-policy.rate-grid.published')).toEqual([
       expect.objectContaining({
         version: 2,
-        payload: { rateGridId: expect.any(String), productId: 'personal-loan', effectiveFrom: '2026-03-01' },
+        payload: {
+          rateGridId: expect.any(String),
+          productId: 'personal-loan',
+          effectiveFrom: '2026-03-01',
+          rates: rateGrid.rates,
+        },
       }),
     ]);
   });

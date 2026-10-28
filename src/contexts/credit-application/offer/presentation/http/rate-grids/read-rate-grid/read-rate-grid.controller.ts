@@ -24,6 +24,7 @@ export class ReadRateGridController {
       rateGridId: rateGrid.rateGridId,
       productId: rateGrid.productId,
       effectiveFrom: rateGrid.effectiveFrom,
+      rates: rateGrid.rates.map((band) => ({ ...band })),
     };
   }
 }

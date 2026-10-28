@@ -80,6 +80,7 @@ model CreditApplicationRateGrid {
   rateGridId       String   @id @map("rate_grid_id")
   productId        String   @map("product_id")
   effectiveFrom    DateTime @map("effective_from") @db.Timestamptz(3)
+  rates            Json     @default("[]")
   lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
   lastEventId      String   @map("last_event_id")
   lastEventVersion Int?     @map("last_event_version")

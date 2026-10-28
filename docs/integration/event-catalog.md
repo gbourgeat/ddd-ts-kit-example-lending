@@ -201,6 +201,9 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `rateGridId` | string | yes |  |
 | `productId` | string | yes |  |
 | `effectiveFrom` | string (date) \| string (date-time) | yes |  |
+| `rates[]` | array of object | yes |  |
+| `rates[].upToMonths` | integer | yes |  |
+| `rates[].rateBasisPoints` | integer | yes |  |
 
 ### credit-policy.residual-income-minimum.published
 

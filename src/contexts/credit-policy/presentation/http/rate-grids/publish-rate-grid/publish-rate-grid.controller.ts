@@ -17,7 +17,7 @@ export class PublishRateGridController {
     errors: [],
   })
   async publishRateGrid(@Body() body: PublishRateGridBody, @CurrentActor() actor: Actor): Promise<Accepted> {
-    const command = new PublishRateGridCommand(actor, body.productId, new Date(body.effectiveFrom));
+    const command = new PublishRateGridCommand(actor, body.productId, new Date(body.effectiveFrom), body.rates);
 
     const id = await this.commands.execute(command);
 

@@ -2475,6 +2475,7 @@ export interface PublishRateGridInput {
   readonly body: {
     productId: string;
     effectiveFrom: string;
+    rates?: Array<Schemas.RateBandBody>;
   };
 }
 
@@ -2517,6 +2518,7 @@ export type ReadRateGridResult =
     rateGridId: string;
     productId: string;
     effectiveFrom: string;
+    rates: Array<Schemas.RateBandAnswer>;
   }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>

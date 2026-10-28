@@ -5456,6 +5456,10 @@ paths:
                 effectiveFrom:
                   pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
                   type: string
+                rates:
+                  items:
+                    $ref: '#/components/schemas/RateBandBody'
+                  type: array
               type: object
               required:
                 - productId
@@ -5550,11 +5554,16 @@ paths:
                         type: string
                       - format: date-time
                         type: string
+                  rates:
+                    items:
+                      $ref: '#/components/schemas/RateBandAnswer'
+                    type: array
                 type: object
                 required:
                   - rateGridId
                   - productId
                   - effectiveFrom
+                  - rates
         '401':
           description: 'Unauthorized. Error codes: UNAUTHORIZED.'
           content:
@@ -6098,6 +6107,28 @@ components:
           additionalProperties: true
         requestId:
           type: string
+    RateBandAnswer:
+      properties:
+        upToMonths:
+          type: integer
+        rateBasisPoints:
+          type: integer
+      type: object
+      required:
+        - upToMonths
+        - rateBasisPoints
+    RateBandBody:
+      properties:
+        upToMonths:
+          minimum: 1
+          type: integer
+        rateBasisPoints:
+          minimum: 0
+          type: integer
+      type: object
+      required:
+        - upToMonths
+        - rateBasisPoints
     RequestedAmountBody:
       properties:
         cents:

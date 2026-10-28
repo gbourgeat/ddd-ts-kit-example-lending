@@ -6,6 +6,7 @@ describe('RateGridPublished', () => {
     const event = new RateGridPublished('rate-grid-1', new Date('2026-01-01T00:00:00.000Z'), {
       productId: 'personal-loan',
       effectiveFrom: new Date('2026-03-01T00:00:00.000Z'),
+      rates: [],
     });
 
     expect(event.name).toBe('credit-policy.rate-grid.published');
@@ -16,6 +17,7 @@ describe('RateGridPublished', () => {
     const event = new RateGridPublished('rate-grid-1', new Date('2026-01-01T00:00:00.000Z'), {
       productId: 'personal-loan',
       effectiveFrom: new Date('2026-03-01T00:00:00.000Z'),
+      rates: [],
     });
 
     expect(event.publication.productId).toBe('personal-loan');

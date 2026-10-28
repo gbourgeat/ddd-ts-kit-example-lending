@@ -14,6 +14,7 @@ export class RateGridPublishedPublisher {
         rateGridId: event.aggregateId,
         productId: event.publication.productId,
         effectiveFrom: event.publication.effectiveFrom.toISOString().slice(0, 'YYYY-MM-DD'.length),
+        rates: event.publication.rates.map((band) => ({ ...band })),
       },
       { id: this.ids.next(), occurredAt: event.occurredAt },
     );

@@ -108,6 +108,7 @@ Notes:
 | US3.14 | credit-policy | contract | Rate grid published | `integration-event credit-policy RateGrid Published --version 1` | US3.07 | conductor | done |
 | US3.15 | credit-policy | contract | Delegation table published | `integration-event credit-policy DelegationTable Published --version 1` | US3.09 | conductor | done |
 | US3.17 | credit-policy | slice | Rate grid, legal maximum rate and delegation table published as version 2, with the product, the category, the levels and the date of effect | edit the domain events and the publishers of `rate-grid`, `legal-maximum-rate` and `delegation-table` to their version 2 contracts (no generator) | US3.13, US3.14, US3.15 | credit-policy | done |
+| US3.18 | credit-policy | slice | Rate grid carries its bands (the rate by duration), published in version 2 and kept by credit-application | `PublishRateGridCommand` takes `rates`; payload v2 gains `rates` | US3.17 | credit-policy | done |
 | US3.16 | credit-policy | contract | Residual income minimum published | `integration-event credit-policy ResidualIncomeMinimum Published --version 1` | US3.10 | conductor | done |
 
 Serves: "Applications" (the catalogue, row 16: US3.06, US3.11, US3.12); "Decision" (the delegation table,

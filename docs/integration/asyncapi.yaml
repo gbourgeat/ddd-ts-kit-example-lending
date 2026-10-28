@@ -1009,11 +1009,16 @@ components:
                     type: string
                   - format: date-time
                     type: string
+              rates:
+                items:
+                  $ref: '#/components/schemas/credit-policy.rate-grid.published.v2.RateGridPublishedV2BandPayload'
+                type: array
             type: object
             required:
               - rateGridId
               - productId
               - effectiveFrom
+              - rates
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -1554,3 +1559,13 @@ components:
       required:
         - level
         - amountCents
+    credit-policy.rate-grid.published.v2.RateGridPublishedV2BandPayload:
+      properties:
+        upToMonths:
+          type: integer
+        rateBasisPoints:
+          type: integer
+      type: object
+      required:
+        - upToMonths
+        - rateBasisPoints

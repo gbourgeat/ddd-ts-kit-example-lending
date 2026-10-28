@@ -32,6 +32,7 @@ describe('Read rate grid', () => {
       rateGridId: 'rate-grid-1',
       productId: 'personal-loan',
       effectiveFrom: '2026-01-01T00:00:00.000Z',
+      rates: [],
     });
   });
 
@@ -71,7 +72,7 @@ function arrange(grids: FakeRateGrids) {
 
 async function keep(grids: FakeRateGrids, rateGridId: string): Promise<void> {
   const event = rateGridPublishedV2.create(
-    { rateGridId, productId: 'personal-loan', effectiveFrom: '2026-01-01T00:00:00.000Z' },
+    { rateGridId, productId: 'personal-loan', effectiveFrom: '2026-01-01T00:00:00.000Z', rates: [] },
     { id: `event-${rateGridId}`, occurredAt: '2026-01-01T00:00:00.000Z' },
   );
 

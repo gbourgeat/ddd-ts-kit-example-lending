@@ -26,6 +26,7 @@ model CreditPolicyRateGrid {
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
   productId    String @map("product_id")
   effectiveFrom DateTime @map("effective_from")
+  rates        Json     @default("[]") @map("rates")
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)

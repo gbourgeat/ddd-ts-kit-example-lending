@@ -2,7 +2,12 @@ import type { AuditStamp, TenantScoped } from '@ddd-ts-kit/kernel';
 import { RateGrid } from '@/contexts/credit-policy/domain/aggregates/rate-grid.aggregate';
 import type { CreditPolicyRateGrid as RateGridRow } from '$generated/prisma/client';
 
-export type RateGridColumns = Omit<RateGridRow, 'version' | keyof AuditStamp | keyof TenantScoped>;
+/** The rates column holds the bands of the grid as a JSON array, one object per band. */
+export type RatesColumn = { upToMonths: number; rateBasisPoints: number }[];
+
+export type RateGridColumns = Omit<RateGridRow, 'rates' | 'version' | keyof AuditStamp | keyof TenantScoped> & {
+  readonly rates: RatesColumn;
+};
 
 export const RateGridMapper = {
   toDomain(row: RateGridRow): RateGrid {
@@ -10,6 +15,7 @@ export const RateGridMapper = {
       registeredAt: row.registeredAt,
       productId: row.productId,
       effectiveFrom: row.effectiveFrom,
+      rates: row.rates as RatesColumn,
     });
 
     loaded.version = row.version;
@@ -18,6 +24,8 @@ export const RateGridMapper = {
   },
 
   toRow(saved: RateGrid): RateGridColumns {
-    return { id: saved.id, ...saved.toState() };
+    const state = saved.toState();
+
+    return { id: saved.id, ...state, rates: state.rates.map((band) => ({ ...band })) };
   },
 };

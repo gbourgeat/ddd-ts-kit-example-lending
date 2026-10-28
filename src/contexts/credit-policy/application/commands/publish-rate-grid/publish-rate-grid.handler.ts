@@ -11,7 +11,11 @@ export class PublishRateGridHandler implements CommandHandler<PublishRateGridCom
   ) {}
 
   async execute(command: PublishRateGridCommand): Promise<string> {
-    const rateGrid = RateGrid.create(this.ids.next(), command.productId, command.effectiveFrom, this.clock.now());
+    const rateGrid = RateGrid.create(
+      this.ids.next(),
+      { productId: command.productId, effectiveFrom: command.effectiveFrom, rates: command.rates },
+      this.clock.now(),
+    );
 
     await this.rateGridRepository.save(rateGrid);
 

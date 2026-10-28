@@ -49,7 +49,7 @@ describe('Read a version 1 stream of Assessed through its upcaster, end to end',
   async function storeAssessmentAsVersion1(applicationId: string): Promise<number> {
     const store = application.persistence.database.client().storedEvent;
     const row = await store.findFirstOrThrow({ where: { type: ASSESSED, stream: { contains: applicationId } } });
-    const { assessorId: _assessorId, ...version1Data } = row.data as Record<string, unknown>;
+    const { assessorId: _assessorId, ...version1Data } = row.data as Record<string, string>;
 
     await store.update({ where: { position: row.position }, data: { schemaVersion: 1, data: version1Data } });
 

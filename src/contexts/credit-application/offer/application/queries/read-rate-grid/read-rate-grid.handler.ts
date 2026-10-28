@@ -18,6 +18,7 @@ export class ReadRateGridHandler implements QueryHandler<ReadRateGridQuery> {
       rateGridId: rateGrid.rateGridId,
       productId: rateGrid.productId,
       effectiveFrom: rateGrid.effectiveFrom.toISOString(),
+      rates: rateGrid.rates,
     };
   }
 }
