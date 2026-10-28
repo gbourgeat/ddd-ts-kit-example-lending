@@ -3,18 +3,22 @@ import {
   EventSourcedRepository,
   type EventStore,
   type PersonalDataCipher,
+  type SnapshotStore,
   type StoredEvent,
 } from '@ddd-ts-kit/kernel';
 import { Loan } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
 import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
 import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 import type { LoanRepository } from '@/contexts/servicing/ledger/domain/repositories/loan.repository';
-import { loanEvents } from '@/contexts/servicing/ledger/infrastructure/persistence/loan-events.mapper';
+import { loanEvents, loanSnapshots } from '@/contexts/servicing/ledger/infrastructure/persistence/loan-events.mapper';
 
 const CATEGORY = 'servicing.loan';
 
 /** How many events of the store one read of the whole store takes. */
 const SCAN_PAGE_SIZE = 500;
+
+/** A snapshot of a loan is taken by the save that makes its stream reach a multiple of this many events: an optimisation only. */
+export const LOAN_SNAPSHOT_EVERY = 20;
 
 /** The stream of Loan is `servicing.loan-<id>` in the event store the platform binds. */
 export class EventStoreLoanRepository implements LoanRepository {
@@ -24,6 +28,7 @@ export class EventStoreLoanRepository implements LoanRepository {
   constructor(
     private readonly store: EventStore,
     cipher: PersonalDataCipher,
+    snapshots?: SnapshotStore,
   ) {
     this.serializer = new EventSerializer<LoanEvent>(loanEvents, { cipher });
 
@@ -32,7 +37,9 @@ export class EventStoreLoanRepository implements LoanRepository {
       category: CATEGORY,
       serializer: this.serializer,
       rehydrate: (id, history) => Loan.rehydrate(id, history),
-      // TODO(domain): when a stream grows long enough to slow a load, add `snapshots: { ...loanSnapshots, store: snapshots, every: <n> }` (a SnapshotStore injected here, a snapshot mapper with its own shape version): see docs/concepts/event-sourcing.md of ddd-ts-kit.
+      ...(snapshots === undefined
+        ? {}
+        : { snapshots: { ...loanSnapshots, store: snapshots, every: LOAN_SNAPSHOT_EVERY } }),
     });
   }
 

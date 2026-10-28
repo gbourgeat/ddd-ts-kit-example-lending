@@ -80,7 +80,11 @@ export function servicingModule(platform: Platform): ServicingWiring {
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
   const loanRepository = platform.adapter(
-    new EventStoreLoanRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
+    new EventStoreLoanRepository(
+      platform.eventSourcing.events,
+      platform.eventSourcing.cipher,
+      platform.eventSourcing.snapshots,
+    ),
     { kind: 'repository', context: 'servicing', token: 'LoanRepository' },
   );
 

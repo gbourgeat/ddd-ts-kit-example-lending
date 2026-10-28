@@ -5,7 +5,9 @@ import {
   type StoredEventData,
   type StoredEventTypes,
 } from '@ddd-ts-kit/kernel';
+import type { Loan } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
 import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
+import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 import { LoanClosed } from '@/contexts/servicing/ledger/domain/events/loan-closed.event';
 import { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
@@ -241,4 +243,86 @@ function borrowerDataOf(subject: string, borrower: Borrower): BorrowerData {
 
 function borrowerOf(data: StoredEventData): Borrower {
   return Borrower.create(data.text('name'), data.text('postalAddress'));
+}
+
+/** The state of a loan as a snapshot keeps it: an optional part is a list of at most one entry, and a list is kept whole. */
+interface LoanSnapshotData {
+  readonly registeredAt: string;
+  readonly closedAt: { readonly at: string }[];
+  readonly borrower: BorrowerData[];
+  readonly schedule: LoanScheduledData[];
+  readonly rescheduling: {
+    readonly schedule: LoanScheduledData;
+    readonly notedBefore: number;
+    readonly earlyRepaidBeforeCents: number;
+  }[];
+  readonly rescheduledBy: { readonly decisionId: string }[];
+  readonly instalmentsDue: { readonly number: number }[];
+  readonly earlyRepaidCents: number;
+  readonly writtenOff: { readonly amountCents: number }[];
+  readonly instalmentsPaid: { readonly number: number }[];
+  readonly instalmentsUnpaid: { readonly number: number }[];
+}
+
+/**
+ * The snapshot of a loan: the state after a version of its stream, read back by `decode` and taken every few events by the
+ * repository. Its version is the shape of this data: a change of shape is a new version, and a snapshot of another version is
+ * ignored (the stream is then replayed from its start).
+ */
+export const loanSnapshots = {
+  version: 1,
+  encode: (loan: Loan): LoanSnapshotData => snapshotDataOf(loan.id, loan.toState()),
+  decode: (data: StoredEventData): LoanState => stateOf(data),
+};
+
+function snapshotDataOf(subject: string, state: LoanState): LoanSnapshotData {
+  return {
+    registeredAt: state.registeredAt.toISOString(),
+    closedAt: listOf(state.closedAt, (at) => ({ at: at.toISOString() })),
+    borrower: listOf(state.borrower, (borrower) => borrowerDataOf(subject, borrower)),
+    schedule: listOf(state.schedule, scheduleDataOf),
+    rescheduling: listOf(state.rescheduling, (rescheduling) => ({
+      schedule: scheduleDataOf(rescheduling.schedule),
+      notedBefore: rescheduling.notedBefore,
+      earlyRepaidBeforeCents: rescheduling.earlyRepaidBefore.cents,
+    })),
+    rescheduledBy: state.rescheduledBy.map((decisionId) => ({ decisionId })),
+    instalmentsDue: state.instalmentsDue.map((number) => ({ number })),
+    earlyRepaidCents: state.earlyRepaid.cents,
+    writtenOff: listOf(state.writtenOff, (amount) => ({ amountCents: amount.cents })),
+    instalmentsPaid: state.instalmentsPaid.map((number) => ({ number })),
+    instalmentsUnpaid: state.instalmentsUnpaid.map((number) => ({ number })),
+  };
+}
+
+function stateOf(data: StoredEventData): LoanState {
+  return {
+    registeredAt: data.instant('registeredAt'),
+    closedAt: atMostOne(data.records('closedAt'), (closed) => closed.instant('at')),
+    borrower: atMostOne(data.records('borrower'), borrowerOf),
+    schedule: atMostOne(data.records('schedule'), scheduleOf),
+    rescheduling: atMostOne(data.records('rescheduling'), (rescheduling) => ({
+      schedule: scheduleOf(rescheduling.record('schedule')),
+      notedBefore: rescheduling.number('notedBefore'),
+      earlyRepaidBefore: Money.ofCents(rescheduling.number('earlyRepaidBeforeCents')),
+    })),
+    rescheduledBy: data.records('rescheduledBy').map((record) => record.text('decisionId')),
+    instalmentsDue: data.records('instalmentsDue').map((record) => record.number('number')),
+    earlyRepaid: Money.ofCents(data.number('earlyRepaidCents')),
+    writtenOff: atMostOne(data.records('writtenOff'), (record) => Money.ofCents(record.number('amountCents'))),
+    instalmentsPaid: data.records('instalmentsPaid').map((record) => record.number('number')),
+    instalmentsUnpaid: data.records('instalmentsUnpaid').map((record) => record.number('number')),
+  };
+}
+
+/** The entry of a list holding the optional part, read by `read`; undefined when the part is absent. */
+function atMostOne<T, R>(entries: readonly T[], read: (entry: T) => R): R | undefined {
+  const [entry] = entries;
+
+  return entry === undefined ? undefined : read(entry);
+}
+
+/** The list holding the optional part, or no entry when it is absent. */
+function listOf<T, R>(part: T | undefined, encode: (part: T) => R): R[] {
+  return part === undefined ? [] : [encode(part)];
 }
