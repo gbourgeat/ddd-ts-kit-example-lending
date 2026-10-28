@@ -12,5 +12,7 @@ export const servicingPermissions = definePermissions('servicing', {
   'loan.reschedule': { description: 'Reschedule loan' },
   'loan.record-repayment': { description: 'Record withdrawal repayment' },
   'loan.collect': { description: 'Collect instalment' },
+  'loan.classify-arrears': { description: 'Classify arrears' },
+  'loan.declare-default': { description: 'Declare default' },
   // /ddd-ts-kit:permissions
 });
