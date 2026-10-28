@@ -12,6 +12,7 @@ import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/do
 import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
+import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import {
   AccountConsent,
   type AccountConsentState,
@@ -24,7 +25,8 @@ export type CreditApplicationEvent =
   | CreditApplicationGuarantorNamed
   | CreditApplicationEntryCorrected
   | CreditApplicationDocumentAttached
-  | CreditApplicationRegisterConsulted;
+  | CreditApplicationRegisterConsulted
+  | CreditApplicationAssessed;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -42,6 +44,8 @@ export interface CreditApplicationState {
   readonly correctedEntryIds: readonly string[];
   /** The documents stored for the file, by their key in the object store: the file holds the reference, never the content. */
   readonly documentKeys: readonly string[];
+  /** How many parties the last consultation of the register found listed: undefined until the register is consulted. */
+  readonly listedPartyCount: number | undefined;
 }
 
 /** What the applicant asks for, and the instant the application is registered. */
@@ -65,6 +69,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     entryCount: 0,
     correctedEntryIds: [],
     documentKeys: [],
+    listedPartyCount: undefined,
   };
 
   private constructor(id: string) {
@@ -157,6 +162,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationRegisterConsulted(this.id, consultedAt, parties));
   }
 
+  /** The application is assessed: what it rests on and the outcome proposed are kept in the file, with the instant of the assessment. */
+  assess(assessment: CreditApplicationAssessed['assessment'], assessedAt: Date): void {
+    this.record(new CreditApplicationAssessed(this.id, assessedAt, assessment));
+  }
+
   /** Whether the applicant's consent to read the accounts is given and not yet expired at `instant`. */
   hasValidAccountConsentAt(instant: Date): boolean {
     if (this.state.accountConsent === undefined) {
@@ -199,6 +209,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     return this.state.guarantorIds;
   }
 
+  /** How many parties the last consultation of the register found listed, or undefined when it was never consulted. */
+  get listedPartyCount(): number | undefined {
+    return this.state.listedPartyCount;
+  }
+
   toState(): CreditApplicationState {
     return { ...this.state };
   }
@@ -212,6 +227,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationEntryCorrected.eventName]: (event) => this.applyEntryCorrected(event),
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
       [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
+      [CreditApplicationAssessed.eventName]: (event) => this.applyAssessed(event),
     };
   }
 
@@ -289,7 +305,15 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     };
   }
 
-  private applyRegisterConsulted(_event: CreditApplicationRegisterConsulted): void {
+  private applyRegisterConsulted(event: CreditApplicationRegisterConsulted): void {
+    this.state = {
+      ...this.state,
+      listedPartyCount: event.parties.filter((party) => party.listed).length,
+      entryCount: this.state.entryCount + 1,
+    };
+  }
+
+  private applyAssessed(_event: CreditApplicationAssessed): void {
     this.state = {
       ...this.state,
       entryCount: this.state.entryCount + 1,

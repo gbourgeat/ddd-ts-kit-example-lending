@@ -85,6 +85,9 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Erase personal data past retention | Destroy the key of the personal values of every application refused six months ago, so that the file can no longer be read | Delete an application |
 | Product | A credit offer of the bank, with the amounts, durations, fee and insurance it is sold with | Offer |
 | Terms | The amounts, durations, arrangement fee and insurance a product is sold with | Condition |
+| Assess | To make the assessment of an application: its ratios, its register answer and its score, then a proposal of approve or refuse |  |
+| No score available | the scoring of the application cannot be made: no scoring model version is published |  |
+| Proposal | the outcome an assessment proposes: approve, or a refusal that a person reviews |  |
 
 ## Modules
 
@@ -132,6 +135,7 @@ No personal data declared.
 - `credit-application:decider-level.keep`
 - `credit-application:rate-grid.keep`
 - `credit-application:legal-maximum-rate.keep`
+- `credit-application:application.assess`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -184,6 +188,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `AssessApplication` | command | `application.assess` |
 | `AttachDocument` | command | `application.attach-document` |
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
@@ -212,6 +217,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications` | `searchApplications` | `ApplicationsRoutes` | `Authenticated` | `SearchApplications` | `public` | query | 200: `page of SearchApplicationsLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
 | POST | `/applications/:id/account-information` | `readAccountInformation` | `ApplicationsRoutes` | `Authenticated` | `ReadAccountInformation` | `application.read-accounts` | params: `ReadAccountInformationParams`, body: `ReadAccountInformationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.MissingAccountConsent`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/assessment` | `assessApplication` | `ApplicationsRoutes` | `Authenticated` | `AssessApplication` | `application.assess` | params: `AssessApplicationParams` | 201: `AssessApplicationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.MissingAccountInformation`, `CreditApplicationCodes.RegisterNotConsulted`, `CreditApplicationCodes.NoScoreAvailable` |
 | POST | `/applications/:id/co-borrowers` | `nameCoBorrower` | `ApplicationsRoutes` | `Authenticated` | `NameCoBorrower` | `application.name-party` | params: `NameCoBorrowerParams`, body: `NameCoBorrowerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
@@ -296,6 +302,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
+| `MissingAccountInformation` | `forApplication` | `MISSING_ACCOUNT_INFORMATION` | none |
+| `NoScoreAvailable` | `forScore` | `NO_SCORE_AVAILABLE` | none |
+| `RegisterNotConsulted` | `forApplication` | `REGISTER_NOT_CONSULTED` | none |
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |

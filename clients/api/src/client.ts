@@ -65,6 +65,12 @@ export interface Client {
    */
   readAccountInformation(input: operations.ReadAccountInformationInput, options?: CallOptions): Promise<operations.ReadAccountInformationResult>;
   /**
+   * Assess application: `POST /applications/{id}/assessment`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), MISSING_ACCOUNT_INFORMATION (422), NO_SCORE_AVAILABLE (422), REGISTER_NOT_CONSULTED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  assessApplication(input: operations.AssessApplicationInput, options?: CallOptions): Promise<operations.AssessApplicationResult>;
+  /**
    * Name co borrower: `POST /applications/{id}/co-borrowers`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -414,6 +420,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchApplications: (input, call) => operations.searchApplications(connection, input, call),
     submitApplication: (input, call) => operations.submitApplication(connection, input, call),
     readAccountInformation: (input, call) => operations.readAccountInformation(connection, input, call),
+    assessApplication: (input, call) => operations.assessApplication(connection, input, call),
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
