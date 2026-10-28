@@ -26,13 +26,13 @@ export function declareFileReferenceUseCases(): UseCaseDeclaration[] {
     requires(KeepBrokerRegistrationCommand, creditApplicationPermissions['broker-registration.keep'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
-    requires(ReadBrokerRegistrationQuery, creditApplicationPermissions['application.decide'], {
+    requires(ReadBrokerRegistrationQuery, creditApplicationPermissions['decision-data.read'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(KeepProductTermsCommand, creditApplicationPermissions['product-terms.keep'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
-    requires(ReadProductTermsQuery, creditApplicationPermissions['application.decide'], {
+    requires(ReadProductTermsQuery, creditApplicationPermissions['decision-data.read'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     publicUseCase(CheckRequestAgainstProductCommand),

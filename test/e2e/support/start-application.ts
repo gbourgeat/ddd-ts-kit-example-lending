@@ -9,6 +9,7 @@ import { creditApplicationModule } from '@/contexts/credit-application/credit-ap
 import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 import { identityModule } from '@/contexts/identity/identity.module';
 import { FakeIdentityProviderAdmin } from '@/contexts/identity/test/fakes/identity-provider-admin.fake';
+import { PrismaOrganisationTenantDirectory } from '@/contexts/identity/infrastructure/persistence/prisma-organisation-tenant-directory.reader';
 import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
 import type { Platform } from '@/platform/composition/platform';
 import type { AppConfig } from '@/platform/config/app-config';
@@ -158,7 +159,7 @@ async function start({ database, config, credentials, screening, register, incid
     events: application.eventSubscriber,
     publish: (events) => application.eventBus.publish(events),
     relate: (tuple) => application.platform.relations.write([tuple]),
-    runJob: (name) => application.platform.jobs.runNow(name),
+    runJob: (name) => runJobOf(application, database, name),
     settled: (options) => settled({ outbox: () => database.persistence.outbox.stats() }, options),
     reset: async () => {
       await database.reset();
@@ -274,4 +275,27 @@ function identityWithProviderFake(provider: FakeIdentityProviderAdmin) {
 
 function eventsOf(config: AppConfig): EventProvider {
   return config.kafkaBrokers === noBroker ? inProcessEvents() : createEventProvider(config);
+}
+
+/** Runs a job now, as the scheduler would at its hour. */
+async function runJobOf(
+  application: ReturnType<typeof composeApplication>,
+  database: TestDatabase,
+  job: string,
+): Promise<unknown> {
+  await expectABankIsOpen(job, database.persistence.database);
+
+  return application.platform.jobs.runNow(job);
+}
+
+/**
+ * A per-tenant job runs once per organisation and answers `succeeded` for nobody when none is open: the spec that runs it
+ * opens the bank first (`POST /organisations`).
+ */
+async function expectABankIsOpen(job: string, database: Persistence['database']): Promise<void> {
+  const banks = await new PrismaOrganisationTenantDirectory(database).tenants();
+
+  if (banks.length === 0) {
+    throw new Error(`The job ${job} runs per bank and no bank is open: open it first, with POST /organisations.`);
+  }
 }

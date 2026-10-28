@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { expectStatus } from '@ddd-ts-kit/testing/e2e';
+import { expectJobAuditedFor } from '$test/e2e/support/job-audit';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { aPersonBody } from '$test/e2e/support/customer-due-diligence/customer-files';
 import { operatorAt } from '$test/e2e/support/customer-due-diligence/overdue-flags';
@@ -106,6 +107,7 @@ async function runNightlyErasure(app: RunningApplication): Promise<unknown> {
   const run = await app.runJob(ERASE_JOB);
 
   await app.settled();
+  await expectJobAuditedFor(app, ERASE_JOB, tenantId);
 
   return run;
 }

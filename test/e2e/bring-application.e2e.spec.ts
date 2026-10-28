@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { expectStatus } from '@ddd-ts-kit/testing/e2e';
+import { expectJobAuditedFor } from '$test/e2e/support/job-audit';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import {
   brokerOf,
@@ -73,6 +74,7 @@ describe('Bring an application as a registered broker, end to end', () => {
     application.register.revoke(registrationNumber);
     await application.runJob(dailyCheck);
     await application.settled();
+    await expectJobAuditedFor(application, dailyCheck, bank);
 
     const response = await broker.post('/applications/bring', request);
 
