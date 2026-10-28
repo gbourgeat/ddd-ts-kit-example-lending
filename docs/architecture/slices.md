@@ -367,7 +367,7 @@ Notes:
 | US14.03 | platform | slice | The audit search returns the reads of customer files and the grants | route of the audit search in `src/platform/audit` (no generator), covered by an e2e per read of customer files | US14.01, US2.16 | conductor | done |
 | US14.04 | credit-application | slice | Explain a refusal to a broker or a conflicted advisor without disclosing the hidden content | `error credit-application ApplicationNotVisible forApplicationNotVisible --code APPLICATION_NOT_VISIBLE --module file`; `query credit-application ExplainRefusal --permission application.read --module file` | US6.18, US7.06 | credit-application | done |
 | US14.05 | identity | slice | Every grant of a right is audited (the delegation granted and revoked) | `e2e identity GrantDelegation` | | identity | done |
-| US14.06 | platform | slice | Every command of every context writes an audit entry, spec per context | `e2e identity OpenOrganisation`; one e2e per context (`e2e <context> <UseCaseName>`) for each command of US2 to US12 | US14.01 | conductor | todo |
+| US14.06 | platform | slice | Every command of every context writes an audit entry, spec per context | `e2e identity OpenOrganisation`; one e2e per context (`e2e <context> <UseCaseName>`) for each command of US2 to US12 | US14.01 | conductor | done |
 
 Serves: "Every change, decision, access to a customer file and grant of a right is audited" (US14.01, US14.03,
 US14.05, US14.06); close 10 (every command audited, every read of a customer file audited and searchable:

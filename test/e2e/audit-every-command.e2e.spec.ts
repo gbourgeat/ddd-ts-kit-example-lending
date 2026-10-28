@@ -7,6 +7,7 @@ import { operatorOf as creditScoringOperatorOf } from '$test/e2e/support/credit-
 import { operatorOf as dueDiligenceOperatorOf } from '$test/e2e/support/customer-due-diligence/customer-files';
 import { aPersonBody } from '$test/e2e/support/customer-due-diligence/customer-files';
 import { startKeycloakStandIn } from '$test/e2e/support/identity/keycloak-stand-in';
+import { servicingOperator, storePaidOutLoan } from '$test/e2e/support/servicing/paid-out-loan';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { bankTenantId, complianceOfficer, raisedAlert } from '$test/e2e/support/financial-crime/alert-world';
 
@@ -111,5 +112,14 @@ describe('Every command of every context writes an audit entry, end to end', () 
     expectStatus(await ada.post('/alerts/alert-1/closure', { reason: 'Checked with the customer' }), 201);
 
     expect(await entriesOf('CloseAlertCommand')).toHaveLength(1);
+  });
+
+  it('audits CloseLoan of servicing', async () => {
+    await storePaidOutLoan(application, 'loan-1', new Date('2026-01-01T00:00:00.000Z'));
+    const operator = await servicingOperator(application, 'ada');
+
+    expectStatus(await operator.post('/loans/loan-1/closure', {}), 204);
+
+    expect(await entriesOf('CloseLoanCommand')).toHaveLength(1);
   });
 });
