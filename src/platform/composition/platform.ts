@@ -21,6 +21,7 @@ import type {
 } from '@ddd-ts-kit/kernel';
 import type { Audit } from '@/platform/audit/create-audit';
 import type { RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
+import type { AccessExplainer } from '@/platform/auth/authorization/access-explainer';
 import type { UseCaseProtection } from '@/platform/auth/authorization/use-case-protection';
 import type { Persistence } from '@/platform/database/persistence';
 import type { RetentionPeriods } from '@/platform/config/read-retention-periods';
@@ -69,6 +70,8 @@ export interface Platform {
   readonly customerDiligence: CustomerDiligenceContract;
   /** Asks the policies about one element, then the authorizer: for the rules that need loaded state. */
   readonly access: Access;
+  /** Why the relationships grant or refuse a permission on an element: what a context names when it explains a refusal. */
+  readonly accessExplainer: AccessExplainer;
   /**
    * The work in progress (correlation id, actor, tenant), for infrastructure only: audit
    * columns, tenant scoping, consumed events. Use cases get the actor in their message.
