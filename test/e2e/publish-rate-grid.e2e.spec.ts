@@ -7,7 +7,7 @@ import { storyOf } from '$test/e2e/support/story-of';
 
 const rateGrid = { productId: 'personal-loan', effectiveFrom: '2026-03-01' };
 
-const EXPECTED_SPAN_TREE = [
+const EXPECTED_SPAN_TREE: Parameters<typeof expectSpanTree>[1] = [
   {
     name: 'POST /rate-grids',
     kind: 'SERVER',

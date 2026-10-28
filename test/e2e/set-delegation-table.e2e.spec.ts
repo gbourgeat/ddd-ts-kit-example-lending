@@ -13,7 +13,7 @@ const delegationTable = {
   creditCommitteeLimitCents: 100_000_000,
 };
 
-const EXPECTED_SPAN_TREE = [
+const EXPECTED_SPAN_TREE: Parameters<typeof expectSpanTree>[1] = [
   {
     name: 'PUT /delegation-table',
     kind: 'SERVER',

@@ -7,7 +7,7 @@ import { storyOf } from '$test/e2e/support/story-of';
 
 const legalMaximumRate = { category: 'car', rateBasisPoints: 1250, effectiveFrom: '2026-03-01' };
 
-const EXPECTED_SPAN_TREE = [
+const EXPECTED_SPAN_TREE: Parameters<typeof expectSpanTree>[1] = [
   {
     name: 'POST /legal-maximum-rates',
     kind: 'SERVER',
