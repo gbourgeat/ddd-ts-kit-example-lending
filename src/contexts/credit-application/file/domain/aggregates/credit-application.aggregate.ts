@@ -7,15 +7,13 @@ import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/f
 import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
 import { InvalidAmount } from '@/contexts/credit-application/file/domain/errors/invalid-amount.error';
 import { InvalidDuration } from '@/contexts/credit-application/file/domain/errors/invalid-duration.error';
-import { InvalidCorrectionReason } from '@/contexts/credit-application/file/domain/errors/invalid-correction-reason.error';
-import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/domain/errors/correction-already-recorded.error';
-import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
 import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
+import { EntryCorrectionService } from '@/contexts/credit-application/file/domain/services/entry-correction.service';
 import type { ProductLimits } from '@/contexts/credit-application/file/domain/values/product-limits';
 import type { ProductTermsFinding } from '@/contexts/credit-application/file/domain/values/product-terms-finding';
 import {
@@ -154,19 +152,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
    * corrects and says why. The corrected entry is never edited, and a second correction of it is refused.
    */
   correctEntry(correctedEntryId: string, reason: string, correctedAt: Date): void {
-    if (reason.trim() === '') {
-      throw InvalidCorrectionReason.forReason();
-    }
-
-    if (!this.isEntryOfThisFile(correctedEntryId)) {
-      throw UnknownEntry.forEntry(correctedEntryId);
-    }
-
-    if (this.state.correctedEntryIds.includes(correctedEntryId)) {
-      throw CorrectionAlreadyRecorded.forEntry(correctedEntryId);
-    }
-
-    this.record(new CreditApplicationEntryCorrected(this.id, correctedAt, correctedEntryId, reason));
+    this.record(new EntryCorrectionService().eventOf(this.id, this.state, { correctedEntryId, reason, correctedAt }));
   }
 
   /** The repayment incident register was consulted for the parties of the application: the answer is kept, never the names. */
@@ -265,24 +251,6 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
 
   private restore(state: CreditApplicationState): void {
     this.state = state;
-  }
-
-  /** An entry is identified by the application it belongs to and its position in the file: `<application>#<position>`. */
-  private isEntryOfThisFile(entryId: string): boolean {
-    const separator = entryId.lastIndexOf('#');
-
-    if (separator <= 0) {
-      return false;
-    }
-
-    const position = Number(entryId.slice(separator + 1));
-
-    return (
-      entryId.slice(0, separator) === this.id &&
-      Number.isSafeInteger(position) &&
-      position >= 1 &&
-      position <= this.state.entryCount
-    );
   }
 
   private applySubmitted(event: CreditApplicationSubmitted): void {
