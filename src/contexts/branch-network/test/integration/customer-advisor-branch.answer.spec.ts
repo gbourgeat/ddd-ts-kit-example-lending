@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
-import { CustomerAdvisorBranchAnswer } from '@/contexts/branch-network/infrastructure/published-language/customer-advisor-branch.answer';
+import { CustomerAdvisorBranchAnswer } from '@/contexts/branch-network/infrastructure/external/customer-advisor-branch.answer';
 import { Portfolio } from '@/contexts/branch-network/domain/aggregates/portfolio.aggregate';
 import { FakePortfolioRepository } from '@/contexts/branch-network/test/fakes/portfolio.repository.fake';
 
