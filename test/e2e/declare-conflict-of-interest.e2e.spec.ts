@@ -26,6 +26,7 @@ const declaringSpans = [
                   {
                     name: 'handler ConflictOfInterestDeclaredPublisher',
                     children: [
+                      { name: 'repository StaffMemberRepository.findById' },
                       {
                         name: 'outbox append branch-network.conflict-of-interest.declared',
                         children: [
