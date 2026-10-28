@@ -454,6 +454,27 @@ the code later becomes a record in `docs/adr/` once the project exists.
   - The projections US7.01, US7.02, US8.06, US8.07, US11.08 (the stores generated on the trunk and their migrations), US12.01 (waits US0.08), US7.04 (waits the chain above), US13.08 (the ImpactAssessment aggregate and its repository), US6.19, US14.02, US14.03, US14.06 and the grants: not built in this run (time and the chain above).
 - Wave 6d migrations to generate (`npm run db:generate working-<what>`, the owner): `credit-scoring` `scoring_models` gets the `versions` JSON column (US5.02, `working-scoring-model-versions`); `branch-network` `staff_members.level` (US1.15) is already in `prisma/migrations/20261028013509_staff_member_level`, to check.
 
+## Wave 6e, state at the end of the run (conductor, 2026-10-28)
+
+Branch `wave6e`, not pushed. Proven end to end on the trunk, by the spec named (`test/e2e/`): US0.08 `submit-application-branch`, US1.16 `submit-application-branch` (the advisor's branch answer), US12.01 `journey-applications-per-branch`, US6.08 `consult-repayment-incident-register`, US11.08 `close-alert`, `close-alert-hidden-from-strangers`, `get-suspicious-activity-report`, `search-alerts`, US13.08 `record-scoring-impact-assessment`. US2.18 is marked todo: `identify-customer-identity-sealed` proves the sealing only, not the answer to credit-application.
+
+Not done, each with its reason:
+- US2.18: the answer to credit-application through its read contract has no e2e proof yet.
+- US6.05: its branch `build/credit-application-w6e3` (not merged) holds the attach answer and the read route. The read proof needs an S3-compatible server on localhost:9000 (`npm run infra:up`), not running here.
+- US6.19: credit-policy's `product.defined` v1 carries only `productId`; the product terms need a payload field or a read contract from credit-policy (its owner).
+- US7.01, US7.02, US8.06, US8.07: the projection stores need their tables and a system permission for the handler (the decider permission is not a system permission); a design decision for the owner.
+- US4.05: the publish is unit-proven; the e2e in `register-broker.e2e.spec.ts` drives the composed application without asserting the event. A shared-support proof needs the register fake and the daily check exposed by `start-application.ts`.
+- US13.05, US13.06, US13.07: the nightly jobs and the erasure-by-key proof are not built in this run.
+- US2.13 (contract), US14.02, US14.03, US14.06: not built in this run.
+- Grants of the part (compliance officer, advisor through the portfolio relation, data protection officer): only `data-protection:impact-assessment.record` is written (commit 853ef40).
+- US7.04 and US8.05: left to their wave, as the owner said.
+
+Verify on the trunk: `npm run test:e2e`, `depcruise`, `deadcode` and `docs:check` pass. `npm run verify` is red on two gates: `test:coverage` (reporting application, and credit-application assessment application, both type-only modules under their floors: owner decision, see the frictions) and `check:arch` (`reporting/application/read-model` is not a canonical directory: `extraDirectories` in the config, refused to this run).
+
+Migrations to generate (owner, `npm run db:generate working-<what>`): `reporting` application counts table (`prisma/schema/reporting.prisma`, US12.01); `data_protection` `impact_assessments` with `scoring_model_version` and `month` (US13.08). `stored-events.lock.json` now records `credit-application.register-consulted` version 1.
+
+Decisions taken under the owner brief in this part are under `## Decisions` (dated 2026-10-28, wave 6e).
+
 ## Open questions
 
 One line each, with who can answer. A question blocks only the step that needs its answer.
