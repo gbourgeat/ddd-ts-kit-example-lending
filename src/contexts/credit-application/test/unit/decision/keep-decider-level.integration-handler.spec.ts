@@ -1,3 +1,4 @@
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { describe, expect, it } from '@jest/globals';
 import { createTestBuses } from '@ddd-ts-kit/testing';
 import { InMemoryCommandBus } from '@ddd-ts-kit/kernel';
@@ -44,14 +45,14 @@ function arrange() {
   const { commandBus } = createTestBuses();
   const levels = new FakeDeciderLevels();
 
-  commandBus.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(levels));
+  commandBus.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(levels, new InMemoryRelationTupleStore()));
 
   return { handler: new KeepDeciderLevelIntegrationHandler(commandBus), levels };
 }
 
 function appointed(level: string) {
   return staffMemberAppointedV2.create(
-    { staffMemberId: 'staff-member-1', branchId: 'branch-1', level },
+    { staffMemberId: 'staff-member-1', branchId: 'branch-1', level, accountId: 'staff-member-1' },
     { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
   );
 }

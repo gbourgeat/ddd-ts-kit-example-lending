@@ -67,7 +67,7 @@ function arrange(levels: FakeDeciderLevels) {
 
 async function keep(levels: FakeDeciderLevels, staffMemberId: string, level: string): Promise<void> {
   const event = staffMemberAppointedV2.create(
-    { staffMemberId, branchId: 'branch-1', level },
+    { staffMemberId, branchId: 'branch-1', level, accountId: staffMemberId },
     { id: `event-${staffMemberId}`, occurredAt: '2026-01-01T00:00:00.000Z' },
   );
 

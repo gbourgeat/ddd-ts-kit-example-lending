@@ -11,13 +11,13 @@ export function declareOfferUseCases(): UseCaseDeclaration[] {
     requires(KeepRateGridCommand, creditApplicationPermissions['rate-grid.keep'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
-    requires(ReadRateGridQuery, creditApplicationPermissions['application.decide'], {
+    requires(ReadRateGridQuery, creditApplicationPermissions['decision-data.read'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(KeepLegalMaximumRateCommand, creditApplicationPermissions['legal-maximum-rate.keep'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
-    requires(ReadLegalMaximumRateQuery, creditApplicationPermissions['application.decide'], {
+    requires(ReadLegalMaximumRateQuery, creditApplicationPermissions['decision-data.read'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
   ];

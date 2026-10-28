@@ -111,7 +111,7 @@ function readModel<T extends object>(
 
 /** The command that keeps the level of each decider and the query that reads it, over the read model the module binds. */
 function registerDeciderLevelHandlers(platform: Platform, deciderLevels: DeciderLevels): void {
-  platform.commands.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(deciderLevels), {
+  platform.commands.register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(deciderLevels, platform.relations), {
     context: 'credit-application',
   });
 

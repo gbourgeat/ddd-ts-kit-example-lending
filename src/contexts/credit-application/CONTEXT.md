@@ -147,6 +147,7 @@ No personal data declared.
 - `credit-application:application.read`
 - `credit-application:application.name-party`
 - `credit-application:application.correct`
+- `credit-application:decision-data.read`
 - `credit-application:application.decide`
 - `credit-application:application.attach-document`
 - `credit-application:application.read-accounts`
@@ -344,7 +345,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Policy | Permission |
 |---|---|
 | `DeclareFileReferenceUseCases` | `broker-registration.keep` |
-| `DeclareDecisionUseCases` | `application.decide` |
+| `DeclareDecisionUseCases` | `decision-data.read` |
 | `DeclareOfferUseCases` | `rate-grid.keep` |
 
 ### Errors

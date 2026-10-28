@@ -76,7 +76,13 @@ export const relationshipSchema = defineSchema({
   user: {},
   system: {},
   context: {
-    relations: { operator: ['user', 'system'], eraser: ['system'], keeper: ['system'], broker: ['user'] },
+    relations: {
+      operator: ['user', 'system'],
+      eraser: ['system'],
+      keeper: ['system'],
+      broker: ['user'],
+      decider: ['user'],
+    },
     derived: {
       ...Object.fromEntries(
         permissions
@@ -93,6 +99,8 @@ export const relationshipSchema = defineSchema({
       'credit-application:broker-registration.keep': 'keeper',
       'credit-application:broker-registration.lapse': 'keeper',
       'credit-application:application.bring': 'broker',
+      // The account of a member of staff appointed to a level (decider level projection) decides, within the limit of the level.
+      'credit-application:application.decide': 'decider',
       'data-protection:data-subject.request-copy': 'operator',
       'data-protection:impact-assessment.record': 'operator',
     },

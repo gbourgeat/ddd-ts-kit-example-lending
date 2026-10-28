@@ -65,6 +65,14 @@ describe('Decide an application, end to end', () => {
     expectStatus(await advisor.post(`/applications/${applicationId}/decision`, approval), 201);
   });
 
+  it('lets the account of a member of staff decide once they are appointed, with no relation written by the spec', async () => {
+    const applicationId = await assessedBy(false);
+    const accountId = await appointStaff(application, 'advisor');
+    const advisor = await application.as({ id: accountId, tenantId: 'acme-bank' });
+
+    expectStatus(await advisor.post(`/applications/${applicationId}/decision`, approval), 201);
+  });
+
   it('records an approval with conditions, a lower amount and a guarantor in words: 201', async () => {
     const applicationId = await assessedBy(false);
     const advisor = await deciderOf(application, 'advisor');
@@ -142,14 +150,11 @@ describe('Decide an application, end to end', () => {
     expectStatus(await advisor.post(`/applications/${applicationId}/decision`, refusal), 201);
   });
 
-  it('refuses a decider whose level is not known, by its code', async () => {
+  it('refuses an operator who was never appointed to a level: only a decider decides, 403', async () => {
     const applicationId = await assessedBy(false);
-    const stranger = await analystOf(application, 'no-level-operator');
+    const operator = await analystOf(application, 'no-level-operator');
 
-    const response = await stranger.post(`/applications/${applicationId}/decision`, approval);
-
-    expect(response.status).toBeGreaterThanOrEqual(400);
-    expect(response.body).toMatchObject({ code: 'UNKNOWN_DECIDER_LEVEL' });
+    expectStatus(await operator.post(`/applications/${applicationId}/decision`, approval), 403);
   });
 
   /** An application assessed by a credit analyst, who is not the decider of the test. */

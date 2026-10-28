@@ -56,7 +56,7 @@ export async function publishDelegationTable(
   await application.settled();
 }
 
-/** Appoints a member of staff to the level on an opened branch, as branch-network does: returns the staff member's identifier. */
+/** Appoints a member of staff to the level on an opened branch, as branch-network does: returns the account they sign in with. */
 export async function appointStaff(
   application: RunningApplication,
   level: string,
@@ -83,9 +83,9 @@ export async function appointStaff(
   await application.settled();
   published.stop();
 
-  const [event] = published.received(staffMemberAppointed);
+  const event = published.received(staffMemberAppointed).find((candidate) => candidate.version === 2);
 
-  return (event?.payload as { staffMemberId: string }).staffMemberId;
+  return (event?.payload as { accountId: string }).accountId;
 }
 
 /** A member of staff of the level, signed in as the staff member, who holds the permissions of the context. */

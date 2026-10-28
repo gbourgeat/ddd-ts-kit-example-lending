@@ -15,10 +15,10 @@ describe('The offer use cases, as declared for authorization', () => {
     expect(declared.resourceOf(instanceOf(KeepRateGridCommand))).toEqual({ type: 'context', id: 'credit-application' });
   });
 
-  it('requires application.decide to read a rate grid, on the context', () => {
+  it('requires decision-data.read to read a rate grid, on the context', () => {
     const declared = declarationOf(ReadRateGridQuery);
 
-    expect(declared.permission).toBe(creditApplicationPermissions['application.decide']);
+    expect(declared.permission).toBe(creditApplicationPermissions['decision-data.read']);
     expect(declared.resourceOf(instanceOf(ReadRateGridQuery))).toEqual({ type: 'context', id: 'credit-application' });
   });
 
@@ -33,10 +33,10 @@ describe('The offer use cases, as declared for authorization', () => {
     });
   });
 
-  it('requires application.decide to read a legal maximum rate, on the context', () => {
+  it('requires decision-data.read to read a legal maximum rate, on the context', () => {
     const declared = declarationOf(ReadLegalMaximumRateQuery);
 
-    expect(declared.permission).toBe(creditApplicationPermissions['application.decide']);
+    expect(declared.permission).toBe(creditApplicationPermissions['decision-data.read']);
 
     expect(declared.resourceOf(instanceOf(ReadLegalMaximumRateQuery))).toEqual({
       type: 'context',

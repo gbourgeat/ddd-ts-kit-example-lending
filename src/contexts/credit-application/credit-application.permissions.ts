@@ -7,6 +7,7 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.read': { description: 'List applications' },
   'application.name-party': { description: 'Name co borrower' },
   'application.correct': { description: 'Correct entry' },
+  'decision-data.read': { description: 'Read the reference data a decision rests on' },
   'application.decide': { description: 'Decide an application: read its declared conflicts first' },
   'application.attach-document': { description: 'Attach document' },
   'application.read-accounts': { description: 'Read account information' },

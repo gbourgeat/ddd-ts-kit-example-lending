@@ -1,3 +1,4 @@
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
 import { anActor } from '@ddd-ts-kit/auth/testing';
@@ -60,14 +61,16 @@ function arrange() {
   const { commandBus } = createTestBuses();
   const levels = new FakeDeciderLevels();
 
-  commandBus.use(holders).register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(levels));
+  commandBus
+    .use(holders)
+    .register(KeepDeciderLevelCommand, new KeepDeciderLevelHandler(levels, new InMemoryRelationTupleStore()));
 
   return { commandBus, levels };
 }
 
 function appointed(staffMemberId: string, level: string, occurredAt: string) {
   return staffMemberAppointedV2.create(
-    { staffMemberId, branchId: 'branch-1', level },
+    { staffMemberId, branchId: 'branch-1', level, accountId: staffMemberId },
     { id: `event-${staffMemberId}-${occurredAt}`, occurredAt },
   );
 }

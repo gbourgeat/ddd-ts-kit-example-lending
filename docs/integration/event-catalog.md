@@ -17,6 +17,7 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `conflictOfInterestId` | string | yes |  |
 | `staffMemberId` | string | yes |  |
 | `customerId` | string | yes |  |
+| `accountId` | string | yes |  |
 
 ### branch-network.staff-member.appointed
 
@@ -38,6 +39,7 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `staffMemberId` | string | yes |  |
 | `branchId` | string | yes |  |
 | `level` | string | yes |  |
+| `accountId` | string | yes |  |
 
 ## brokerage
 

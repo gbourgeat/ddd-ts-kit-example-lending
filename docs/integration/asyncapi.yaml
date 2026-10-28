@@ -312,11 +312,14 @@ components:
                 type: string
               customerId:
                 type: string
+              accountId:
+                type: string
             type: object
             required:
               - conflictOfInterestId
               - staffMemberId
               - customerId
+              - accountId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.
@@ -398,11 +401,14 @@ components:
                 type: string
               level:
                 type: string
+              accountId:
+                type: string
             type: object
             required:
               - staffMemberId
               - branchId
               - level
+              - accountId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

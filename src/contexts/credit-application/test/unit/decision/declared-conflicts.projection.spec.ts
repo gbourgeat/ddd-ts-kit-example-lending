@@ -34,7 +34,12 @@ describe('Declared conflicts, kept from what branch-network announces', () => {
 
     await projection.declared(
       conflictOfInterestDeclaredV1.create(
-        { conflictOfInterestId: 'conflict-of-interest-1', staffMemberId: 'staff-member-2', customerId: 'customer-1' },
+        {
+          conflictOfInterestId: 'conflict-of-interest-1',
+          staffMemberId: 'staff-member-2',
+          customerId: 'customer-1',
+          accountId: 'staff-member-2',
+        },
         { id: 'event-late', occurredAt: '2026-02-01T00:00:00.000Z' },
       ),
     );
@@ -47,7 +52,7 @@ describe('Declared conflicts, kept from what branch-network announces', () => {
 
 function declaredAt(occurredAt: string, conflictOfInterestId = 'conflict-of-interest-1') {
   return conflictOfInterestDeclaredV1.create(
-    { conflictOfInterestId, staffMemberId: 'staff-member-1', customerId: 'customer-1' },
+    { conflictOfInterestId, staffMemberId: 'staff-member-1', customerId: 'customer-1', accountId: 'staff-member-1' },
     { id: `event-${occurredAt}`, occurredAt },
   );
 }
