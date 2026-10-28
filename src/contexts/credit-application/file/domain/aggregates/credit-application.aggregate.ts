@@ -14,6 +14,7 @@ import {
 import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
 import type { RefusalConclusion } from '@/contexts/credit-application/file/domain/values/refusal-conclusion';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
+import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
 import { DecisionCheckService } from '@/contexts/credit-application/file/domain/services/decision-check.service';
 import type { DecisionInput } from '@/contexts/credit-application/file/domain/values/decision-input';
 import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
@@ -43,7 +44,8 @@ export type CreditApplicationEvent =
   | CreditApplicationRequestFoundOutsideProductTerms
   | CreditApplicationRequestCheckedWithUnknownProductTerms
   | CreditApplicationRefusalReviewed
-  | CreditApplicationDecided;
+  | CreditApplicationDecided
+  | CreditApplicationBrought;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -183,6 +185,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new DecisionCheckService().eventOf(this.id, this.state, decision));
   }
 
+  /** A broker brought the application for the customer it was submitted for: the broker is kept in the file. */
+  recordBrought(brokerId: string, broughtAt: Date): void {
+    this.record(new CreditApplicationBrought(this.id, broughtAt, brokerId));
+  }
+
   /**
    * The check of the application against the limits of its product: each limit the request breaks is kept as a finding,
    * or, when the terms of the product are not known, that they are not. The application is never refused by a check.
@@ -262,12 +269,13 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
       [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
       [CreditApplicationAssessed.eventName]: (event) => this.applyAssessed(event),
-      [CreditApplicationRequestFoundOutsideProductTerms.eventName]: (event) =>
-        this.applyRequestFoundOutsideProductTerms(event),
+      [CreditApplicationRequestFoundOutsideProductTerms.eventName]: (event) => this.applyFinding(event.finding),
       [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: (event) =>
-        this.applyRequestCheckedWithUnknownProductTerms(event),
+        this.applyFinding({ kind: 'terms-unknown', productId: event.productId }),
       [CreditApplicationRefusalReviewed.eventName]: (event) => this.applyRefusalReviewed(event),
       [CreditApplicationDecided.eventName]: (event) => this.applyDecided(event),
+      // The broker changes no state of the file: the event itself keeps who brought the application.
+      [CreditApplicationBrought.eventName]: () => undefined,
     };
   }
 
@@ -322,16 +330,6 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       refusalReviewConclusion: undefined,
       refusalReviewerId: '',
     });
-  }
-
-  private applyRequestFoundOutsideProductTerms(event: CreditApplicationRequestFoundOutsideProductTerms): void {
-    this.applyFinding(event.finding);
-  }
-
-  private applyRequestCheckedWithUnknownProductTerms(
-    event: CreditApplicationRequestCheckedWithUnknownProductTerms,
-  ): void {
-    this.applyFinding({ kind: 'terms-unknown', productId: event.productId });
   }
 
   private applyFinding(finding: ProductTermsFinding): void {

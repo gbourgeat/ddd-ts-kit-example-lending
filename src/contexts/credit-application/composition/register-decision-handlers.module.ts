@@ -2,6 +2,7 @@ import type { Platform } from '@/platform/composition/platform';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import type { DeciderLevels } from '@/contexts/credit-application/decision/application/ports/decider-levels.port';
 import type { DelegationTables } from '@/contexts/credit-application/decision/application/ports/delegation-tables.port';
+import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { DeciderLimitReader } from '@/contexts/credit-application/decision/application/projections/decider-limit-reader.projection';
 import { DecideApplicationCommand } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.command';
 import { DecideApplicationHandler } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.handler';
@@ -10,13 +11,22 @@ import { DecideApplicationHandler } from '@/contexts/credit-application/decision
 export function registerDecisionHandlers(
   platform: Platform,
   creditApplicationRepository: CreditApplicationRepository,
-  readModels: { readonly deciderLevels: DeciderLevels; readonly delegationTables: DelegationTables },
+  readModels: {
+    readonly deciderLevels: DeciderLevels;
+    readonly delegationTables: DelegationTables;
+    readonly declaredConflicts: DeclaredConflictsStore;
+  },
 ): void {
   const deciderLimits = new DeciderLimitReader(readModels.deciderLevels, readModels.delegationTables);
 
   platform.commands.register(
     DecideApplicationCommand,
-    new DecideApplicationHandler(creditApplicationRepository, deciderLimits, platform.clock),
+    new DecideApplicationHandler(
+      creditApplicationRepository,
+      deciderLimits,
+      platform.clock,
+      readModels.declaredConflicts,
+    ),
     { context: 'credit-application' },
   );
 }

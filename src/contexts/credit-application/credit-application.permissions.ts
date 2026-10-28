@@ -20,5 +20,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'product-terms.keep': { description: 'Keep product terms' },
   'broker-registration.keep': { description: 'Keep broker registration' },
   'application.review-refusal': { description: 'Review proposed refusal' },
+  'application.bring': { description: 'Bring application' },
   // /ddd-ts-kit:permissions
 });

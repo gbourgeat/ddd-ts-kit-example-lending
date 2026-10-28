@@ -275,6 +275,43 @@ export function submitApplication(
   return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface BringApplicationInput {
+  readonly body: {
+    customerId: string;
+    productId: string;
+    amount: Schemas.RequestedAmountBody;
+    durationMonths: number;
+  };
+}
+
+export type BringApplicationResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'BROKER_REGISTRATION_LAPSED' | 'INVALID_AMOUNT' | 'INVALID_DURATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Bring application: `POST /applications/bring`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), BROKER_REGISTRATION_LAPSED (422), INVALID_AMOUNT (422), INVALID_DURATION (422), VALIDATION_FAILED (422).
+ */
+export function bringApplication(
+  connection: Connection,
+  input: BringApplicationInput,
+  options: CallOptions = {},
+): Promise<BringApplicationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/bring',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<BringApplicationResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadAccountInformationInput {
   readonly path: {
     readonly id: string;

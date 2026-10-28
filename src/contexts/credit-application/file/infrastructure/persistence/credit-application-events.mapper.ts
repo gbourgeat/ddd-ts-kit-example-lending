@@ -14,6 +14,7 @@ import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contex
 import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
+import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -84,6 +85,10 @@ interface CreditApplicationDecidedData {
   readonly approvedAmountCents: number;
   readonly branchId: string;
   readonly exception: boolean;
+}
+
+interface CreditApplicationBroughtData {
+  readonly brokerId: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -263,5 +268,11 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.text('branchId'),
         data.flag('exception'),
       ),
+  }),
+  [CreditApplicationBrought.eventName]: defineStoredEvent(CreditApplicationBrought, {
+    version: 1,
+    encode: (event): CreditApplicationBroughtData => ({ brokerId: event.brokerId }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationBrought(aggregateId, occurredAt, data.text('brokerId')),
   }),
 };

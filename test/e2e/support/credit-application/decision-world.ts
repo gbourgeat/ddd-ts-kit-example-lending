@@ -7,6 +7,8 @@ import {
   analystOf,
   applicationWithAccountsAndRegister,
   publishScoringVersion,
+  readAccountsAndRegister,
+  submittedApplication,
 } from '$test/e2e/support/credit-application/assessed-application-world';
 
 const birthDate = new Date('1980-05-01T00:00:00.000Z');
@@ -55,18 +57,24 @@ export async function publishDelegationTable(
 }
 
 /** Appoints a member of staff to the level on an opened branch, as branch-network does: returns the staff member's identifier. */
-export async function appointStaff(application: RunningApplication, level: string): Promise<string> {
+export async function appointStaff(
+  application: RunningApplication,
+  level: string,
+  accountId?: string,
+): Promise<string> {
   const operator = await branchOperatorOf(application);
   const branchId = await openedBranchOf(operator);
   const published = collectEvents(application.events, [staffMemberAppointed]);
 
   appointments += 1;
 
+  const account = accountId ?? `${level}-${appointments}`;
+
   expectStatus(
     await operator.post(`/branches/${branchId}/staff`, {
       name: `${level} ${appointments}`,
-      email: `${level}-${appointments}@example.test`,
-      accountId: `${level}-${appointments}`,
+      email: `${account}@example.test`,
+      accountId: account,
       level,
     }),
     201,
@@ -116,4 +124,34 @@ export async function confirmRefusal(
   const confirmation = { conclusion: 'confirm', reason: 'The register lists a homonym, not the applicant.' };
 
   expectStatus(await reviewer.post(`/applications/${applicationId}/refusal-review`, confirmation), 201);
+}
+
+/** A member of staff declares a conflict of interest on a customer, as the signed-in staff member of branch-network. */
+export async function declareConflictAs(
+  application: RunningApplication,
+  accountId: string,
+  customerId: string,
+): Promise<void> {
+  await application.relate({ object: 'context:branch-network', relation: 'operator', subject: `user:${accountId}` });
+  const staff = await application.as({ id: accountId, tenantId: 'acme-bank' });
+
+  expectStatus(await staff.post('/conflicts', { customerId }), 201);
+  await application.settled();
+}
+
+/** A submitted application assessed by the staff member given, whose applicant is the customer returned with it. */
+export async function assessedApplicationOfCustomer(
+  application: RunningApplication,
+  assessorId: string,
+): Promise<{ applicationId: string; customerId: string }> {
+  const { applicationId, applicant, customerId } = await submittedApplication(application);
+
+  await readAccountsAndRegister(application, applicationId, applicant);
+  await publishScoringVersion(application);
+
+  const assessor = await analystOf(application, assessorId);
+
+  expectStatus(await assessor.post(`/applications/${applicationId}/assessment`, {}), 201);
+
+  return { applicationId, customerId };
 }
