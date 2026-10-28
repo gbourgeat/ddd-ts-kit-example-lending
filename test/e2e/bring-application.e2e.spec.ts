@@ -65,7 +65,7 @@ describe('Bring an application as a registered broker, end to end', () => {
     expect(brought.body).toMatchObject({ id: expect.any(String) });
   });
 
-  it('refuses the application of a broker whose registration lapsed, by the code BROKER_REGISTRATION_LAPSED', async () => {
+  it('refuses the application of a broker whose registration lapsed: it is no longer a broker of the context, 403', async () => {
     const bank = await openBank(application);
     const brokerId = await registerBroker(application, bank);
     const broker = await brokerOf(application, brokerId, bank);
@@ -76,6 +76,6 @@ describe('Bring an application as a registered broker, end to end', () => {
 
     const response = await broker.post('/applications/bring', request);
 
-    expect(response.body).toMatchObject({ code: 'BROKER_REGISTRATION_LAPSED' });
+    expectStatus(response, 403);
   });
 });

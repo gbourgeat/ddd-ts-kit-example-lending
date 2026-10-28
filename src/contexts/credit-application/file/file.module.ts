@@ -273,9 +273,9 @@ function registerCheckRequestAgainstProduct(
 
 /** The command that keeps the broker registrations and the query that reads them, over the read model the module binds. */
 function registerBrokerRegistrationHandlers(platform: Platform, brokerRegistrations: BrokerRegistrations): void {
-  platform.commands.register(KeepBrokerRegistrationCommand, new KeepBrokerRegistrationHandler(brokerRegistrations), {
-    context: 'credit-application',
-  });
+  const keep = new KeepBrokerRegistrationHandler(brokerRegistrations, platform.relations);
+
+  platform.commands.register(KeepBrokerRegistrationCommand, keep, { context: 'credit-application' });
 
   platform.queries.register(ReadBrokerRegistrationQuery, new ReadBrokerRegistrationHandler(brokerRegistrations), {
     context: 'credit-application',

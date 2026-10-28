@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
 import { anActor } from '@ddd-ts-kit/auth/testing';
 import { createTestBuses } from '@ddd-ts-kit/testing';
+import { InMemoryRelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import { stampOf, type Actor } from '@ddd-ts-kit/kernel';
 import { brokerRegisteredV1 } from '@/contexts/brokerage/published-language';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
@@ -57,6 +58,20 @@ describe('Keep broker registration', () => {
     expect(await registrations.get('broker-1')).toMatchObject({ inForce: false });
   });
 
+  it('makes the broker a broker of the context while its registration is in force, and no longer once it lapsed', async () => {
+    const { commandBus, relations } = arrange();
+    const tuple = { object: 'context:credit-application', relation: 'broker', subject: 'user:broker-1' };
+
+    await commandBus.execute(keepCommand(holder, 'broker-1', true, '2026-01-01T00:00:00.000Z'));
+    const whileInForce = await relations.readByObject(tuple.object, tuple.relation);
+
+    await commandBus.execute(keepCommand(holder, 'broker-1', false, '2026-02-01T00:00:00.000Z'));
+    const afterLapse = await relations.readByObject(tuple.object, tuple.relation);
+
+    expect(whileInForce).toEqual([tuple]);
+    expect(afterLapse).toEqual([]);
+  });
+
   it('is refused to an actor who does not hold the permission broker-registration.keep, and keeps nothing', async () => {
     const { commandBus, registrations } = arrange();
     const command = keepCommand(anActor().build(), 'broker-1', true, '2026-01-01T00:00:00.000Z');
@@ -69,10 +84,13 @@ describe('Keep broker registration', () => {
 function arrange() {
   const { commandBus } = createTestBuses();
   const registrations = new FakeBrokerRegistrations();
+  const relations = new InMemoryRelationTupleStore();
 
-  commandBus.use(holders).register(KeepBrokerRegistrationCommand, new KeepBrokerRegistrationHandler(registrations));
+  commandBus
+    .use(holders)
+    .register(KeepBrokerRegistrationCommand, new KeepBrokerRegistrationHandler(registrations, relations));
 
-  return { commandBus, registrations };
+  return { commandBus, registrations, relations };
 }
 
 function keepCommand(
