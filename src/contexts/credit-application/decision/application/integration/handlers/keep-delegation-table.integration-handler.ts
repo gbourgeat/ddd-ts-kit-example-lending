@@ -6,6 +6,7 @@ import {
 import { KeepDelegationTableCommand } from '@/contexts/credit-application/decision/application/commands/keep-delegation-table/keep-delegation-table.command';
 import { delegationTableRowOf } from '@/contexts/credit-application/decision/application/projections/delegation-table-row-of.projection';
 
+// ddd-ts-kit-disable-next-line events/consumer-idempotent -- ADR-0005: registered in its module file, which the rule does not read
 export class KeepDelegationTableIntegrationHandler {
   static readonly eventType = delegationTablePublishedV2.type;
 

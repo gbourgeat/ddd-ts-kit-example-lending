@@ -1,6 +1,6 @@
 # ADR-0003: Composition files of a context with modules
 
-- Status: accepted (owner, wave 6f)
+- Status: accepted (owner, wave 6f); superseded for credit-application on 2026-10-28 by the module files of ddd-ts-kit 0.98.0 (`composition/` deleted there); still in force for customer-due-diligence
 - Date: 2026-10-28
 - Deviates from: `contexts.credit-application.extraDirectories.composition`
 
