@@ -3,6 +3,6 @@ import { delegationTableCriteria } from '@/contexts/credit-application/decision/
 
 describe('Delegation table read model criteria', () => {
   it('lets a read filter the delegation tables by their identifier', () => {
-    expect(delegationTableCriteria.fields.delegationTableId.filter).toContain('eq');
+    expect(delegationTableCriteria.fields.delegationTableId?.filter).toContain('eq');
   });
 });

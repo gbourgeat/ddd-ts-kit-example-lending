@@ -1,17 +1,12 @@
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
-import {
-  conflictOfInterestDeclaredV1 as declaredConflictsDefinition,
-  staffMemberAppointedV2 as deciderLevelDefinition,
-} from '@/contexts/branch-network/published-language';
-import { DeciderLevelProjection } from '@/contexts/credit-application/decision/application/projections/decider-level.projection';
+import { conflictOfInterestDeclaredV1 as declaredConflictsDefinition } from '@/contexts/branch-network/published-language';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { DeclaredConflictsProjection } from '@/contexts/credit-application/decision/application/projections/declared-conflicts.projection';
 import type { Platform } from '@/platform/composition/platform';
 
-/** The reactions of the decision module: the conflicts and the level of each decider. The delegation table is kept by its command. */
+/** The reactions of the decision module: the declared conflicts. The delegation table and the level of each decider are kept by their commands. */
 export function registerDecisionReactions(platform: Platform, declaredConflicts: DeclaredConflictsStore): void {
   keepDeclaredConflicts(platform, declaredConflicts);
-  keepDeciderLevels(platform);
 }
 
 function keepDeclaredConflicts(platform: Platform, declaredConflicts: DeclaredConflictsStore): void {
@@ -27,20 +22,6 @@ function keepDeclaredConflicts(platform: Platform, declaredConflicts: DeclaredCo
         scope: platform.scope,
       },
       (event) => declaredConflictsProjection.declared(event),
-    ),
-  ]);
-}
-
-function keepDeciderLevels(platform: Platform): void {
-  const deciderLevelProjection = new DeciderLevelProjection();
-  const { processedEvents: processed, unitOfWork } = platform.persistence;
-  const { scope } = platform;
-
-  subscribeAll(platform.subscriberFor('credit-application'), [
-    consume(
-      deciderLevelDefinition,
-      { consumer: 'credit-application.decider-level', processed, unitOfWork, scope },
-      (event) => deciderLevelProjection.appointed(event),
     ),
   ]);
 }

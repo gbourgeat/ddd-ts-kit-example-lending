@@ -58,4 +58,19 @@ model CreditApplicationDelegationTable {
   @@map("delegation_tables")
   @@schema("credit_application")
 }
+/// The decider levels read model: one row per staff member, the level branch-network appointed them to, the newest event kept.
+model CreditApplicationDeciderLevel {
+  staffMemberId    String   @id @map("staff_member_id")
+  branchId         String   @map("branch_id")
+  level            String   @map("level")
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+  tenantId         String   @map("tenant_id")
+
+  @@index([tenantId, staffMemberId], map: "decider_levels_tenant_idx")
+  @@map("decider_levels")
+  @@schema("credit_application")
+}
 // /ddd-ts-kit:models

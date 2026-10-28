@@ -86,7 +86,7 @@ describe('Keep delegation table, end to end', () => {
 
     const [event] = published.received(delegationTablePublished);
 
-    return event.payload.delegationTableId as string;
+    return (event?.payload as { delegationTableId: string }).delegationTableId;
   }
 
   async function deciderOf(accountId: string): Promise<HttpClient> {

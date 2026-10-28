@@ -13,5 +13,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.consult-register': { description: 'Consult repayment incident register' },
   'application.erase-past-retention': { description: 'Erase personal data past retention' },
   'delegation-table.keep': { description: 'Keep delegation table' },
+  'decider-level.keep': { description: 'Keep decider level' },
   // /ddd-ts-kit:permissions
 });
