@@ -4,6 +4,7 @@ import { creditApplicationControllers } from '@/contexts/credit-application/cred
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 import { InProcessCustomerAdvisorBranchGateway } from '@/contexts/credit-application/file/infrastructure/external/in-process-customer-advisor-branch.gateway';
+import type { CustomerAdvisorBranchGateway } from '@/contexts/credit-application/file/application/ports/customer-advisor-branch-gateway.port';
 // ddd-ts-kit:imports
 
 import { publicUseCase, requires } from '@ddd-ts-kit/auth';
@@ -58,8 +59,9 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     },
   );
 
-  registerGateways(platform);
-  registerHandlers(platform, declaredConflicts);
+  const customerAdvisorBranch = registerGateways(platform);
+
+  registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 
@@ -72,8 +74,8 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
 }
 
 /** The gateways to the other contexts: the branch of an advisor is answered by branch-network, bound by the platform. */
-function registerGateways(platform: Platform): void {
-  platform.adapter(new InProcessCustomerAdvisorBranchGateway(platform.customerAdvisorBranch), {
+function registerGateways(platform: Platform): CustomerAdvisorBranchGateway {
+  return platform.adapter(new InProcessCustomerAdvisorBranchGateway(platform.customerAdvisorBranch), {
     kind: 'external',
     context: 'credit-application',
     token: 'CustomerAdvisorBranchGateway',
@@ -81,7 +83,11 @@ function registerGateways(platform: Platform): void {
 }
 
 /** The command and query handlers of the context, with the repositories and readers they are given. */
-function registerHandlers(platform: Platform, declaredConflicts: DeclaredConflictsStore): void {
+function registerHandlers(
+  platform: Platform,
+  declaredConflicts: DeclaredConflictsStore,
+  customerAdvisorBranch: CustomerAdvisorBranchGateway,
+): void {
   // ddd-ts-kit:handlers
   const creditApplicationRepository = platform.adapter(
     new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
@@ -90,7 +96,7 @@ function registerHandlers(platform: Platform, declaredConflicts: DeclaredConflic
 
   platform.commands.register(
     SubmitApplicationCommand,
-    new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock),
+    new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock, customerAdvisorBranch),
     { context: 'credit-application' },
   );
 

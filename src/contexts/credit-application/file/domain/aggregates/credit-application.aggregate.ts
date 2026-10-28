@@ -29,6 +29,8 @@ export interface CreditApplicationState {
   readonly amount: Money;
   readonly durationMonths: number;
   readonly registeredAt: Date;
+  /** The branch the application was submitted on: empty when no advisor holds the applicant, or when it was submitted before the branch was recorded. */
+  readonly branchId: string;
   readonly accountConsent: AccountConsentState | undefined;
   readonly coBorrowerIds: readonly string[];
   readonly guarantorIds: readonly string[];
@@ -45,6 +47,7 @@ export interface LoanRequest {
   readonly amount: Money;
   readonly durationMonths: number;
   readonly registeredAt: Date;
+  readonly branchId: string;
 }
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
@@ -53,6 +56,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     amount: Money.ofCents(0),
     durationMonths: 0,
     registeredAt: new Date(0),
+    branchId: '',
     accountConsent: undefined,
     coBorrowerIds: [],
     guarantorIds: [],
@@ -77,7 +81,14 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     const created = new CreditApplication(id);
 
     created.record(
-      new CreditApplicationSubmitted(id, applicantId, request.amount, request.durationMonths, request.registeredAt),
+      new CreditApplicationSubmitted(
+        id,
+        applicantId,
+        request.amount,
+        request.durationMonths,
+        request.registeredAt,
+        request.branchId,
+      ),
     );
 
     return created;
@@ -161,6 +172,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     return this.state.registeredAt;
   }
 
+  get branchId(): string {
+    return this.state.branchId;
+  }
+
   get coBorrowerIds(): readonly string[] {
     return this.state.coBorrowerIds;
   }
@@ -213,6 +228,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       amount: event.amount,
       durationMonths: event.durationMonths,
       registeredAt: event.occurredAt,
+      branchId: event.branchId,
       entryCount: this.state.entryCount + 1,
     };
   }

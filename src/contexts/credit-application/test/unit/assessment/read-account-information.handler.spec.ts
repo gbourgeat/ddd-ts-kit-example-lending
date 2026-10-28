@@ -87,5 +87,6 @@ function seededApplication(registeredAt: Date): CreditApplication {
     amount: Money.ofCents(1234567),
     durationMonths: 60,
     registeredAt,
+    branchId: 'branch-1',
   });
 }

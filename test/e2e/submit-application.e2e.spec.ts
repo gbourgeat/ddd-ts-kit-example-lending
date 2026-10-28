@@ -15,6 +15,7 @@ const submissionTree: readonly ExpectedSpan[] = [
       {
         name: 'command SubmitApplicationCommand',
         children: [
+          { name: 'external CustomerAdvisorBranchGateway.branchOfCustomerAdvisor' },
           { name: 'repository CreditApplicationRepository.save' },
           {
             name: 'unit-of-work before-commit',

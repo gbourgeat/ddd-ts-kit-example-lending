@@ -73,6 +73,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Attach | to add a document to the application file, as an entry of it, its content stored in the object store |  |
 | Document attached | a document of the application was stored in the object store and recorded in the file |  |
 | Information | what an account information provider tells about the applicant's accounts: the income and expenses read for an application, kept as a document of its file |  |
+| Advisor | the staff member whose portfolio holds a customer, who gives the customer's branch |  |
+| Branch | the branch of the advisor whose portfolio holds the applicant, on which the application is submitted |  |
 
 ## Modules
 
