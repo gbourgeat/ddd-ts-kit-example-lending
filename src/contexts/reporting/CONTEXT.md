@@ -46,6 +46,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `reporting:report.portfolio-at-risk`
+- `reporting:report.defaults`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -92,12 +93,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `DefaultedLoans` | query | `report.defaults` |
 | `PortfolioAtRiskPerBranch` | query | `report.portfolio-at-risk` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
+| GET | `/reports/defaulted-loans` | `defaultedLoans` | `ReportsRoutes` | `Authenticated` | `DefaultedLoans` | `report.defaults` |  | 200: `DefaultedLoansAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 | GET | `/reports/portfolio-at-risk` | `portfolioAtRiskPerBranch` | `ReportsRoutes` | `Authenticated` | `PortfolioAtRiskPerBranch` | `report.portfolio-at-risk` |  | 200: `PortfolioAtRiskPerBranchAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Projections
@@ -107,6 +110,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | not read | not read |  |
 | not read | `ApplicationCountProjection` |  |
 | not read | `DecisionProjection` |  |
+| not read | `DefaultedLoanProjection` |  |
 | not read | `LoanPrincipalProjection` |  |
 | not read | `PortfolioAtRiskProjection` |  |
 
@@ -116,6 +120,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `ApplicationCounts` | not bound |  |
 | `DecisionCounts` | not bound |  |
+| `DefaultedLoan` | not bound |  |
+| `DefaultedLoansReader` | repository | `PrismaDefaultedLoansReader` |
 | `LoanPrincipal` | not bound |  |
 | `PortfolioAtRisk` | not bound |  |
 | `PortfolioAtRiskPerBranchReader` | repository | `PrismaPortfolioAtRiskPerBranchReader` |

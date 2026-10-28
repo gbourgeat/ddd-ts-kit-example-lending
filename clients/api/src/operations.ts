@@ -3240,6 +3240,36 @@ export function readRateGrid(
   return send<ReadRateGridResult>(connection, operation, { ...input, ...options });
 }
 
+export type DefaultedLoansInput = Record<string, never>;
+
+export type DefaultedLoansResult =
+  | Success<200, {
+    loans: Array<Schemas.DefaultedLoanAnswer>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>;
+
+/**
+ * Defaulted loans: `GET /reports/defaulted-loans`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+ */
+export function defaultedLoans(
+  connection: Connection,
+  input: DefaultedLoansInput = {},
+  options: CallOptions = {},
+): Promise<DefaultedLoansResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/reports/defaulted-loans',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json' },
+  };
+
+  return send<DefaultedLoansResult>(connection, operation, { ...input, ...options });
+}
+
 export type PortfolioAtRiskPerBranchInput = Record<string, never>;
 
 export type PortfolioAtRiskPerBranchResult =

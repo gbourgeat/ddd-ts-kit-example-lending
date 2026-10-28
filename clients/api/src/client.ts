@@ -533,6 +533,12 @@ export interface Client {
    */
   readRateGrid(input: operations.ReadRateGridInput, options?: CallOptions): Promise<operations.ReadRateGridResult>;
   /**
+   * Defaulted loans: `GET /reports/defaulted-loans`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
+   */
+  defaultedLoans(input?: operations.DefaultedLoansInput, options?: CallOptions): Promise<operations.DefaultedLoansResult>;
+  /**
    * Portfolio at risk per branch: `GET /reports/portfolio-at-risk`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406).
@@ -654,6 +660,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
+    defaultedLoans: (input, call) => operations.defaultedLoans(connection, input, call),
     portfolioAtRiskPerBranch: (input, call) => operations.portfolioAtRiskPerBranch(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
     scoreApplicant: (input, call) => operations.scoreApplicant(connection, input, call),

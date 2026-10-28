@@ -43,6 +43,13 @@ export type DeclaredConflictLine = {
   customerId: string;
 };
 
+export type DefaultedLoanAnswer = {
+  loanId: string;
+  branchId: string;
+  principalCents: number;
+  defaultedAt: string;
+};
+
 export type DelegationTableLevelAnswer = {
   level: string;
   amountCents: number;

@@ -14,7 +14,10 @@ import { ApplicationCountProjection } from '@/contexts/reporting/application/pro
 import { PrismaApplicationCounts } from '@/contexts/reporting/infrastructure/persistence/prisma-application-counts.repository';
 import { DecisionProjection } from '@/contexts/reporting/application/projections/decision.projection';
 import { PrismaDecisionCounts } from '@/contexts/reporting/infrastructure/persistence/prisma-decision-counts.repository';
-import { loanArrearsBucketEnteredV1 as portfolioAtRiskDefinition } from '@/contexts/servicing/published-language';
+import {
+  loanArrearsBucketEnteredV1 as portfolioAtRiskDefinition,
+  loanDefaultedV1 as defaultedLoanDefinition,
+} from '@/contexts/servicing/published-language';
 import { PortfolioAtRiskProjection } from '@/contexts/reporting/application/projections/portfolio-at-risk.projection';
 import { LoanPrincipalProjection } from '@/contexts/reporting/application/projections/loan-principal.projection';
 import { PrismaPortfolioAtRisk } from '@/contexts/reporting/infrastructure/persistence/prisma-portfolio-at-risk.repository';
@@ -24,6 +27,11 @@ import { reportingPermissions } from '@/contexts/reporting/reporting.permissions
 import { PortfolioAtRiskPerBranchHandler } from '@/contexts/reporting/application/queries/portfolio-at-risk-per-branch/portfolio-at-risk-per-branch.handler';
 import { PortfolioAtRiskPerBranchQuery } from '@/contexts/reporting/application/queries/portfolio-at-risk-per-branch/portfolio-at-risk-per-branch.query';
 import { PrismaPortfolioAtRiskPerBranchReader } from '@/contexts/reporting/infrastructure/persistence/prisma-portfolio-at-risk-per-branch.reader';
+import { DefaultedLoanProjection } from '@/contexts/reporting/application/projections/defaulted-loan.projection';
+import { DefaultedLoansHandler } from '@/contexts/reporting/application/queries/defaulted-loans/defaulted-loans.handler';
+import { DefaultedLoansQuery } from '@/contexts/reporting/application/queries/defaulted-loans/defaulted-loans.query';
+import { PrismaDefaultedLoan } from '@/contexts/reporting/infrastructure/persistence/prisma-defaulted-loan.repository';
+import { PrismaDefaultedLoansReader } from '@/contexts/reporting/infrastructure/persistence/prisma-defaulted-loans.reader';
 // /ddd-ts-kit:imports
 
 export interface ReportingWiring {
@@ -60,6 +68,15 @@ function registerHandlers(platform: Platform): void {
     new PortfolioAtRiskPerBranchHandler(portfolioAtRiskPerBranchReader),
     { context: 'reporting' },
   );
+
+  const defaultedLoansReader = platform.adapter(
+    new PrismaDefaultedLoansReader(platform.persistence.database, platform.scope),
+    { kind: 'repository', context: 'reporting' },
+  );
+
+  platform.queries.register(DefaultedLoansQuery, new DefaultedLoansHandler(defaultedLoansReader), {
+    context: 'reporting',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -137,6 +154,24 @@ function registerReactions(platform: Platform): void {
       },
     ),
   ]);
+
+  const defaultedLoans = new PrismaDefaultedLoan(platform.persistence.database, platform.scope);
+  const defaultedLoanProjection = new DefaultedLoanProjection(defaultedLoans);
+
+  subscribeAll(platform.subscriberFor('reporting'), [
+    consume(
+      defaultedLoanDefinition,
+      {
+        consumer: 'reporting.defaulted-loan',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      async (event) => {
+        await defaultedLoanProjection.defaulted(event);
+      },
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 
@@ -151,6 +186,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
     requires(PortfolioAtRiskPerBranchQuery, reportingPermissions['report.portfolio-at-risk'], {
+      resource: () => ({ type: 'context', id: 'reporting' }),
+    }),
+    requires(DefaultedLoansQuery, reportingPermissions['report.defaults'], {
       resource: () => ({ type: 'context', id: 'reporting' }),
     }),
     // /ddd-ts-kit:authorization
