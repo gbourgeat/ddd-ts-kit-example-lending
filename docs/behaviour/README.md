@@ -10,7 +10,7 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 | [brokerage](brokerage.md) | 37 | 0 | 13 |
 | [credit-application](credit-application.md) | 150 | 14 | 57 |
 | [credit-policy](credit-policy.md) | 138 | 0 | 48 |
-| [credit-scoring](credit-scoring.md) | 20 | 0 | 8 |
+| [credit-scoring](credit-scoring.md) | 42 | 0 | 13 |
 | [customer-due-diligence](customer-due-diligence.md) | 174 | 12 | 64 |
 | [data-protection](data-protection.md) | 38 | 1 | 15 |
 | [financial-crime](financial-crime.md) | 53 | 0 | 18 |
