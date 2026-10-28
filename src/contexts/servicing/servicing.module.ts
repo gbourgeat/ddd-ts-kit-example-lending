@@ -22,6 +22,9 @@ import { ReadLoanHandler } from '@/contexts/servicing/ledger/application/queries
 import { ReadLoanQuery } from '@/contexts/servicing/ledger/application/queries/read-loan/read-loan.query';
 import { EventStoreReadLoanReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-read-loan.reader';
 import { RemoteBorrowerIdentity } from '@/contexts/servicing/ledger/infrastructure/external/remote-borrower-identity.adapter';
+import { ComputeDueInstalmentsCommand } from '@/contexts/servicing/instalments/application/commands/compute-due-instalments/compute-due-instalments.command';
+import { ComputeDueInstalmentsHandler } from '@/contexts/servicing/instalments/application/commands/compute-due-instalments/compute-due-instalments.handler';
+import { ComputeDueInstalmentsJob } from '@/contexts/servicing/instalments/application/scheduling/compute-due-instalments.job';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -81,6 +84,10 @@ function registerHandlers(platform: Platform): void {
   });
 
   platform.queries.register(ReadLoanQuery, new ReadLoanHandler(readLoanReader), { context: 'servicing' });
+
+  platform.commands.register(ComputeDueInstalmentsCommand, new ComputeDueInstalmentsHandler(loanRepository), {
+    context: 'servicing',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -124,6 +131,15 @@ function registerJobs(platform: Platform): void {
     tenancy: 'per-tenant',
     run: (execution) => erasePersonalDataPastRetentionJob.run(execution),
   });
+
+  const computeDueInstalmentsJob = new ComputeDueInstalmentsJob(platform.commands);
+
+  platform.jobs.register({
+    name: 'servicing.compute-due-instalments',
+    schedule: { cron: '0 1 * * *', timeZone: 'Europe/Paris' },
+    tenancy: 'per-tenant',
+    run: (execution) => computeDueInstalmentsJob.run(execution),
+  });
   // /ddd-ts-kit:jobs
 }
 
@@ -142,6 +158,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(ReadLoanQuery, servicingPermissions['loan.read'], {
       resource: (query) => ({ type: 'loan', id: query.loanId }),
+    }),
+    requires(ComputeDueInstalmentsCommand, servicingPermissions['loan.compute-due'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     // /ddd-ts-kit:authorization
   ];
