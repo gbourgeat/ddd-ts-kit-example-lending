@@ -34,6 +34,8 @@ import { EndRelationshipCommand } from '@/contexts/customer-due-diligence/applic
 import { EndRelationshipHandler } from '@/contexts/customer-due-diligence/application/commands/end-relationship/end-relationship.handler';
 import { EndRelationshipOnSanctionsMatchEventHandler } from '@/contexts/customer-due-diligence/application/event-handlers/end-relationship-on-sanctions-match.event-handler';
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
+import { DismissMatchCommand } from '@/contexts/customer-due-diligence/application/commands/dismiss-match/dismiss-match.command';
+import { DismissMatchHandler } from '@/contexts/customer-due-diligence/application/commands/dismiss-match/dismiss-match.handler';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -120,6 +122,10 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
   );
 
   platform.commands.register(EndRelationshipCommand, new EndRelationshipHandler(customerRepository, platform.clock), {
+    context: 'customer-due-diligence',
+  });
+
+  platform.commands.register(DismissMatchCommand, new DismissMatchHandler(customerRepository, platform.clock), {
     context: 'customer-due-diligence',
   });
   // /ddd-ts-kit:handlers
@@ -215,6 +221,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(EndRelationshipCommand, customerDueDiligencePermissions['relationship.end'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(DismissMatchCommand, customerDueDiligencePermissions['match.dismiss'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

@@ -6,6 +6,7 @@ import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/do
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
+import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
 import { aCustomer, aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
@@ -142,6 +143,37 @@ describe('Customer, once its screening found a possible match, and when its rela
     const identified = aCustomer().identifiedBy('customer-14').bornAt(bornAt).build();
 
     expectRefusal(() => identified.confirmSanctionsMatch(registeredOn), 'NO_POSSIBLE_MATCH');
+  });
+
+  it('dismisses a possible match with the reason of compliance, recording the instant of the dismissal', () => {
+    const screened = aCustomer()
+      .identifiedBy('customer-18')
+      .bornAt(bornAt)
+      .withEvents([new CustomerPossibleMatchFound('customer-18', bornAt)])
+      .build();
+
+    screened.dismissMatch('Another Ada Lovelace, born in another country', registeredOn);
+
+    expect(screened.pullEvents()).toEqual([
+      new CustomerPossibleMatchDismissed('customer-18', registeredOn, 'Another Ada Lovelace, born in another country'),
+    ]);
+  });
+
+  it('refuses to dismiss a possible match without a reason of compliance, recording nothing', () => {
+    const screened = aCustomer()
+      .identifiedBy('customer-19')
+      .bornAt(bornAt)
+      .withEvents([new CustomerPossibleMatchFound('customer-19', bornAt)])
+      .build();
+
+    expectRefusal(() => screened.dismissMatch('   ', registeredOn), 'MISSING_REASON');
+    expect(screened.pullEvents()).toEqual([]);
+  });
+
+  it('refuses to dismiss a customer with no possible match waiting for compliance review', () => {
+    const identified = aCustomer().identifiedBy('customer-20').bornAt(bornAt).build();
+
+    expectRefusal(() => identified.dismissMatch('Nothing to clear', registeredOn), 'NO_POSSIBLE_MATCH');
   });
 
   it('refuses to confirm a match twice, the second confirmation records nothing', () => {

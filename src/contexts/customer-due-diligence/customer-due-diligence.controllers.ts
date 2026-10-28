@@ -7,6 +7,7 @@ import { GetCustomerFileController } from '@/contexts/customer-due-diligence/pre
 import { AssignAdvisorController } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.controller';
 import { ConfirmSanctionsMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.controller';
 import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
+import { DismissMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
 import { ScreenCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
@@ -15,6 +16,8 @@ import { AssignAdvisorBody } from '@/contexts/customer-due-diligence/presentatio
 import { ConfirmSanctionsMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.params';
 import { DeclareDirectorsAndOwnersParams } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.params';
 import { DeclareDirectorsAndOwnersBody } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.body';
+import { DismissMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.params';
+import { DismissMatchBody } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.body';
 import { IdentifyCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.body';
 import { ScreenCustomerParams } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.params';
 import { ScreenCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.body';
@@ -37,6 +40,9 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
       body: DeclareDirectorsAndOwnersBody,
       answer: acceptedSchema,
     },
+  }),
+  withSignatures(DismissMatchController, {
+    dismissMatch: { params: DismissMatchParams, body: DismissMatchBody, answer: acceptedSchema },
   }),
   withSignatures(IdentifyCustomerController, {
     identifyCustomer: { body: IdentifyCustomerBody, answer: acceptedSchema },
