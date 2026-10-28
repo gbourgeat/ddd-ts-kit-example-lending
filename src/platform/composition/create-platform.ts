@@ -7,7 +7,11 @@ import {
   reportAfterCommitFailures,
   type DomainEventDispatcher,
 } from '@ddd-ts-kit/kernel';
+import type { RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import type { TracedApplication } from '@ddd-ts-kit/tracing';
+import type { CustomerAdvisorBranchContract } from '@/contexts/branch-network/published-language';
+import { CustomerAdvisorBranchAnswer } from '@/contexts/branch-network/infrastructure/external/customer-advisor-branch.answer';
+import { PrismaPortfolioRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-portfolio.repository';
 import { accessPolicies } from '@/platform/auth/authorization/access-policies';
 import { createAuthorizer } from '@/platform/auth/authorization/create-authorizer';
 import { createRelationTuples } from '@/platform/auth/relationships/create-relation-tuples';
@@ -36,10 +40,8 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
   const foundations = layFoundations(persistence, options);
   const { traced, ...founded } = foundations;
   const onDecision = foundations.audit.decisions;
-  const { clock, logger, scope } = foundations;
-  // A handler of the after-commit phase that fails is logged and reported: the command it follows is committed, and answers.
-  const afterCommitFailed = reportAfterCommitFailures({ reporter: foundations.errors, logger, scope });
-  const domainEvents = traced.domainEvents(new InMemoryDomainEventDispatcher(afterCommitFailed));
+  const { clock, scope } = foundations;
+  const domainEvents = domainEventsOf(foundations);
   const relations = createRelationTuples(persistence.database);
   const authorizer = createAuthorizer(relations);
   const protection = new UseCaseProtection(authorizer, onDecision);
@@ -59,6 +61,7 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
     domainEvents,
     persistence,
     relations,
+    customerAdvisorBranch: customerAdvisorBranchOf(persistence, relations, foundations),
     access: new PolicyAccess({ authorizer, clock, policies: accessPolicies, onDecision }),
     actors: new ScopedActorContext(scope, foundations.ids),
     adapter,
@@ -66,6 +69,25 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
     protection,
     files,
   };
+}
+
+/**
+ * The domain events of the traced application; a handler of the after-commit phase that fails is
+ * logged and reported: the command it follows is committed, and answers.
+ */
+function domainEventsOf({ traced, errors, logger, scope }: Foundations): DomainEventDispatcher {
+  const afterCommitFailed = reportAfterCommitFailures({ reporter: errors, logger, scope });
+
+  return traced.domainEvents(new InMemoryDomainEventDispatcher(afterCommitFailed));
+}
+
+/** The branch of a customer's advisor, answered from the portfolios of branch-network. */
+function customerAdvisorBranchOf(
+  persistence: Persistence,
+  relations: RelationTupleStore,
+  { scope, clock }: Foundations,
+): CustomerAdvisorBranchContract {
+  return new CustomerAdvisorBranchAnswer(relations, new PrismaPortfolioRepository(persistence.database, scope, clock));
 }
 
 /** Where the content of files lives: the storage of `main.ts`; left out (the tools, the tests), the memory of the process. */

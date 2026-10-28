@@ -3,6 +3,7 @@ import type { Type } from '@nestjs/common';
 import { creditApplicationControllers } from '@/contexts/credit-application/credit-application.controllers';
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
+import { InProcessCustomerAdvisorBranchGateway } from '@/contexts/credit-application/file/infrastructure/external/in-process-customer-advisor-branch.gateway';
 // ddd-ts-kit:imports
 
 import { publicUseCase, requires } from '@ddd-ts-kit/auth';
@@ -57,6 +58,7 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     },
   );
 
+  registerGateways(platform);
   registerHandlers(platform, declaredConflicts);
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
@@ -67,6 +69,15 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     routes: routesOf(platform),
     controllers: creditApplicationControllers,
   };
+}
+
+/** The gateways to the other contexts: the branch of an advisor is answered by branch-network, bound by the platform. */
+function registerGateways(platform: Platform): void {
+  platform.adapter(new InProcessCustomerAdvisorBranchGateway(platform.customerAdvisorBranch), {
+    kind: 'external',
+    context: 'credit-application',
+    token: 'CustomerAdvisorBranchGateway',
+  });
 }
 
 /** The command and query handlers of the context, with the repositories and readers they are given. */

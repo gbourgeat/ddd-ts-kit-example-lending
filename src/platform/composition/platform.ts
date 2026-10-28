@@ -26,6 +26,7 @@ import type { Persistence } from '@/platform/database/persistence';
 import type { RetentionPeriods } from '@/platform/config/read-retention-periods';
 import type { EventSourcing } from '@/platform/event-sourcing/create-event-sourcing';
 import type { Files } from '@/platform/files/create-files';
+import type { CustomerAdvisorBranchContract } from '@/contexts/branch-network/published-language';
 import type { BackgroundJobs } from '@/platform/jobs/background-jobs';
 
 /** Wraps an adapter from outside: a span for its kind and, for what leaves the process, the default policy unless it states its own. */
@@ -53,6 +54,8 @@ export interface Platform {
   readonly retention: RetentionPeriods;
   /** The relationships the authorizer reads, written in the transaction of the change they describe. */
   readonly relations: RelationTupleStore;
+  /** The branch of a customer's advisor, answered by branch-network: what a context reaches through its gateway, never the module of another context. */
+  readonly customerAdvisorBranch: CustomerAdvisorBranchContract;
   /** Asks the policies about one element, then the authorizer: for the rules that need loaded state. */
   readonly access: Access;
   /**
