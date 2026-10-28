@@ -25,6 +25,8 @@ import { RemoteBorrowerIdentity } from '@/contexts/servicing/ledger/infrastructu
 import { ComputeDueInstalmentsCommand } from '@/contexts/servicing/instalments/application/commands/compute-due-instalments/compute-due-instalments.command';
 import { ComputeDueInstalmentsHandler } from '@/contexts/servicing/instalments/application/commands/compute-due-instalments/compute-due-instalments.handler';
 import { ComputeDueInstalmentsJob } from '@/contexts/servicing/instalments/application/scheduling/compute-due-instalments.job';
+import { LoanPaidOutPublisher } from '@/contexts/servicing/ledger/application/integration/publishers/loan-paid-out.publisher';
+import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -117,6 +119,17 @@ function registerReactions(platform: Platform): void {
       (event) => recordPayoutOnPayoutAuthorisedIntegrationHandler.handle(event),
     ),
   ]);
+
+  const loanPaidOutPublisher = platform.adapter(new LoanPaidOutPublisher(platform.publisher, platform.ids), {
+    kind: 'domain-event-handler',
+    context: 'servicing',
+  });
+
+  platform.domainEvents.on(LoanPaidOut.eventName, async (event) => {
+    if (event instanceof LoanPaidOut) {
+      await loanPaidOutPublisher.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 

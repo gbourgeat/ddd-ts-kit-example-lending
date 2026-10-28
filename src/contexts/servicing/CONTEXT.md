@@ -68,6 +68,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `servicing.loan.paid-out` (version 1)
 <!-- /ddd-ts-kit:events -->
 
 ## Personal data
@@ -154,6 +155,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
 | `credit-application.credit-application.payout-authorised` | 1 | `credit-application` | `RecordPayoutOnPayoutAuthorisedIntegrationHandler` | `servicing.record-payout-on-payout-authorised` |
+
+### Publishers
+
+| Event | Versions | Publisher |
+|---|---|---|
+| `servicing.loan.paid-out` | 1 | `LoanPaidOutPublisher` |
 
 ### Ports
 
