@@ -5,6 +5,8 @@ import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/in
 import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
 import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
 import { FakeIntermediariesRegister } from '@/contexts/brokerage/test/fakes/intermediaries-register.fake';
+import { creditApplicationModule } from '@/contexts/credit-application/credit-application.module';
+import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 import { identityModule } from '@/contexts/identity/identity.module';
 import { FakeIdentityProviderAdmin } from '@/contexts/identity/test/fakes/identity-provider-admin.fake';
 import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
@@ -62,6 +64,9 @@ export interface RunningApplication {
   /** The intermediaries register of brokerage: a spec revokes a registration with `register.revoke(number)`. */
   readonly register: FakeIntermediariesRegister;
 
+  /** The national register of repayment incidents of credit-application: a spec lists a person with `incidents.record(name, birthDate)`. */
+  readonly incidents: SimulatedRepaymentIncidentRegister;
+
   /** Runs a background job of the application now, by its name (`brokerage.check-registration`). */
   runJob(name: string): Promise<unknown>;
 
@@ -83,13 +88,15 @@ export async function startApplication(): Promise<RunningApplication> {
   const credentials = await createCredentials();
   const screening = new SimulatedScreeningProvider();
   const register = new FakeIntermediariesRegister();
-  const started = await start({ database, config, credentials, screening, register });
+  const incidents = new SimulatedRepaymentIncidentRegister();
+  const started = await start({ database, config, credentials, screening, register, incidents });
 
   return {
     client: started.client,
     events: started.events,
     screening,
     register,
+    incidents,
     runJob: (name) => started.runJob(name),
     persistence: database.persistence,
     as: async (actor) => started.client.withHeaders(await credentials.headersOf(actor)),
@@ -125,12 +132,13 @@ interface StartProps {
   readonly credentials: Credentials;
   readonly screening: SimulatedScreeningProvider;
   readonly register: FakeIntermediariesRegister;
+  readonly incidents: SimulatedRepaymentIncidentRegister;
 }
 
 /** The application on the test database, listening on a free port; closing it closes the database last. */
-async function start({ database, config, credentials, screening, register }: StartProps): Promise<Started> {
+async function start({ database, config, credentials, screening, register, incidents }: StartProps): Promise<Started> {
   const redis = config.redisUrl === noRedis ? undefined : openRedis(config);
-  const selection = contextsWith(screening, register);
+  const selection = contextsWith(screening, register, incidents);
 
   const application = composeApplication(
     database.persistence,
@@ -186,6 +194,7 @@ function applicationOptions(
 function contextsWith(
   screening: SimulatedScreeningProvider,
   register: FakeIntermediariesRegister,
+  incidents: SimulatedRepaymentIncidentRegister,
 ): typeof everyContext {
   return everyContext.map((context) => {
     if (context === customerDueDiligenceModule) {
@@ -194,6 +203,10 @@ function contextsWith(
 
     if (context === brokerageModule) {
       return brokerageWithRegister(register);
+    }
+
+    if (context === creditApplicationModule) {
+      return creditApplicationWithIncidents(incidents);
     }
 
     if (context === identityModule) {
@@ -216,6 +229,21 @@ function brokerageWithRegister(register: FakeIntermediariesRegister) {
     };
 
     return brokerageModule({ ...platform, adapter });
+  };
+}
+
+/** The credit application context as the application wires it, except that its register of repayment incidents is the one the spec drives. */
+function creditApplicationWithIncidents(incidents: SimulatedRepaymentIncidentRegister) {
+  return (platform: Platform): ReturnType<typeof creditApplicationModule> => {
+    const adapter: Platform['adapter'] = (instance, info) => {
+      if (info.token === 'RepaymentIncidentRegister') {
+        return platform.adapter(incidents as unknown as typeof instance, info);
+      }
+
+      return platform.adapter(instance, info);
+    };
+
+    return creditApplicationModule({ ...platform, adapter });
   };
 }
 

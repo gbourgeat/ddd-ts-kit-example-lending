@@ -97,8 +97,22 @@ describe('Assess application, end to end', () => {
       repaymentIncidents: 0,
       residualIncomeCents: 160_000,
       score: 85,
+      proposedOutcome: 'approve',
       factors: ['Your debts take a share of your income that is close to the limit'],
     });
+  });
+
+  it('proposes a refusal, never a refusal itself, when the register lists the applicant: 201', async () => {
+    application.incidents.record('Ada Lovelace', new Date('1980-05-01T00:00:00.000Z'));
+    const applicationId = await applicationWithAccountsAndRegister();
+    const operator = await creditScoringOperatorOf(application, 'olivia');
+
+    expectStatus(await operator.post('/scoring-models', version), 201);
+
+    const credit = await analyst();
+    const response = expectStatus(await credit.post(`/applications/${applicationId}/assessment`, {}), 201);
+
+    expect(response.body).toMatchObject({ repaymentIncidents: 1, proposedOutcome: 'refuse' });
   });
 
   it('refuses the assessment without a published scoring model version, by its code', async () => {
