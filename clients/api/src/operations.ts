@@ -932,6 +932,40 @@ export function draftOffer(
   return send<DraftOfferResult>(connection, operation, { ...input, ...options });
 }
 
+export interface AuthorizePayoutInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type AuthorizePayoutResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'OFFER_NOT_SIGNED' | 'PAYOUT_AFTER_WITHDRAWAL' | 'PAYOUT_NOT_ELIGIBLE' | 'PAYOUT_TOO_EARLY' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Authorize payout: `POST /applications/{id}/payout-authorisation`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_NOT_SIGNED (422), PAYOUT_AFTER_WITHDRAWAL (422), PAYOUT_NOT_ELIGIBLE (422), PAYOUT_TOO_EARLY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function authorizePayout(
+  connection: Connection,
+  input: AuthorizePayoutInput,
+  options: CallOptions = {},
+): Promise<AuthorizePayoutResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/payout-authorisation',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<AuthorizePayoutResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadProductTermsFindingsInput {
   readonly path: {
     readonly id: string;
@@ -1074,6 +1108,40 @@ export function decideRescheduling(
   };
 
   return send<DecideReschedulingResult>(connection, operation, { ...input, ...options });
+}
+
+export interface WithdrawLoanInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type WithdrawLoanResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'OFFER_NOT_SIGNED' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED' | 'WITHDRAWAL_ALREADY_RECORDED' | 'WITHDRAWAL_EXPIRED', Schemas.Problem>;
+
+/**
+ * Withdraw loan: `POST /applications/{id}/withdrawal`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_NOT_SIGNED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422), WITHDRAWAL_ALREADY_RECORDED (422), WITHDRAWAL_EXPIRED (422).
+ */
+export function withdrawLoan(
+  connection: Connection,
+  input: WithdrawLoanInput,
+  options: CallOptions = {},
+): Promise<WithdrawLoanResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/withdrawal',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<WithdrawLoanResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SearchAuditEntriesInput {

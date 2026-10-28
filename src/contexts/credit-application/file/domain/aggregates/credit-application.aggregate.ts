@@ -40,6 +40,10 @@ import { ContestCheckService } from '@/contexts/credit-application/file/domain/s
 import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
 import { ReschedulingCheckService } from '@/contexts/credit-application/file/domain/services/rescheduling-check.service';
 import type { ReschedulingInput } from '@/contexts/credit-application/file/domain/values/rescheduling-input';
+import { CreditApplicationWithdrawn } from '@/contexts/credit-application/offer/domain/events/credit-application-withdrawn.event';
+import { CreditApplicationPayoutAuthorised } from '@/contexts/credit-application/offer/domain/events/credit-application-payout-authorised.event';
+import { WithdrawalCheckService } from '@/contexts/credit-application/offer/domain/services/withdrawal-check.service';
+import { PayoutAuthorisationCheckService } from '@/contexts/credit-application/offer/domain/services/payout-authorisation-check.service';
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
   private state: CreditApplicationState = initialCreditApplicationState();
@@ -153,6 +157,20 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new ContestCheckService().eventOf(this.id, this.state, contest));
   }
 
+  /** The borrower withdraws the application within 14 calendar days of the signing of its offer, without a reason, once. */
+  withdraw(signedAt: Date | undefined, withdrawnAt: Date): void {
+    const facts = { alreadyWithdrawn: this.state.withdrawnAt !== undefined, signedAt, now: withdrawnAt };
+
+    this.record(new WithdrawalCheckService().eventOf(this.id, facts));
+  }
+
+  /** The payout is authorised: refused before the 8th day after the signing, after a withdrawal, or to an ineligible customer. */
+  authorisePayout(payout: { signedAt: Date | undefined; ineligibility: string | undefined; now: Date }): void {
+    const facts = { withdrawn: this.state.withdrawnAt !== undefined, ...payout };
+
+    this.record(new PayoutAuthorisationCheckService().eventOf(this.id, facts));
+  }
+
   /** A broker brought the application for the customer it was submitted for: the broker is kept in the file. */
   recordBrought(brokerId: string, broughtAt: Date): void {
     this.record(new CreditApplicationBrought(this.id, broughtAt, brokerId));
@@ -252,6 +270,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationRescheduleDecided.eventName]: () => this.applyEntryAppended({}),
       [CreditApplicationContested.eventName]: (event) =>
         this.applyEntryAppended(new ContestCheckService().changesOf(event, this.state)),
+      [CreditApplicationWithdrawn.eventName]: (event) => this.applyEntryAppended({ withdrawnAt: event.occurredAt }),
+      [CreditApplicationPayoutAuthorised.eventName]: () => this.applyEntryAppended({}),
     };
   }
 

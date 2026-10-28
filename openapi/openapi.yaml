@@ -2019,6 +2019,72 @@ paths:
             - UNKNOWN_CREDIT_APPLICATION
             - UNKNOWN_LEGAL_MAXIMUM_RATE
             - VALIDATION_FAILED
+  /applications/{id}/payout-authorisation:
+    post:
+      operationId: authorizePayout
+      summary: Authorize payout
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: OFFER_NOT_SIGNED, PAYOUT_AFTER_WITHDRAWAL, PAYOUT_NOT_ELIGIBLE, PAYOUT_TOO_EARLY, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - OFFER_NOT_SIGNED
+            - PAYOUT_AFTER_WITHDRAWAL
+            - PAYOUT_NOT_ELIGIBLE
+            - PAYOUT_TOO_EARLY
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /applications/{id}/product-terms-findings:
     get:
       operationId: readProductTermsFindings
@@ -2317,6 +2383,71 @@ paths:
             - UNKNOWN_DECIDER_LEVEL
             - UNKNOWN_DELEGATION_TABLE
             - VALIDATION_FAILED
+  /applications/{id}/withdrawal:
+    post:
+      operationId: withdrawLoan
+      summary: Withdraw loan
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: OFFER_NOT_SIGNED, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED, WITHDRAWAL_ALREADY_RECORDED, WITHDRAWAL_EXPIRED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - OFFER_NOT_SIGNED
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+            - WITHDRAWAL_ALREADY_RECORDED
+            - WITHDRAWAL_EXPIRED
   /audit/entries:
     get:
       operationId: searchAuditEntries

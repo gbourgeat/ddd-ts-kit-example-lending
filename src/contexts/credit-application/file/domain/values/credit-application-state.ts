@@ -47,4 +47,6 @@ export interface CreditApplicationState {
   readonly contestation:
     | { readonly requesterId: string; readonly contestedAt: Date; readonly reason: string }
     | undefined;
+  /** The instant the borrower withdrew the application, undefined until a withdrawal: once only, and no payout after it. */
+  readonly withdrawnAt: Date | undefined;
 }

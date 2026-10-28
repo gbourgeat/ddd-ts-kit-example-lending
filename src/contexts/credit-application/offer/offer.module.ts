@@ -39,6 +39,11 @@ import { IssueOfferCommand } from '@/contexts/credit-application/offer/applicati
 import { IssueOfferHandler } from '@/contexts/credit-application/offer/application/commands/issue-offer/issue-offer.handler';
 import { AcceptOfferCommand } from '@/contexts/credit-application/offer/application/commands/accept-offer/accept-offer.command';
 import { AcceptOfferHandler } from '@/contexts/credit-application/offer/application/commands/accept-offer/accept-offer.handler';
+import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+import { WithdrawLoanCommand } from '@/contexts/credit-application/offer/application/commands/withdraw-loan/withdraw-loan.command';
+import { WithdrawLoanHandler } from '@/contexts/credit-application/offer/application/commands/withdraw-loan/withdraw-loan.handler';
+import { AuthorizePayoutCommand } from '@/contexts/credit-application/offer/application/commands/authorize-payout/authorize-payout.command';
+import { AuthorizePayoutHandler } from '@/contexts/credit-application/offer/application/commands/authorize-payout/authorize-payout.handler';
 // /ddd-ts-kit:imports
 
 /** What the module offer of the model registers; credit-application.module.ts composes it with the rest of the context. */
@@ -46,12 +51,6 @@ export const offerModule = {
   /** The command and query handlers of the module, with the repositories and readers they are given. */
   registerHandlers(platform: Platform, given: { readonly repository: CreditApplicationRepository }): void {
     // ddd-ts-kit:handlers
-    platform.adapter(new InProcessCustomerDiligenceGateway(platform.customerDiligence), {
-      kind: 'gateway',
-      context: 'credit-application',
-      token: 'CustomerDiligenceGateway',
-    });
-
     registerRateGridHandlers(platform);
     registerLegalMaximumRateHandlers(platform);
 
@@ -79,6 +78,16 @@ export const offerModule = {
       new AcceptOfferHandler(offerRepository, { signature, clock: platform.clock }),
       { context: 'credit-application' },
     );
+
+    const creditApplicationRepository = platform.adapter(
+      new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
+      { kind: 'repository', context: 'credit-application', token: 'CreditApplicationRepository' },
+    );
+
+    registerWithdrawalAndPayoutHandlers(platform, {
+      applications: creditApplicationRepository,
+      offers: offerRepository,
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -111,6 +120,12 @@ export const offerModule = {
       }),
       requires(AcceptOfferCommand, creditApplicationPermissions['offer.accept'], {
         resource: (command) => ({ type: 'offer', id: command.offerId }),
+      }),
+      requires(WithdrawLoanCommand, creditApplicationPermissions['application.withdraw'], {
+        resource: (command) => ({ type: 'application', id: command.applicationId }),
+      }),
+      requires(AuthorizePayoutCommand, creditApplicationPermissions['application.authorise-payout'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
       }),
       // /ddd-ts-kit:authorization
     ];
@@ -160,6 +175,35 @@ function registerOfferCommands(
     {
       context: 'credit-application',
     },
+  );
+}
+
+/** The borrower's withdrawal and the operator's payout authorisation, checked against the signing of the offer. */
+function registerWithdrawalAndPayoutHandlers(
+  platform: Platform,
+  given: {
+    readonly applications: CreditApplicationRepository;
+    readonly offers: OfferRepository;
+  },
+): void {
+  const { applications, offers } = given;
+
+  const diligence = platform.adapter(new InProcessCustomerDiligenceGateway(platform.customerDiligence), {
+    kind: 'gateway',
+    context: 'credit-application',
+    token: 'CustomerDiligenceGateway',
+  });
+
+  platform.commands.register(
+    WithdrawLoanCommand,
+    new WithdrawLoanHandler(applications, { offers, clock: platform.clock }),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    AuthorizePayoutCommand,
+    new AuthorizePayoutHandler(applications, { offers, diligence, clock: platform.clock }),
+    { context: 'credit-application' },
   );
 }
 

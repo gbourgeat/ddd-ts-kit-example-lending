@@ -167,6 +167,12 @@ export interface Client {
    */
   draftOffer(input: operations.DraftOfferInput, options?: CallOptions): Promise<operations.DraftOfferResult>;
   /**
+   * Authorize payout: `POST /applications/{id}/payout-authorisation`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_NOT_SIGNED (422), PAYOUT_AFTER_WITHDRAWAL (422), PAYOUT_NOT_ELIGIBLE (422), PAYOUT_TOO_EARLY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  authorizePayout(input: operations.AuthorizePayoutInput, options?: CallOptions): Promise<operations.AuthorizePayoutResult>;
+  /**
    * Read what the check of an application against its product found: `GET /applications/{id}/product-terms-findings`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -190,6 +196,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), CONFLICTED_DECIDER (422), DECISION_ABOVE_LIMIT (422), INVALID_DURATION (422), PREPARER_CANNOT_DECIDE (422), RESCHEDULING_NOT_APPROVED (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
    */
   decideRescheduling(input: operations.DecideReschedulingInput, options?: CallOptions): Promise<operations.DecideReschedulingResult>;
+  /**
+   * Withdraw loan: `POST /applications/{id}/withdrawal`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_NOT_SIGNED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422), WITHDRAWAL_ALREADY_RECORDED (422), WITHDRAWAL_EXPIRED (422).
+   */
+  withdrawLoan(input: operations.WithdrawLoanInput, options?: CallOptions): Promise<operations.WithdrawLoanResult>;
   /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
@@ -539,10 +551,12 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     requestHumanReview: (input, call) => operations.requestHumanReview(connection, input, call),
     issueOffer: (input, call) => operations.issueOffer(connection, input, call),
     draftOffer: (input, call) => operations.draftOffer(connection, input, call),
+    authorizePayout: (input, call) => operations.authorizePayout(connection, input, call),
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),
     reviewProposedRefusal: (input, call) => operations.reviewProposedRefusal(connection, input, call),
     consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
     decideRescheduling: (input, call) => operations.decideRescheduling(connection, input, call),
+    withdrawLoan: (input, call) => operations.withdrawLoan(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),

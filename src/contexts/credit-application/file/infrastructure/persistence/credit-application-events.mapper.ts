@@ -22,6 +22,10 @@ import { CreditApplicationContested } from '@/contexts/credit-application/file/d
 import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
 import { creditApplicationRescheduleDecidedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-reschedule-decided.mapper';
 import { creditApplicationContestedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-contested.mapper';
+import { CreditApplicationWithdrawn } from '@/contexts/credit-application/offer/domain/events/credit-application-withdrawn.event';
+import { CreditApplicationPayoutAuthorised } from '@/contexts/credit-application/offer/domain/events/credit-application-payout-authorised.event';
+import { creditApplicationWithdrawnStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-withdrawn.mapper';
+import { creditApplicationPayoutAuthorisedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-payout-authorised.mapper';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -338,4 +342,6 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
   }),
   [CreditApplicationRescheduleDecided.eventName]: creditApplicationRescheduleDecidedStored,
   [CreditApplicationContested.eventName]: creditApplicationContestedStored,
+  [CreditApplicationWithdrawn.eventName]: creditApplicationWithdrawnStored,
+  [CreditApplicationPayoutAuthorised.eventName]: creditApplicationPayoutAuthorisedStored,
 };

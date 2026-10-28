@@ -28,8 +28,10 @@ import { SearchApplicationsController } from '@/contexts/credit-application/file
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
 import { ReadBrokerRegistrationController } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.controller';
 import { ReadProductTermsController } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.controller';
+import { AuthorizePayoutController } from '@/contexts/credit-application/offer/presentation/http/applications/authorize-payout/authorize-payout.controller';
 import { DraftOfferController } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.controller';
 import { IssueOfferController } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.controller';
+import { WithdrawLoanController } from '@/contexts/credit-application/offer/presentation/http/applications/withdraw-loan/withdraw-loan.controller';
 import { ReadLegalMaximumRateController } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.controller';
 import { AcceptOfferController } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.controller';
 import { ReadPreContractualSheetController } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.controller';
@@ -78,10 +80,14 @@ import { ReadBrokerRegistrationParams } from '@/contexts/credit-application/file
 import { ReadBrokerRegistrationAnswer } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.answer';
 import { ReadProductTermsParams } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.params';
 import { ReadProductTermsAnswer } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.answer';
+import { AuthorizePayoutParams } from '@/contexts/credit-application/offer/presentation/http/applications/authorize-payout/authorize-payout.params';
+import { AuthorizePayoutBody } from '@/contexts/credit-application/offer/presentation/http/applications/authorize-payout/authorize-payout.body';
 import { DraftOfferParams } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.params';
 import { DraftOfferBody } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.body';
 import { IssueOfferParams } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.params';
 import { IssueOfferBody } from '@/contexts/credit-application/offer/presentation/http/applications/issue-offer/issue-offer.body';
+import { WithdrawLoanParams } from '@/contexts/credit-application/offer/presentation/http/applications/withdraw-loan/withdraw-loan.params';
+import { WithdrawLoanBody } from '@/contexts/credit-application/offer/presentation/http/applications/withdraw-loan/withdraw-loan.body';
 import { ReadLegalMaximumRateParams } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.params';
 import { ReadLegalMaximumRateAnswer } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.answer';
 import { AcceptOfferParams } from '@/contexts/credit-application/offer/presentation/http/offers/accept-offer/accept-offer.params';
@@ -174,11 +180,17 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(ReadProductTermsController, {
     readProductTerms: { params: ReadProductTermsParams, answer: ReadProductTermsAnswer },
   }),
+  withSignatures(AuthorizePayoutController, {
+    authorizePayout: { params: AuthorizePayoutParams, body: AuthorizePayoutBody, answer: null },
+  }),
   withSignatures(DraftOfferController, {
     draftOffer: { params: DraftOfferParams, body: DraftOfferBody, answer: acceptedSchema },
   }),
   withSignatures(IssueOfferController, {
     issueOffer: { params: IssueOfferParams, body: IssueOfferBody, answer: null },
+  }),
+  withSignatures(WithdrawLoanController, {
+    withdrawLoan: { params: WithdrawLoanParams, body: WithdrawLoanBody, answer: null },
   }),
   withSignatures(ReadLegalMaximumRateController, {
     readLegalMaximumRate: { params: ReadLegalMaximumRateParams, answer: ReadLegalMaximumRateAnswer },

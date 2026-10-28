@@ -50,6 +50,12 @@ export const CreditApplicationCodes = {
   OfferAlreadyAccepted: 'OFFER_ALREADY_ACCEPTED',
   OfferExpired: 'OFFER_EXPIRED',
   ReschedulingNotApproved: 'RESCHEDULING_NOT_APPROVED',
+  PayoutTooEarly: 'PAYOUT_TOO_EARLY',
+  WithdrawalExpired: 'WITHDRAWAL_EXPIRED',
+  WithdrawalAlreadyRecorded: 'WITHDRAWAL_ALREADY_RECORDED',
+  OfferNotSigned: 'OFFER_NOT_SIGNED',
+  PayoutAfterWithdrawal: 'PAYOUT_AFTER_WITHDRAWAL',
+  PayoutNotEligible: 'PAYOUT_NOT_ELIGIBLE',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

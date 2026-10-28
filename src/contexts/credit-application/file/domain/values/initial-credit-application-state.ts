@@ -26,5 +26,6 @@ export function initialCreditApplicationState(): CreditApplicationState {
     humanReview: undefined,
     exceptionDecision: undefined,
     contestation: undefined,
+    withdrawnAt: undefined,
   };
 }
