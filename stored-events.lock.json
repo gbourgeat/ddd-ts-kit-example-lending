@@ -15,7 +15,8 @@
     "1": "sha256:25dd58ec9a66b312"
   },
   "credit-application.credit-application.submitted": {
-    "1": "sha256:9fc1a08288528135"
+    "1": "sha256:9fc1a08288528135",
+    "2": "sha256:d4b0bb9444e9d615"
   },
   "customer-due-diligence.customer.advisor-assigned": {
     "1": "sha256:bfc471f16ecf58e3"
