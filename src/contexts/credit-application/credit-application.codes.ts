@@ -9,6 +9,8 @@ export const CreditApplicationCodes = {
   InvalidCorrectionReason: 'INVALID_CORRECTION_REASON',
   MissingAccountConsent: 'MISSING_ACCOUNT_CONSENT',
   UnidentifiedParty: 'UNIDENTIFIED_PARTY',
+  UnknownDelegationTable: 'UNKNOWN_DELEGATION_TABLE',
+  UnknownDeciderLevel: 'UNKNOWN_DECIDER_LEVEL',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];
