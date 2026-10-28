@@ -31,6 +31,7 @@ Retention and erasure are a legal obligation every context serves, with no busin
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `ImpactAssessment`
 - `RetentionPeriod`
 <!-- /ddd-ts-kit:aggregates -->
 
@@ -118,6 +119,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `CopyOfDataStore` | external | `FileCopyOfDataStore` |
+| `ImpactAssessmentRepository` | external | `PrismaImpactAssessmentRepository` |
 | `PersonalDataGathering` | external | `PlatformPersonalDataGathering` |
 | `PersonalDataPurge` | external | `PlatformPersonalDataPurge` |
 | `RetentionPeriodRepository` | repository | `PrismaRetentionPeriodRepository` |
