@@ -326,7 +326,7 @@ Notes:
 | US12.02 | reporting | slice | Decisions per branch: approval rate and share of exceptions | `projection reporting Decision credit-application.credit-application.decided` | US7.12 | reporting | done |
 | US12.03 | reporting | slice | Portfolio at risk per branch, from the arrears buckets | `projection reporting PortfolioAtRisk servicing.loan.arrears-bucket-entered` | US10.08 | reporting | done |
 | US12.04 | reporting | slice | Loans in default, for the supervisor | `projection reporting DefaultedLoan servicing.loan.defaulted` | US10.08 | reporting | done |
-| US12.05 | reporting | slice | Monthly report per branch | `query reporting MonthlyReport --permission report.monthly --search` | US12.01, US12.02, US12.03 | reporting | todo |
+| US12.05 | reporting | slice | Monthly report per branch | `query reporting MonthlyReport --permission report.monthly --search` | US12.01, US12.02, US12.03 | reporting | done |
 | US12.06 | reporting | slice | Monthly report as CSV | `representation reporting MonthlyReport csv` | US12.05 | reporting | todo |
 | US12.07 | reporting | slice | Defaults list as CSV | `query reporting DefaultsList --permission report.defaults`; `representation reporting DefaultsList csv` | US12.04 | reporting | todo |
 
