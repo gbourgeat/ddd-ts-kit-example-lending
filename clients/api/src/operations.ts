@@ -2464,6 +2464,52 @@ export function repayEarly(
   return send<RepayEarlyResult>(connection, operation, { ...input, ...options });
 }
 
+export interface GetLoanStatementInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly query: {
+    readonly asOf: string;
+  };
+}
+
+export type GetLoanStatementResult =
+  | Success<200, {
+    loanId: string;
+    asOf: string;
+    outstandingCapitalCents: number;
+    arrearsCents: number;
+    daysPastDue: number;
+    instalmentsCents: Array<number>;
+    instalmentsDue: Array<number>;
+    instalmentsPaid: Array<number>;
+    instalmentsUnpaid: Array<number>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_LOAN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Get loan statement: `GET /loans/{id}/statement`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+ */
+export function getLoanStatement(
+  connection: Connection,
+  input: GetLoanStatementInput,
+  options: CallOptions = {},
+): Promise<GetLoanStatementResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/loans/{id}/statement',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<GetLoanStatementResult>(connection, operation, { ...input, ...options });
+}
+
 export interface WriteOffLoanInput {
   readonly path: {
     readonly id: string;

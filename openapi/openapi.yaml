@@ -5286,6 +5286,109 @@ paths:
             - LOAN_ALREADY_CLOSED
             - UNKNOWN_LOAN
             - VALIDATION_FAILED
+  /loans/{id}/statement:
+    get:
+      operationId: getLoanStatement
+      summary: Get loan statement
+      tags:
+        - servicing
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: asOf
+          in: query
+          required: true
+          schema:
+            pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+            type: string
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  loanId:
+                    type: string
+                  asOf:
+                    type: string
+                  outstandingCapitalCents:
+                    type: integer
+                  arrearsCents:
+                    type: integer
+                  daysPastDue:
+                    type: integer
+                  instalmentsCents:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsDue:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsPaid:
+                    items:
+                      type: integer
+                    type: array
+                  instalmentsUnpaid:
+                    items:
+                      type: integer
+                    type: array
+                type: object
+                required:
+                  - loanId
+                  - asOf
+                  - outstandingCapitalCents
+                  - arrearsCents
+                  - daysPastDue
+                  - instalmentsCents
+                  - instalmentsDue
+                  - instalmentsPaid
+                  - instalmentsUnpaid
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_LOAN, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_LOAN
+            - VALIDATION_FAILED
   /loans/{id}/write-off:
     post:
       operationId: writeOffLoan

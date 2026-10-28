@@ -19,15 +19,18 @@ const SCAN_PAGE_SIZE = 500;
 /** The stream of Loan is `servicing.loan-<id>` in the event store the platform binds. */
 export class EventStoreLoanRepository implements LoanRepository {
   private readonly streams: EventSourcedRepository<Loan, LoanEvent, LoanState>;
+  private readonly serializer: EventSerializer<LoanEvent>;
 
   constructor(
     private readonly store: EventStore,
     cipher: PersonalDataCipher,
   ) {
+    this.serializer = new EventSerializer<LoanEvent>(loanEvents, { cipher });
+
     this.streams = new EventSourcedRepository({
       store,
       category: CATEGORY,
-      serializer: new EventSerializer<LoanEvent>(loanEvents, { cipher }),
+      serializer: this.serializer,
       rehydrate: (id, history) => Loan.rehydrate(id, history),
       // TODO(domain): when a stream grows long enough to slow a load, add `snapshots: { ...loanSnapshots, store: snapshots, every: <n> }` (a SnapshotStore injected here, a snapshot mapper with its own shape version): see docs/concepts/event-sourcing.md of ddd-ts-kit.
     });
@@ -69,6 +72,13 @@ export class EventStoreLoanRepository implements LoanRepository {
 
   save(saved: Loan): Promise<void> {
     return this.streams.save(saved);
+  }
+
+  /** The events of the stream, opened by the serializer in their order: an erased personal value reads as erased. */
+  async historyOf(id: string): Promise<readonly LoanEvent[]> {
+    const stored = await this.store.readStream(EventSourcedRepository.streamOf(CATEGORY, id));
+
+    return Promise.all(stored.map((event) => this.serializer.deserialize(event)));
   }
 
   /** The identifiers of the loan streams, read from the whole store in the order its appends committed. */

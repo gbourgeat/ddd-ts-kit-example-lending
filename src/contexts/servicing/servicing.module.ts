@@ -50,6 +50,9 @@ import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infra
 import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
 import { LoanPaymentReceivedPublisher } from '@/contexts/servicing/instalments/application/integration/publishers/loan-payment-received.publisher';
 import { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
+import { GetLoanStatementHandler } from '@/contexts/servicing/ledger/application/queries/get-loan-statement/get-loan-statement.handler';
+import { GetLoanStatementQuery } from '@/contexts/servicing/ledger/application/queries/get-loan-statement/get-loan-statement.query';
+import { EventStoreGetLoanStatementReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-get-loan-statement.reader';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -147,6 +150,15 @@ function registerHandlers(platform: Platform): void {
       context: 'servicing',
     },
   );
+
+  const getLoanStatementReader = platform.adapter(new EventStoreGetLoanStatementReader(loanRepository), {
+    kind: 'repository',
+    context: 'servicing',
+  });
+
+  platform.queries.register(GetLoanStatementQuery, new GetLoanStatementHandler(getLoanStatementReader), {
+    context: 'servicing',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -301,6 +313,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(CollectInstalmentCommand, servicingPermissions['loan.collect'], {
       resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(GetLoanStatementQuery, servicingPermissions['loan.read'], {
+      resource: (query) => ({ type: 'loan', id: query.loanId }),
     }),
     // /ddd-ts-kit:authorization
   ];

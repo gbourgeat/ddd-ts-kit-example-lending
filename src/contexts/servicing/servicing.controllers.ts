@@ -2,12 +2,16 @@
 import { withSignatures } from '@ddd-ts-kit/http/nest';
 import type { Type } from '@nestjs/common';
 import { CloseLoanController } from '@/contexts/servicing/ledger/presentation/http/loans/close-loan/close-loan.controller';
+import { GetLoanStatementController } from '@/contexts/servicing/ledger/presentation/http/loans/get-loan-statement/get-loan-statement.controller';
 import { ReadLoanController } from '@/contexts/servicing/ledger/presentation/http/loans/read-loan/read-loan.controller';
 import { RepayEarlyController } from '@/contexts/servicing/ledger/presentation/http/loans/repay-early/repay-early.controller';
 import { ReverseWriteOffController } from '@/contexts/servicing/ledger/presentation/http/loans/reverse-write-off/reverse-write-off.controller';
 import { WriteOffLoanController } from '@/contexts/servicing/ledger/presentation/http/loans/write-off-loan/write-off-loan.controller';
 import { CloseLoanParams } from '@/contexts/servicing/ledger/presentation/http/loans/close-loan/close-loan.params';
 import { CloseLoanBody } from '@/contexts/servicing/ledger/presentation/http/loans/close-loan/close-loan.body';
+import { GetLoanStatementParams } from '@/contexts/servicing/ledger/presentation/http/loans/get-loan-statement/get-loan-statement.params';
+import { GetLoanStatementQueryParams } from '@/contexts/servicing/ledger/presentation/http/loans/get-loan-statement/get-loan-statement-query.params';
+import { GetLoanStatementAnswer } from '@/contexts/servicing/ledger/presentation/http/loans/get-loan-statement/get-loan-statement.answer';
 import { ReadLoanParams } from '@/contexts/servicing/ledger/presentation/http/loans/read-loan/read-loan.params';
 import { ReadLoanAnswer } from '@/contexts/servicing/ledger/presentation/http/loans/read-loan/read-loan.answer';
 import { RepayEarlyParams } from '@/contexts/servicing/ledger/presentation/http/loans/repay-early/repay-early.params';
@@ -20,6 +24,13 @@ import { WriteOffLoanBody } from '@/contexts/servicing/ledger/presentation/http/
 /** The Nest controllers of servicing, each with what the signatures of its methods say: the module of the context lists them, Nest builds them. */
 export const servicingControllers: readonly Type<unknown>[] = [
   withSignatures(CloseLoanController, { closeLoan: { params: CloseLoanParams, body: CloseLoanBody, answer: null } }),
+  withSignatures(GetLoanStatementController, {
+    getLoanStatement: {
+      params: GetLoanStatementParams,
+      query: GetLoanStatementQueryParams,
+      answer: GetLoanStatementAnswer,
+    },
+  }),
   withSignatures(ReadLoanController, { readLoan: { params: ReadLoanParams, answer: ReadLoanAnswer } }),
   withSignatures(RepayEarlyController, {
     repayEarly: { params: RepayEarlyParams, body: RepayEarlyBody, answer: null },

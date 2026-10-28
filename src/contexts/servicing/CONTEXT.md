@@ -68,6 +68,8 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Marked | Recorded as the state of an instalment: marked unpaid after a rejected debit |  |
 | Collect | Take the money of an instalment from the payer by direct debit |  |
 | Mandate | The direct debit authority of the payer, held by the payment provider; the simulated provider takes the loan id as its reference |  |
+| Statement | The loan as it stood on a past date, replayed from its events up to that date: balance, arrears and schedule |  |
+| Get | Read, the query of a view |  |
 
 ## Modules
 
@@ -165,6 +167,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CollectInstalment` | command | `loan.collect` |
 | `ComputeDueInstalments` | command | `loan.compute-due` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
+| `GetLoanStatement` | query | `loan.read` |
 | `ReadLoan` | query | `loan.read` |
 | `RecordPayout` | command | `loan.record-payout` |
 | `RecordWithdrawalRepayment` | command | `loan.record-repayment` |
@@ -180,6 +183,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/loans/:id` | `readLoan` | `LoansRoutes` | `Authenticated` | `ReadLoan` | `loan.read` | params: `ReadLoanParams` | 200: `ReadLoanAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | POST | `/loans/:id/closure` | `closeLoan` | `LoansRoutes` | `Authenticated` | `CloseLoan` | `loan.close` | params: `CloseLoanParams`, body: `CloseLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
 | POST | `/loans/:id/early-repayments` | `repayEarly` | `LoansRoutes` | `Authenticated` | `RepayEarly` | `loan.repay-early` | params: `RepayEarlyParams`, body: `RepayEarlyBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed`, `ServicingCodes.InvalidRepayment`, `ServicingCodes.EarlyRepaymentTooHigh` |
+| GET | `/loans/:id/statement` | `getLoanStatement` | `LoansRoutes` | `Authenticated` | `GetLoanStatement` | `loan.read` | params: `GetLoanStatementParams`, query: `GetLoanStatementQueryParams` | 200: `GetLoanStatementAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | POST | `/loans/:id/write-off` | `writeOffLoan` | `LoansRoutes` | `Authenticated` | `WriteOffLoan` | `loan.write-off` | params: `WriteOffLoanParams`, body: `WriteOffLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
 | POST | `/loans/:id/write-off-reversal` | `reverseWriteOff` | `LoansRoutes` | `Authenticated` | `ReverseWriteOff` | `loan.write-off` | params: `ReverseWriteOffParams`, body: `ReverseWriteOffBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanNotWrittenOff` |
 
@@ -204,6 +208,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `BorrowerIdentity` | gateway | `RemoteBorrowerIdentity` |
 | `BorrowerNotifier` | external | `SimulatedBorrowerNotifier` |
+| `GetLoanStatementReader` | repository | `EventStoreGetLoanStatementReader` |
 | `LoanRepository` | repository | `EventStoreLoanRepository` |
 | `PaymentProvider` | external | `SimulatedPaymentProvider` |
 | `PersonalDataErasure` | external | `RemotePersonalDataErasure` |
