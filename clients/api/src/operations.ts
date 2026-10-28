@@ -646,6 +646,40 @@ export function readDocument(
   return send<ReadDocumentResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RequestExceptionInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type RequestExceptionResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Request exception: `POST /applications/{id}/exceptions`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ */
+export function requestException(
+  connection: Connection,
+  input: RequestExceptionInput,
+  options: CallOptions = {},
+): Promise<RequestExceptionResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/exceptions',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RequestExceptionResult>(connection, operation, { ...input, ...options });
+}
+
 export interface NameGuarantorInput {
   readonly path: {
     readonly id: string;

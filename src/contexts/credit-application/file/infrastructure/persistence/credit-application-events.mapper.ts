@@ -1,6 +1,6 @@
 import { defineStoredEvent, type StoredEventTypes } from '@ddd-ts-kit/kernel';
 import { Money } from '@/shared-kernel/money.vo';
-import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-application/file/domain/events/credit-application-account-consent-given.event';
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
@@ -15,6 +15,7 @@ import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
+import { CreditApplicationExceptionRequested } from '@/contexts/credit-application/file/domain/events/credit-application-exception-requested.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -89,6 +90,12 @@ interface CreditApplicationDecidedData {
 
 interface CreditApplicationBroughtData {
   readonly brokerId: string;
+}
+
+interface CreditApplicationExceptionRequestedData {
+  readonly requesterId: string;
+  readonly targetLevel: string;
+  readonly justification: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -274,5 +281,21 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     encode: (event): CreditApplicationBroughtData => ({ brokerId: event.brokerId }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationBrought(aggregateId, occurredAt, data.text('brokerId')),
+  }),
+  [CreditApplicationExceptionRequested.eventName]: defineStoredEvent(CreditApplicationExceptionRequested, {
+    version: 1,
+    encode: (event): CreditApplicationExceptionRequestedData => ({
+      requesterId: event.requesterId,
+      targetLevel: event.targetLevel,
+      justification: event.justification,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationExceptionRequested(
+        aggregateId,
+        occurredAt,
+        data.text('requesterId'),
+        data.text('targetLevel'),
+        data.text('justification'),
+      ),
   }),
 };

@@ -1,6 +1,6 @@
 import { Money } from '@/shared-kernel/money.vo';
 import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
-import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
 
 /** What a decision approved: the product, the amount approved and the duration asked. */
 export interface ApprovedTerms {

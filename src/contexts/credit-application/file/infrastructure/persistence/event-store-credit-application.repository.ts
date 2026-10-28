@@ -5,11 +5,9 @@ import {
   type PersonalDataCipher,
   type StoredEvent,
 } from '@ddd-ts-kit/kernel';
-import {
-  CreditApplication,
-  type CreditApplicationEvent,
-  type CreditApplicationState,
-} from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
+import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import { RefusalRetentionService } from '@/contexts/credit-application/file/domain/services/refusal-retention.service';
 import { creditApplicationEvents } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-events.mapper';

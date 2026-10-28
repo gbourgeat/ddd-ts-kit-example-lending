@@ -33,6 +33,11 @@ import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infr
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
+import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
+import { RequestExceptionCommand } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.command';
+import { RequestExceptionHandler } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.handler';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -62,6 +67,15 @@ export const decisionModule = {
     registerDeciderLevelHandlers(platform, deciderLevels);
     registerDelegationTableHandlers(platform, delegationTables);
     registerDecideApplication(platform, repository, { deciderLevels, delegationTables, declaredConflicts });
+
+    const creditApplicationRepository = platform.adapter(
+      new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
+      { kind: 'repository', context: 'credit-application', token: 'CreditApplicationRepository' },
+    );
+
+    platform.commands.register(RequestExceptionCommand, new RequestExceptionHandler(creditApplicationRepository), {
+      context: 'credit-application',
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -85,6 +99,9 @@ export const decisionModule = {
     return [
       // ddd-ts-kit:authorization
       ...declareDecisionUseCases(),
+      requires(RequestExceptionCommand, creditApplicationPermissions['application.request-exception'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },

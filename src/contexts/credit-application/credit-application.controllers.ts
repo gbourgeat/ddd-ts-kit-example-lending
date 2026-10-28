@@ -8,6 +8,7 @@ import { ReadAccountInformationController } from '@/contexts/credit-application/
 import { ReviewProposedRefusalController } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.controller';
 import { DecideApplicationController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.controller';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
+import { RequestExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.controller';
 import { ReadDeciderLevelController } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.controller';
 import { ReadDelegationTableController } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.controller';
 import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
@@ -38,6 +39,8 @@ import { DecideApplicationParams } from '@/contexts/credit-application/decision/
 import { DecideApplicationBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
 import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.answer';
+import { RequestExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.params';
+import { RequestExceptionBody } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.body';
 import { ReadDeciderLevelParams } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.params';
 import { ReadDeciderLevelAnswer } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.answer';
 import { ReadDelegationTableParams } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.params';
@@ -98,6 +101,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(ReadDeclaredConflictsController, {
     readDeclaredConflicts: { params: ReadDeclaredConflictsParams, answer: ReadDeclaredConflictsAnswer },
+  }),
+  withSignatures(RequestExceptionController, {
+    requestException: { params: RequestExceptionParams, body: RequestExceptionBody, answer: null },
   }),
   withSignatures(ReadDeciderLevelController, {
     readDeciderLevel: { params: ReadDeciderLevelParams, answer: ReadDeciderLevelAnswer },

@@ -164,6 +164,7 @@ No personal data declared.
 - `credit-application:application.bring`
 - `credit-application:offer.draft`
 - `credit-application:offer.read-sheet`
+- `credit-application:application.request-exception`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -245,6 +246,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadProductTerms` | query | not read |
 | `ReadProductTermsFindings` | query | not read |
 | `ReadRateGrid` | query | not read |
+| `RequestException` | command | `application.request-exception` |
 | `ReviewProposedRefusal` | command | `application.review-refusal` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
@@ -264,6 +266,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | not read | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
+| POST | `/applications/:id/exceptions` | `requestException` | `ApplicationsRoutes` | `Authenticated` | `RequestException` | `application.request-exception` | params: `RequestExceptionParams`, body: `RequestExceptionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/offer-draft` | `draftOffer` | `ApplicationsRoutes` | `Authenticated` | `DraftOffer` | `offer.draft` | params: `DraftOfferParams`, body: `DraftOfferBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.ApplicationNotApproved`, `CreditApplicationCodes.NoRateForOffer`, `CreditApplicationCodes.UnknownLegalMaximumRate`, `CreditApplicationCodes.OfferAboveLegalMaximum` |
 | GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
@@ -355,11 +358,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AlreadyDecided` | `forAlreadyDecided` | `ALREADY_DECIDED` | none |
 | `BrokerRegistrationLapsed` | `forBroker` | `BROKER_REGISTRATION_LAPSED` | `brokerId` |
 | `CorrectionAlreadyRecorded` | `forEntry` | `CORRECTION_ALREADY_RECORDED` | none |
+| `ExceptionAlreadyRequested` | `forExceptionAlreadyRequested` | `EXCEPTION_ALREADY_REQUESTED` | none |
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
 | `InvalidDecisionConditions` | `forConditions` | `INVALID_DECISION_CONDITIONS` | none |
 | `InvalidDecisionReasons` | `forReasons` | `INVALID_DECISION_REASONS` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
+| `InvalidExceptionJustification` | `forInvalidExceptionJustification` | `INVALID_EXCEPTION_JUSTIFICATION` | none |
 | `InvalidReviewReason` | `forReason` | `INVALID_REVIEW_REASON` | none |
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
 | `NoRefusalToReview` | `forApplication` | `NO_REFUSAL_TO_REVIEW` | none |
@@ -379,6 +384,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
 | `ConflictedDecider` | `forConflictedDecider` | `CONFLICTED_DECIDER` | none |
 | `DecisionAboveLimit` | `forAboveLimit` | `DECISION_ABOVE_LIMIT` | `levelNeeded` |
+| `ExceptionNotAboveLimit` | `forExceptionNotAboveLimit` | `EXCEPTION_NOT_ABOVE_LIMIT` | none |
 | `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |

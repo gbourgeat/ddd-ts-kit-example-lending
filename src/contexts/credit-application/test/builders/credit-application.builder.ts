@@ -1,10 +1,8 @@
 import { Builder, sequence, type Defaults } from '@ddd-ts-kit/testing';
 import { Money } from '@/shared-kernel/money.vo';
 import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
-import {
-  CreditApplication,
-  type CreditApplicationEvent,
-} from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
 import { CreditApplicationAssessed } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';

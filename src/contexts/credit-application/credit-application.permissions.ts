@@ -24,5 +24,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.bring': { description: 'Bring application' },
   'offer.draft': { description: 'Draft offer' },
   'offer.read-sheet': { description: 'Read pre contractual sheet' },
+  'application.request-exception': { description: 'Request exception' },
   // /ddd-ts-kit:permissions
 });

@@ -119,6 +119,12 @@ export interface Client {
    */
   readDocument(input: operations.ReadDocumentInput, options?: CallOptions): Promise<operations.ReadDocumentResult>;
   /**
+   * Request exception: `POST /applications/{id}/exceptions`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+   */
+  requestException(input: operations.RequestExceptionInput, options?: CallOptions): Promise<operations.RequestExceptionResult>;
+  /**
    * Name guarantor: `POST /applications/{id}/guarantors`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -483,6 +489,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     readDocument: (input, call) => operations.readDocument(connection, input, call),
+    requestException: (input, call) => operations.requestException(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     draftOffer: (input, call) => operations.draftOffer(connection, input, call),
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),

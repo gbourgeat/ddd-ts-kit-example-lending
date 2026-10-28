@@ -1,5 +1,5 @@
 import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
-import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
 
 /** When the personal data of a refused application may be erased: once its retention, counted from the refusal, is over. */
 export class RefusalRetentionService {
