@@ -105,7 +105,13 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
   const deciderLevels = readModel(platform, 'DeciderLevels', PrismaDeciderLevels);
 
   registerDeciderLevelHandlers(platform, deciderLevels);
-  registerDecisionHandlers(platform, creditApplicationRepository, { deciderLevels, delegationTables });
+
+  registerDecisionHandlers(platform, creditApplicationRepository, {
+    deciderLevels,
+    delegationTables,
+    declaredConflicts,
+  });
+
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 

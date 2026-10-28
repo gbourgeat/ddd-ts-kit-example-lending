@@ -363,6 +363,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `NoScoreAvailable` | `forScore` | `NO_SCORE_AVAILABLE` | none |
 | `RegisterNotConsulted` | `forApplication` | `REGISTER_NOT_CONSULTED` | none |
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
+| `ConflictedDecider` | `forConflictedDecider` | `CONFLICTED_DECIDER` | none |
 | `DecisionAboveLimit` | `forAboveLimit` | `DECISION_ABOVE_LIMIT` | `levelNeeded` |
 | `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |

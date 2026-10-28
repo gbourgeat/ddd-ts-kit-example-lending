@@ -35,17 +35,33 @@ describe('DecisionLimitService', () => {
     );
   });
 
+  it('refuses the decision of a person who declared a conflict on the applicant, by its code', () => {
+    expect(() => check({ level: 'risk-manager', amountCents: 1, conflictedIds: ['staff-1'] })).toThrow(
+      expect.objectContaining({ code: 'CONFLICTED_DECIDER' }),
+    );
+  });
+
+  it('lets a decider through when the conflicts declared on the applicant name other staff members', () => {
+    expect(() => check({ level: 'risk-manager', amountCents: 1, conflictedIds: ['staff-2'] })).not.toThrow();
+  });
+
   it('lets a refusal, which approves nothing, through whatever the level', () => {
     expect(() => check({ level: 'advisor', amountCents: 0 })).not.toThrow();
   });
 });
 
-function check(decision: { level: string; amountCents: number; preparerIds?: string[] }): void {
+function check(decision: {
+  level: string;
+  amountCents: number;
+  preparerIds?: string[];
+  conflictedIds?: string[];
+}): void {
   new DecisionLimitService().check({
     deciderId: 'staff-1',
     level: decision.level,
     amountCents: decision.amountCents,
     levels,
     preparerIds: decision.preparerIds ?? [],
+    conflictedIds: decision.conflictedIds ?? [],
   });
 }

@@ -10,7 +10,7 @@ const version = { modelRisk: 'medium', label: '2026.1' };
 /** The borrower submits an application, which she owns: the applicant of the file. */
 export async function submittedApplication(
   application: RunningApplication,
-): Promise<{ applicationId: string; applicant: HttpClient }> {
+): Promise<{ applicationId: string; applicant: HttpClient; customerId: string }> {
   const operator = await operatorOf(application, 'ada');
   const borrowerId = (expectStatus(await operator.post('/customers', borrowerBody), 201).body as { id: string }).id;
 
@@ -25,21 +25,30 @@ export async function submittedApplication(
     subject: `customer:${borrowerId}`,
   });
 
-  return { applicationId, applicant };
+  return { applicationId, applicant, customerId: borrowerId };
 }
 
 /** The applicant consents, the accounts are read and a credit analyst consults the register: what an assessment rests on. */
 export async function applicationWithAccountsAndRegister(application: RunningApplication): Promise<string> {
   const { applicationId, applicant } = await submittedApplication(application);
 
+  await readAccountsAndRegister(application, applicationId, applicant);
+
+  return applicationId;
+}
+
+/** The applicant's consent and accounts, then the register consulted by a credit analyst, for a submitted application. */
+export async function readAccountsAndRegister(
+  application: RunningApplication,
+  applicationId: string,
+  applicant: HttpClient,
+): Promise<void> {
   expectStatus(await applicant.post(`/applications/${applicationId}/consent`, {}), 201);
   expectStatus(await applicant.post(`/applications/${applicationId}/account-information`, {}), 201);
 
   const credit = await analystOf(application, 'credit-analyst');
 
   expectStatus(await credit.post(`/applications/${applicationId}/register-consultations`, {}), 201);
-
-  return applicationId;
 }
 
 /** A staff member of the context, an operator who assesses and reviews the applications. */

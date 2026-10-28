@@ -30,6 +30,7 @@ export const CreditApplicationCodes = {
   PreparerCannotDecide: 'PREPARER_CANNOT_DECIDE',
   RefusalProposalStands: 'REFUSAL_PROPOSAL_STANDS',
   DecisionAboveLimit: 'DECISION_ABOVE_LIMIT',
+  ConflictedDecider: 'CONFLICTED_DECIDER',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];
