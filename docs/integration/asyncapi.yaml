@@ -35,6 +35,12 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/credit-application.credit-application.decided.v1'
+  credit-application.credit-application.payout-authorised:
+    address: credit-application.credit-application.payout-authorised
+    description: 'The payout of an approved application is authorised: the 8th day after signing has come, it was not withdrawn and the customer is eligible. Servicing opens the loan.'
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-application.credit-application.payout-authorised.v1'
   credit-application.credit-application.reschedule-decided:
     address: credit-application.credit-application.reschedule-decided
     description: 'A decider decided, under the delegation rules, to reschedule the loan of an approved application: its new duration and the capital it covers.'
@@ -49,6 +55,12 @@ channels:
         $ref: '#/components/messages/credit-application.credit-application.submitted.v1'
       v2:
         $ref: '#/components/messages/credit-application.credit-application.submitted.v2'
+  credit-application.credit-application.withdrawn:
+    address: credit-application.credit-application.withdrawn
+    description: The borrower withdrew the application within 14 calendar days of signing its offer. After a payout, servicing asks them to repay the capital and the interest accrued.
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-application.credit-application.withdrawn.v1'
   credit-policy.delegation-table.published:
     address: credit-policy.delegation-table.published
     description: 'A delegation table took effect: the amount each level of decider may approve, from its date of effect.'
@@ -179,6 +191,12 @@ operations:
       $ref: '#/channels/credit-application.credit-application.decided'
     messages:
       - $ref: '#/channels/credit-application.credit-application.decided/messages/v1'
+  send.credit-application.credit-application.payout-authorised:
+    action: send
+    channel:
+      $ref: '#/channels/credit-application.credit-application.payout-authorised'
+    messages:
+      - $ref: '#/channels/credit-application.credit-application.payout-authorised/messages/v1'
   send.credit-application.credit-application.reschedule-decided:
     action: send
     channel:
@@ -192,6 +210,12 @@ operations:
     messages:
       - $ref: '#/channels/credit-application.credit-application.submitted/messages/v1'
       - $ref: '#/channels/credit-application.credit-application.submitted/messages/v2'
+  send.credit-application.credit-application.withdrawn:
+    action: send
+    channel:
+      $ref: '#/channels/credit-application.credit-application.withdrawn'
+    messages:
+      - $ref: '#/channels/credit-application.credit-application.withdrawn/messages/v1'
   send.credit-policy.delegation-table.published:
     action: send
     channel:
@@ -558,6 +582,61 @@ components:
             description: W3C traceparent captured at publication.
           correlationId:
             type: string
+    credit-application.credit-application.payout-authorised.v1:
+      name: credit-application.credit-application.payout-authorised
+      title: credit-application.credit-application.payout-authorised v1
+      summary: 'The payout of an approved application is authorised: the 8th day after signing has come, it was not withdrawn and the customer is eligible. Servicing opens the loan.'
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.payout-authorised
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+              customerId:
+                type: string
+              branchId:
+                type: string
+              amountCents:
+                type: integer
+              durationMonths:
+                type: integer
+              rateBasisPoints:
+                type: integer
+            type: object
+            required:
+              - creditApplicationId
+              - customerId
+              - branchId
+              - amountCents
+              - durationMonths
+              - rateBasisPoints
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
     credit-application.credit-application.reschedule-decided.v1:
       name: credit-application.credit-application.reschedule-decided
       title: credit-application.credit-application.reschedule-decided v1
@@ -701,6 +780,46 @@ components:
               - requestedAmountCents
               - durationMonths
               - branchId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-application.credit-application.withdrawn.v1:
+      name: credit-application.credit-application.withdrawn
+      title: credit-application.credit-application.withdrawn v1
+      summary: The borrower withdrew the application within 14 calendar days of signing its offer. After a payout, servicing asks them to repay the capital and the interest accrued.
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.withdrawn
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+            type: object
+            required:
+              - creditApplicationId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

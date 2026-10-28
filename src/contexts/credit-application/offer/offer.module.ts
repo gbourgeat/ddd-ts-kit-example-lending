@@ -44,6 +44,10 @@ import { WithdrawLoanCommand } from '@/contexts/credit-application/offer/applica
 import { WithdrawLoanHandler } from '@/contexts/credit-application/offer/application/commands/withdraw-loan/withdraw-loan.handler';
 import { AuthorizePayoutCommand } from '@/contexts/credit-application/offer/application/commands/authorize-payout/authorize-payout.command';
 import { AuthorizePayoutHandler } from '@/contexts/credit-application/offer/application/commands/authorize-payout/authorize-payout.handler';
+import { CreditApplicationWithdrawnPublisher } from '@/contexts/credit-application/offer/application/integration/publishers/credit-application-withdrawn.publisher';
+import { CreditApplicationWithdrawn } from '@/contexts/credit-application/offer/domain/events/credit-application-withdrawn.event';
+import { CreditApplicationPayoutAuthorisedPublisher } from '@/contexts/credit-application/offer/application/integration/publishers/credit-application-payout-authorised.publisher';
+import { CreditApplicationPayoutAuthorised } from '@/contexts/credit-application/offer/domain/events/credit-application-payout-authorised.event';
 // /ddd-ts-kit:imports
 
 /** What the module offer of the model registers; credit-application.module.ts composes it with the rest of the context. */
@@ -95,6 +99,33 @@ export const offerModule = {
   registerReactions(platform: Platform): void {
     // ddd-ts-kit:reactions
     keepReferenceData(platform);
+
+    const creditApplicationWithdrawnPublisher = platform.adapter(
+      new CreditApplicationWithdrawnPublisher(platform.publisher, platform.ids),
+      { kind: 'domain-event-handler', context: 'credit-application' },
+    );
+
+    platform.domainEvents.on(CreditApplicationWithdrawn.eventName, async (event) => {
+      if (event instanceof CreditApplicationWithdrawn) {
+        await creditApplicationWithdrawnPublisher.handle(event);
+      }
+    });
+
+    const creditApplicationPayoutAuthorisedPublisher = platform.adapter(
+      new CreditApplicationPayoutAuthorisedPublisher(
+        platform.publisher,
+        platform.ids,
+        new PrismaOfferRepository(platform.persistence.database, platform.scope, platform.clock),
+        new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
+      ),
+      { kind: 'domain-event-handler', context: 'credit-application' },
+    );
+
+    platform.domainEvents.on(CreditApplicationPayoutAuthorised.eventName, async (event) => {
+      if (event instanceof CreditApplicationPayoutAuthorised) {
+        await creditApplicationPayoutAuthorisedPublisher.handle(event);
+      }
+    });
     // /ddd-ts-kit:reactions
   },
 

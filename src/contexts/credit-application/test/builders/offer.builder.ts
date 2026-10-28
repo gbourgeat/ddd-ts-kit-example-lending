@@ -6,6 +6,7 @@ interface OfferIngredients {
   readonly bornAt: Date;
   readonly annualPercentageRateTenths: number;
   readonly legalMaximumBasisPoints: number;
+  readonly applicationId: string;
 }
 
 export class OfferBuilder extends Builder<OfferIngredients, Offer> {
@@ -22,6 +23,11 @@ export class OfferBuilder extends Builder<OfferIngredients, Offer> {
     return this.with('annualPercentageRateTenths', tenths);
   }
 
+  /** Drafted for the application. */
+  withApplication(applicationId: string): this {
+    return this.with('applicationId', applicationId);
+  }
+
   /** Under the legal maximum rate in force, in basis points of a year. */
   underMaximum(basisPoints: number): this {
     return this.with('legalMaximumBasisPoints', basisPoints);
@@ -33,6 +39,7 @@ export class OfferBuilder extends Builder<OfferIngredients, Offer> {
       bornAt: new Date('2026-01-01T00:00:00.000Z'),
       annualPercentageRateTenths: 61,
       legalMaximumBasisPoints: 1_250,
+      applicationId: 'application-1',
     };
   }
 
@@ -40,7 +47,7 @@ export class OfferBuilder extends Builder<OfferIngredients, Offer> {
     return Offer.draft(
       ingredients.id,
       {
-        applicationId: 'application-1',
+        applicationId: ingredients.applicationId,
         amountCents: 1_000_000,
         durationMonths: 60,
         rateBasisPoints: 590,

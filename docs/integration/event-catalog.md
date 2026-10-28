@@ -85,6 +85,23 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `branchId` | string | yes |  |
 | `approvedAmountCents` | integer | yes |  |
 
+### credit-application.credit-application.payout-authorised
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.payout-authorised` | 1 | The payout of an approved application is authorised: the 8th day after signing has come, it was not withdrawn and the customer is eligible. Servicing opens the loan. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
+| `customerId` | string | yes |  |
+| `branchId` | string | yes |  |
+| `amountCents` | integer | yes |  |
+| `durationMonths` | integer | yes |  |
+| `rateBasisPoints` | integer | yes |  |
+
 ### credit-application.credit-application.reschedule-decided
 
 | Type | Version | Description | Deprecated |
@@ -124,6 +141,18 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | `requestedAmountCents` | integer | yes |  |
 | `durationMonths` | integer | yes |  |
 | `branchId` | string | yes |  |
+
+### credit-application.credit-application.withdrawn
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `credit-application.credit-application.withdrawn` | 1 | The borrower withdrew the application within 14 calendar days of signing its offer. After a payout, servicing asks them to repay the capital and the interest accrued. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `creditApplicationId` | string | yes |  |
 
 ## credit-policy
 
