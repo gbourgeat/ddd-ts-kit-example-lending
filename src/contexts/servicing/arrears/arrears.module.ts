@@ -24,6 +24,8 @@ import { DeclareIncidentAfterTwoUnpaidEventHandler } from '@/contexts/servicing/
 import { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 import { WithdrawIncidentWhenPaidEventHandler } from '@/contexts/servicing/arrears/application/event-handlers/withdraw-incident-when-paid.event-handler';
 import { LoanArrearsCleared } from '@/contexts/servicing/arrears/domain/events/loan-arrears-cleared.event';
+import { NotifyBorrowerAtEachStageEventHandler } from '@/contexts/servicing/arrears/application/event-handlers/notify-borrower-at-each-stage.event-handler';
+import { SimulatedBorrowerNotifier } from '@/contexts/servicing/arrears/infrastructure/external/simulated-borrower-notifier.adapter';
 // /ddd-ts-kit:imports
 
 /** What the module arrears of the model registers; servicing.module.ts composes it with the rest of the context. */
@@ -57,6 +59,8 @@ export const arrearsModule = {
     platform.commands.register(DeclareDefaultCommand, new DeclareDefaultHandler(loanRepository), {
       context: 'servicing',
     });
+
+    notifyBorrowerAtEachStage(platform, loanRepository);
     // /ddd-ts-kit:handlers
   },
 
@@ -109,6 +113,7 @@ export const arrearsModule = {
         await withdrawIncidentWhenPaidEventHandler.handle(event);
       }
     });
+
     // /ddd-ts-kit:reactions
   },
 
@@ -163,3 +168,26 @@ export const arrearsModule = {
     ];
   },
 };
+
+/** The reaction reads the borrower through the loan repository and tells it by the notifier, once the classification is committed. */
+function notifyBorrowerAtEachStage(platform: Platform, loanRepository: LoanRepository): void {
+  const borrowerNotifier = platform.adapter(new SimulatedBorrowerNotifier(), {
+    kind: 'external',
+    context: 'servicing',
+  });
+
+  const notifyBorrowerAtEachStageEventHandler = platform.adapter(
+    new NotifyBorrowerAtEachStageEventHandler(loanRepository, borrowerNotifier),
+    { kind: 'domain-event-handler', context: 'servicing' },
+  );
+
+  platform.domainEvents.on(
+    LoanArrearsBucketEntered.eventName,
+    async (event) => {
+      if (event instanceof LoanArrearsBucketEntered) {
+        await notifyBorrowerAtEachStageEventHandler.handle(event);
+      }
+    },
+    { phase: 'after-commit' },
+  );
+}
