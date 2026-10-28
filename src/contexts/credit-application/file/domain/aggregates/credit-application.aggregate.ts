@@ -262,10 +262,9 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
       [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
       [CreditApplicationAssessed.eventName]: (event) => this.applyAssessed(event),
-      [CreditApplicationRequestFoundOutsideProductTerms.eventName]: (event) =>
-        this.applyRequestFoundOutsideProductTerms(event),
+      [CreditApplicationRequestFoundOutsideProductTerms.eventName]: (event) => this.applyFinding(event.finding),
       [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: (event) =>
-        this.applyRequestCheckedWithUnknownProductTerms(event),
+        this.applyFinding({ kind: 'terms-unknown', productId: event.productId }),
       [CreditApplicationRefusalReviewed.eventName]: (event) => this.applyRefusalReviewed(event),
       [CreditApplicationDecided.eventName]: (event) => this.applyDecided(event),
     };
@@ -322,16 +321,6 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       refusalReviewConclusion: undefined,
       refusalReviewerId: '',
     });
-  }
-
-  private applyRequestFoundOutsideProductTerms(event: CreditApplicationRequestFoundOutsideProductTerms): void {
-    this.applyFinding(event.finding);
-  }
-
-  private applyRequestCheckedWithUnknownProductTerms(
-    event: CreditApplicationRequestCheckedWithUnknownProductTerms,
-  ): void {
-    this.applyFinding({ kind: 'terms-unknown', productId: event.productId });
   }
 
   private applyFinding(finding: ProductTermsFinding): void {
