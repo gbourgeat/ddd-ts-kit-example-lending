@@ -258,7 +258,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationDecided.eventName]: (event) => this.applyDecided(event),
       // The broker changes no state of the file: the event itself keeps who brought the application.
       [CreditApplicationBrought.eventName]: () => undefined,
-      [CreditApplicationExceptionRequested.eventName]: (event) => this.applyExceptionRequested(event),
+      [CreditApplicationExceptionRequested.eventName]: (event) =>
+        this.applyEntryAppended(new ExceptionRequestCheckService().changesOf(event)),
       [CreditApplicationHumanReviewRequested.eventName]: (event) => this.applyHumanReviewRequested(event),
       [CreditApplicationExceptionDecided.eventName]: (event) =>
         this.applyEntryAppended(new ExceptionDecisionCheckService().changesOf(event)),
@@ -330,17 +331,6 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
 
   private applyDecided(event: CreditApplicationDecided): void {
     this.applyEntryAppended({ decision: DecisionRecord.of(event) });
-  }
-
-  private applyExceptionRequested(event: CreditApplicationExceptionRequested): void {
-    this.applyEntryAppended({
-      exception: {
-        requesterId: event.requesterId,
-        targetLevel: event.targetLevel,
-        justification: event.justification,
-        requestedAt: event.occurredAt,
-      },
-    });
   }
 
   private applyHumanReviewRequested(event: CreditApplicationHumanReviewRequested): void {
