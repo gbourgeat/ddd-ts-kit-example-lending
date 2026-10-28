@@ -68,6 +68,21 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'operator',
     subject: 'system:system:servicing.erase-personal-data-past-retention',
   },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-product-terms',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-broker-registration',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.lapse-broker-registration',
+  },
   // /ddd-ts-kit:system-grants
 ];
 
