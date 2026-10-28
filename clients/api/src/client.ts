@@ -161,6 +161,18 @@ export interface Client {
    */
   dismissMatch(input: operations.DismissMatchInput, options?: CallOptions): Promise<operations.DismissMatchResult>;
   /**
+   * Rate the risk of a customer, low, medium or high: `PUT /customers/{id}/risk`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  rateCustomerRisk(input: operations.RateCustomerRiskInput, options?: CallOptions): Promise<operations.RateCustomerRiskResult>;
+  /**
+   * Get the risk rating of a customer, low, medium or high, when the caller may read it: `GET /customers/{id}/risk-rating`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+   */
+  getCustomerRiskRating(input: operations.GetCustomerRiskRatingInput, options?: CallOptions): Promise<operations.GetCustomerRiskRatingResult>;
+  /**
    * Screen a customer against the sanctions and politically exposed lists: `POST /customers/{id}/screening`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
@@ -316,6 +328,8 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     confirmSanctionsMatch: (input, call) => operations.confirmSanctionsMatch(connection, input, call),
     dismissMatch: (input, call) => operations.dismissMatch(connection, input, call),
+    rateCustomerRisk: (input, call) => operations.rateCustomerRisk(connection, input, call),
+    getCustomerRiskRating: (input, call) => operations.getCustomerRiskRating(connection, input, call),
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),

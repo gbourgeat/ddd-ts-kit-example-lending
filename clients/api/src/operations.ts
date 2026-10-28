@@ -929,6 +929,79 @@ export function dismissMatch(
   return send<DismissMatchResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RateCustomerRiskInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    rating: 'low' | 'medium' | 'high';
+  };
+}
+
+export type RateCustomerRiskResult =
+  | Success<200, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Rate the risk of a customer, low, medium or high: `PUT /customers/{id}/risk`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function rateCustomerRisk(
+  connection: Connection,
+  input: RateCustomerRiskInput,
+  options: CallOptions = {},
+): Promise<RateCustomerRiskResult> {
+  const operation: Operation = {
+    method: 'PUT',
+    path: '/customers/{id}/risk',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RateCustomerRiskResult>(connection, operation, { ...input, ...options });
+}
+
+export interface GetCustomerRiskRatingInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type GetCustomerRiskRatingResult =
+  | Success<200, {
+    customerId: string;
+    riskRating?: 'low' | 'medium' | 'high';
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Get the risk rating of a customer, low, medium or high, when the caller may read it: `GET /customers/{id}/risk-rating`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function getCustomerRiskRating(
+  connection: Connection,
+  input: GetCustomerRiskRatingInput,
+  options: CallOptions = {},
+): Promise<GetCustomerRiskRatingResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/customers/{id}/risk-rating',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<GetCustomerRiskRatingResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ScreenCustomerInput {
   readonly path: {
     readonly id: string;
