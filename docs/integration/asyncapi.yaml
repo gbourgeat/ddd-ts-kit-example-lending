@@ -159,6 +159,18 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/privacy.data-subject.erased.v1'
+  servicing.loan.arrears-bucket-entered:
+    address: servicing.loan.arrears-bucket-entered
+    description: A loan enters an arrears bucket, by the days past due of its oldest unpaid instalment, so that those who report the portfolio at risk follow it.
+    messages:
+      v1:
+        $ref: '#/components/messages/servicing.loan.arrears-bucket-entered.v1'
+  servicing.loan.defaulted:
+    address: servicing.loan.defaulted
+    description: A loan is declared in default, 90 days past due, and handed to collections.
+    messages:
+      v1:
+        $ref: '#/components/messages/servicing.loan.defaulted.v1'
   servicing.loan.paid-out:
     address: servicing.loan.paid-out
     description: 'The money of a loan is paid out to its borrower and its schedule starts: the loan exists from this moment, under the identifier of the application it was granted for.'
@@ -322,6 +334,18 @@ operations:
       $ref: '#/channels/privacy.data-subject.erased'
     messages:
       - $ref: '#/channels/privacy.data-subject.erased/messages/v1'
+  send.servicing.loan.arrears-bucket-entered:
+    action: send
+    channel:
+      $ref: '#/channels/servicing.loan.arrears-bucket-entered'
+    messages:
+      - $ref: '#/channels/servicing.loan.arrears-bucket-entered/messages/v1'
+  send.servicing.loan.defaulted:
+    action: send
+    channel:
+      $ref: '#/channels/servicing.loan.defaulted'
+    messages:
+      - $ref: '#/channels/servicing.loan.defaulted/messages/v1'
   send.servicing.loan.paid-out:
     action: send
     channel:
@@ -1751,6 +1775,94 @@ components:
                 type: string
                 format: date-time
                 description: When the platform erased its copies.
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    servicing.loan.arrears-bucket-entered.v1:
+      name: servicing.loan.arrears-bucket-entered
+      title: servicing.loan.arrears-bucket-entered v1
+      summary: A loan enters an arrears bucket, by the days past due of its oldest unpaid instalment, so that those who report the portfolio at risk follow it.
+      contentType: application/json
+      tags:
+        - name: servicing
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: servicing.loan.arrears-bucket-entered
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              loanId:
+                type: string
+              bucket:
+                type: string
+                enum:
+                  - OneToThirtyDays
+                  - ThirtyOneToSixtyDays
+                  - SixtyOneToNinetyDays
+                  - OverNinetyDays
+            type: object
+            required:
+              - loanId
+              - bucket
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    servicing.loan.defaulted.v1:
+      name: servicing.loan.defaulted
+      title: servicing.loan.defaulted v1
+      summary: A loan is declared in default, 90 days past due, and handed to collections.
+      contentType: application/json
+      tags:
+        - name: servicing
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: servicing.loan.defaulted
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              loanId:
+                type: string
+            type: object
+            required:
+              - loanId
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

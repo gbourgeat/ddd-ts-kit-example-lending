@@ -48,6 +48,10 @@ import { RemotePersonalDataErasure } from '@/contexts/servicing/ledger/infrastru
 import { EventStoreReadLoanReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-read-loan.reader';
 import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infrastructure/external/simulated-payment-provider.adapter';
 import { EventStoreGetLoanStatementReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-get-loan-statement.reader';
+import { LoanArrearsBucketEnteredPublisher } from '@/contexts/servicing/arrears/application/integration/publishers/loan-arrears-bucket-entered.publisher';
+import { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
+import { LoanDefaultedPublisher } from '@/contexts/servicing/arrears/application/integration/publishers/loan-defaulted.publisher';
+import { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-defaulted.event';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -210,6 +214,28 @@ function registerReactions(platform: Platform): void {
   platform.domainEvents.on(LoanPaymentReceived.eventName, async (event) => {
     if (event instanceof LoanPaymentReceived) {
       await loanPaymentReceivedPublisher.handle(event);
+    }
+  });
+
+  const loanArrearsBucketEnteredPublisher = platform.adapter(
+    new LoanArrearsBucketEnteredPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'servicing' },
+  );
+
+  platform.domainEvents.on(LoanArrearsBucketEntered.eventName, async (event) => {
+    if (event instanceof LoanArrearsBucketEntered) {
+      await loanArrearsBucketEnteredPublisher.handle(event);
+    }
+  });
+
+  const loanDefaultedPublisher = platform.adapter(new LoanDefaultedPublisher(platform.publisher, platform.ids), {
+    kind: 'domain-event-handler',
+    context: 'servicing',
+  });
+
+  platform.domainEvents.on(LoanDefaulted.eventName, async (event) => {
+    if (event instanceof LoanDefaulted) {
+      await loanDefaultedPublisher.handle(event);
     }
   });
   // /ddd-ts-kit:reactions

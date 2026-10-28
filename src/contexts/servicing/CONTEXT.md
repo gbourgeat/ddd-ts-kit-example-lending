@@ -91,6 +91,8 @@ Running the loans day after day is necessary to the business, but the lending ju
 ## Published events
 
 <!-- ddd-ts-kit:events -->
+- `servicing.loan.arrears-bucket-entered` (version 1)
+- `servicing.loan.defaulted` (version 1)
 - `servicing.loan.paid-out` (version 1)
 - `servicing.loan.payment-received` (version 1)
 <!-- /ddd-ts-kit:events -->
@@ -208,6 +210,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Versions | Publisher |
 |---|---|---|
+| `servicing.loan.arrears-bucket-entered` | 1 | `LoanArrearsBucketEnteredPublisher` |
+| `servicing.loan.defaulted` | 1 | `LoanDefaultedPublisher` |
 | `servicing.loan.paid-out` | 1 | `LoanPaidOutPublisher` |
 | `servicing.loan.payment-received` | 1 | `LoanPaymentReceivedPublisher` |
 

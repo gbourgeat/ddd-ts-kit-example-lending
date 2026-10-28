@@ -424,6 +424,31 @@ Consumers: `identity`
 
 ## servicing
 
+### servicing.loan.arrears-bucket-entered
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.arrears-bucket-entered` | 1 | A loan enters an arrears bucket, by the days past due of its oldest unpaid instalment, so that those who report the portfolio at risk follow it. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
+| `bucket` | enum ("OneToThirtyDays", "ThirtyOneToSixtyDays", "SixtyOneToNinetyDays", "OverNinetyDays") | yes |  |
+
+### servicing.loan.defaulted
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.defaulted` | 1 | A loan is declared in default, 90 days past due, and handed to collections. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
+
 ### servicing.loan.paid-out
 
 | Type | Version | Description | Deprecated |

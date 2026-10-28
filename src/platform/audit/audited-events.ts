@@ -35,7 +35,12 @@ import {
   productDefinedV2,
 } from '@/contexts/credit-policy/published-language';
 import { brokerRegisteredV1, brokerRegistrationLapsedV1 } from '@/contexts/brokerage/published-language';
-import { loanPaidOutV1, loanPaymentReceivedV1 } from '@/contexts/servicing/published-language';
+import {
+  loanPaidOutV1,
+  loanPaymentReceivedV1,
+  loanArrearsBucketEnteredV1,
+  loanDefaultedV1,
+} from '@/contexts/servicing/published-language';
 // /ddd-ts-kit:imports
 
 /** Every integration event the contexts declare: the audit trail records that each one occurred. `generate integration-event` adds to it. */
@@ -72,5 +77,7 @@ export const auditedEvents = createEventRegistry([
   creditApplicationPayoutAuthorisedV1,
   loanPaidOutV1,
   loanPaymentReceivedV1,
+  loanArrearsBucketEnteredV1,
+  loanDefaultedV1,
   // /ddd-ts-kit:events
 ]);
