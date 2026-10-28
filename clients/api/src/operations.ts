@@ -2001,3 +2001,43 @@ export function setResidualIncomeMinimum(
 
   return send<SetResidualIncomeMinimumResult>(connection, operation, { ...input, ...options });
 }
+
+export interface PublishScoringModelVersionInput {
+  readonly body: {
+    modelRisk: 'low' | 'medium' | 'high';
+    label: string;
+  };
+}
+
+export type PublishScoringModelVersionResult =
+  | Success<201, {
+    id: string;
+    number: number;
+    modelRisk: 'low' | 'medium' | 'high';
+    label: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'SCORING_MODEL_LABEL_REQUIRED' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Publish scoring model version: `POST /scoring-models`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), SCORING_MODEL_LABEL_REQUIRED (422), VALIDATION_FAILED (422).
+ */
+export function publishScoringModelVersion(
+  connection: Connection,
+  input: PublishScoringModelVersionInput,
+  options: CallOptions = {},
+): Promise<PublishScoringModelVersionResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/scoring-models',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<PublishScoringModelVersionResult>(connection, operation, { ...input, ...options });
+}

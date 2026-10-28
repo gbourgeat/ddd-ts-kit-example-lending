@@ -52,6 +52,7 @@ import { FlagOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligenc
 import { FlagOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-overdue-due-diligence/flag-overdue-due-diligence.handler';
 import { FlagAllOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.command';
 import { FlagAllOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.handler';
+import { FlagOverdueDueDiligenceJob } from '@/contexts/customer-due-diligence/application/scheduling/flag-overdue-due-diligence.job';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -261,6 +262,14 @@ function registerReactions(platform: Platform): void {
 /** The jobs of the context, scheduled and in the background. */
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
+  const flagOverdueDueDiligenceJob = new FlagOverdueDueDiligenceJob(platform.commands);
+
+  platform.jobs.register({
+    name: 'customer-due-diligence.flag-overdue-due-diligence',
+    schedule: { cron: '0 1 * * *', timeZone: 'Europe/Paris' },
+    tenancy: 'per-tenant',
+    run: (execution) => flagOverdueDueDiligenceJob.run(execution),
+  });
   // /ddd-ts-kit:jobs
 }
 

@@ -98,7 +98,9 @@ No personal data declared.
 ## Scheduled jobs
 
 <!-- ddd-ts-kit:jobs -->
-No scheduled job.
+| Job | Schedule | Command |
+|---|---|---|
+| `FlagOverdueDueDiligenceJob` | `` | `FlagAllOverdueDueDiligence` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs

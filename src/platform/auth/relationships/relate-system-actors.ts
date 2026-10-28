@@ -28,6 +28,11 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'operator',
     subject: 'system:system:EndRelationshipOnSanctionsMatchEventHandler',
   },
+  {
+    object: 'context:customer-due-diligence',
+    relation: 'operator',
+    subject: 'system:system:customer-due-diligence.flag-overdue-due-diligence',
+  },
   // /ddd-ts-kit:system-grants
 ];
 

@@ -8,6 +8,7 @@ tags:
   - name: brokerage
   - name: credit-application
   - name: credit-policy
+  - name: credit-scoring
   - name: customer-due-diligence
   - name: data-protection
   - name: financial-crime
@@ -4419,6 +4420,104 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - INVALID_RESIDUAL_INCOME_MINIMUM
+            - VALIDATION_FAILED
+  /scoring-models:
+    post:
+      operationId: publishScoringModelVersion
+      summary: Publish scoring model version
+      tags:
+        - credit-scoring
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                modelRisk:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+                label:
+                  type: string
+              type: object
+              required:
+                - modelRisk
+                - label
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  number:
+                    type: integer
+                  modelRisk:
+                    type: string
+                    enum:
+                      - low
+                      - medium
+                      - high
+                  label:
+                    type: string
+                type: object
+                required:
+                  - id
+                  - number
+                  - modelRisk
+                  - label
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: SCORING_MODEL_LABEL_REQUIRED, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - SCORING_MODEL_LABEL_REQUIRED
             - VALIDATION_FAILED
 components:
   schemas:
