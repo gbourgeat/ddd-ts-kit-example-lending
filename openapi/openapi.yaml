@@ -1526,6 +1526,70 @@ paths:
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
+  /applications/{id}/offer:
+    post:
+      operationId: issueOffer
+      summary: Issue offer
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: OFFER_ABOVE_LEGAL_MAXIMUM, UNKNOWN_LEGAL_MAXIMUM_RATE, UNKNOWN_OFFER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - OFFER_ABOVE_LEGAL_MAXIMUM
+            - UNKNOWN_LEGAL_MAXIMUM_RATE
+            - UNKNOWN_OFFER
+            - VALIDATION_FAILED
   /applications/{id}/offer-draft:
     post:
       operationId: draftOffer
