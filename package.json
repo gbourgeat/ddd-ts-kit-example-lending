@@ -121,7 +121,7 @@
     "@stryker-mutator/jest-runner": "^10.1.1",
     "@swc/core": "^1.16.13",
     "@swc/jest": "^0.2.39",
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.6.5",
     "@types/pg": "^8.23.1",
     "@typescript/native": "npm:typescript@~7.0.2",
     "ddd-ts-kit": "^0.99.0",
