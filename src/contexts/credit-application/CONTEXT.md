@@ -218,8 +218,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
 | `KeepBrokerRegistration` | command | not read |
-| `KeepDeciderLevel` | command | `decider-level.keep` |
-| `KeepDelegationTable` | command | `delegation-table.keep` |
+| `KeepDeciderLevel` | command | not read |
+| `KeepDelegationTable` | command | not read |
 | `KeepLegalMaximumRate` | command | not read |
 | `KeepProductTerms` | command | not read |
 | `KeepRateGrid` | command | not read |
@@ -227,9 +227,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `NameGuarantor` | command | `application.name-party` |
 | `ReadAccountInformation` | command | `application.read-accounts` |
 | `ReadBrokerRegistration` | query | not read |
-| `ReadDeciderLevel` | query | `application.decide` |
-| `ReadDeclaredConflicts` | query | `application.decide` |
-| `ReadDelegationTable` | query | `application.decide` |
+| `ReadDeciderLevel` | query | not read |
+| `ReadDeclaredConflicts` | query | not read |
+| `ReadDelegationTable` | query | not read |
 | `ReadDocument` | query | `application.read` |
 | `ReadLegalMaximumRate` | query | not read |
 | `ReadProductTerms` | query | not read |
@@ -251,7 +251,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | POST | `/applications/:id/decision` | `decideApplication` | `ApplicationsRoutes` | `Authenticated` | `DecideApplication` | not read | params: `DecideApplicationParams`, body: `DecideApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotAssessed`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.RefusalNotReviewed`, `CreditApplicationCodes.RefusalProposalStands`, `CreditApplicationCodes.InvalidDecisionReasons`, `CreditApplicationCodes.InvalidDecisionConditions`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable`, `CreditApplicationCodes.DecisionAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide` |
-| GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | `application.decide` | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | not read | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
@@ -259,8 +259,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/refusal-review` | `reviewProposedRefusal` | `ApplicationsRoutes` | `Authenticated` | `ReviewProposedRefusal` | `application.review-refusal` | params: `ReviewProposedRefusalParams`, body: `ReviewProposedRefusalBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.InvalidReviewReason`, `CreditApplicationCodes.NoRefusalToReview`, `CreditApplicationCodes.RefusalAlreadyReviewed`, `CreditApplicationCodes.ReviewerCannotBeAssessor` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
 | GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | not read | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
-| GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | `application.decide` | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
-| GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | `application.decide` | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
+| GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | not read | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
+| GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | not read | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 | GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
 | GET | `/product-terms/:productId` | `readProductTerms` | `ProductTermsRoutes` | `Authenticated` | `ReadProductTerms` | not read | params: `ReadProductTermsParams` | 200: `ReadProductTermsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownProductTerms` |
 | GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | not read | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
@@ -329,6 +329,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Policy | Permission |
 |---|---|
 | `DeclareFileReferenceUseCases` | `broker-registration.keep` |
+| `DeclareDecisionUseCases` | `application.decide` |
 | `DeclareOfferUseCases` | `rate-grid.keep` |
 
 ### Errors

@@ -9,6 +9,9 @@
   "credit-application.credit-application.co-borrower-named": {
     "1": "sha256:a3b8eb43c397ea60"
   },
+  "credit-application.credit-application.decided": {
+    "1": "sha256:6f4c0bca797a9304"
+  },
   "credit-application.credit-application.document-attached": {
     "1": "sha256:147596fb8d97663a"
   },
