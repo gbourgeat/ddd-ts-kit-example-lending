@@ -23,6 +23,8 @@ Figures for management and the supervisor are read from the events of other cont
 | Defaults list | The loans in default, for the supervisor, as CSV | Default (servicing) |
 | Supervisor | The banking supervisor, who receives the defaults list | Financial intelligence unit |
 | Decision | A decider's ruling on a credit application: an approval, an approval with conditions or a refusal. | Exception (credit-application) |
+| Loan principal | the amount paid out to a loan, kept to share the portfolio at risk of a branch |  |
+| Branch | the branch of the bank a loan was paid out on, the unit of the reports |  |
 
 ## Aggregates
 
@@ -43,7 +45,8 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `reporting:report.portfolio-at-risk`
+- `reporting:report.defaults`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -86,6 +89,20 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `credit-application` (published-language), `servicing` (published-language), `branch-network` (published-language), `identity` (conformist); downstreams: none.
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `DefaultedLoans` | query | `report.defaults` |
+| `PortfolioAtRiskPerBranch` | query | `report.portfolio-at-risk` |
+
+### Routes
+
+| Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
+|---|---|---|---|---|---|---|---|---|---|
+| GET | `/reports/defaulted-loans` | `defaultedLoans` | `ReportsRoutes` | `Authenticated` | `DefaultedLoans` | `report.defaults` |  | 200: `DefaultedLoansAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
+| GET | `/reports/portfolio-at-risk` | `portfolioAtRiskPerBranch` | `ReportsRoutes` | `Authenticated` | `PortfolioAtRiskPerBranch` | `report.portfolio-at-risk` |  | 200: `PortfolioAtRiskPerBranchAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
+
 ### Projections
 
 | Projection | Class | Applies |
@@ -93,6 +110,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | not read | not read |  |
 | not read | `ApplicationCountProjection` |  |
 | not read | `DecisionProjection` |  |
+| not read | `DefaultedLoanProjection` |  |
+| not read | `LoanPrincipalProjection` |  |
+| not read | `PortfolioAtRiskProjection` |  |
 
 ### Ports
 
@@ -100,6 +120,11 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `ApplicationCounts` | not bound |  |
 | `DecisionCounts` | not bound |  |
+| `DefaultedLoan` | not bound |  |
+| `DefaultedLoansReader` | repository | `PrismaDefaultedLoansReader` |
+| `LoanPrincipal` | not bound |  |
+| `PortfolioAtRisk` | not bound |  |
+| `PortfolioAtRiskPerBranchReader` | repository | `PrismaPortfolioAtRiskPerBranchReader` |
 
 ### Errors
 
