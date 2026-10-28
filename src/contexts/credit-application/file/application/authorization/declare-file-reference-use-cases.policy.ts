@@ -6,7 +6,6 @@ import { KeepProductTermsCommand } from '@/contexts/credit-application/file/appl
 import { ReadBrokerRegistrationQuery } from '@/contexts/credit-application/file/application/queries/read-broker-registration/read-broker-registration.query';
 import { ReadProductTermsFindingsQuery } from '@/contexts/credit-application/file/application/queries/read-product-terms-findings/read-product-terms-findings.query';
 import { ReadProductTermsQuery } from '@/contexts/credit-application/file/application/queries/read-product-terms/read-product-terms.query';
-import { DecideApplicationCommand } from '@/contexts/credit-application/decision/application/commands/decide-application/decide-application.command';
 
 /** What the use cases of the file module on the broker registrations and the product terms require: keeping them, reading them, and the check of a request against its product. */
 export function declareFileReferenceUseCases(): UseCaseDeclaration[] {
@@ -21,9 +20,6 @@ export function declareFileReferenceUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(ReadProductTermsQuery, creditApplicationPermissions['application.decide'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
-    }),
-    requires(DecideApplicationCommand, creditApplicationPermissions['application.decide'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     publicUseCase(CheckRequestAgainstProductCommand),
