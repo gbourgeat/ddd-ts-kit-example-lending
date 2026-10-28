@@ -41,6 +41,11 @@ import { RateCustomerRiskHandler } from '@/contexts/customer-due-diligence/appli
 import { GetCustomerRiskRatingHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-risk-rating/get-customer-risk-rating.handler';
 import { GetCustomerRiskRatingQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-risk-rating/get-customer-risk-rating.query';
 import { EventStoreGetCustomerRiskRatingReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-get-customer-risk-rating.reader';
+import { RefreshDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/refresh-due-diligence/refresh-due-diligence.command';
+import { RefreshDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/refresh-due-diligence/refresh-due-diligence.handler';
+import { GetCustomerDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/queries/get-customer-due-diligence/get-customer-due-diligence.handler';
+import { GetCustomerDueDiligenceQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-due-diligence/get-customer-due-diligence.query';
+import { EventStoreGetCustomerDueDiligenceReader } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-get-customer-due-diligence.reader';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -148,6 +153,26 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new GetCustomerRiskRatingHandler(getCustomerRiskRatingReader, platform.access),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    RefreshDueDiligenceCommand,
+    new RefreshDueDiligenceHandler(customerRepository, screening, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
+
+  const getCustomerDueDiligenceReader = platform.adapter(
+    new EventStoreGetCustomerDueDiligenceReader(customerRepository),
+    {
+      kind: 'repository',
+      context: 'customer-due-diligence',
+    },
+  );
+
+  platform.queries.register(
+    GetCustomerDueDiligenceQuery,
+    new GetCustomerDueDiligenceHandler(getCustomerDueDiligenceReader, platform.access),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -250,6 +275,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(GetCustomerRiskRatingQuery, customerDueDiligencePermissions['customer.read-risk'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(RefreshDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.refresh'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(GetCustomerDueDiligenceQuery, customerDueDiligencePermissions['due-diligence.read'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization
