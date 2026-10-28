@@ -6,7 +6,7 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 
 | Page | Rules stated | Planned | Specs |
 |---|---|---|---|
-| [branch-network](branch-network.md) | 117 | 0 | 39 |
+| [branch-network](branch-network.md) | 118 | 0 | 39 |
 | [brokerage](brokerage.md) | 37 | 0 | 13 |
 | [credit-application](credit-application.md) | 432 | 17 | 167 |
 | [credit-policy](credit-policy.md) | 139 | 0 | 49 |
@@ -17,4 +17,4 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 | [identity](identity.md) | 175 | 0 | 60 |
 | [reporting](reporting.md) | 19 | 0 | 6 |
 | [servicing](servicing.md) | 49 | 8 | 22 |
-| [the application](application.md) | 331 | 4 | 80 |
+| [the application](application.md) | 332 | 4 | 80 |

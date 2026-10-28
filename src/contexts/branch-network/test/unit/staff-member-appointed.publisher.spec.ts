@@ -12,6 +12,7 @@ describe('Publishing "staff member appointed" to other contexts', () => {
       new StaffMemberAppointed('staff-member-1', new Date('2026-01-01T00:00:00.000Z'), {
         branchId: 'branch-1',
         level: 'risk-manager',
+        accountId: 'account-1',
       }),
     );
 
@@ -28,7 +29,12 @@ describe('Publishing "staff member appointed" to other contexts', () => {
         type: 'branch-network.staff-member.appointed',
         version: 2,
         occurredAt: '2026-01-01T00:00:00.000Z',
-        payload: { staffMemberId: 'staff-member-1', branchId: 'branch-1', level: 'risk-manager' },
+        payload: {
+          staffMemberId: 'staff-member-1',
+          branchId: 'branch-1',
+          level: 'risk-manager',
+          accountId: 'account-1',
+        },
       },
     ]);
   });

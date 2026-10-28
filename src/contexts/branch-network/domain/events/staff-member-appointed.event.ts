@@ -8,6 +8,8 @@ export class StaffMemberAppointed extends NamedDomainEvent('branch-network.staff
     readonly facts: {
       readonly branchId: string;
       readonly level: string;
+      /** The account the staff member signs in with: the actor of what they decide. */
+      readonly accountId: string;
     },
   ) {
     super();

@@ -20,7 +20,13 @@ const bornAt = new Date('2026-01-01T00:00:00.000Z');
 describe('When staff member appointed', () => {
   it('reacts at the end of the unit of work, before the commit, without failing', async () => {
     const { handler, staffMemberRepository } = arrange();
-    const event = new StaffMemberAppointed('staff-member-1', bornAt, { branchId: 'branch-7', level: 'advisor' });
+
+    const event = new StaffMemberAppointed('staff-member-1', bornAt, {
+      branchId: 'branch-7',
+      level: 'advisor',
+      accountId: 'account-1',
+    });
+
     const domainEvents = new InMemoryDomainEventDispatcher();
     const reactedAt: string[] = [];
 
@@ -44,7 +50,11 @@ describe('When staff member appointed', () => {
     await staffMemberRepository.save(aStaffMember().identifiedBy('staff-member-1').onBranch('branch-7').build());
 
     await handler.handle(
-      new StaffMemberAppointed('staff-member-1', bornAt, { branchId: 'branch-7', level: 'advisor' }),
+      new StaffMemberAppointed('staff-member-1', bornAt, {
+        branchId: 'branch-7',
+        level: 'advisor',
+        accountId: 'account-1',
+      }),
     );
 
     const portfolio = await portfolioRepository.findById('portfolio-1');
@@ -57,7 +67,13 @@ describe('When staff member appointed', () => {
     const { handler, portfolioRepository } = arrange();
 
     await expect(
-      handler.handle(new StaffMemberAppointed('staff-member-9', bornAt, { branchId: 'branch-7', level: 'advisor' })),
+      handler.handle(
+        new StaffMemberAppointed('staff-member-9', bornAt, {
+          branchId: 'branch-7',
+          level: 'advisor',
+          accountId: 'account-1',
+        }),
+      ),
     ).rejects.toMatchObject({
       code: 'UNKNOWN_STAFF_MEMBER',
     });
