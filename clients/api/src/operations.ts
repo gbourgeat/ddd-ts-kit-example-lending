@@ -2467,6 +2467,43 @@ export function repayEarly(
   return send<RepayEarlyResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RecordLatePaymentInput {
+  readonly path: {
+    readonly id: string;
+    readonly number: string;
+  };
+  readonly body: {
+    amountCents: number;
+  };
+}
+
+export type RecordLatePaymentResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_LOAN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Record late payment: `POST /loans/{id}/instalments/{number}/payments`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+ */
+export function recordLatePayment(
+  connection: Connection,
+  input: RecordLatePaymentInput,
+  options: CallOptions = {},
+): Promise<RecordLatePaymentResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/loans/{id}/instalments/{number}/payments',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RecordLatePaymentResult>(connection, operation, { ...input, ...options });
+}
+
 export interface GetLoanStatementInput {
   readonly path: {
     readonly id: string;

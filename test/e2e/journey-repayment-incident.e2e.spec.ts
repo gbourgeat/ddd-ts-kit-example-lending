@@ -1,8 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import { expectStatus } from '@ddd-ts-kit/testing/e2e';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { BANK_TENANT, openBank } from '$test/e2e/support/servicing/bank';
 import { payOutLoan, readLoanAsBorrower, runNightlyComputation } from '$test/e2e/support/servicing/nightly-run';
-import { storedEventsText } from '$test/e2e/support/servicing/paid-out-loan';
+import { servicingOperator, storedEventsText } from '$test/e2e/support/servicing/paid-out-loan';
 
 /** A loan whose mandate the payer's bank refuses: its direct debits are rejected, one after the other. */
 const REFUSED_LOAN_ID = 'refused-loan-1';
@@ -47,6 +48,23 @@ describe('Declare a repayment incident after two consecutive unpaid instalments,
     await runNightlyComputation(application, SECOND_NIGHTLY_RUN);
 
     expect(occurrencesOf(DECLARED_EVENT, await storedEventsText(application))).toBe(1);
+  });
+
+  it('withdraws the declaration once the unpaid instalments are paid late through the route', async () => {
+    await payOutLoan(application, REFUSED_LOAN_ID);
+    await runNightlyComputation(application, FIRST_NIGHTLY_RUN);
+    await runNightlyComputation(application, SECOND_NIGHTLY_RUN);
+    const operator = await servicingOperator(application, 'ops');
+
+    expectStatus(await operator.post(`/loans/${REFUSED_LOAN_ID}/instalments/1/payments`, { amountCents: 8_560 }), 204);
+    expectStatus(await operator.post(`/loans/${REFUSED_LOAN_ID}/instalments/2/payments`, { amountCents: 8_560 }), 204);
+    await application.settled();
+
+    expect(await readLoanAsBorrower(application, REFUSED_LOAN_ID)).toMatchObject({
+      incidentDeclared: false,
+      instalmentsUnpaid: [1, 2],
+      instalmentsPaid: [1, 2],
+    });
   });
 
   it('does not declare the loan while a single instalment is unpaid', async () => {
