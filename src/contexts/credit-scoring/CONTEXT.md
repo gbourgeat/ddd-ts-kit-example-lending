@@ -24,6 +24,7 @@ The scoring model is the bank's own judgement of credit risk, versioned and owne
 | Published | A version of the scoring model made available for use by the credit decisions | Draft, the version being prepared |
 | Label | The name given to a published version of the scoring model, for example 2026.1 | Name of the model |
 | Applicant | The person whose inputs the scoring model scores, for one model version |  |
+| Compute | The act of scoring an applicant with a model version, as an operator | Score |
 
 ## Aggregates
 
@@ -46,6 +47,7 @@ No personal data declared.
 
 <!-- ddd-ts-kit:permissions -->
 - `credit-scoring:scoring-model.publish`
+- `credit-scoring:score.compute`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -90,11 +92,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `PublishScoringModelVersion` | command | `scoring-model.publish` |
+| `ScoreApplicant` | query | `score.compute` |
 
 ### Routes
 
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
+| POST | `/scores` | `scoreApplicant` | `ScoresRoutes` | `Authenticated` | `ScoreApplicant` | `score.compute` | body: `ScoreApplicantBody` | 200: `ScoreApplicantAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditScoringCodes.UnknownModelVersion` |
 | POST | `/scoring-models` | `publishScoringModelVersion` | `ScoringModelsRoutes` | `Authenticated` | `PublishScoringModelVersion` | `scoring-model.publish` | body: `PublishScoringModelVersionBody` | 201: `PublishedScoringModelVersion` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditScoringCodes.ScoringModelLabelRequired` |
 
 ### Ports
@@ -107,8 +111,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
+| `InvalidApplicantInput` | `forInput` | `INVALID_APPLICANT_INPUT` | none |
 | `InvalidFactor` | `forWords` | `INVALID_FACTOR` | none |
 | `InvalidFactor` | `forHarm` | `INVALID_FACTOR` | none |
 | `InvalidScore` | `forValue` | `INVALID_SCORE` | none |
 | `ScoringModelLabelRequired` | `forLabel` | `SCORING_MODEL_LABEL_REQUIRED` | none |
+| `UnknownModelVersion` | `forLabel` | `UNKNOWN_MODEL_VERSION` | none |
 <!-- /ddd-ts-kit:reference -->
