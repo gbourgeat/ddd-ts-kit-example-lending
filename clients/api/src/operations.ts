@@ -3270,6 +3270,64 @@ export function defaultedLoans(
   return send<DefaultedLoansResult>(connection, operation, { ...input, ...options });
 }
 
+export interface MonthlyReportInput {
+  readonly query: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: id. */
+    readonly sort?: string;
+    readonly month: string;
+  };
+}
+
+export type MonthlyReportResult =
+  | Success<200, {
+    items: Array<{
+      branchId: string;
+      month: string;
+      applicationCount: number;
+      applicationAmountCents: number;
+      decisionCount: number;
+      approvalCount: number;
+      exceptionCount: number;
+      approvalRateBasisPoints: number;
+      exceptionShareBasisPoints: number;
+      portfolioAtRiskBasisPoints: number;
+    }>;
+    /** Present when it is cheap to count. */
+    total?: number;
+    /** Present when more items follow. */
+    nextCursor?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Monthly report: `GET /reports/monthly`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function monthlyReport(
+  connection: Connection,
+  input: MonthlyReportInput,
+  options: CallOptions = {},
+): Promise<MonthlyReportResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/reports/monthly',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<MonthlyReportResult>(connection, operation, { ...input, ...options });
+}
+
 export type PortfolioAtRiskPerBranchInput = Record<string, never>;
 
 export type PortfolioAtRiskPerBranchResult =

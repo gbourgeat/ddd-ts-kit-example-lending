@@ -47,6 +47,7 @@ No personal data declared.
 <!-- ddd-ts-kit:permissions -->
 - `reporting:report.portfolio-at-risk`
 - `reporting:report.defaults`
+- `reporting:report.monthly`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -94,6 +95,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `DefaultedLoans` | query | `report.defaults` |
+| `MonthlyReport` | query | `report.monthly` |
 | `PortfolioAtRiskPerBranch` | query | `report.portfolio-at-risk` |
 
 ### Routes
@@ -101,6 +103,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Method | Path | Operation | Group | Guards | Use case | Permission | Request | Responses | Errors |
 |---|---|---|---|---|---|---|---|---|---|
 | GET | `/reports/defaulted-loans` | `defaultedLoans` | `ReportsRoutes` | `Authenticated` | `DefaultedLoans` | `report.defaults` |  | 200: `DefaultedLoansAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
+| GET | `/reports/monthly` | `monthlyReport` | `ReportsRoutes` | `Authenticated` | `MonthlyReport` | `report.monthly` | query | 200: `page of MonthlyReportLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | GET | `/reports/portfolio-at-risk` | `portfolioAtRiskPerBranch` | `ReportsRoutes` | `Authenticated` | `PortfolioAtRiskPerBranch` | `report.portfolio-at-risk` |  | 200: `PortfolioAtRiskPerBranchAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Projections
@@ -123,6 +126,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DefaultedLoan` | not bound |  |
 | `DefaultedLoansReader` | repository | `PrismaDefaultedLoansReader` |
 | `LoanPrincipal` | not bound |  |
+| `MonthlyReportReader` | repository | `PrismaMonthlyReportReader` |
 | `PortfolioAtRisk` | not bound |  |
 | `PortfolioAtRiskPerBranchReader` | repository | `PrismaPortfolioAtRiskPerBranchReader` |
 
