@@ -1,5 +1,5 @@
 import { defineCriteria } from '@ddd-ts-kit/kernel';
-import type { ApplicationCountRow } from '@/contexts/reporting/application/read-model/application-count.row';
+import type { ApplicationCountRow } from '@/contexts/reporting/application/ports/application-counts.port';
 
 /** What a read of the applications-per-branch read model may filter and sort by. */
 export const applicationCountCriteria = defineCriteria<ApplicationCountRow>({

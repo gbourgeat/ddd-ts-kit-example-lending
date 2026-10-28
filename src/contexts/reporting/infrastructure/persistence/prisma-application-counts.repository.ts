@@ -2,8 +2,8 @@ import type { ExecutionScope } from '@ddd-ts-kit/kernel';
 import { PrismaReadModelStore } from '@ddd-ts-kit/prisma';
 import type { Prisma } from '$generated/prisma/client';
 import type { ApplicationCounts } from '@/contexts/reporting/application/ports/application-counts.port';
-import { applicationCountCriteria } from '@/contexts/reporting/application/read-model/application-count.criteria';
-import type { ApplicationCountRow } from '@/contexts/reporting/application/read-model/application-count.row';
+import { applicationCountCriteria } from '@/contexts/reporting/application/projections/application-count-criteria.projection';
+import type { ApplicationCountRow } from '@/contexts/reporting/application/ports/application-counts.port';
 import type { Database } from '@/platform/database/database';
 
 /** The applications-per-branch read model in its table of the reporting schema, confined to the tenant of the work. */

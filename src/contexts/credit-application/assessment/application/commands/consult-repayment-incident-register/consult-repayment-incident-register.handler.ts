@@ -4,9 +4,11 @@ import type { CreditApplicationRepository } from '@/contexts/credit-application/
 import type { CustomerIdentityGateway } from '@/contexts/credit-application/assessment/application/ports/customer-identity-gateway.port';
 import type { RepaymentIncidentRegister } from '@/contexts/credit-application/assessment/application/ports/repayment-incident-register.port';
 import { UnidentifiedParty } from '@/contexts/credit-application/assessment/domain/errors/unidentified-party.error';
-import type { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
-import type { ConsultedParty } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consulted-party.result';
-import type { RepaymentIncidentConsultation } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/repayment-incident-consultation.result';
+import type {
+  ConsultRepaymentIncidentRegisterCommand,
+  ConsultedParty,
+  RepaymentIncidentConsultation,
+} from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
 
 /** Asks the register about the applicant and each co-borrower, reading their names and birth dates at the instant of the consult. */
 export class ConsultRepaymentIncidentRegisterHandler
