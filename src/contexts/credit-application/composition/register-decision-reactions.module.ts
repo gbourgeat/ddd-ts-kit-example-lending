@@ -6,8 +6,6 @@ import {
 import { delegationTablePublishedV2 as delegationTableDefinition } from '@/contexts/credit-policy/published-language';
 import { DelegationTableProjection } from '@/contexts/credit-application/decision/application/projections/delegation-table.projection';
 import { DeciderLevelProjection } from '@/contexts/credit-application/decision/application/projections/decider-level.projection';
-import { KeepDelegationTableIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-delegation-table.integration-handler';
-import { KeepDeciderLevelIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-decider-level.integration-handler';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { DeclaredConflictsProjection } from '@/contexts/credit-application/decision/application/projections/declared-conflicts.projection';
 import type { Platform } from '@/platform/composition/platform';
@@ -38,8 +36,6 @@ function keepDeclaredConflicts(platform: Platform, declaredConflicts: DeclaredCo
 function keepDelegationAndLevels(platform: Platform): void {
   const delegationTableProjection = new DelegationTableProjection();
   const deciderLevelProjection = new DeciderLevelProjection();
-  const keepDelegationTable = new KeepDelegationTableIntegrationHandler(platform.commands);
-  const keepDeciderLevel = new KeepDeciderLevelIntegrationHandler(platform.commands);
   const { processedEvents: processed, unitOfWork } = platform.persistence;
   const { scope } = platform;
 
@@ -53,16 +49,6 @@ function keepDelegationAndLevels(platform: Platform): void {
       deciderLevelDefinition,
       { consumer: 'credit-application.decider-level', processed, unitOfWork, scope },
       (event) => deciderLevelProjection.appointed(event),
-    ),
-    consume(
-      delegationTableDefinition,
-      { consumer: 'credit-application.keep-delegation-table', processed, unitOfWork, scope },
-      (event) => keepDelegationTable.handle(event),
-    ),
-    consume(
-      deciderLevelDefinition,
-      { consumer: 'credit-application.keep-decider-level', processed, unitOfWork, scope },
-      (event) => keepDeciderLevel.handle(event),
     ),
   ]);
 }

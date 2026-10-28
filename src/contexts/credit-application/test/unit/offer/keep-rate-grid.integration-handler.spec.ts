@@ -1,0 +1,32 @@
+import { describe, expect, it } from '@jest/globals';
+import { InMemoryCommandBus } from '@ddd-ts-kit/kernel';
+import { rateGridPublishedV2 } from '@/contexts/credit-policy/published-language';
+import { KeepRateGridIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-rate-grid.integration-handler';
+
+describe('When credit-policy publishes credit-policy.rate-grid.published', () => {
+  it('listens to the type credit-policy publishes', () => {
+    const handler = new KeepRateGridIntegrationHandler(new InMemoryCommandBus());
+
+    expect(handler).toBeInstanceOf(KeepRateGridIntegrationHandler);
+    expect(KeepRateGridIntegrationHandler.eventType).toBe('credit-policy.rate-grid.published');
+  });
+
+  it('acts as a system actor named after its consumer name', () => {
+    const handler = new KeepRateGridIntegrationHandler(new InMemoryCommandBus());
+
+    expect(handler.actor).toMatchObject({ id: 'system:credit-application.keep-rate-grid', type: 'system' });
+  });
+
+  it('receives the event as credit-policy publishes it', async () => {
+    const handler = new KeepRateGridIntegrationHandler(new InMemoryCommandBus());
+    const meta = { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' };
+    // TODO(domain): give the payload every field credit-policy declares, register the command the handler executes and assert what credit-application did.
+    const event = rateGridPublishedV2.create({ rateGridId: 'rate-grid-1' }, meta);
+
+    await expect(handler.handle(event)).resolves.toBeUndefined();
+  });
+
+  // TODO(domain): replace each entry below by a test that hands the handler an event built from the upstream declaration and asserts what credit-application did, through a real command bus with the handler and its fakes.
+  it.todo('executes the command that follows the upstream fact');
+  it.todo('has the same outcome when the same event is delivered twice');
+});

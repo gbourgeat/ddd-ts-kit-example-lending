@@ -80,6 +80,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Delegation | the limits each level of staff may decide within, kept by credit-policy | not the delegation of a member of staff to another |
 | Table | the rows of the delegation table: one limit per level of staff, with its date of effect | not a database table |
 | Level | the level of authority of a member of staff, which bounds what they may decide | not a level of the bank hierarchy |
+| Grid | The nominal rate of each product by risk rating and duration, as credit-policy publishes it | Annual percentage rate |
+| Legal maximum rate | The highest annual rate for a category of loan in force on a day | Rate grid |
 
 ## Modules
 
@@ -204,8 +206,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
-| `branch-network.staff-member.appointed` | 2 | `branch-network` | `KeepDeciderLevelIntegrationHandler` | not read |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | not read |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | `credit-application.keep-delegation-table` |
 
 ### Publishers
 
@@ -221,6 +225,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | not read | `DeclaredConflictRow` |  |
 | not read | `DeclaredConflictsProjection` |  |
 | not read | `DelegationTableProjection` |  |
+| not read | `LegalMaximumRateProjection` |  |
+| not read | `RateGridProjection` |  |
 
 ### Ports
 
