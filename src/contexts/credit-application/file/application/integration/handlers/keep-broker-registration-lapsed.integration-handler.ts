@@ -3,7 +3,6 @@ import { brokerRegistrationLapsedV1, type BrokerRegistrationLapsedV1 } from '@/c
 import { KeepBrokerRegistrationCommand } from '@/contexts/credit-application/file/application/commands/keep-broker-registration/keep-broker-registration.command';
 
 /** Keeps a broker's registration lapsed from the day brokerage announced it: the broker may no longer bring applications. */
-// ddd-ts-kit-disable-next-line events/consumer-idempotent -- ADR-0005: registered in its module file, which the rule does not read
 export class KeepBrokerRegistrationLapsedIntegrationHandler {
   static readonly eventType = brokerRegistrationLapsedV1.type;
 

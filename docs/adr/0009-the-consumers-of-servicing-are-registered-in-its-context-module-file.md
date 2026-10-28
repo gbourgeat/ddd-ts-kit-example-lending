@@ -1,6 +1,6 @@
 # ADR-0009: The consumers of servicing are registered in their module files, which `events/consumer-idempotent` does not read
 
-- Status: accepted (conductor, owner brief, to confirm)
+- Status: superseded by ddd-ts-kit 0.99.0 (the rule `events/consumer-idempotent` reads every module file of a context; the suppressions are removed)
 - Date: 2026-10-28
 - Deviates from: `events/consumer-idempotent`
 
