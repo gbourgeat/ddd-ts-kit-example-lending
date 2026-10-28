@@ -11,14 +11,11 @@ import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { SubmitApplicationCommand } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.command';
 import { SubmitApplicationHandler } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.handler';
-import { CreditApplicationSubmittedPublisher } from '@/contexts/credit-application/file/application/integration/publishers/credit-application-submitted.publisher';
-import { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
 import { GiveAccountConsentCommand } from '@/contexts/credit-application/file/application/commands/give-account-consent/give-account-consent.command';
 import { SearchApplicationsHandler } from '@/contexts/credit-application/file/application/queries/search-applications/search-applications.handler';
 import { SearchApplicationsQuery } from '@/contexts/credit-application/file/application/queries/search-applications/search-applications.query';
 import { PrismaSearchApplicationsReader } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-search-applications.reader';
 import { PrismaApplicationListProjection } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-application-list-projection.repository';
-import { ApplicationListOnSubmittedEventHandler } from '@/contexts/credit-application/file/application/event-handlers/application-list-on-submitted.event-handler';
 import { NameCoBorrowerCommand } from '@/contexts/credit-application/file/application/commands/name-co-borrower/name-co-borrower.command';
 import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
 import { NameGuarantorCommand } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.command';
@@ -65,6 +62,7 @@ import { KeepDeciderLevelCommand } from '@/contexts/credit-application/decision/
 import { ReadDeciderLevelQuery } from '@/contexts/credit-application/decision/application/queries/read-decider-level/read-decider-level.query';
 import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-decider-levels.repository';
 import { registerDeciderLevelHandlers } from '@/contexts/credit-application/composition/register-decider-level-handlers.module';
+import { registerSubmissionReactions } from '@/contexts/credit-application/composition/register-submission-reactions.module';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -203,33 +201,14 @@ function registerHandlers(
 /** What the context does when an event happens: its own events and those of the other contexts. */
 function registerReactions(platform: Platform, declaredConflicts: DeclaredConflictsStore): void {
   // ddd-ts-kit:reactions
-  const creditApplicationSubmittedPublisher = platform.adapter(
-    new CreditApplicationSubmittedPublisher(platform.publisher, platform.ids),
-    { kind: 'domain-event-handler', context: 'credit-application' },
+  registerSubmissionReactions(
+    platform,
+    platform.adapter(new PrismaApplicationListProjection(platform.persistence.database, platform.scope), {
+      kind: 'repository',
+      context: 'credit-application',
+      token: 'ApplicationListProjection',
+    }),
   );
-
-  platform.domainEvents.on(CreditApplicationSubmitted.eventName, async (event) => {
-    if (event instanceof CreditApplicationSubmitted) {
-      await creditApplicationSubmittedPublisher.handle(event);
-    }
-  });
-
-  const applicationListOnSubmittedEventHandler = platform.adapter(
-    new ApplicationListOnSubmittedEventHandler(
-      platform.adapter(new PrismaApplicationListProjection(platform.persistence.database, platform.scope), {
-        kind: 'repository',
-        context: 'credit-application',
-        token: 'ApplicationListProjection',
-      }),
-    ),
-    { kind: 'domain-event-handler', context: 'credit-application' },
-  );
-
-  platform.domainEvents.on(CreditApplicationSubmitted.eventName, async (event) => {
-    if (event instanceof CreditApplicationSubmitted) {
-      await applicationListOnSubmittedEventHandler.handle(event);
-    }
-  });
 
   registerDecisionReactions(platform, declaredConflicts);
 
