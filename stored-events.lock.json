@@ -37,7 +37,8 @@
   },
   "customer-due-diligence.customer.identified": {
     "1": "sha256:733dac3b56fba725",
-    "2": "sha256:8ccff80e0d86ce8f"
+    "2": "sha256:8ccff80e0d86ce8f",
+    "3": "sha256:968bc88b98d147bc"
   },
   "customer-due-diligence.customer.possible-match-dismissed": {
     "1": "sha256:7fcf1f10d63955ce"

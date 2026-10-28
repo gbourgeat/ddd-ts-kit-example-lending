@@ -208,7 +208,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
 | `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
-| `CustomerAdvisorBranchGateway` | gateway | `InProcessCustomerAdvisorBranchGateway` |
+| `CustomerAdvisorBranchGateway` | external | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
@@ -234,6 +234,5 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Gateway | Upstream | Adapters |
 |---|---|---|
-| `CustomerAdvisorBranchGateway` | `branch-network` | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerIdentityGateway` | `customer-due-diligence` | `InProcessCustomerIdentityGateway` |
 <!-- /ddd-ts-kit:reference -->
