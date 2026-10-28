@@ -5,11 +5,36 @@ export type Accepted = {
   id: string;
 };
 
+export type AssessmentShownLine = {
+  assessorId: string;
+  assessedAt: string;
+  modelVersion: string;
+  debtToIncomePercent: number;
+  repaymentIncidents: number;
+  residualIncomeCents: number;
+  score: number;
+  band: string;
+  factors: Array<string>;
+  proposedOutcome: string;
+};
+
 export type ConsultedPartyLine = {
   customerId: string;
   name: string;
   birthDate: string;
   listed: boolean;
+};
+
+export type DecisionShownLine = {
+  outcome: string;
+  deciderId: string;
+  level: string;
+  reasons: string;
+  conditions: string;
+  approvedAmountCents: number;
+  branchId: string;
+  exception: boolean;
+  decidedAt: string;
 };
 
 export type DeclaredConflictLine = {
@@ -79,6 +104,22 @@ export type RateBandAnswer = {
 export type RateBandBody = {
   upToMonths: number;
   rateBasisPoints: number;
+};
+
+export type RefusalReviewShownLine = {
+  reviewerId: string;
+  conclusion: string;
+  reason: string;
+  reviewedAt: string;
+};
+
+export type RegisterPartyLine = {
+  customerId: string;
+  listed: boolean;
+};
+
+export type RegisterShownLine = {
+  parties: Array<RegisterPartyLine>;
 };
 
 export type RequestedAmountBody = {

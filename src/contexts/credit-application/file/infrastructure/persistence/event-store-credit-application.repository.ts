@@ -23,14 +23,18 @@ const SCAN_PAGE_SIZE = 500;
 export class EventStoreCreditApplicationRepository implements CreditApplicationRepository {
   private readonly streams: EventSourcedRepository<CreditApplication, CreditApplicationEvent, CreditApplicationState>;
 
+  private readonly serializer: EventSerializer<CreditApplicationEvent>;
+
   constructor(
     private readonly store: EventStore,
     cipher: PersonalDataCipher,
   ) {
+    this.serializer = new EventSerializer<CreditApplicationEvent>(creditApplicationEvents, { cipher });
+
     this.streams = new EventSourcedRepository({
       store,
       category: CATEGORY,
-      serializer: new EventSerializer<CreditApplicationEvent>(creditApplicationEvents, { cipher }),
+      serializer: this.serializer,
       rehydrate: (id, history) => CreditApplication.rehydrate(id, history),
       // TODO(domain): when a stream grows long enough to slow a load, add `snapshots: { ...creditApplicationSnapshots, store: snapshots, every: <n> }` (a SnapshotStore injected here, a snapshot mapper with its own shape version): see docs/concepts/event-sourcing.md of ddd-ts-kit.
     });
@@ -57,6 +61,13 @@ export class EventStoreCreditApplicationRepository implements CreditApplicationR
 
   save(saved: CreditApplication): Promise<void> {
     return this.streams.save(saved);
+  }
+
+  /** The events of the stream, opened by the serializer in their order: an erased personal value reads as erased. */
+  async historyOf(id: string): Promise<readonly CreditApplicationEvent[]> {
+    const stored = await this.store.readStream(EventSourcedRepository.streamOf(CATEGORY, id));
+
+    return Promise.all(stored.map((event) => this.serializer.deserialize(event)));
   }
 
   /** The identifiers of the application streams, read from the whole store in the order its appends committed. */

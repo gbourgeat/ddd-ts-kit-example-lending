@@ -33,6 +33,11 @@ import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infr
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
+import { ShowDecisionViewHandler } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.handler';
+import { ShowDecisionViewQuery } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.query';
+import { RepositoryShowDecisionViewReader } from '@/contexts/credit-application/decision/infrastructure/persistence/repository-show-decision-view.reader';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -62,6 +67,15 @@ export const decisionModule = {
     registerDeciderLevelHandlers(platform, deciderLevels);
     registerDelegationTableHandlers(platform, delegationTables);
     registerDecideApplication(platform, repository, { deciderLevels, delegationTables, declaredConflicts });
+
+    const showDecisionViewReader = platform.adapter(new RepositoryShowDecisionViewReader(repository), {
+      kind: 'repository',
+      context: 'credit-application',
+    });
+
+    platform.queries.register(ShowDecisionViewQuery, new ShowDecisionViewHandler(showDecisionViewReader), {
+      context: 'credit-application',
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -85,6 +99,9 @@ export const decisionModule = {
     return [
       // ddd-ts-kit:authorization
       ...declareDecisionUseCases(),
+      requires(ShowDecisionViewQuery, creditApplicationPermissions['application.decide'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },
