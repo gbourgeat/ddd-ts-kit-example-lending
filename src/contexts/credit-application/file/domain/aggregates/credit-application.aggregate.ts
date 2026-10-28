@@ -5,8 +5,6 @@ import { CreditApplicationAccountConsentGiven } from '@/contexts/credit-applicat
 import { CreditApplicationCoBorrowerNamed } from '@/contexts/credit-application/file/domain/events/credit-application-co-borrower-named.event';
 import { CreditApplicationGuarantorNamed } from '@/contexts/credit-application/file/domain/events/credit-application-guarantor-named.event';
 import { CreditApplicationEntryCorrected } from '@/contexts/credit-application/file/domain/events/credit-application-entry-corrected.event';
-import { InvalidAmount } from '@/contexts/credit-application/file/domain/errors/invalid-amount.error';
-import { InvalidDuration } from '@/contexts/credit-application/file/domain/errors/invalid-duration.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
 import {
@@ -20,6 +18,8 @@ import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contex
 import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
 import { EntryCorrectionService } from '@/contexts/credit-application/file/domain/services/entry-correction.service';
 import { RefusalReviewService } from '@/contexts/credit-application/file/domain/services/refusal-review.service';
+import { ApplicationRequestService } from '@/contexts/credit-application/file/domain/services/application-request.service';
+import type { ApplicationRequest } from '@/contexts/credit-application/file/domain/values/application-request';
 import type { ProductLimits } from '@/contexts/credit-application/file/domain/values/product-limits';
 import type { ProductTermsFinding } from '@/contexts/credit-application/file/domain/values/product-terms-finding';
 import {
@@ -68,15 +68,6 @@ export interface CreditApplicationState {
   readonly refusalReviewConclusion: RefusalConclusion | undefined;
 }
 
-/** What the applicant asks for, and the instant the application is registered. */
-export interface LoanRequest {
-  readonly amount: Money;
-  readonly durationMonths: number;
-  readonly registeredAt: Date;
-  readonly branchId: string;
-  readonly productId?: string;
-}
-
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
   private state: CreditApplicationState = {
     applicantId: '',
@@ -101,28 +92,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     super(id);
   }
 
-  static create(id: string, applicantId: string, request: LoanRequest): CreditApplication {
-    if (request.amount.cents <= 0) {
-      throw InvalidAmount.forCents(request.amount.cents);
-    }
-
-    if (!Number.isSafeInteger(request.durationMonths) || request.durationMonths <= 0) {
-      throw InvalidDuration.forMonths(request.durationMonths);
-    }
-
+  static create(id: string, applicantId: string, request: ApplicationRequest): CreditApplication {
     const created = new CreditApplication(id);
 
-    created.record(
-      new CreditApplicationSubmitted(
-        id,
-        applicantId,
-        request.amount,
-        request.durationMonths,
-        request.registeredAt,
-        request.branchId,
-        request.productId ?? '',
-      ),
-    );
+    created.record(new ApplicationRequestService().submittedEventOf(id, applicantId, request));
 
     return created;
   }
