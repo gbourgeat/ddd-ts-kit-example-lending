@@ -70,6 +70,8 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Mandate | The direct debit authority of the payer, held by the payment provider; the simulated provider takes the loan id as its reference |  |
 | Statement | The loan as it stood on a past date, replayed from its events up to that date: balance, arrears and schedule |  |
 | Get | Read, the query of a view |  |
+| Classify | Place a loan in the arrears bucket its days past due put it in |  |
+| Declare | State to the register or to collections that a loan is in default |  |
 
 ## Modules
 
@@ -111,6 +113,8 @@ No personal data declared.
 - `servicing:loan.reschedule`
 - `servicing:loan.record-repayment`
 - `servicing:loan.collect`
+- `servicing:loan.classify-arrears`
+- `servicing:loan.declare-default`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -120,6 +124,8 @@ No personal data declared.
 |---|---|---|
 | `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
 | `ComputeDueInstalmentsJob` | `` | `ComputeDueInstalments` |
+| `ClassifyArrearsJob` | `` | `ClassifyArrears` |
+| `DeclareDefaultJob` | `` | `DeclareDefault` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs
@@ -163,9 +169,11 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `ClassifyArrears` | command | `loan.classify-arrears` |
 | `CloseLoan` | command | `loan.close` |
 | `CollectInstalment` | command | `loan.collect` |
 | `ComputeDueInstalments` | command | `loan.compute-due` |
+| `DeclareDefault` | command | `loan.declare-default` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `GetLoanStatement` | query | `loan.read` |
 | `ReadLoan` | query | `loan.read` |

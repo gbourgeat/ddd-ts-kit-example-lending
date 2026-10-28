@@ -8,11 +8,8 @@ import { EventStoreLoanRepository } from '@/contexts/servicing/ledger/infrastruc
 import { requires } from '@ddd-ts-kit/auth';
 import { servicingPermissions } from '@/contexts/servicing/servicing.permissions';
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/servicing/ledger/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
-import { ErasePersonalDataPastRetentionHandler } from '@/contexts/servicing/ledger/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
 import { ErasePersonalDataPastRetentionJob } from '@/contexts/servicing/ledger/application/scheduling/erase-personal-data-past-retention.job';
-import { RemotePersonalDataErasure } from '@/contexts/servicing/ledger/infrastructure/external/remote-personal-data-erasure.adapter';
 import { CloseLoanCommand } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.command';
-import { CloseLoanHandler } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.handler';
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
 import {
   creditApplicationPayoutAuthorisedV1 as recordPayoutOnPayoutAuthorisedDefinition,
@@ -21,37 +18,35 @@ import {
 } from '@/contexts/credit-application/published-language';
 import { RecordPayoutOnPayoutAuthorisedIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/record-payout-on-payout-authorised.integration-handler';
 import { RecordPayoutCommand } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.command';
-import { RecordPayoutHandler } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.handler';
-import { ReadLoanHandler } from '@/contexts/servicing/ledger/application/queries/read-loan/read-loan.handler';
 import { ReadLoanQuery } from '@/contexts/servicing/ledger/application/queries/read-loan/read-loan.query';
-import { EventStoreReadLoanReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-read-loan.reader';
 import { RemoteBorrowerIdentity } from '@/contexts/servicing/ledger/infrastructure/external/remote-borrower-identity.adapter';
 import { ComputeDueInstalmentsCommand } from '@/contexts/servicing/instalments/application/commands/compute-due-instalments/compute-due-instalments.command';
-import { ComputeDueInstalmentsHandler } from '@/contexts/servicing/instalments/application/commands/compute-due-instalments/compute-due-instalments.handler';
 import { ComputeDueInstalmentsJob } from '@/contexts/servicing/instalments/application/scheduling/compute-due-instalments.job';
 import { LoanPaidOutPublisher } from '@/contexts/servicing/ledger/application/integration/publishers/loan-paid-out.publisher';
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 import { RepayEarlyCommand } from '@/contexts/servicing/ledger/application/commands/repay-early/repay-early.command';
-import { RepayEarlyHandler } from '@/contexts/servicing/ledger/application/commands/repay-early/repay-early.handler';
 import { WriteOffLoanCommand } from '@/contexts/servicing/ledger/application/commands/write-off-loan/write-off-loan.command';
-import { WriteOffLoanHandler } from '@/contexts/servicing/ledger/application/commands/write-off-loan/write-off-loan.handler';
 import { ReverseWriteOffCommand } from '@/contexts/servicing/ledger/application/commands/reverse-write-off/reverse-write-off.command';
-import { ReverseWriteOffHandler } from '@/contexts/servicing/ledger/application/commands/reverse-write-off/reverse-write-off.handler';
 import { RescheduleOnDecisionIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/reschedule-on-decision.integration-handler';
 import { RescheduleLoanCommand } from '@/contexts/servicing/ledger/application/commands/reschedule-loan/reschedule-loan.command';
-import { RescheduleLoanHandler } from '@/contexts/servicing/ledger/application/commands/reschedule-loan/reschedule-loan.handler';
 import { RepayWithdrawnLoanIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/repay-withdrawn-loan.integration-handler';
 import { RecordWithdrawalRepaymentCommand } from '@/contexts/servicing/ledger/application/commands/record-withdrawal-repayment/record-withdrawal-repayment.command';
-import { RecordWithdrawalRepaymentHandler } from '@/contexts/servicing/ledger/application/commands/record-withdrawal-repayment/record-withdrawal-repayment.handler';
 import { CollectInstalmentCommand } from '@/contexts/servicing/instalments/application/commands/collect-instalment/collect-instalment.command';
-import { CollectInstalmentHandler } from '@/contexts/servicing/instalments/application/commands/collect-instalment/collect-instalment.handler';
 import { CollectDueInstalmentEventHandler } from '@/contexts/servicing/instalments/application/event-handlers/collect-due-instalment.event-handler';
-import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infrastructure/external/simulated-payment-provider.adapter';
 import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
 import { LoanPaymentReceivedPublisher } from '@/contexts/servicing/instalments/application/integration/publishers/loan-payment-received.publisher';
 import { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
-import { GetLoanStatementHandler } from '@/contexts/servicing/ledger/application/queries/get-loan-statement/get-loan-statement.handler';
 import { GetLoanStatementQuery } from '@/contexts/servicing/ledger/application/queries/get-loan-statement/get-loan-statement.query';
+import { ClassifyArrearsCommand } from '@/contexts/servicing/arrears/application/commands/classify-arrears/classify-arrears.command';
+import { ClassifyArrearsHandler } from '@/contexts/servicing/arrears/application/commands/classify-arrears/classify-arrears.handler';
+import { ClassifyArrearsJob } from '@/contexts/servicing/arrears/application/scheduling/classify-arrears.job';
+import { DeclareDefaultCommand } from '@/contexts/servicing/arrears/application/commands/declare-default/declare-default.command';
+import { DeclareDefaultHandler } from '@/contexts/servicing/arrears/application/commands/declare-default/declare-default.handler';
+import { DeclareDefaultJob } from '@/contexts/servicing/arrears/application/scheduling/declare-default.job';
+import { registerLoanHandlers } from '@/contexts/servicing/composition/register-loan-handlers.module';
+import { RemotePersonalDataErasure } from '@/contexts/servicing/ledger/infrastructure/external/remote-personal-data-erasure.adapter';
+import { EventStoreReadLoanReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-read-loan.reader';
+import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infrastructure/external/simulated-payment-provider.adapter';
 import { EventStoreGetLoanStatementReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-get-loan-statement.reader';
 // /ddd-ts-kit:imports
 
@@ -94,50 +89,13 @@ function registerHandlers(platform: Platform): void {
     token: 'PersonalDataErasure',
   });
 
-  platform.commands.register(
-    ErasePersonalDataPastRetentionCommand,
-    new ErasePersonalDataPastRetentionHandler(loanRepository, personalDataErasure),
-    { context: 'servicing' },
-  );
-
-  platform.commands.register(CloseLoanCommand, new CloseLoanHandler(loanRepository, platform.clock), {
-    context: 'servicing',
-  });
-
-  platform.commands.register(
-    RecordPayoutCommand,
-    new RecordPayoutHandler(loanRepository, { clock: platform.clock, relations: platform.relations }),
-    { context: 'servicing' },
-  );
-
   const readLoanReader = platform.adapter(new EventStoreReadLoanReader(loanRepository), {
     kind: 'repository',
     context: 'servicing',
   });
 
-  platform.queries.register(ReadLoanQuery, new ReadLoanHandler(readLoanReader), { context: 'servicing' });
-
-  platform.commands.register(ComputeDueInstalmentsCommand, new ComputeDueInstalmentsHandler(loanRepository), {
-    context: 'servicing',
-  });
-
-  platform.commands.register(RepayEarlyCommand, new RepayEarlyHandler(loanRepository, platform.clock), {
-    context: 'servicing',
-  });
-
-  platform.commands.register(WriteOffLoanCommand, new WriteOffLoanHandler(loanRepository, platform.clock), {
-    context: 'servicing',
-  });
-
-  platform.commands.register(ReverseWriteOffCommand, new ReverseWriteOffHandler(loanRepository, platform.clock), {
-    context: 'servicing',
-  });
-
-  platform.commands.register(RescheduleLoanCommand, new RescheduleLoanHandler(loanRepository, platform.clock), {
-    context: 'servicing',
-  });
-
-  platform.commands.register(RecordWithdrawalRepaymentCommand, new RecordWithdrawalRepaymentHandler(loanRepository), {
+  const getLoanStatementReader = platform.adapter(new EventStoreGetLoanStatementReader(loanRepository), {
+    kind: 'repository',
     context: 'servicing',
   });
 
@@ -147,20 +105,19 @@ function registerHandlers(platform: Platform): void {
     token: 'PaymentProvider',
   });
 
-  platform.commands.register(
-    CollectInstalmentCommand,
-    new CollectInstalmentHandler(loanRepository, paymentProvider, platform.clock),
-    {
-      context: 'servicing',
-    },
-  );
+  registerLoanHandlers(platform, {
+    loanRepository,
+    personalDataErasure,
+    readLoanReader,
+    getLoanStatementReader,
+    paymentProvider,
+  });
 
-  const getLoanStatementReader = platform.adapter(new EventStoreGetLoanStatementReader(loanRepository), {
-    kind: 'repository',
+  platform.commands.register(ClassifyArrearsCommand, new ClassifyArrearsHandler(loanRepository), {
     context: 'servicing',
   });
 
-  platform.queries.register(GetLoanStatementQuery, new GetLoanStatementHandler(getLoanStatementReader), {
+  platform.commands.register(DeclareDefaultCommand, new DeclareDefaultHandler(loanRepository), {
     context: 'servicing',
   });
   // /ddd-ts-kit:handlers
@@ -278,6 +235,24 @@ function registerJobs(platform: Platform): void {
     tenancy: 'per-tenant',
     run: (execution) => computeDueInstalmentsJob.run(execution),
   });
+
+  const classifyArrearsJob = new ClassifyArrearsJob(platform.commands);
+
+  platform.jobs.register({
+    name: 'servicing.classify-arrears',
+    schedule: { cron: '0 2 * * *', timeZone: 'Europe/Paris' },
+    tenancy: 'per-tenant',
+    run: (execution) => classifyArrearsJob.run(execution),
+  });
+
+  const declareDefaultJob = new DeclareDefaultJob(platform.commands);
+
+  platform.jobs.register({
+    name: 'servicing.declare-default',
+    schedule: { cron: '0 2 * * *', timeZone: 'Europe/Paris' },
+    tenancy: 'per-tenant',
+    run: (execution) => declareDefaultJob.run(execution),
+  });
   // /ddd-ts-kit:jobs
 }
 
@@ -320,6 +295,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(GetLoanStatementQuery, servicingPermissions['loan.read'], {
       resource: (query) => ({ type: 'loan', id: query.loanId }),
+    }),
+    requires(ClassifyArrearsCommand, servicingPermissions['loan.classify-arrears'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(DeclareDefaultCommand, servicingPermissions['loan.declare-default'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     // /ddd-ts-kit:authorization
   ];

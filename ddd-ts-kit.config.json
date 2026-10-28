@@ -138,7 +138,7 @@
     },
     "servicing": {
       "classification": "supporting",
-      "extraDirectories": ["domain/values"],
+      "extraDirectories": ["domain/values", "composition"],
       "upstreams": [
         {
           "context": "credit-application",
@@ -235,6 +235,11 @@
       "what": "contexts.servicing.extraDirectories.domain/values",
       "adr": "0006",
       "reason": "The union of the events, the state and the pure rules of the ledger live in ledger domain values to keep the aggregate under 350 lines (conductor, owner brief)"
+    },
+    {
+      "what": "contexts.servicing.extraDirectories.composition",
+      "adr": "0008",
+      "reason": "The registration of the handlers of the ledger and of the instalments moves out of the module file, which passed the 350-line limit (conductor, owner brief)"
     },
     {
       "what": "contexts.reporting.extraDirectories.application/read-model",

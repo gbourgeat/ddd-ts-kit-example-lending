@@ -101,6 +101,8 @@ const systemRelationships: readonly RelationTuple[] = [
     subject: 'system:system:credit-application.lapse-broker-registration',
   },
   { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.compute-due-instalments' },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.classify-arrears' },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.declare-default' },
   // /ddd-ts-kit:system-grants
 ];
 
