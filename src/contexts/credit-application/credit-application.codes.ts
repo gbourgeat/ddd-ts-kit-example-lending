@@ -7,6 +7,7 @@ export const CreditApplicationCodes = {
   UnknownEntry: 'UNKNOWN_ENTRY',
   CorrectionAlreadyRecorded: 'CORRECTION_ALREADY_RECORDED',
   InvalidCorrectionReason: 'INVALID_CORRECTION_REASON',
+  MissingAccountConsent: 'MISSING_ACCOUNT_CONSENT',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

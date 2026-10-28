@@ -4,6 +4,7 @@ import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/do
 import { BusinessAlreadyRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-already-registered.error';
 import { BusinessNotRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-not-registered.error';
 import { IdentityDocumentExpired } from '@/contexts/customer-due-diligence/domain/errors/identity-document-expired.error';
+import { MissingReason } from '@/contexts/customer-due-diligence/domain/errors/missing-reason.error';
 import { NoPossibleMatch } from '@/contexts/customer-due-diligence/domain/errors/no-possible-match.error';
 import { ProofOfAddressTooOld } from '@/contexts/customer-due-diligence/domain/errors/proof-of-address-too-old.error';
 import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
@@ -11,12 +12,26 @@ import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domai
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
+import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
+import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
+import { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
+import { CustomerDueDiligenceRefreshed } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-refreshed.event';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
 
 /** A proof of address is accepted for this many months after its date. */
 const PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS = 3;
+
+/** How many years a due diligence stays current, by the risk rating of the customer. */
+const REFRESH_CADENCE_IN_YEARS: Record<RiskRating, number> = {
+  [RiskRating.High]: 1,
+  [RiskRating.Medium]: 3,
+  [RiskRating.Low]: 5,
+};
+
+/** A customer never rated is refreshed yearly. */
+const NEVER_RATED_REFRESH_CADENCE_IN_YEARS = 1;
 
 export type CustomerEvent =
   | CustomerIdentified
@@ -25,7 +40,10 @@ export type CustomerEvent =
   | CustomerAdvisorAssigned
   | CustomerPossibleMatchFound
   | CustomerSanctionsMatchConfirmed
-  | CustomerRelationshipEnded;
+  | CustomerRelationshipEnded
+  | CustomerPossibleMatchDismissed
+  | CustomerRiskRated
+  | CustomerDueDiligenceRefreshed;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -47,8 +65,12 @@ export interface CustomerState {
   readonly ownersDeclaredAt?: Date;
   readonly advisorId?: string;
   readonly possibleMatchFoundAt?: Date;
+  readonly possibleMatchDismissedAt?: Date | undefined;
   readonly sanctionsMatchConfirmedAt?: Date;
   readonly relationshipEndedAt?: Date;
+  readonly riskRating?: RiskRating;
+  readonly dueDiligenceRefreshedAt?: Date;
+  readonly dueDiligenceDueOn?: Date;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -129,6 +151,19 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerSanctionsMatchConfirmed(this.id, now));
   }
 
+  /** Compliance clears the possible match waiting for review, with its reason: the customer is not on the list. Only a pending possible match can be dismissed. */
+  dismissMatch(reason: string, now: Date): void {
+    if (reason.trim() === '') {
+      throw MissingReason.forDismissal(this.id);
+    }
+
+    if (!this.hasPendingPossibleMatch()) {
+      throw NoPossibleMatch.forCustomer(this.id);
+    }
+
+    this.record(new CustomerPossibleMatchDismissed(this.id, now, reason));
+  }
+
   /** Ends the business relationship with the customer; ending one already ended records nothing, so a repeated reaction is safe. */
   endRelationship(now: Date): void {
     if (this.state.relationshipEndedAt !== undefined) {
@@ -136,6 +171,31 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     }
 
     this.record(new CustomerRelationshipEnded(this.id, now));
+  }
+
+  /** Records the risk rating of the customer, low, medium or high; a later rating replaces the earlier one, which is kept in the events. */
+  rateRisk(rating: RiskRating, now: Date): void {
+    this.record(new CustomerRiskRated(this.id, now, rating));
+  }
+
+  /** Refreshes the due diligence: the screening outcome is recorded, a possible match goes to review, the risk rating is restated only when the customer has one. */
+  refreshDueDiligence(screening: 'clear' | 'possible-match', now: Date): void {
+    const possibleMatch = screening === 'possible-match';
+    const riskRating = this.state.riskRating;
+
+    this.record(
+      new CustomerDueDiligenceRefreshed(
+        this.id,
+        now,
+        possibleMatch,
+        Customer.dueDiligenceDueOn(now, riskRating),
+        riskRating,
+      ),
+    );
+
+    if (possibleMatch) {
+      this.recordPossibleMatch(now);
+    }
   }
 
   toState(): CustomerState {
@@ -151,7 +211,22 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerPossibleMatchFound.eventName]: (event) => this.applyPossibleMatchFound(event),
       [CustomerSanctionsMatchConfirmed.eventName]: (event) => this.applySanctionsMatchConfirmed(event),
       [CustomerRelationshipEnded.eventName]: (event) => this.applyRelationshipEnded(event),
+      [CustomerPossibleMatchDismissed.eventName]: (event) => this.applyPossibleMatchDismissed(event),
+      [CustomerRiskRated.eventName]: (event) => this.applyRiskRated(event),
+      [CustomerDueDiligenceRefreshed.eventName]: (event) => this.applyDueDiligenceRefreshed(event),
     };
+  }
+
+  /** The day the due diligence falls due again: the cadence of the risk rating of the customer, yearly while it is never rated. */
+  private static dueDiligenceDueOn(now: Date, riskRating: RiskRating | undefined): Date {
+    const years =
+      riskRating === undefined ? NEVER_RATED_REFRESH_CADENCE_IN_YEARS : REFRESH_CADENCE_IN_YEARS[riskRating];
+
+    const dueOn = new Date(now.getTime());
+
+    dueOn.setUTCFullYear(dueOn.getUTCFullYear() + years);
+
+    return dueOn;
   }
 
   private static checkIdentity(id: string, identity: PersonIdentity, now: Date): void {
@@ -201,7 +276,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   private applyPossibleMatchFound(event: CustomerPossibleMatchFound): void {
-    this.state = { ...this.state, possibleMatchFoundAt: event.occurredAt };
+    this.state = { ...this.state, possibleMatchFoundAt: event.occurredAt, possibleMatchDismissedAt: undefined };
   }
 
   private applySanctionsMatchConfirmed(event: CustomerSanctionsMatchConfirmed): void {
@@ -209,10 +284,31 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   private hasPendingPossibleMatch(): boolean {
-    return this.state.possibleMatchFoundAt !== undefined && this.state.sanctionsMatchConfirmedAt === undefined;
+    return (
+      this.state.possibleMatchFoundAt !== undefined &&
+      this.state.sanctionsMatchConfirmedAt === undefined &&
+      this.state.possibleMatchDismissedAt === undefined
+    );
   }
 
   private applyRelationshipEnded(event: CustomerRelationshipEnded): void {
     this.state = { ...this.state, relationshipEndedAt: event.occurredAt };
+  }
+
+  private applyPossibleMatchDismissed(event: CustomerPossibleMatchDismissed): void {
+    this.state = { ...this.state, possibleMatchDismissedAt: event.occurredAt };
+  }
+
+  private applyRiskRated(event: CustomerRiskRated): void {
+    this.state = { ...this.state, riskRating: event.rating };
+  }
+
+  private applyDueDiligenceRefreshed(event: CustomerDueDiligenceRefreshed): void {
+    this.state = {
+      ...this.state,
+      dueDiligenceRefreshedAt: event.occurredAt,
+      dueDiligenceDueOn: event.nextDueOn,
+      ...(event.riskRating === undefined ? {} : { riskRating: event.riskRating }),
+    };
   }
 }

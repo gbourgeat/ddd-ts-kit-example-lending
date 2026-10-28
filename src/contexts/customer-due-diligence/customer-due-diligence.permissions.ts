@@ -10,5 +10,10 @@ export const customerDueDiligencePermissions = definePermissions('customer-due-d
   'customer.screen': { description: 'Screen customer' },
   'match.confirm': { description: 'Confirm sanctions match' },
   'relationship.end': { description: 'End relationship' },
+  'match.dismiss': { description: 'Dismiss match' },
+  'customer.rate-risk': { description: 'Rate customer risk' },
+  'customer.read-risk': { description: 'Get customer risk rating' },
+  'due-diligence.refresh': { description: 'Refresh due diligence' },
+  'due-diligence.read': { description: 'Get customer due diligence' },
   // /ddd-ts-kit:permissions
 });

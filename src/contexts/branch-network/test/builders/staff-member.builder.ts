@@ -8,6 +8,7 @@ interface StaffMemberIngredients {
   readonly name: string;
   readonly email: string;
   readonly accountId: string;
+  readonly level: string;
   readonly ownCustomerId: string | undefined;
 }
 
@@ -36,6 +37,10 @@ export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMem
     return this.with('accountId', accountId);
   }
 
+  atLevel(level: string): this {
+    return this.with('level', level);
+  }
+
   ownsCustomerFile(customerId: string): this {
     return this.with('ownCustomerId', customerId);
   }
@@ -48,6 +53,7 @@ export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMem
       name: 'Ada Lovelace',
       email: 'ada.lovelace@bank.test',
       accountId: 'account-ada',
+      level: 'advisor',
       ownCustomerId: undefined,
     };
   }
@@ -60,6 +66,7 @@ export class StaffMemberBuilder extends Builder<StaffMemberIngredients, StaffMem
         name: ingredients.name,
         email: ingredients.email,
         accountId: ingredients.accountId,
+        level: ingredients.level,
         ownCustomerId: ingredients.ownCustomerId,
       },
       ingredients.bornAt,

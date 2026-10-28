@@ -492,6 +492,81 @@ paths:
             - INVALID_AMOUNT
             - INVALID_DURATION
             - VALIDATION_FAILED
+  /applications/{id}/account-information:
+    post:
+      operationId: readAccountInformation
+      summary: Read account information
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: MISSING_ACCOUNT_CONSENT, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - MISSING_ACCOUNT_CONSENT
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /applications/{id}/co-borrowers:
     post:
       operationId: nameCoBorrower
@@ -788,6 +863,92 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/documents:
+    post:
+      operationId: attachDocument
+      summary: Attach document
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        description: 'Text fields first, then the file: a field sent after the file is not read.'
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  contentMediaType: application/octet-stream
+                  description: 'The file: application/pdf, image/png, image/jpeg, at most 10485760 bytes, its type checked on its content.'
+                  x-max-bytes: 10485760
+                  x-media-types:
+                    - application/pdf
+                    - image/png
+                    - image/jpeg
+              required:
+                - file
+            encoding:
+              file:
+                contentType: application/pdf, image/png, image/jpeg
+      responses:
+        '201':
+          description: Stored; the file is visible once the command has committed.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '413':
+          description: 'Content Too Large. Error codes: FILE_TOO_LARGE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FILE_TOO_LARGE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
         '422':
           description: 'Unprocessable Content. Error codes: UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
           content:
@@ -1162,6 +1323,8 @@ paths:
                   type: string
                 accountId:
                   type: string
+                level:
+                  type: string
                 ownCustomerId:
                   type: string
               type: object
@@ -1169,6 +1332,7 @@ paths:
                 - name
                 - email
                 - accountId
+                - level
       responses:
         '201':
           description: The answer.
@@ -1846,6 +2010,77 @@ paths:
             - PROOF_OF_ADDRESS_TOO_OLD
             - UNKNOWN_CUSTOMER
             - VALIDATION_FAILED
+  /customers/{id}/due-diligence:
+    get:
+      operationId: getCustomerDueDiligence
+      summary: Get the date of the last refresh of the due diligence of a customer and the date it falls due again, when the caller may read it
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  customerId:
+                    type: string
+                  refreshedOn:
+                    pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                    type: string
+                  nextDueOn:
+                    pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                    type: string
+                type: object
+                required:
+                  - customerId
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
   /customers/{id}/matches/confirm:
     post:
       operationId: confirmSanctionsMatch
@@ -1906,6 +2141,323 @@ paths:
           x-error-codes:
             - NO_POSSIBLE_MATCH
             - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
+  /customers/{id}/matches/dismiss:
+    post:
+      operationId: dismissMatch
+      summary: Clear the possible match of a customer, with its reason, when compliance finds no sanctions match
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                reason:
+                  type: string
+              type: object
+              required:
+                - reason
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: NO_POSSIBLE_MATCH, UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NO_POSSIBLE_MATCH
+            - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
+  /customers/{id}/refresh:
+    post:
+      operationId: refreshDueDiligence
+      summary: Refresh due diligence
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  minLength: 1
+                  type: string
+                birthDate:
+                  pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                  type: string
+              type: object
+              required:
+                - name
+                - birthDate
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
+  /customers/{id}/risk:
+    put:
+      operationId: rateCustomerRisk
+      summary: Rate the risk of a customer, low, medium or high
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                rating:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              type: object
+              required:
+                - rating
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
+  /customers/{id}/risk-rating:
+    get:
+      operationId: getCustomerRiskRating
+      summary: Get the risk rating of a customer, low, medium or high, when the caller may read it
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  customerId:
+                    type: string
+                  riskRating:
+                    type: string
+                    enum:
+                      - low
+                      - medium
+                      - high
+                type: object
+                required:
+                  - customerId
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
             - VALIDATION_FAILED
   /customers/{id}/screening:
     post:

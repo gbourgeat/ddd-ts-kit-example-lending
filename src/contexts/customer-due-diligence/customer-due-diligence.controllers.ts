@@ -7,7 +7,12 @@ import { GetCustomerFileController } from '@/contexts/customer-due-diligence/pre
 import { AssignAdvisorController } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.controller';
 import { ConfirmSanctionsMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.controller';
 import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
+import { DismissMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.controller';
+import { GetCustomerDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.controller';
+import { GetCustomerRiskRatingController } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-risk-rating/get-customer-risk-rating.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
+import { RateCustomerRiskController } from '@/contexts/customer-due-diligence/presentation/http/customers/rate-customer-risk/rate-customer-risk.controller';
+import { RefreshDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/refresh-due-diligence/refresh-due-diligence.controller';
 import { ScreenCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.controller';
 import { RegisterBusinessBody } from '@/contexts/customer-due-diligence/presentation/http/businesses/register-business/register-business.body';
 import { AssignAdvisorParams } from '@/contexts/customer-due-diligence/presentation/http/customers/assign-advisor/assign-advisor.params';
@@ -15,7 +20,17 @@ import { AssignAdvisorBody } from '@/contexts/customer-due-diligence/presentatio
 import { ConfirmSanctionsMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.params';
 import { DeclareDirectorsAndOwnersParams } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.params';
 import { DeclareDirectorsAndOwnersBody } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.body';
+import { DismissMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.params';
+import { DismissMatchBody } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.body';
+import { GetCustomerDueDiligenceParams } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.params';
+import { GetCustomerDueDiligenceAnswer } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.answer';
+import { GetCustomerRiskRatingParams } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-risk-rating/get-customer-risk-rating.params';
+import { GetCustomerRiskRatingAnswer } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-risk-rating/get-customer-risk-rating.answer';
 import { IdentifyCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.body';
+import { RateCustomerRiskParams } from '@/contexts/customer-due-diligence/presentation/http/customers/rate-customer-risk/rate-customer-risk.params';
+import { RateCustomerRiskBody } from '@/contexts/customer-due-diligence/presentation/http/customers/rate-customer-risk/rate-customer-risk.body';
+import { RefreshDueDiligenceParams } from '@/contexts/customer-due-diligence/presentation/http/customers/refresh-due-diligence/refresh-due-diligence.params';
+import { RefreshDueDiligenceBody } from '@/contexts/customer-due-diligence/presentation/http/customers/refresh-due-diligence/refresh-due-diligence.body';
 import { ScreenCustomerParams } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.params';
 import { ScreenCustomerBody } from '@/contexts/customer-due-diligence/presentation/http/customers/screen-customer/screen-customer.body';
 
@@ -38,8 +53,23 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
       answer: acceptedSchema,
     },
   }),
+  withSignatures(DismissMatchController, {
+    dismissMatch: { params: DismissMatchParams, body: DismissMatchBody, answer: acceptedSchema },
+  }),
+  withSignatures(GetCustomerDueDiligenceController, {
+    getCustomerDueDiligence: { params: GetCustomerDueDiligenceParams, answer: GetCustomerDueDiligenceAnswer },
+  }),
+  withSignatures(GetCustomerRiskRatingController, {
+    getCustomerRiskRating: { params: GetCustomerRiskRatingParams, answer: GetCustomerRiskRatingAnswer },
+  }),
   withSignatures(IdentifyCustomerController, {
     identifyCustomer: { body: IdentifyCustomerBody, answer: acceptedSchema },
+  }),
+  withSignatures(RateCustomerRiskController, {
+    rateCustomerRisk: { params: RateCustomerRiskParams, body: RateCustomerRiskBody, answer: acceptedSchema },
+  }),
+  withSignatures(RefreshDueDiligenceController, {
+    refreshDueDiligence: { params: RefreshDueDiligenceParams, body: RefreshDueDiligenceBody, answer: acceptedSchema },
   }),
   withSignatures(ScreenCustomerController, {
     screenCustomer: { params: ScreenCustomerParams, body: ScreenCustomerBody, answer: acceptedSchema },

@@ -5,6 +5,7 @@ export const CustomerDueDiligenceCodes = {
   ProofOfAddressTooOld: 'PROOF_OF_ADDRESS_TOO_OLD',
   BusinessNotRegistered: 'BUSINESS_NOT_REGISTERED',
   NoPossibleMatch: 'NO_POSSIBLE_MATCH',
+  MissingReason: 'MISSING_REASON',
 } as const;
 
 export type CustomerDueDiligenceCode = (typeof CustomerDueDiligenceCodes)[keyof typeof CustomerDueDiligenceCodes];

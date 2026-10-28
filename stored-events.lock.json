@@ -5,6 +5,9 @@
   "credit-application.credit-application.co-borrower-named": {
     "1": "sha256:a3b8eb43c397ea60"
   },
+  "credit-application.credit-application.document-attached": {
+    "1": "sha256:147596fb8d97663a"
+  },
   "credit-application.credit-application.entry-corrected": {
     "1": "sha256:5b747a08750d0be3"
   },
@@ -23,15 +26,24 @@
   "customer-due-diligence.customer.directors-and-owners-declared": {
     "1": "sha256:cb0ab1df6df4a11c"
   },
+  "customer-due-diligence.customer.due-diligence-refreshed": {
+    "1": "sha256:b54cb914fe21085d"
+  },
   "customer-due-diligence.customer.identified": {
     "1": "sha256:733dac3b56fba725",
     "2": "sha256:8ccff80e0d86ce8f"
+  },
+  "customer-due-diligence.customer.possible-match-dismissed": {
+    "1": "sha256:7fcf1f10d63955ce"
   },
   "customer-due-diligence.customer.possible-match-found": {
     "1": "sha256:733dac3b56fba725"
   },
   "customer-due-diligence.customer.relationship-ended": {
     "1": "sha256:733dac3b56fba725"
+  },
+  "customer-due-diligence.customer.risk-rated": {
+    "1": "sha256:8d5689c8d7f25a93"
   },
   "customer-due-diligence.customer.sanctions-match-confirmed": {
     "1": "sha256:733dac3b56fba725"

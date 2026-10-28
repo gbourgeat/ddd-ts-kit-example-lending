@@ -25,7 +25,13 @@ export class LegalMaximumRate extends AggregateRoot<string> {
       effectiveFrom: terms.effectiveFrom,
     });
 
-    created.record(new LegalMaximumRatePublished(id, now));
+    created.record(
+      new LegalMaximumRatePublished(id, now, {
+        category: terms.category,
+        rateBasisPoints: terms.rateBasisPoints,
+        effectiveFrom: terms.effectiveFrom,
+      }),
+    );
 
     return created;
   }

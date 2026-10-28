@@ -10,6 +10,7 @@ import { InvalidDuration } from '@/contexts/credit-application/file/domain/error
 import { InvalidCorrectionReason } from '@/contexts/credit-application/file/domain/errors/invalid-correction-reason.error';
 import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/domain/errors/correction-already-recorded.error';
 import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
+import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
 import {
   AccountConsent,
   type AccountConsentState,
@@ -20,7 +21,8 @@ export type CreditApplicationEvent =
   | CreditApplicationAccountConsentGiven
   | CreditApplicationCoBorrowerNamed
   | CreditApplicationGuarantorNamed
-  | CreditApplicationEntryCorrected;
+  | CreditApplicationEntryCorrected
+  | CreditApplicationDocumentAttached;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -34,6 +36,8 @@ export interface CreditApplicationState {
   readonly entryCount: number;
   /** The entries that a correction already names: a second correction of one of them is refused. */
   readonly correctedEntryIds: readonly string[];
+  /** The documents stored for the file, by their key in the object store: the file holds the reference, never the content. */
+  readonly documentKeys: readonly string[];
 }
 
 /** What the applicant asks for, and the instant the application is registered. */
@@ -54,6 +58,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     guarantorIds: [],
     entryCount: 0,
     correctedEntryIds: [],
+    documentKeys: [],
   };
 
   private constructor(id: string) {
@@ -97,6 +102,13 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   /** The applicant names a person as the co-borrower of the application, who shares the debt. */
   nameCoBorrower(coBorrowerId: string, namedAt: Date): void {
     this.record(new CreditApplicationCoBorrowerNamed(this.id, namedAt, coBorrowerId));
+  }
+
+  /** The applicant attaches a document to the file: its content is already stored under `document.key`. */
+  attachDocument(document: { key: string; mediaType: string; sizeBytes: number }, attachedAt: Date): void {
+    this.record(
+      new CreditApplicationDocumentAttached(this.id, attachedAt, document.key, document.mediaType, document.sizeBytes),
+    );
   }
 
   /** The applicant names a person as the guarantor of the application, who backs the debt if the borrower does not pay. */
@@ -168,6 +180,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationCoBorrowerNamed.eventName]: (event) => this.applyCoBorrowerNamed(event),
       [CreditApplicationGuarantorNamed.eventName]: (event) => this.applyGuarantorNamed(event),
       [CreditApplicationEntryCorrected.eventName]: (event) => this.applyEntryCorrected(event),
+      [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
     };
   }
 
@@ -232,6 +245,14 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.state = {
       ...this.state,
       correctedEntryIds: [...this.state.correctedEntryIds, event.correctedEntryId],
+      entryCount: this.state.entryCount + 1,
+    };
+  }
+
+  private applyDocumentAttached(event: CreditApplicationDocumentAttached): void {
+    this.state = {
+      ...this.state,
+      documentKeys: [...this.state.documentKeys, event.documentKey],
       entryCount: this.state.entryCount + 1,
     };
   }

@@ -27,7 +27,7 @@ describe('POST /branches/:id/staff', () => {
         params: { id: 'id-1' },
         query: {},
         headers: {},
-        body: { name: 'Ada Lovelace', email: 'ada.lovelace@bank.test' },
+        body: { name: 'Ada Lovelace', email: 'ada.lovelace@bank.test', accountId: 'account-ada', level: 'advisor' },
         raw: undefined,
       },
       { validateResponses: true, resolvePrincipal: () => caller },

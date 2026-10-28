@@ -49,6 +49,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Confirm | Compliance decides that a possible match is a sanctions match |  |
 | Ended | Said of a business relationship the bank has ended: a confirmed sanctions match ends it |  |
 | End | The bank ends its business relationship with a customer |  |
+| Reason | the written motive a compliance officer gives for a decision taken on a customer |  |
 
 ## Aggregates
 
@@ -80,6 +81,11 @@ No personal data declared.
 - `customer-due-diligence:customer.screen`
 - `customer-due-diligence:match.confirm`
 - `customer-due-diligence:relationship.end`
+- `customer-due-diligence:match.dismiss`
+- `customer-due-diligence:customer.rate-risk`
+- `customer-due-diligence:customer.read-risk`
+- `customer-due-diligence:due-diligence.refresh`
+- `customer-due-diligence:due-diligence.read`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -129,9 +135,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AssignAdvisor` | command | `customer.assign-advisor` |
 | `ConfirmSanctionsMatch` | command | `match.confirm` |
 | `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
+| `DismissMatch` | command | `match.dismiss` |
 | `EndRelationship` | command | `relationship.end` |
+| `GetCustomerDueDiligence` | query | `due-diligence.read` |
 | `GetCustomerFile` | query | `customer.read` |
+| `GetCustomerRiskRating` | query | `customer.read-risk` |
 | `IdentifyCustomer` | command | `customer.identify` |
+| `RateCustomerRisk` | command | `customer.rate-risk` |
+| `RefreshDueDiligence` | command | `due-diligence.refresh` |
 | `RegisterBusiness` | command | `business.register` |
 | `ScreenCustomer` | command | `customer.screen` |
 
@@ -144,7 +155,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/customers` | `identifyCustomer` | `CustomersRoutes` | `Authenticated` | `IdentifyCustomer` | `customer.identify` | body: `IdentifyCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
 | PUT | `/customers/:id/advisor` | `assignAdvisor` | `CustomersRoutes` | `Authenticated` | `AssignAdvisor` | `customer.assign-advisor` | params: `AssignAdvisorParams`, body: `AssignAdvisorBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/customers/:id/directors-and-owners` | `declareDirectorsAndOwners` | `CustomersRoutes` | `Authenticated` | `DeclareDirectorsAndOwners` | `business.declare-owners` | params: `DeclareDirectorsAndOwnersParams`, body: `DeclareDirectorsAndOwnersBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BUSINESS_NOT_REGISTERED`, `UNKNOWN_CUSTOMER`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
+| GET | `/customers/:id/due-diligence` | `getCustomerDueDiligence` | `CustomersRoutes` | `Authenticated` | `GetCustomerDueDiligence` | `due-diligence.read` | params: `GetCustomerDueDiligenceParams` | 200: `GetCustomerDueDiligenceAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/customers/:id/matches/confirm` | `confirmSanctionsMatch` | `CustomersRoutes` | `Authenticated` | `ConfirmSanctionsMatch` | `match.confirm` | params: `ConfirmSanctionsMatchParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `NO_POSSIBLE_MATCH` |
+| POST | `/customers/:id/matches/dismiss` | `dismissMatch` | `CustomersRoutes` | `Authenticated` | `DismissMatch` | `match.dismiss` | params: `DismissMatchParams`, body: `DismissMatchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `NO_POSSIBLE_MATCH` |
+| POST | `/customers/:id/refresh` | `refreshDueDiligence` | `CustomersRoutes` | `Authenticated` | `RefreshDueDiligence` | `due-diligence.refresh` | params: `RefreshDueDiligenceParams`, body: `RefreshDueDiligenceBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
+| PUT | `/customers/:id/risk` | `rateCustomerRisk` | `CustomersRoutes` | `Authenticated` | `RateCustomerRisk` | `customer.rate-risk` | params: `RateCustomerRiskParams`, body: `RateCustomerRiskBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
+| GET | `/customers/:id/risk-rating` | `getCustomerRiskRating` | `CustomersRoutes` | `Authenticated` | `GetCustomerRiskRating` | `customer.read-risk` | params: `GetCustomerRiskRatingParams` | 200: `GetCustomerRiskRatingAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/customers/:id/screening` | `screenCustomer` | `CustomersRoutes` | `Authenticated` | `ScreenCustomer` | `customer.screen` | params: `ScreenCustomerParams`, body: `ScreenCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 
 ### Publishers
@@ -160,7 +176,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `CustomerFileProjection` | repository | `PrismaCustomerFileProjectionRepository` |
 | `CustomerRepository` | repository | `EventStoreCustomerRepository` |
+| `GetCustomerDueDiligenceReader` | repository | `EventStoreGetCustomerDueDiligenceReader` |
 | `GetCustomerFileReader` | repository | `PrismaGetCustomerFileReader` |
+| `GetCustomerRiskRatingReader` | repository | `EventStoreGetCustomerRiskRatingReader` |
 | `ScreeningProvider` | external | `SimulatedScreeningProvider` |
 
 ### Errors
@@ -170,6 +188,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BusinessAlreadyRegistered` | `forCustomer` | `BUSINESS_ALREADY_REGISTERED` | none |
 | `BusinessNotRegistered` | `forCustomer` | `BUSINESS_NOT_REGISTERED` | none |
 | `IdentityDocumentExpired` | `forCustomer` | `IDENTITY_DOCUMENT_EXPIRED` | none |
+| `MissingReason` | `forDismissal` | `MISSING_REASON` | none |
 | `NoPossibleMatch` | `forCustomer` | `NO_POSSIBLE_MATCH` | none |
 | `ProofOfAddressTooOld` | `forCustomer` | `PROOF_OF_ADDRESS_TOO_OLD` | none |
 | `UnknownCustomer` | `forCustomer` | `UNKNOWN_CUSTOMER` | none |

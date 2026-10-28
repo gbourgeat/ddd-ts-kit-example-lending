@@ -70,6 +70,9 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Declared | stated by the staff member themself, as opposed to found by a check |  |
 | Conflicts | the declared conflicts of interest of staff members on a customer, each one barring that staff member from deciding the customer's application |  |
 | Decide | the decider's act of choosing the outcome of an application, within the decider's limit | Decision: the choice itself |
+| Attach | to add a document to the application file, as an entry of it, its content stored in the object store |  |
+| Document attached | a document of the application was stored in the object store and recorded in the file |  |
+| Information | what an account information provider tells about the applicant's accounts: the income and expenses read for an application, kept as a document of its file |  |
 
 ## Modules
 
@@ -109,6 +112,8 @@ No personal data declared.
 - `credit-application:application.name-party`
 - `credit-application:application.correct`
 - `credit-application:application.decide`
+- `credit-application:application.attach-document`
+- `credit-application:application.read-accounts`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -159,10 +164,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `AttachDocument` | command | `application.attach-document` |
 | `CorrectEntry` | command | `application.correct` |
 | `GiveAccountConsent` | command | `application.consent` |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
+| `ReadAccountInformation` | command | `application.read-accounts` |
 | `ReadDeclaredConflicts` | query | `application.decide` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
@@ -173,10 +180,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|---|---|---|---|---|---|
 | GET | `/applications` | `searchApplications` | `ApplicationsRoutes` | `Authenticated` | `SearchApplications` | `public` | query | 200: `page of SearchApplicationsLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/applications` | `submitApplication` | `ApplicationsRoutes` | `Authenticated` | `SubmitApplication` | `application.submit` | body: `SubmitApplicationBody` | 201: `ApplicationSubmittedBody` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
+| POST | `/applications/:id/account-information` | `readAccountInformation` | `ApplicationsRoutes` | `Authenticated` | `ReadAccountInformation` | `application.read-accounts` | params: `ReadAccountInformationParams`, body: `ReadAccountInformationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.MissingAccountConsent`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/co-borrowers` | `nameCoBorrower` | `ApplicationsRoutes` | `Authenticated` | `NameCoBorrower` | `application.name-party` | params: `NameCoBorrowerParams`, body: `NameCoBorrowerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | `application.decide` | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 
 ### Publishers
@@ -213,6 +222,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
+| `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |

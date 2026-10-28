@@ -18,7 +18,13 @@ describe('LegalMaximumRate', () => {
 
     const recorded = aLegalMaximumRate().identifiedBy('legal-maximum-rate-7').bornAt(bornAt).build();
 
-    expect(recorded.pullEvents()).toEqual([new LegalMaximumRatePublished('legal-maximum-rate-7', bornAt)]);
+    expect(recorded.pullEvents()).toEqual([
+      new LegalMaximumRatePublished('legal-maximum-rate-7', bornAt, {
+        category: recorded.category,
+        rateBasisPoints: recorded.rateBasisPoints,
+        effectiveFrom: recorded.effectiveFrom,
+      }),
+    ]);
   });
 
   it('is rehydrated in its stored state without recording a new fact', () => {
