@@ -7,6 +7,8 @@ import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/do
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
+import { CustomerDueDiligenceFlaggedOverdue } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-flagged-overdue.event';
+import { CustomerHighRiskApproved } from '@/contexts/customer-due-diligence/domain/events/customer-high-risk-approved.event';
 import { aCustomer, aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders/customer.builder';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
@@ -188,5 +190,79 @@ describe('Customer, once its screening found a possible match, and when its rela
 
     expectRefusal(() => confirmed.confirmSanctionsMatch(registeredOn), 'NO_POSSIBLE_MATCH');
     expect(confirmed.pullEvents()).toEqual([]);
+  });
+});
+
+describe('Customer, once compliance approves a high risk customer', () => {
+  const ratedAt = new Date('2026-03-02T00:00:00.000Z');
+  const approvedAt = new Date('2026-03-03T00:00:00.000Z');
+
+  it('records the approval of a customer rated high risk', () => {
+    const customer = aCustomer().build();
+
+    customer.rateRisk('high', ratedAt);
+    customer.pullEvents();
+
+    customer.approveHighRisk(approvedAt);
+
+    expect(customer.pullEvents()).toEqual([new CustomerHighRiskApproved(customer.id, approvedAt)]);
+  });
+
+  it('refuses the approval of a customer rated medium risk, with CUSTOMER_NOT_HIGH_RISK', () => {
+    const customer = aCustomer().build();
+
+    customer.rateRisk('medium', ratedAt);
+
+    expectRefusal(() => customer.approveHighRisk(approvedAt), 'CUSTOMER_NOT_HIGH_RISK');
+  });
+
+  it('refuses the approval of a customer never rated, with CUSTOMER_NOT_HIGH_RISK', () => {
+    const customer = aCustomer().build();
+
+    expectRefusal(() => customer.approveHighRisk(approvedAt), 'CUSTOMER_NOT_HIGH_RISK');
+  });
+
+  it('clears the approval when the customer is rated again, so it must be approved again', () => {
+    const customer = aCustomer().build();
+
+    customer.rateRisk('high', ratedAt);
+    customer.approveHighRisk(approvedAt);
+
+    const approvedState = customer.toState().highRiskApprovedAt;
+
+    customer.rateRisk('high', approvedAt);
+
+    expect(approvedState).toEqual(approvedAt);
+    expect(customer.toState().highRiskApprovedAt).toBeUndefined();
+  });
+});
+
+describe('Customer, once its due diligence is refreshed', () => {
+  const refreshedOn = new Date('2026-03-02T00:00:00.000Z');
+  const fiveYearsAndADayLater = new Date('2031-03-03T00:00:00.000Z');
+
+  it('flags the due diligence overdue once it is past its date, and records nothing again while flagged', () => {
+    const customer = Customer.create('customer-1', aPersonIdentity(), refreshedOn);
+
+    customer.rateRisk('low', refreshedOn);
+    customer.refreshDueDiligence('clear', refreshedOn);
+    customer.pullEvents();
+
+    customer.flagOverdueDueDiligence(fiveYearsAndADayLater);
+    customer.flagOverdueDueDiligence(fiveYearsAndADayLater);
+
+    expect(customer.pullEvents()).toEqual([new CustomerDueDiligenceFlaggedOverdue(customer.id, fiveYearsAndADayLater)]);
+  });
+
+  it('records nothing while the due diligence is still current on the day it falls due', () => {
+    const customer = Customer.create('customer-1', aPersonIdentity(), refreshedOn);
+
+    customer.rateRisk('low', refreshedOn);
+    customer.refreshDueDiligence('clear', refreshedOn);
+    customer.pullEvents();
+
+    customer.flagOverdueDueDiligence(new Date('2031-03-02T00:00:00.000Z'));
+
+    expect(customer.pullEvents()).toEqual([]);
   });
 });

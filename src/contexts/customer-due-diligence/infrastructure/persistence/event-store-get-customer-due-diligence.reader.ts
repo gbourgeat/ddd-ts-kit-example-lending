@@ -22,7 +22,7 @@ export class EventStoreGetCustomerDueDiligenceReader implements GetCustomerDueDi
       throw UnknownCustomer.forCustomer(customerId);
     }
 
-    const { dueDiligenceRefreshedAt, dueDiligenceDueOn } = customer.toState();
+    const { dueDiligenceRefreshedAt, dueDiligenceDueOn, dueDiligenceFlaggedOverdueAt } = customer.toState();
 
     if (dueDiligenceRefreshedAt === undefined || dueDiligenceDueOn === undefined) {
       return { customerId };
@@ -32,6 +32,9 @@ export class EventStoreGetCustomerDueDiligenceReader implements GetCustomerDueDi
       customerId,
       refreshedOn: dueDiligenceRefreshedAt.toISOString(),
       nextDueOn: dueDiligenceDueOn.toISOString(),
+      ...(dueDiligenceFlaggedOverdueAt === undefined
+        ? {}
+        : { flaggedOverdueOn: dueDiligenceFlaggedOverdueAt.toISOString() }),
     };
   }
 }

@@ -50,6 +50,10 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Ended | Said of a business relationship the bank has ended: a confirmed sanctions match ends it |  |
 | End | The bank ends its business relationship with a customer |  |
 | Reason | the written motive a compliance officer gives for a decision taken on a customer |  |
+| Approve | Compliance records its approval of a customer rated high risk; a later re-rating clears it |  |
+| High | Said of a risk rating of the highest class: a high risk customer |  |
+| Flag | The bank marks a due diligence whose refresh is past its date as overdue, once |  |
+| Calendar | The dates a due diligence falls due and is overdue, by the risk rating of the customer |  |
 
 ## Aggregates
 
@@ -86,6 +90,8 @@ No personal data declared.
 - `customer-due-diligence:customer.read-risk`
 - `customer-due-diligence:due-diligence.refresh`
 - `customer-due-diligence:due-diligence.read`
+- `customer-due-diligence:customer.approve-high-risk`
+- `customer-due-diligence:due-diligence.flag-overdue`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -132,11 +138,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Use case | Kind | Permission |
 |---|---|---|
+| `ApproveHighRiskCustomer` | command | `customer.approve-high-risk` |
 | `AssignAdvisor` | command | `customer.assign-advisor` |
 | `ConfirmSanctionsMatch` | command | `match.confirm` |
 | `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
 | `DismissMatch` | command | `match.dismiss` |
 | `EndRelationship` | command | `relationship.end` |
+| `FlagOverdueDueDiligence` | command | `due-diligence.flag-overdue` |
 | `GetCustomerDueDiligence` | query | `due-diligence.read` |
 | `GetCustomerFile` | query | `customer.read` |
 | `GetCustomerRiskRating` | query | `customer.read-risk` |
@@ -153,6 +161,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/businesses` | `registerBusiness` | `BusinessesRoutes` | `Authenticated` | `RegisterBusiness` | `business.register` | body: `RegisterBusinessBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `BUSINESS_ALREADY_REGISTERED` |
 | GET | `/customer-files` | `getCustomerFile` | `CustomerFilesRoutes` | `Authenticated` | `GetCustomerFile` | `customer.read` | query | 200: `page of GetCustomerFileLine` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/customers` | `identifyCustomer` | `CustomersRoutes` | `Authenticated` | `IdentifyCustomer` | `customer.identify` | body: `IdentifyCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
+| POST | `/customers/:customerId/due-diligence/flag-overdue` | `flagOverdueDueDiligence` | `CustomersRoutes` | `Authenticated` | `FlagOverdueDueDiligence` | `due-diligence.flag-overdue` | params: `FlagOverdueDueDiligenceParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
+| POST | `/customers/:customerId/high-risk-approval` | `approveHighRiskCustomer` | `CustomersRoutes` | `Authenticated` | `ApproveHighRiskCustomer` | `customer.approve-high-risk` | params: `ApproveHighRiskCustomerParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `CUSTOMER_NOT_HIGH_RISK` |
 | PUT | `/customers/:id/advisor` | `assignAdvisor` | `CustomersRoutes` | `Authenticated` | `AssignAdvisor` | `customer.assign-advisor` | params: `AssignAdvisorParams`, body: `AssignAdvisorBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/customers/:id/directors-and-owners` | `declareDirectorsAndOwners` | `CustomersRoutes` | `Authenticated` | `DeclareDirectorsAndOwners` | `business.declare-owners` | params: `DeclareDirectorsAndOwnersParams`, body: `DeclareDirectorsAndOwnersBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BUSINESS_NOT_REGISTERED`, `UNKNOWN_CUSTOMER`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
 | GET | `/customers/:id/due-diligence` | `getCustomerDueDiligence` | `CustomersRoutes` | `Authenticated` | `GetCustomerDueDiligence` | `due-diligence.read` | params: `GetCustomerDueDiligenceParams` | 200: `GetCustomerDueDiligenceAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
@@ -187,6 +197,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|
 | `BusinessAlreadyRegistered` | `forCustomer` | `BUSINESS_ALREADY_REGISTERED` | none |
 | `BusinessNotRegistered` | `forCustomer` | `BUSINESS_NOT_REGISTERED` | none |
+| `CustomerNotHighRisk` | `forCustomer` | `CUSTOMER_NOT_HIGH_RISK` | none |
 | `IdentityDocumentExpired` | `forCustomer` | `IDENTITY_DOCUMENT_EXPIRED` | none |
 | `MissingReason` | `forDismissal` | `MISSING_REASON` | none |
 | `NoPossibleMatch` | `forCustomer` | `NO_POSSIBLE_MATCH` | none |
