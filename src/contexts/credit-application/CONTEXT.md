@@ -102,6 +102,10 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Cannot | not permitted; part of a refusal name only |  |
 | Be | to exist as; part of a refusal name only |  |
 | Assessor | the staff member who ran the assessment of an application |  |
+| Stands | the proposed refusal, once confirmed by a review, is the outcome of the application, a decision to approve cannot overturn it |  |
+| Above | beyond the amount a level may approve |  |
+| Limit | the most a level of staff may approve, the amount of its delegation |  |
+| Force | in effect on a day: the table of the latest date of effect not after that day |  |
 
 ## Modules
 
@@ -210,6 +214,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CheckRequestAgainstProduct` | command | not read |
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
+| `DecideApplication` | command | not read |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
 | `KeepBrokerRegistration` | command | not read |
@@ -245,6 +250,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/co-borrowers` | `nameCoBorrower` | `ApplicationsRoutes` | `Authenticated` | `NameCoBorrower` | `application.name-party` | params: `NameCoBorrowerParams`, body: `NameCoBorrowerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
+| POST | `/applications/:id/decision` | `decideApplication` | `ApplicationsRoutes` | `Authenticated` | `DecideApplication` | not read | params: `DecideApplicationParams`, body: `DecideApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotAssessed`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.RefusalNotReviewed`, `CreditApplicationCodes.RefusalProposalStands`, `CreditApplicationCodes.InvalidDecisionReasons`, `CreditApplicationCodes.InvalidDecisionConditions`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable`, `CreditApplicationCodes.DecisionAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide` |
 | GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | `application.decide` | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
@@ -329,14 +335,20 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
+| `AlreadyDecided` | `forAlreadyDecided` | `ALREADY_DECIDED` | none |
 | `CorrectionAlreadyRecorded` | `forEntry` | `CORRECTION_ALREADY_RECORDED` | none |
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
+| `InvalidDecisionConditions` | `forConditions` | `INVALID_DECISION_CONDITIONS` | none |
+| `InvalidDecisionReasons` | `forReasons` | `INVALID_DECISION_REASONS` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
 | `InvalidReviewReason` | `forReason` | `INVALID_REVIEW_REASON` | none |
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
 | `NoRefusalToReview` | `forApplication` | `NO_REFUSAL_TO_REVIEW` | none |
+| `NotAssessed` | `forNotAssessed` | `NOT_ASSESSED` | none |
 | `RefusalAlreadyReviewed` | `forApplication` | `REFUSAL_ALREADY_REVIEWED` | none |
+| `RefusalNotReviewed` | `forApplication` | `REFUSAL_NOT_REVIEWED` | none |
+| `RefusalProposalStands` | `forApplication` | `REFUSAL_PROPOSAL_STANDS` | none |
 | `ReviewerCannotBeAssessor` | `forApplication` | `REVIEWER_CANNOT_BE_ASSESSOR` | none |
 | `UnknownBrokerRegistration` | `forUnknownBrokerRegistration` | `UNKNOWN_BROKER_REGISTRATION` | none |
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
@@ -347,6 +359,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `NoScoreAvailable` | `forScore` | `NO_SCORE_AVAILABLE` | none |
 | `RegisterNotConsulted` | `forApplication` | `REGISTER_NOT_CONSULTED` | none |
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
+| `DecisionAboveLimit` | `forAboveLimit` | `DECISION_ABOVE_LIMIT` | `levelNeeded` |
+| `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |

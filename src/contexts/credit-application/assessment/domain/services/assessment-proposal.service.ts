@@ -1,3 +1,5 @@
+import type { ProposedOutcome } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
+import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import type { Money } from '@/shared-kernel/money.vo';
 
 const GREEN_BAND = 'green';
@@ -7,11 +9,11 @@ const GREEN_BAND = 'green';
  * otherwise it proposes a refusal, which a person reviews: the machine never refuses alone.
  */
 export class AssessmentProposalService {
-  outcomeOf(band: string, residualIncome: Money): 'approve' | 'refuse' {
+  outcomeOf(band: string, residualIncome: Money): ProposedOutcome {
     if (band === GREEN_BAND && residualIncome.cents > 0) {
-      return 'approve';
+      return DecisionOutcome.Approve;
     }
 
-    return 'refuse';
+    return DecisionOutcome.Refuse;
   }
 }

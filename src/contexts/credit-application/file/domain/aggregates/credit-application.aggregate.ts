@@ -13,6 +13,10 @@ import {
 } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
 import type { RefusalConclusion } from '@/contexts/credit-application/file/domain/values/refusal-conclusion';
+import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
+import { DecisionCheckService } from '@/contexts/credit-application/file/domain/services/decision-check.service';
+import type { DecisionInput } from '@/contexts/credit-application/file/domain/values/decision-input';
+import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
@@ -38,7 +42,8 @@ export type CreditApplicationEvent =
   | CreditApplicationAssessed
   | CreditApplicationRequestFoundOutsideProductTerms
   | CreditApplicationRequestCheckedWithUnknownProductTerms
-  | CreditApplicationRefusalReviewed;
+  | CreditApplicationRefusalReviewed
+  | CreditApplicationDecided;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
@@ -66,6 +71,10 @@ export interface CreditApplicationState {
   readonly lastAssessment: { readonly proposedOutcome: ProposedOutcome; readonly assessorId: string } | undefined;
   /** The conclusion of the review of the last assessment, undefined until a person reviews it. */
   readonly refusalReviewConclusion: RefusalConclusion | undefined;
+  /** The reviewer of the last refusal review: with the assessor, the person who prepared the file. */
+  readonly refusalReviewerId: string;
+  /** The decision taken on the application, undefined until the decider decides it. */
+  readonly decision: { readonly outcome: DecisionOutcome; readonly deciderId: string } | undefined;
 }
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
@@ -86,6 +95,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     listedPartyCount: undefined,
     lastAssessment: undefined,
     refusalReviewConclusion: undefined,
+    refusalReviewerId: '',
+    decision: undefined,
   };
 
   private constructor(id: string) {
@@ -167,6 +178,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new RefusalReviewService().eventOf(this.id, this.state, review));
   }
 
+  /** The decider decides the application: approve, approve with conditions or refuse, checked against the file. */
+  decide(decision: DecisionInput): void {
+    this.record(new DecisionCheckService().eventOf(this.id, this.state, decision));
+  }
+
   /**
    * The check of the application against the limits of its product: each limit the request breaks is kept as a finding,
    * or, when the terms of the product are not known, that they are not. The application is never refused by a check.
@@ -222,6 +238,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     return this.state.guarantorIds;
   }
 
+  /** The persons who prepared the file: the assessor of the last assessment and the reviewer of its refusal. */
+  get preparerIds(): readonly string[] {
+    return [this.state.lastAssessment?.assessorId ?? '', this.state.refusalReviewerId].filter((id) => id !== '');
+  }
+
   /** How many parties the last consultation of the register found listed, or undefined when it was never consulted. */
   get listedPartyCount(): number | undefined {
     return this.state.listedPartyCount;
@@ -246,6 +267,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationRequestCheckedWithUnknownProductTerms.eventName]: (event) =>
         this.applyRequestCheckedWithUnknownProductTerms(event),
       [CreditApplicationRefusalReviewed.eventName]: (event) => this.applyRefusalReviewed(event),
+      [CreditApplicationDecided.eventName]: (event) => this.applyDecided(event),
     };
   }
 
@@ -298,6 +320,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.applyEntryAppended({
       lastAssessment: { proposedOutcome: event.assessment.proposedOutcome, assessorId: event.assessorId },
       refusalReviewConclusion: undefined,
+      refusalReviewerId: '',
     });
   }
 
@@ -316,6 +339,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   }
 
   private applyRefusalReviewed(event: CreditApplicationRefusalReviewed): void {
-    this.applyEntryAppended({ refusalReviewConclusion: event.conclusion });
+    this.applyEntryAppended({ refusalReviewConclusion: event.conclusion, refusalReviewerId: event.reviewerId });
+  }
+
+  private applyDecided(event: CreditApplicationDecided): void {
+    this.applyEntryAppended({ decision: { outcome: event.outcome, deciderId: event.deciderId } });
   }
 }

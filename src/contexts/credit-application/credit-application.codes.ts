@@ -22,6 +22,14 @@ export const CreditApplicationCodes = {
   RefusalAlreadyReviewed: 'REFUSAL_ALREADY_REVIEWED',
   InvalidReviewReason: 'INVALID_REVIEW_REASON',
   ReviewerCannotBeAssessor: 'REVIEWER_CANNOT_BE_ASSESSOR',
+  NotAssessed: 'NOT_ASSESSED',
+  AlreadyDecided: 'ALREADY_DECIDED',
+  RefusalNotReviewed: 'REFUSAL_NOT_REVIEWED',
+  InvalidDecisionReasons: 'INVALID_DECISION_REASONS',
+  InvalidDecisionConditions: 'INVALID_DECISION_CONDITIONS',
+  PreparerCannotDecide: 'PREPARER_CANNOT_DECIDE',
+  RefusalProposalStands: 'REFUSAL_PROPOSAL_STANDS',
+  DecisionAboveLimit: 'DECISION_ABOVE_LIMIT',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

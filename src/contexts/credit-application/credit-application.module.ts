@@ -17,6 +17,7 @@ import { PrismaSearchApplicationsReader } from '@/contexts/credit-application/fi
 import { PrismaApplicationListProjection } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-application-list-projection.repository';
 import { NameCoBorrowerCommand } from '@/contexts/credit-application/file/application/commands/name-co-borrower/name-co-borrower.command';
 import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import { NameGuarantorCommand } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.command';
 import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
@@ -45,6 +46,7 @@ import { KeepDeciderLevelCommand } from '@/contexts/credit-application/decision/
 import { ReadDeciderLevelQuery } from '@/contexts/credit-application/decision/application/queries/read-decider-level/read-decider-level.query';
 import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-decider-levels.repository';
 import { registerDeciderLevelHandlers } from '@/contexts/credit-application/composition/register-decider-level-handlers.module';
+import { registerDecisionHandlers } from '@/contexts/credit-application/composition/register-decision-handlers.module';
 import { registerSubmissionReactions } from '@/contexts/credit-application/composition/register-submission-reactions.module';
 import { declareFileReferenceUseCases } from '@/contexts/credit-application/file/application/authorization/declare-file-reference-use-cases.policy';
 import { declareOfferUseCases } from '@/contexts/credit-application/offer/application/authorization/declare-offer-use-cases.policy';
@@ -98,12 +100,14 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     token: 'CustomerDiligenceGateway',
   });
 
-  registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
+  const creditApplicationRepository = registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
+
   registerDelegationTableHandlers(platform, delegationTables);
 
   const deciderLevels = readModel(platform, 'DeciderLevels', PrismaDeciderLevels);
 
   registerDeciderLevelHandlers(platform, deciderLevels);
+  registerDecisionHandlers(platform, creditApplicationRepository, { deciderLevels, delegationTables });
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 
@@ -140,7 +144,7 @@ function registerHandlers(
   platform: Platform,
   declaredConflicts: DeclaredConflictsStore,
   customerAdvisorBranch: CustomerAdvisorBranchGateway,
-): void {
+): CreditApplicationRepository {
   // ddd-ts-kit:handlers
   const creditApplicationRepository = platform.adapter(
     new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
@@ -205,6 +209,8 @@ function registerHandlers(
 
   registerBrokerRegistrationHandlers(platform, brokerRegistrations);
   // /ddd-ts-kit:handlers
+
+  return creditApplicationRepository;
 }
 
 /** What the context does when an event happens: its own events and those of the other contexts. */

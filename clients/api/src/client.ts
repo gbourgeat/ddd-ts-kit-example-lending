@@ -89,6 +89,12 @@ export interface Client {
    */
   correctEntry(input: operations.CorrectEntryInput, options?: CallOptions): Promise<operations.CorrectEntryResult>;
   /**
+   * Decide application: `POST /applications/{id}/decision`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), DECISION_ABOVE_LIMIT (422), INVALID_DECISION_CONDITIONS (422), INVALID_DECISION_REASONS (422), NOT_ASSESSED (422), PREPARER_CANNOT_DECIDE (422), REFUSAL_NOT_REVIEWED (422), REFUSAL_PROPOSAL_STANDS (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  decideApplication(input: operations.DecideApplicationInput, options?: CallOptions): Promise<operations.DecideApplicationResult>;
+  /**
    * Read declared conflicts: `GET /applications/{id}/declared-conflicts`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -448,6 +454,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
+    decideApplication: (input, call) => operations.decideApplication(connection, input, call),
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     readDocument: (input, call) => operations.readDocument(connection, input, call),
