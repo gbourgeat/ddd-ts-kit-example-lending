@@ -31,7 +31,7 @@ export async function registerBroker(app: RunningApplication, bank: string): Pro
 
 /** The broker signed in as itself, holding the permission to bring applications of the context. */
 export async function brokerOf(app: RunningApplication, brokerId: string, bank: string): Promise<HttpClient> {
-  await app.relate({ object: 'context:credit-application', relation: 'operator', subject: `user:${brokerId}` });
+  await app.relate({ object: 'context:credit-application', relation: 'broker', subject: `user:${brokerId}` });
 
   return app.as({ id: brokerId, tenantId: bank });
 }
