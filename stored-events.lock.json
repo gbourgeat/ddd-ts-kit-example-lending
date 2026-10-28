@@ -92,7 +92,13 @@
   "customer-due-diligence.customer.sanctions-match-confirmed": {
     "1": "sha256:733dac3b56fba725"
   },
+  "servicing.loan.arrears-bucket-entered": {
+    "1": "sha256:0206b5a57d44af0d"
+  },
   "servicing.loan.closed": {
+    "1": "sha256:733dac3b56fba725"
+  },
+  "servicing.loan.defaulted": {
     "1": "sha256:733dac3b56fba725"
   },
   "servicing.loan.early-repayment-recorded": {
