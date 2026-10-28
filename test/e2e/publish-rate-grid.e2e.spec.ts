@@ -7,6 +7,35 @@ import { storyOf } from '$test/e2e/support/story-of';
 
 const rateGrid = { productId: 'personal-loan', effectiveFrom: '2026-03-01' };
 
+const EXPECTED_SPAN_TREE = [
+  {
+    name: 'POST /rate-grids',
+    kind: 'SERVER',
+    children: [
+      {
+        name: 'command PublishRateGridCommand',
+        children: [
+          { name: 'repository RateGridRepository.save' },
+          {
+            name: 'unit-of-work before-commit',
+            children: [
+              {
+                name: 'domain-event credit-policy.rate-grid.published',
+                children: [
+                  {
+                    name: 'handler RateGridPublishedPublisher',
+                    children: [{ name: 'outbox append credit-policy.rate-grid.published' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
 describe('Publish rate grid, end to end', () => {
   const tracing = installTestTracing();
   let application: RunningApplication;
@@ -46,34 +75,7 @@ describe('Publish rate grid, end to end', () => {
     });
 
     // Exact on names and structure, and kept before the tests whose request leaves work behind (a relay still publishing would add its spans here). Once "publish rate grid" announces a fact, its spans come after the save, under `unit-of-work before-commit`: `domain-event <name>`, `handler <Class>`, `outbox append <type>`, then, once `application.settled()` has resolved inside `traceOf`, `publish <type>` and `process <consumer>` with the command it sends.
-    expectSpanTree(storyOf(trace), [
-      {
-        name: 'POST /rate-grids',
-        kind: 'SERVER',
-        children: [
-          {
-            name: 'command PublishRateGridCommand',
-            children: [
-              { name: 'repository RateGridRepository.save' },
-              {
-                name: 'unit-of-work before-commit',
-                children: [
-                  {
-                    name: 'domain-event credit-policy.rate-grid.published',
-                    children: [
-                      {
-                        name: 'handler RateGridPublishedPublisher',
-                        children: [{ name: 'outbox append credit-policy.rate-grid.published' }],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+    expectSpanTree(storyOf(trace), EXPECTED_SPAN_TREE);
   });
 
   it('answers 201 to POST /rate-grids', async () => {

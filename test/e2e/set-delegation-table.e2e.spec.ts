@@ -13,6 +13,35 @@ const delegationTable = {
   creditCommitteeLimitCents: 100_000_000,
 };
 
+const EXPECTED_SPAN_TREE = [
+  {
+    name: 'PUT /delegation-table',
+    kind: 'SERVER',
+    children: [
+      {
+        name: 'command SetDelegationTableCommand',
+        children: [
+          { name: 'repository DelegationTableRepository.save' },
+          {
+            name: 'unit-of-work before-commit',
+            children: [
+              {
+                name: 'domain-event credit-policy.delegation-table.published',
+                children: [
+                  {
+                    name: 'handler DelegationTablePublishedPublisher',
+                    children: [{ name: 'outbox append credit-policy.delegation-table.published' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
 describe('Set delegation table, end to end', () => {
   const tracing = installTestTracing();
   let application: RunningApplication;
@@ -52,34 +81,7 @@ describe('Set delegation table, end to end', () => {
     });
 
     // Exact on names and structure, and kept before the tests whose request leaves work behind (a relay still publishing would add its spans here). Once "set delegation table" announces a fact, its spans come after the save, under `unit-of-work before-commit`: `domain-event <name>`, `handler <Class>`, `outbox append <type>`, then, once `application.settled()` has resolved inside `traceOf`, `publish <type>` and `process <consumer>` with the command it sends.
-    expectSpanTree(storyOf(trace), [
-      {
-        name: 'PUT /delegation-table',
-        kind: 'SERVER',
-        children: [
-          {
-            name: 'command SetDelegationTableCommand',
-            children: [
-              { name: 'repository DelegationTableRepository.save' },
-              {
-                name: 'unit-of-work before-commit',
-                children: [
-                  {
-                    name: 'domain-event credit-policy.delegation-table.published',
-                    children: [
-                      {
-                        name: 'handler DelegationTablePublishedPublisher',
-                        children: [{ name: 'outbox append credit-policy.delegation-table.published' }],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+    expectSpanTree(storyOf(trace), EXPECTED_SPAN_TREE);
   });
 
   it('answers 200 to PUT /delegation-table', async () => {
