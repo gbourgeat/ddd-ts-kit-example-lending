@@ -1,7 +1,11 @@
 import { describe, expect, it } from '@jest/globals';
+import { createTestBuses } from '@ddd-ts-kit/testing';
 import { InMemoryCommandBus } from '@ddd-ts-kit/kernel';
 import { rateGridPublishedV2 } from '@/contexts/credit-policy/published-language';
 import { KeepRateGridIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-rate-grid.integration-handler';
+import { KeepRateGridCommand } from '@/contexts/credit-application/offer/application/commands/keep-rate-grid/keep-rate-grid.command';
+import { KeepRateGridHandler } from '@/contexts/credit-application/offer/application/commands/keep-rate-grid/keep-rate-grid.handler';
+import { FakeRateGrids } from '@/contexts/credit-application/test/fakes/rate-grids.fake';
 
 describe('When credit-policy publishes credit-policy.rate-grid.published', () => {
   it('listens to the type credit-policy publishes', () => {
@@ -17,20 +21,37 @@ describe('When credit-policy publishes credit-policy.rate-grid.published', () =>
     expect(handler.actor).toMatchObject({ id: 'system:credit-application.keep-rate-grid', type: 'system' });
   });
 
-  it('receives the event as credit-policy publishes it', async () => {
-    const handler = new KeepRateGridIntegrationHandler(new InMemoryCommandBus());
-    const meta = { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' };
+  it('keeps the rate grid with the product and day credit-policy published', async () => {
+    const { handler, grids } = arrange();
 
-    // TODO(domain): give the payload every field credit-policy declares, register the command the handler executes and assert what credit-application did.
-    const event = rateGridPublishedV2.create(
-      { rateGridId: 'rate-grid-1', productId: 'product-1', effectiveFrom: '2026-01-01' },
-      meta,
-    );
+    await handler.handle(publishedGrid());
 
-    await expect(handler.handle(event)).resolves.toBeUndefined();
+    expect(await grids.get('rate-grid-1')).toMatchObject({ rateGridId: 'rate-grid-1', productId: 'personal-loan' });
   });
 
-  // TODO(domain): replace each entry below by a test that hands the handler an event built from the upstream declaration and asserts what credit-application did, through a real command bus with the handler and its fakes.
-  it.todo('executes the command that follows the upstream fact');
-  it.todo('has the same outcome when the same event is delivered twice');
+  it('has the same outcome when the same event is delivered twice', async () => {
+    const { handler, grids } = arrange();
+    const event = publishedGrid();
+
+    await handler.handle(event);
+    await handler.handle(event);
+
+    expect(await grids.get('rate-grid-1')).toMatchObject({ productId: 'personal-loan' });
+  });
 });
+
+function arrange() {
+  const { commandBus } = createTestBuses();
+  const grids = new FakeRateGrids();
+
+  commandBus.register(KeepRateGridCommand, new KeepRateGridHandler(grids));
+
+  return { handler: new KeepRateGridIntegrationHandler(commandBus), grids };
+}
+
+function publishedGrid() {
+  return rateGridPublishedV2.create(
+    { rateGridId: 'rate-grid-1', productId: 'personal-loan', effectiveFrom: '2026-01-01' },
+    { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
+  );
+}

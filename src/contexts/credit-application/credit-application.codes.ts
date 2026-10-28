@@ -11,6 +11,7 @@ export const CreditApplicationCodes = {
   UnidentifiedParty: 'UNIDENTIFIED_PARTY',
   UnknownDelegationTable: 'UNKNOWN_DELEGATION_TABLE',
   UnknownDeciderLevel: 'UNKNOWN_DECIDER_LEVEL',
+  UnknownRateGrid: 'UNKNOWN_RATE_GRID',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

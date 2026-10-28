@@ -63,6 +63,10 @@ import { ReadDeciderLevelQuery } from '@/contexts/credit-application/decision/ap
 import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-decider-levels.repository';
 import { registerDeciderLevelHandlers } from '@/contexts/credit-application/composition/register-decider-level-handlers.module';
 import { registerSubmissionReactions } from '@/contexts/credit-application/composition/register-submission-reactions.module';
+import { KeepRateGridCommand } from '@/contexts/credit-application/offer/application/commands/keep-rate-grid/keep-rate-grid.command';
+import { ReadRateGridQuery } from '@/contexts/credit-application/offer/application/queries/read-rate-grid/read-rate-grid.query';
+import { PrismaRateGrids } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-rate-grids.repository';
+import { registerRateGridHandlers } from '@/contexts/credit-application/composition/register-rate-grid-handlers.module';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -195,6 +199,13 @@ function registerHandlers(
     context: 'credit-application',
   });
 
+  const rateGrids = platform.adapter(new PrismaRateGrids(platform.persistence.database, platform.scope), {
+    kind: 'repository',
+    context: 'credit-application',
+    token: 'RateGrids',
+  });
+
+  registerRateGridHandlers(platform, rateGrids);
   // /ddd-ts-kit:handlers
 }
 
@@ -314,6 +325,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: (query) => ({ type: 'application', id: query.applicationId }),
     }),
     requires(ErasePersonalDataPastRetentionCommand, creditApplicationPermissions['application.erase-past-retention'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(KeepRateGridCommand, creditApplicationPermissions['rate-grid.keep'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(ReadRateGridQuery, creditApplicationPermissions['application.decide'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     // /ddd-ts-kit:authorization

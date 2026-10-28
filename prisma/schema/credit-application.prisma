@@ -74,3 +74,19 @@ model CreditApplicationDeciderLevel {
   @@schema("credit_application")
 }
 // /ddd-ts-kit:models
+
+/// The rate grids read model: one row per grid credit-policy published, for one product, from its day of effect.
+model CreditApplicationRateGrid {
+  rateGridId       String   @id @map("rate_grid_id")
+  productId        String   @map("product_id")
+  effectiveFrom    DateTime @map("effective_from") @db.Timestamptz(3)
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+  tenantId         String   @map("tenant_id")
+
+  @@index([tenantId, rateGridId], map: "rate_grids_tenant_idx")
+  @@map("rate_grids")
+  @@schema("credit_application")
+}
