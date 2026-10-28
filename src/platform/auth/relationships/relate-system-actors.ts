@@ -33,6 +33,26 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'operator',
     subject: 'system:system:customer-due-diligence.flag-overdue-due-diligence',
   },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-delegation-table',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-decider-level',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-rate-grid',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-legal-maximum-rate',
+  },
   // /ddd-ts-kit:system-grants
 ];
 

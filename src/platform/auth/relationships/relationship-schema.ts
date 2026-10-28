@@ -30,11 +30,20 @@ const elements: SchemaDefinition = {
     },
   },
   customer: {
-    relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
+    relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'], context: ['context'] },
     derived: {
       'credit-application:application.submit': 'self',
       'data-protection:data-subject.request-copy': 'self',
       'branch-network:portfolio.search-customers': { anyOf: ['advisor'], butNot: ['conflicted'] },
+      // Compliance reads the risk and the due diligence of every customer as an operator of the context; the advisor of the customer, through the portfolio, reads them unless conflicted.
+      'customer-due-diligence:customer.read-risk': {
+        anyOf: [via('context', 'operator'), 'advisor'],
+        butNot: ['conflicted'],
+      },
+      'customer-due-diligence:due-diligence.read': {
+        anyOf: [via('context', 'operator'), 'advisor'],
+        butNot: ['conflicted'],
+      },
       advisor: via('portfolio', 'advisor'),
     },
   },
@@ -73,7 +82,7 @@ export const relationshipSchema = defineSchema({
   user: {},
   system: {},
   context: {
-    relations: { operator: ['user', 'system'], eraser: ['system'] },
+    relations: { operator: ['user', 'system'], eraser: ['system'], keeper: ['system'] },
     derived: {
       ...Object.fromEntries(
         permissions
@@ -82,6 +91,10 @@ export const relationshipSchema = defineSchema({
           .map((permission) => [permission.id, 'operator']),
       ),
       'data-protection:data.erase': { anyOf: ['operator', 'eraser'] },
+      'credit-application:delegation-table.keep': 'keeper',
+      'credit-application:decider-level.keep': 'keeper',
+      'credit-application:rate-grid.keep': 'keeper',
+      'credit-application:legal-maximum-rate.keep': 'keeper',
       'data-protection:data-subject.request-copy': 'operator',
       'data-protection:impact-assessment.record': 'operator',
     },
