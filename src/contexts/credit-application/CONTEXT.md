@@ -176,6 +176,7 @@ No personal data declared.
 - `credit-application:exception.decide`
 - `credit-application:application.contest`
 - `credit-application:offer.accept`
+- `credit-application:application.reschedule`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -238,6 +239,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CorrectEntry` | command | `application.correct` |
 | `DecideApplication` | command | not read |
 | `DecideException` | command | `exception.decide` |
+| `DecideRescheduling` | command | `application.reschedule` |
 | `DraftOffer` | command | `offer.draft` |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
@@ -294,6 +296,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/refusal-review` | `reviewProposedRefusal` | `ApplicationsRoutes` | `Authenticated` | `ReviewProposedRefusal` | `application.review-refusal` | params: `ReviewProposedRefusalParams`, body: `ReviewProposedRefusalBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.InvalidReviewReason`, `CreditApplicationCodes.NoRefusalToReview`, `CreditApplicationCodes.RefusalAlreadyReviewed`, `CreditApplicationCodes.ReviewerCannotBeAssessor` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
+| POST | `/applications/:id/rescheduling-decision` | `decideRescheduling` | `ApplicationsRoutes` | `Authenticated` | `DecideRescheduling` | `application.reschedule` | params: `DecideReschedulingParams`, body: `DecideReschedulingBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.ReschedulingNotApproved`, `CreditApplicationCodes.InvalidDuration`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable`, `CreditApplicationCodes.DecisionAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide`, `CreditApplicationCodes.ConflictedDecider` |
 | POST | `/applications/bring` | `bringApplication` | `ApplicationsRoutes` | `Authenticated` | `BringApplication` | not read | body: `BringApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.BrokerRegistrationLapsed`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
 | GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | not read | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | not read | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
@@ -418,6 +421,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `NotCreditCommittee` | `forNotCreditCommittee` | `NOT_CREDIT_COMMITTEE` | `deciderLevel` |
 | `NotDecided` | `forNotDecided` | `NOT_DECIDED` | none |
 | `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
+| `ReschedulingNotApproved` | `forApplication` | `RESCHEDULING_NOT_APPROVED` | `applicationId` |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |
 | `ApplicationNotApproved` | `forApplication` | `APPLICATION_NOT_APPROVED` | `applicationId` |

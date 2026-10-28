@@ -46,6 +46,8 @@ import { DecideExceptionCommand } from '@/contexts/credit-application/decision/a
 import { DecideExceptionHandler } from '@/contexts/credit-application/decision/application/commands/decide-exception/decide-exception.handler';
 import { ContestDecisionCommand } from '@/contexts/credit-application/decision/application/commands/contest-decision/contest-decision.command';
 import { ContestDecisionHandler } from '@/contexts/credit-application/decision/application/commands/contest-decision/contest-decision.handler';
+import { DecideReschedulingCommand } from '@/contexts/credit-application/decision/application/commands/decide-rescheduling/decide-rescheduling.command';
+import { DecideReschedulingHandler } from '@/contexts/credit-application/decision/application/commands/decide-rescheduling/decide-rescheduling.handler';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -93,6 +95,7 @@ export const decisionModule = {
       deciderLimits: new DeciderLimitReader(deciderLevels, delegationTables),
       declaredConflicts,
     });
+
     // /ddd-ts-kit:handlers
   },
 
@@ -130,6 +133,9 @@ export const decisionModule = {
       }),
       requires(ContestDecisionCommand, creditApplicationPermissions['application.contest'], {
         resource: (command) => ({ type: 'application', id: command.applicationId }),
+      }),
+      requires(DecideReschedulingCommand, creditApplicationPermissions['application.reschedule'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
       }),
       // /ddd-ts-kit:authorization
     ];
@@ -172,6 +178,12 @@ function registerExceptionAndContest(
   platform.commands.register(ContestDecisionCommand, new ContestDecisionHandler(repository, platform.clock), {
     context: 'credit-application',
   });
+
+  platform.commands.register(
+    DecideReschedulingCommand,
+    new DecideReschedulingHandler(repository, deciderLimits, platform.clock, declaredConflicts),
+    { context: 'credit-application' },
+  );
 }
 
 /** The command that keeps the level of each decider and the query that reads it, over the read model the module binds. */

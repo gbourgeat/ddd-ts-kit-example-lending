@@ -185,6 +185,12 @@ export interface Client {
    */
   consultRepaymentIncidentRegister(input: operations.ConsultRepaymentIncidentRegisterInput, options?: CallOptions): Promise<operations.ConsultRepaymentIncidentRegisterResult>;
   /**
+   * Decide rescheduling: `POST /applications/{id}/rescheduling-decision`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), CONFLICTED_DECIDER (422), DECISION_ABOVE_LIMIT (422), INVALID_DURATION (422), PREPARER_CANNOT_DECIDE (422), RESCHEDULING_NOT_APPROVED (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  decideRescheduling(input: operations.DecideReschedulingInput, options?: CallOptions): Promise<operations.DecideReschedulingResult>;
+  /**
    * Search the entries of the audit trail: `GET /audit/entries`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
@@ -536,6 +542,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),
     reviewProposedRefusal: (input, call) => operations.reviewProposedRefusal(connection, input, call),
     consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
+    decideRescheduling: (input, call) => operations.decideRescheduling(connection, input, call),
     searchAuditEntries: (input, call) => operations.searchAuditEntries(connection, input, call),
     openBranch: (input, call) => operations.openBranch(connection, input, call),
     appointStaffMember: (input, call) => operations.appointStaffMember(connection, input, call),
