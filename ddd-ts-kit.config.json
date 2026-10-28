@@ -138,7 +138,7 @@
     },
     "servicing": {
       "classification": "supporting",
-      "extraDirectories": ["domain/values", "composition"],
+      "extraDirectories": ["domain/values", "composition", "application/notices", "application/read-model"],
       "upstreams": [
         {
           "context": "credit-application",
@@ -240,6 +240,16 @@
       "what": "contexts.servicing.extraDirectories.composition",
       "adr": "0008",
       "reason": "The registration of the handlers of the ledger and of the instalments moves out of the module file, which passed the 350-line limit (conductor, owner brief)"
+    },
+    {
+      "what": "contexts.servicing.extraDirectories.application/notices",
+      "adr": "0010",
+      "reason": "The wording of the notice of each arrears stage is a pure function of the stage (conductor, owner brief)"
+    },
+    {
+      "what": "contexts.servicing.extraDirectories.application/read-model",
+      "adr": "0010",
+      "reason": "The row, the criteria and the summary of the portfolio at risk are plain read-model types and pure functions (conductor, owner brief)"
     },
     {
       "what": "contexts.reporting.extraDirectories.application/read-model",
