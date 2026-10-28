@@ -5,7 +5,7 @@ import { FakeCustomerIdentityGateway } from '@/contexts/credit-application/test/
 
 const ADAPTERS: readonly (readonly [string, () => CustomerIdentityGateway])[] = [
   ['the fake', () => new FakeCustomerIdentityGateway()],
-  ['the in-process adapter', () => new InProcessCustomerIdentityGateway({})],
+  ['the in-process adapter', () => new InProcessCustomerIdentityGateway({ identityOf: async () => undefined })],
 ];
 
 describe.each(ADAPTERS)('CustomerIdentityGateway, %s', (_name, create) => {

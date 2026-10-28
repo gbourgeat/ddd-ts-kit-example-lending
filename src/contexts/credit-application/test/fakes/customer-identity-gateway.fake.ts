@@ -1,5 +1,13 @@
 import type { CustomerIdentityGateway } from '@/contexts/credit-application/assessment/application/ports/customer-identity-gateway.port';
 
 export class FakeCustomerIdentityGateway implements CustomerIdentityGateway {
-  // TODO(domain): implement each operation of CustomerIdentityGateway in memory, with what customer-due-diligence would answer given by the test.
+  private readonly identities = new Map<string, { name: string; birthDate: string }>();
+
+  answerIdentityOf(customerId: string, identity: { name: string; birthDate: string }): void {
+    this.identities.set(customerId, identity);
+  }
+
+  async identityOf(customerId: string): Promise<{ name: string; birthDate: string } | undefined> {
+    return this.identities.get(customerId);
+  }
 }

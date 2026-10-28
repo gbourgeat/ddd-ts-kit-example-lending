@@ -5,5 +5,7 @@ import type { CustomerAdvisorBranchGateway } from '@/contexts/credit-application
 export class InProcessCustomerAdvisorBranchGateway implements CustomerAdvisorBranchGateway {
   constructor(readonly upstream: CustomerAdvisorBranchContract) {}
 
-  // TODO(domain): implement each operation of CustomerAdvisorBranchGateway by asking `this.upstream`, translating its answer into the types of credit-application.
+  branchOfCustomerAdvisor(customerId: string): Promise<string | undefined> {
+    return this.upstream.branchOfCustomerAdvisor(customerId);
+  }
 }

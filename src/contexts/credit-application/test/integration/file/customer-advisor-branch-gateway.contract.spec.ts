@@ -5,7 +5,10 @@ import { FakeCustomerAdvisorBranchGateway } from '@/contexts/credit-application/
 
 const ADAPTERS: readonly (readonly [string, () => CustomerAdvisorBranchGateway])[] = [
   ['the fake', () => new FakeCustomerAdvisorBranchGateway()],
-  ['the in-process adapter', () => new InProcessCustomerAdvisorBranchGateway({})],
+  [
+    'the in-process adapter',
+    () => new InProcessCustomerAdvisorBranchGateway({ branchOfCustomerAdvisor: async () => undefined }),
+  ],
 ];
 
 describe.each(ADAPTERS)('CustomerAdvisorBranchGateway, %s', (_name, create) => {

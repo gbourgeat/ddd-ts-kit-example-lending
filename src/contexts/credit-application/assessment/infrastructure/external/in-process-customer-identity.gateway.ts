@@ -5,5 +5,7 @@ import type { CustomerIdentityGateway } from '@/contexts/credit-application/asse
 export class InProcessCustomerIdentityGateway implements CustomerIdentityGateway {
   constructor(readonly upstream: CustomerIdentityContract) {}
 
-  // TODO(domain): implement each operation of CustomerIdentityGateway by asking `this.upstream`, translating its answer into the types of credit-application.
+  identityOf(customerId: string): Promise<{ name: string; birthDate: string } | undefined> {
+    return this.upstream.identityOf(customerId);
+  }
 }
