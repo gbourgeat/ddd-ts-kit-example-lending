@@ -114,6 +114,8 @@ export const relationshipSchema = defineSchema({
       'credit-application:application.request-exception': 'decider',
       // The credit committee decides an exception: a decider of the context, the level is checked by the handler.
       'credit-application:exception.decide': 'decider',
+      // A rescheduling is decided like a credit, by a decider within their limit.
+      'credit-application:application.reschedule': 'decider',
       'data-protection:data-subject.request-copy': 'operator',
       'data-protection:impact-assessment.record': 'operator',
     },
