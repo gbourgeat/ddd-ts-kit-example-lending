@@ -80,6 +80,9 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Withdraw | To take back a declaration to the repayment incident register once the arrears are paid |  |
 | When | On the occurrence of a fact, the reaction runs |  |
 | Paid | The arrears are paid: the loan is paid up on its unpaid instalments |  |
+| Notify | Send the borrower one notice for an arrears stage, by mail and by text message: the notifier covers both channels | Notice to the payer by the bank |
+| Stage | One of the arrears buckets a loan enters as its days past due grow |  |
+| Each | Every time a loan enters a bucket, not once per loan |  |
 
 ## Modules
 
