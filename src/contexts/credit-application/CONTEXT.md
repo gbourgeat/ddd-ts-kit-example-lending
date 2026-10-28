@@ -292,6 +292,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | not read | not read |  |
 | not read | not read |  |
 | not read | not read |  |
+| not read | `DeciderLimitReader` |  |
 | not read | `DeclaredConflictRow` |  |
 | not read | `DeclaredConflictsProjection` |  |
 | not read | not read |  |
