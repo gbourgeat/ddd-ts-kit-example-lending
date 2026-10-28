@@ -23,6 +23,7 @@ The scoring model is the bank's own judgement of credit risk, versioned and owne
 | Factor | An input that pushed the score down, stated in words a customer understands | Input |
 | Published | A version of the scoring model made available for use by the credit decisions | Draft, the version being prepared |
 | Label | The name given to a published version of the scoring model, for example 2026.1 | Name of the model |
+| Applicant | The person whose inputs the scoring model scores, for one model version |  |
 
 ## Aggregates
 
@@ -106,5 +107,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
+| `InvalidFactor` | `forWords` | `INVALID_FACTOR` | none |
+| `InvalidFactor` | `forHarm` | `INVALID_FACTOR` | none |
+| `InvalidScore` | `forValue` | `INVALID_SCORE` | none |
 | `ScoringModelLabelRequired` | `forLabel` | `SCORING_MODEL_LABEL_REQUIRED` | none |
 <!-- /ddd-ts-kit:reference -->
