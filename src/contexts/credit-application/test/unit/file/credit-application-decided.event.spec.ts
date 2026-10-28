@@ -12,6 +12,8 @@ describe('CreditApplicationDecided', () => {
       '',
       '',
       1_234_567,
+      'branch-1',
+      false,
     );
 
     expect(event.name).toBe('credit-application.credit-application.decided');
@@ -22,6 +24,8 @@ describe('CreditApplicationDecided', () => {
       deciderId: 'staff-1',
       level: 'advisor',
       approvedAmountCents: 1_234_567,
+      branchId: 'branch-1',
+      exception: false,
     });
   });
 });

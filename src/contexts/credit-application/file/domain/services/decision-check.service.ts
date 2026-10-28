@@ -21,6 +21,7 @@ export class DecisionCheckService {
       readonly lastAssessment: { readonly proposedOutcome: string } | undefined;
       readonly refusalReviewConclusion: RefusalConclusion | undefined;
       readonly amount: { readonly cents: number };
+      readonly branchId: string;
     },
     decision: DecisionInput,
   ): CreditApplicationDecided {
@@ -47,6 +48,8 @@ export class DecisionCheckService {
       decision.reasons,
       decision.conditions,
       decision.approvedAmountCents,
+      file.branchId,
+      false,
     );
   }
 

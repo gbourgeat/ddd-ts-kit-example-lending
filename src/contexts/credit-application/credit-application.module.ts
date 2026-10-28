@@ -73,6 +73,8 @@ import { KeepDelegationTableIntegrationHandler } from '@/contexts/credit-applica
 import { KeepLegalMaximumRateIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-legal-maximum-rate.integration-handler';
 import { KeepRateGridIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-rate-grid.integration-handler';
 import { ReviewProposedRefusalCommand } from '@/contexts/credit-application/assessment/application/commands/review-proposed-refusal/review-proposed-refusal.command';
+import { CreditApplicationDecidedPublisher } from '@/contexts/credit-application/decision/application/integration/publishers/credit-application-decided.publisher';
+import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -221,6 +223,16 @@ function registerReactions(platform: Platform, declaredConflicts: DeclaredConfli
 
   keepReferenceData(platform);
 
+  const creditApplicationDecidedPublisher = platform.adapter(
+    new CreditApplicationDecidedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'credit-application' },
+  );
+
+  platform.domainEvents.on(CreditApplicationDecided.eventName, async (event) => {
+    if (event instanceof CreditApplicationDecided) {
+      await creditApplicationDecidedPublisher.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 

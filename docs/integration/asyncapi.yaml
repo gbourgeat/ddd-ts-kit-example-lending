@@ -29,6 +29,12 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/brokerage.broker.registration-lapsed.v1'
+  credit-application.credit-application.decided:
+    address: credit-application.credit-application.decided
+    description: 'A decider approved, approved with conditions or refused a credit application: the outcome, whether it is an exception, the branch and the amount approved.'
+    messages:
+      v1:
+        $ref: '#/components/messages/credit-application.credit-application.decided.v1'
   credit-application.credit-application.submitted:
     address: credit-application.credit-application.submitted
     description: A credit application was submitted, for an amount and a duration, on a branch.
@@ -161,6 +167,12 @@ operations:
       $ref: '#/channels/brokerage.broker.registration-lapsed'
     messages:
       - $ref: '#/channels/brokerage.broker.registration-lapsed/messages/v1'
+  send.credit-application.credit-application.decided:
+    action: send
+    channel:
+      $ref: '#/channels/credit-application.credit-application.decided'
+    messages:
+      - $ref: '#/channels/credit-application.credit-application.decided/messages/v1'
   send.credit-application.credit-application.submitted:
     action: send
     channel:
@@ -471,6 +483,58 @@ components:
             type: object
             required:
               - brokerId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    credit-application.credit-application.decided.v1:
+      name: credit-application.credit-application.decided
+      title: credit-application.credit-application.decided v1
+      summary: 'A decider approved, approved with conditions or refused a credit application: the outcome, whether it is an exception, the branch and the amount approved.'
+      contentType: application/json
+      tags:
+        - name: credit-application
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: credit-application.credit-application.decided
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              creditApplicationId:
+                type: string
+              outcome:
+                type: string
+              exception:
+                type: boolean
+              branchId:
+                type: string
+              approvedAmountCents:
+                type: integer
+            type: object
+            required:
+              - creditApplicationId
+              - outcome
+              - exception
+              - branchId
+              - approvedAmountCents
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

@@ -82,6 +82,8 @@ interface CreditApplicationDecidedData {
   readonly reasons: string;
   readonly conditions: string;
   readonly approvedAmountCents: number;
+  readonly branchId: string;
+  readonly exception: boolean;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -233,7 +235,11 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
       ),
   }),
   [CreditApplicationDecided.eventName]: defineStoredEvent(CreditApplicationDecided, {
-    version: 1,
+    version: 2,
+    upcasters: {
+      // A decision of version 1 recorded no branch and no exception: it is read with an empty branch and no exception.
+      1: () => ({ branchId: '', exception: false }),
+    },
     encode: (event): CreditApplicationDecidedData => ({
       outcome: event.outcome,
       deciderId: event.deciderId,
@@ -241,6 +247,8 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
       reasons: event.reasons,
       conditions: event.conditions,
       approvedAmountCents: event.approvedAmountCents,
+      branchId: event.branchId,
+      exception: event.exception,
     }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationDecided(
@@ -252,6 +260,8 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.text('reasons'),
         data.text('conditions'),
         data.number('approvedAmountCents'),
+        data.text('branchId'),
+        data.flag('exception'),
       ),
   }),
 };

@@ -102,6 +102,7 @@ function file(overrides: object = {}) {
     lastAssessment: assessed,
     refusalReviewConclusion: undefined,
     amount: { cents: 1_234_567 },
+    branchId: 'branch-1',
     ...overrides,
   };
 }
