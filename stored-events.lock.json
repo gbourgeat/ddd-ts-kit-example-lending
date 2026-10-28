@@ -26,8 +26,14 @@
   "customer-due-diligence.customer.directors-and-owners-declared": {
     "1": "sha256:cb0ab1df6df4a11c"
   },
+  "customer-due-diligence.customer.due-diligence-flagged-overdue": {
+    "1": "sha256:733dac3b56fba725"
+  },
   "customer-due-diligence.customer.due-diligence-refreshed": {
     "1": "sha256:b54cb914fe21085d"
+  },
+  "customer-due-diligence.customer.high-risk-approved": {
+    "1": "sha256:733dac3b56fba725"
   },
   "customer-due-diligence.customer.identified": {
     "1": "sha256:733dac3b56fba725",
