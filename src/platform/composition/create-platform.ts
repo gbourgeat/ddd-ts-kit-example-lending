@@ -67,9 +67,7 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
     domainEvents,
     persistence,
     relations,
-    customerAdvisorBranch: customerAdvisorBranchOf(persistence, relations, foundations),
-    customerIdentity: customerIdentityOf(foundations),
-    customerDiligence: customerDiligenceOf(foundations),
+    ...contractsBetweenContexts(persistence, relations, foundations),
     access: new PolicyAccess({ authorizer, clock, policies: accessPolicies, onDecision: foundations.audit.decisions }),
     actors: new ScopedActorContext(scope, foundations.ids),
     adapter,
@@ -87,6 +85,15 @@ function domainEventsOf({ traced, errors, logger, scope }: Foundations): DomainE
   const afterCommitFailed = reportAfterCommitFailures({ reporter: errors, logger, scope });
 
   return traced.domainEvents(new InMemoryDomainEventDispatcher(afterCommitFailed));
+}
+
+/** What a context answers synchronously to the others, in the process: the branch of an advisor, the identity and the diligence of a customer. */
+function contractsBetweenContexts(persistence: Persistence, relations: RelationTupleStore, foundations: Foundations) {
+  return {
+    customerAdvisorBranch: customerAdvisorBranchOf(persistence, relations, foundations),
+    customerIdentity: customerIdentityOf(foundations),
+    customerDiligence: customerDiligenceOf(foundations),
+  };
 }
 
 /** The branch of a customer's advisor, answered from the portfolios of branch-network. */
