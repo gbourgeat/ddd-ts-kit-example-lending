@@ -7,6 +7,8 @@ import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
 import { FakeIntermediariesRegister } from '@/contexts/brokerage/test/fakes/intermediaries-register.fake';
 import { creditApplicationModule } from '@/contexts/credit-application/credit-application.module';
 import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
+import { servicingModule } from '@/contexts/servicing/servicing.module';
+import { SimulatedBorrowerNotifier } from '@/contexts/servicing/arrears/infrastructure/external/simulated-borrower-notifier.adapter';
 import { identityModule } from '@/contexts/identity/identity.module';
 import { FakeIdentityProviderAdmin } from '@/contexts/identity/test/fakes/identity-provider-admin.fake';
 import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
@@ -67,6 +69,9 @@ export interface RunningApplication {
   /** The national register of repayment incidents of credit-application: a spec lists a person with `incidents.record(name, birthDate)`. */
   readonly incidents: SimulatedRepaymentIncidentRegister;
 
+  /** The messages the simulated borrower notifier of servicing sent: `notifier.messagesTo(name)`. */
+  readonly notifier: SimulatedBorrowerNotifier;
+
   /** Runs a background job of the application now, by its name (`brokerage.check-registration`). */
   runJob(name: string): Promise<unknown>;
 
@@ -89,7 +94,8 @@ export async function startApplication(): Promise<RunningApplication> {
   const screening = new SimulatedScreeningProvider();
   const register = new FakeIntermediariesRegister();
   const incidents = new SimulatedRepaymentIncidentRegister();
-  const started = await start({ database, config, credentials, screening, register, incidents });
+  const notifier = new SimulatedBorrowerNotifier();
+  const started = await start({ database, config, credentials, screening, register, incidents, notifier });
 
   return {
     client: started.client,
@@ -97,6 +103,7 @@ export async function startApplication(): Promise<RunningApplication> {
     screening,
     register,
     incidents,
+    notifier,
     runJob: (name) => started.runJob(name),
     persistence: database.persistence,
     as: async (actor) => started.client.withHeaders(await credentials.headersOf(actor)),
@@ -133,12 +140,21 @@ interface StartProps {
   readonly screening: SimulatedScreeningProvider;
   readonly register: FakeIntermediariesRegister;
   readonly incidents: SimulatedRepaymentIncidentRegister;
+  readonly notifier: SimulatedBorrowerNotifier;
 }
 
 /** The application on the test database, listening on a free port; closing it closes the database last. */
-async function start({ database, config, credentials, screening, register, incidents }: StartProps): Promise<Started> {
+async function start({
+  database,
+  config,
+  credentials,
+  screening,
+  register,
+  incidents,
+  notifier,
+}: StartProps): Promise<Started> {
   const redis = config.redisUrl === noRedis ? undefined : openRedis(config);
-  const selection = contextsWith(screening, register, incidents);
+  const selection = contextsWith(screening, register, incidents, notifier);
 
   const application = composeApplication(
     database.persistence,
@@ -195,6 +211,7 @@ function contextsWith(
   screening: SimulatedScreeningProvider,
   register: FakeIntermediariesRegister,
   incidents: SimulatedRepaymentIncidentRegister,
+  notifier: SimulatedBorrowerNotifier,
 ): typeof everyContext {
   return everyContext.map((context) => {
     if (context === customerDueDiligenceModule) {
@@ -207,6 +224,10 @@ function contextsWith(
 
     if (context === creditApplicationModule) {
       return creditApplicationWithIncidents(incidents);
+    }
+
+    if (context === servicingModule) {
+      return servicingWithNotifier(notifier);
     }
 
     if (context === identityModule) {
@@ -244,6 +265,21 @@ function creditApplicationWithIncidents(incidents: SimulatedRepaymentIncidentReg
     };
 
     return creditApplicationModule({ ...platform, adapter });
+  };
+}
+
+/** The servicing context as the application wires it, except that its borrower notifier is the one the spec reads. */
+function servicingWithNotifier(notifier: SimulatedBorrowerNotifier) {
+  return (platform: Platform): ReturnType<typeof servicingModule> => {
+    const adapter: Platform['adapter'] = (instance, info) => {
+      if (info.token === 'BorrowerNotifier') {
+        return platform.adapter(notifier as unknown as typeof instance, info);
+      }
+
+      return platform.adapter(instance, info);
+    };
+
+    return servicingModule({ ...platform, adapter });
   };
 }
 

@@ -202,6 +202,7 @@ function notifyBorrowerAtEachStage(platform: Platform, loanRepository: LoanRepos
   const borrowerNotifier = platform.adapter(new SimulatedBorrowerNotifier(), {
     kind: 'external',
     context: 'servicing',
+    token: 'BorrowerNotifier',
   });
 
   const notifyBorrowerAtEachStageEventHandler = platform.adapter(
