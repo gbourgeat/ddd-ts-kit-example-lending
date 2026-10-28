@@ -27,6 +27,7 @@ import type { RetentionPeriods } from '@/platform/config/read-retention-periods'
 import type { EventSourcing } from '@/platform/event-sourcing/create-event-sourcing';
 import type { Files } from '@/platform/files/create-files';
 import type { CustomerAdvisorBranchContract } from '@/contexts/branch-network/published-language';
+import type { ScoringContract } from '@/contexts/credit-scoring/published-language';
 import type {
   CustomerDiligenceContract,
   CustomerIdentityContract,
@@ -62,6 +63,8 @@ export interface Platform {
   readonly customerAdvisorBranch: CustomerAdvisorBranchContract;
   /** The identity of an identified customer, answered by customer-due-diligence: what a context reaches through its port, never the module of another context. */
   readonly customerIdentity: CustomerIdentityContract;
+  /** The score of an applicant, answered by credit-scoring with its latest published model version. */
+  readonly scoring: ScoringContract;
   /** Whether a customer may be lent to on a day: the payout gate reads it synchronously. */
   readonly customerDiligence: CustomerDiligenceContract;
   /** Asks the policies about one element, then the authorizer: for the rules that need loaded state. */

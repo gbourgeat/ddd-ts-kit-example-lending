@@ -275,6 +275,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `OfferRepository` | external | `PrismaOfferRepository` |
 | `RateGrids` | not bound |  |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
+| `ScoringGateway` | gateway | `InProcessScoringGateway` |
 | `SearchApplicationsReader` | repository | `PrismaSearchApplicationsReader` |
 
 ### Policies
@@ -308,4 +309,5 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `CustomerDiligenceGateway` | `customer-due-diligence` | `InProcessCustomerDiligenceGateway` |
 | `CustomerIdentityGateway` | `customer-due-diligence` | `InProcessCustomerIdentityGateway` |
+| `ScoringGateway` | `credit-scoring` | `InProcessScoringGateway` |
 <!-- /ddd-ts-kit:reference -->
