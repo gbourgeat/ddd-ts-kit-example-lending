@@ -27,6 +27,12 @@ import { ComputeDueInstalmentsHandler } from '@/contexts/servicing/instalments/a
 import { ComputeDueInstalmentsJob } from '@/contexts/servicing/instalments/application/scheduling/compute-due-instalments.job';
 import { LoanPaidOutPublisher } from '@/contexts/servicing/ledger/application/integration/publishers/loan-paid-out.publisher';
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
+import { RepayEarlyCommand } from '@/contexts/servicing/ledger/application/commands/repay-early/repay-early.command';
+import { RepayEarlyHandler } from '@/contexts/servicing/ledger/application/commands/repay-early/repay-early.handler';
+import { WriteOffLoanCommand } from '@/contexts/servicing/ledger/application/commands/write-off-loan/write-off-loan.command';
+import { WriteOffLoanHandler } from '@/contexts/servicing/ledger/application/commands/write-off-loan/write-off-loan.handler';
+import { ReverseWriteOffCommand } from '@/contexts/servicing/ledger/application/commands/reverse-write-off/reverse-write-off.command';
+import { ReverseWriteOffHandler } from '@/contexts/servicing/ledger/application/commands/reverse-write-off/reverse-write-off.handler';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -88,6 +94,18 @@ function registerHandlers(platform: Platform): void {
   platform.queries.register(ReadLoanQuery, new ReadLoanHandler(readLoanReader), { context: 'servicing' });
 
   platform.commands.register(ComputeDueInstalmentsCommand, new ComputeDueInstalmentsHandler(loanRepository), {
+    context: 'servicing',
+  });
+
+  platform.commands.register(RepayEarlyCommand, new RepayEarlyHandler(loanRepository, platform.clock), {
+    context: 'servicing',
+  });
+
+  platform.commands.register(WriteOffLoanCommand, new WriteOffLoanHandler(loanRepository, platform.clock), {
+    context: 'servicing',
+  });
+
+  platform.commands.register(ReverseWriteOffCommand, new ReverseWriteOffHandler(loanRepository, platform.clock), {
     context: 'servicing',
   });
   // /ddd-ts-kit:handlers
@@ -173,6 +191,15 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: (query) => ({ type: 'loan', id: query.loanId }),
     }),
     requires(ComputeDueInstalmentsCommand, servicingPermissions['loan.compute-due'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(RepayEarlyCommand, servicingPermissions['loan.repay-early'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(WriteOffLoanCommand, servicingPermissions['loan.write-off'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(ReverseWriteOffCommand, servicingPermissions['loan.write-off'], {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     // /ddd-ts-kit:authorization

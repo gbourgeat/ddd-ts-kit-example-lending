@@ -407,6 +407,24 @@ export interface Client {
    */
   closeLoan(input: operations.CloseLoanInput, options?: CallOptions): Promise<operations.CloseLoanResult>;
   /**
+   * Repay early: `POST /loans/{id}/early-repayments`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), EARLY_REPAYMENT_TOO_HIGH (422), INVALID_REPAYMENT (422), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  repayEarly(input: operations.RepayEarlyInput, options?: CallOptions): Promise<operations.RepayEarlyResult>;
+  /**
+   * Write off loan: `POST /loans/{id}/write-off`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  writeOffLoan(input: operations.WriteOffLoanInput, options?: CallOptions): Promise<operations.WriteOffLoanResult>;
+  /**
+   * Reverse write off: `POST /loans/{id}/write-off-reversal`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_NOT_WRITTEN_OFF (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  reverseWriteOff(input: operations.ReverseWriteOffInput, options?: CallOptions): Promise<operations.ReverseWriteOffResult>;
+  /**
    * Accept offer: `POST /offers/{id}/acceptance`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ALREADY_ACCEPTED (422), OFFER_EXPIRED (422), OFFER_NOT_ISSUED (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
@@ -603,6 +621,9 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
     readLoan: (input, call) => operations.readLoan(connection, input, call),
     closeLoan: (input, call) => operations.closeLoan(connection, input, call),
+    repayEarly: (input, call) => operations.repayEarly(connection, input, call),
+    writeOffLoan: (input, call) => operations.writeOffLoan(connection, input, call),
+    reverseWriteOff: (input, call) => operations.reverseWriteOff(connection, input, call),
     acceptOffer: (input, call) => operations.acceptOffer(connection, input, call),
     readPreContractualSheet: (input, call) => operations.readPreContractualSheet(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),

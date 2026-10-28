@@ -27,7 +27,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Movement | One entry of the loan ledger: payout, instalment, payment, fee, early repayment, rescheduling or write-off | Entry (application file) |
 | Ledger | The loan's movements, never edited; an error is reversed by a movement of opposite effect | Application file |
 | Balance | The amount still owed on a given date, past dates included | Outstanding amount (reporting) |
-| Early repayment | A repayment, in part or in full, before the schedule ends; its fee is at most 1 percent when more than a year remains, 0.5 percent otherwise | Payment |
+| Early repayment | A repayment of capital, in part or in full, before the schedule ends; its fee is 1 percent of the capital repaid when more than a year (12 months) of the schedule remains, 0.5 percent otherwise, in integer cents rounded down; the capital repaid cannot exceed the outstanding capital, and repaying all of it closes the loan | Payment |
 | Late fee | The fee for an unpaid instalment, capped by law | Early repayment fee |
 | Arrears | The unpaid amount of a loan past its due dates | Default |
 | Days past due | The days since the oldest unpaid instalment | Arrears |
@@ -52,6 +52,11 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Compute | Work out each night which instalments of the schedule of a loan have fallen due |  |
 | Due date | The day an instalment falls due: its number of calendar months after the payout, on the payout day or the last day of a shorter month, in UTC |  |
 | Noted | The ledger records that an instalment fell due, once, with its number, its due date and its amount |  |
+| Repay | Pay back capital of a loan, in part or in full, before its schedule ends: an early repayment |  |
+| Write off | Record that the outstanding capital of a loan is not recovered: the loan ends, and the write-off can be reversed |  |
+| High | Above the outstanding capital of the loan: a repayment too high is refused |  |
+| Reverse | Undo a write-off by a movement of opposite effect: the outstanding capital is open again |  |
+| Outstanding capital | The capital still owed by a loan: its principal, less the capital repaid by the instalments noted due, the early repayments and the write-off |  |
 
 ## Modules
 
@@ -87,6 +92,8 @@ No personal data declared.
 - `servicing:loan.record-payout`
 - `servicing:loan.read`
 - `servicing:loan.compute-due`
+- `servicing:loan.repay-early`
+- `servicing:loan.write-off`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -144,6 +151,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `ReadLoan` | query | `loan.read` |
 | `RecordPayout` | command | `loan.record-payout` |
+| `RepayEarly` | command | `loan.repay-early` |
+| `ReverseWriteOff` | command | `loan.write-off` |
+| `WriteOffLoan` | command | `loan.write-off` |
 
 ### Routes
 
@@ -151,6 +161,9 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|---|---|---|---|---|---|
 | GET | `/loans/:id` | `readLoan` | `LoansRoutes` | `Authenticated` | `ReadLoan` | `loan.read` | params: `ReadLoanParams` | 200: `ReadLoanAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | POST | `/loans/:id/closure` | `closeLoan` | `LoansRoutes` | `Authenticated` | `CloseLoan` | `loan.close` | params: `CloseLoanParams`, body: `CloseLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
+| POST | `/loans/:id/early-repayments` | `repayEarly` | `LoansRoutes` | `Authenticated` | `RepayEarly` | `loan.repay-early` | params: `RepayEarlyParams`, body: `RepayEarlyBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed`, `ServicingCodes.InvalidRepayment`, `ServicingCodes.EarlyRepaymentTooHigh` |
+| POST | `/loans/:id/write-off` | `writeOffLoan` | `LoansRoutes` | `Authenticated` | `WriteOffLoan` | `loan.write-off` | params: `WriteOffLoanParams`, body: `WriteOffLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
+| POST | `/loans/:id/write-off-reversal` | `reverseWriteOff` | `LoansRoutes` | `Authenticated` | `ReverseWriteOff` | `loan.write-off` | params: `ReverseWriteOffParams`, body: `ReverseWriteOffBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanNotWrittenOff` |
 
 ### Consumed events
 
@@ -181,9 +194,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
 | `BorrowerNotIdentified` | `forCustomer` | `BORROWER_NOT_IDENTIFIED` | none |
+| `EarlyRepaymentTooHigh` | `forRepayment` | `EARLY_REPAYMENT_TOO_HIGH` | none |
 | `InvalidBorrower` | `forName` | `INVALID_BORROWER` | none |
+| `InvalidRepayment` | `forAmount` | `INVALID_REPAYMENT` | none |
 | `InvalidSchedule` | `forInvalidTerms` | `INVALID_SCHEDULE` | none |
 | `LoanAlreadyClosed` | `forLoan` | `LOAN_ALREADY_CLOSED` | none |
+| `LoanNotWrittenOff` | `forLoan` | `LOAN_NOT_WRITTEN_OFF` | none |
 | `UnknownLoan` | `forLoan` | `UNKNOWN_LOAN` | none |
 
 ### Gateways

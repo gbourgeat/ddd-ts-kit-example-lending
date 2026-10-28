@@ -95,6 +95,9 @@
   "servicing.loan.closed": {
     "1": "sha256:733dac3b56fba725"
   },
+  "servicing.loan.early-repayment-recorded": {
+    "1": "sha256:f3a01c211296243d"
+  },
   "servicing.loan.instalment-due-noted": {
     "1": "sha256:93c79aef0844a567"
   },
@@ -104,5 +107,11 @@
   },
   "servicing.loan.scheduled": {
     "1": "sha256:78206acad92d34f1"
+  },
+  "servicing.loan.write-off-reversed": {
+    "1": "sha256:b850bdcabb77abf1"
+  },
+  "servicing.loan.written-off": {
+    "1": "sha256:b850bdcabb77abf1"
   }
 }

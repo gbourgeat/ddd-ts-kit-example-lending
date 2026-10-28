@@ -7,5 +7,7 @@ export const servicingPermissions = definePermissions('servicing', {
   'loan.record-payout': { description: 'Record payout' },
   'loan.read': { description: 'Read loan' },
   'loan.compute-due': { description: 'Compute due instalments' },
+  'loan.repay-early': { description: 'Repay early' },
+  'loan.write-off': { description: 'Write off loan' },
   // /ddd-ts-kit:permissions
 });

@@ -13,6 +13,20 @@ import { LoanScheduled } from '@/contexts/servicing/ledger/domain/events/loan-sc
 import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
 import { Money } from '@/shared-kernel/money.vo';
 import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
+import { LoanEarlyRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-early-repayment-recorded.event';
+import { LoanWrittenOff } from '@/contexts/servicing/ledger/domain/events/loan-written-off.event';
+import { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/loan-write-off-reversed.event';
+
+/** The capital repaid early and the fee charged on it, in whole cents. */
+interface LoanEarlyRepaymentRecordedData {
+  readonly capitalCents: number;
+  readonly feeCents: number;
+}
+
+/** The amount written off, in whole cents. */
+interface LoanAmountData {
+  readonly amountCents: number;
+}
 
 /** An instalment noted as due: its number in the schedule, its due date as text and its amount, in whole cents. */
 interface LoanInstalmentDueNotedData {
@@ -102,6 +116,32 @@ export const loanEvents: StoredEventTypes<LoanEvent> = {
         new Date(data.text('dueOn')),
         Money.ofCents(data.number('amountCents')),
       ),
+  }),
+  [LoanEarlyRepaymentRecorded.eventName]: defineStoredEvent(LoanEarlyRepaymentRecorded, {
+    version: 1,
+    encode: (event): LoanEarlyRepaymentRecordedData => ({
+      capitalCents: event.capital.cents,
+      feeCents: event.fee.cents,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanEarlyRepaymentRecorded(
+        aggregateId,
+        occurredAt,
+        Money.ofCents(data.number('capitalCents')),
+        Money.ofCents(data.number('feeCents')),
+      ),
+  }),
+  [LoanWrittenOff.eventName]: defineStoredEvent(LoanWrittenOff, {
+    version: 1,
+    encode: (event): LoanAmountData => ({ amountCents: event.amount.cents }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanWrittenOff(aggregateId, occurredAt, Money.ofCents(data.number('amountCents'))),
+  }),
+  [LoanWriteOffReversed.eventName]: defineStoredEvent(LoanWriteOffReversed, {
+    version: 1,
+    encode: (event): LoanAmountData => ({ amountCents: event.amount.cents }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanWriteOffReversed(aggregateId, occurredAt, Money.ofCents(data.number('amountCents'))),
   }),
 };
 

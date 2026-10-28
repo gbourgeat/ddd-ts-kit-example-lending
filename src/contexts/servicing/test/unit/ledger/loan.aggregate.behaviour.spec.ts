@@ -4,7 +4,11 @@ import { Loan } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggrega
 import { LoanClosed } from '@/contexts/servicing/ledger/domain/events/loan-closed.event';
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
+import { LoanEarlyRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-early-repayment-recorded.event';
+import { LoanWrittenOff } from '@/contexts/servicing/ledger/domain/events/loan-written-off.event';
+import { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/loan-write-off-reversed.event';
 import { aLoan } from '@/contexts/servicing/test/builders/loan.builder';
+import { Money } from '@/shared-kernel/money.vo';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
 const closedAt = new Date('2031-03-01T00:00:00.000Z');
@@ -95,5 +99,71 @@ describe('A loan whose instalments fall due', () => {
     )
       .when((loan) => loan.computeDueInstalments(new Date('2026-03-10T00:00:00.000Z')))
       .thenNoEvent();
+  });
+});
+
+describe('A loan repaid early', () => {
+  const now = new Date('2026-06-10T00:00:00.000Z');
+
+  it('records the capital repaid, leaving the rest outstanding', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => loan.repayEarly(Money.ofCents(40_000), now))
+      .thenEventNames([LoanEarlyRepaymentRecorded.eventName])
+      .thenState((loan) => expect(loan.outstandingCapital.cents).toBe(60_000));
+  });
+
+  it('is closed by the same ledger when the whole outstanding capital is repaid', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => loan.repayEarly(Money.ofCents(100_000), now))
+      .thenEventNames([LoanEarlyRepaymentRecorded.eventName, LoanClosed.eventName])
+      .thenState((loan) => expect(loan.closedAt).toEqual(now));
+  });
+
+  it('refuses a repayment above the outstanding capital, and records nothing', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => loan.repayEarly(Money.ofCents(100_001), now))
+      .thenError('EARLY_REPAYMENT_TOO_HIGH');
+  });
+
+  it('refuses a repayment of nothing, and records nothing', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => loan.repayEarly(Money.ofCents(0), now))
+      .thenError('INVALID_REPAYMENT');
+  });
+});
+
+describe('A loan written off', () => {
+  const writtenOffAt = new Date('2026-06-10T00:00:00.000Z');
+
+  it('records the outstanding capital written off, and the loan ends', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => loan.writeOff(writtenOffAt))
+      .thenEventNames([LoanWrittenOff.eventName])
+      .thenState((loan) => expect(loan.closedAt).toEqual(writtenOffAt));
+  });
+
+  it('refuses a second write-off, since the loan is closed', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => {
+        loan.writeOff(writtenOffAt);
+        loan.writeOff(writtenOffAt);
+      })
+      .thenError('LOAN_ALREADY_CLOSED');
+  });
+
+  it('is reopened by a reversal, its outstanding capital open again', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => {
+        loan.writeOff(writtenOffAt);
+        loan.reverseWriteOff(writtenOffAt);
+      })
+      .thenEventNames([LoanWrittenOff.eventName, LoanWriteOffReversed.eventName])
+      .thenState((loan) => expect(loan.closedAt).toBeUndefined());
+  });
+
+  it('refuses a reversal of a loan not written off', () => {
+    given(aLoan().identifiedBy('loan-1').bornAt(bornAt))
+      .when((loan) => loan.reverseWriteOff(writtenOffAt))
+      .thenError('LOAN_NOT_WRITTEN_OFF');
   });
 });

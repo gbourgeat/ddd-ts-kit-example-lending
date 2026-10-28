@@ -16,5 +16,5 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 | [financial-crime](financial-crime.md) | 63 | 0 | 23 |
 | [identity](identity.md) | 175 | 0 | 60 |
 | [reporting](reporting.md) | 19 | 0 | 6 |
-| [servicing](servicing.md) | 90 | 10 | 35 |
-| [the application](application.md) | 423 | 4 | 101 |
+| [servicing](servicing.md) | 130 | 10 | 49 |
+| [the application](application.md) | 435 | 4 | 104 |

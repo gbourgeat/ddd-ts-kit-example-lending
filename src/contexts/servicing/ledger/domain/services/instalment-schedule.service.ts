@@ -43,6 +43,21 @@ export class InstalmentScheduleService {
     return amounts;
   }
 
+  /** The capital still owed once the first `paid` instalments are paid: each repays its amount less the interest of the balance it is paid on. */
+  balanceAfter(
+    terms: { principal: Money; annualRateBasisPoints: number; instalments: readonly Money[] },
+    paid: number,
+  ): Money {
+    const rate = BigInt(terms.annualRateBasisPoints);
+    let balance = BigInt(terms.principal.cents);
+
+    for (const instalment of terms.instalments.slice(0, paid)) {
+      balance -= BigInt(instalment.cents) - this.interestCents(balance, rate);
+    }
+
+    return Money.ofCents(Number(balance));
+  }
+
   private constantCents(terms: CheckedTerms): bigint {
     if (terms.rate === ZERO) {
       return this.roundHalfUp(terms.principal, terms.months);

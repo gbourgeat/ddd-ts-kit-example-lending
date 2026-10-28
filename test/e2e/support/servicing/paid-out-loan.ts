@@ -15,8 +15,13 @@ import type { RunningApplication } from '$test/e2e/support/start-application';
 /** The tenant the operators of this file act for: the streams of a loan keep the tenant that first wrote them. */
 const TENANT = 'acme-bank';
 
-/** Stores a loan paid out at `paidOutAt` in the event store of the application, through the loan's own repository. */
-export async function storePaidOutLoan(application: RunningApplication, id: string, paidOutAt: Date): Promise<void> {
+/** Stores a loan of `durationMonths` paid out at `paidOutAt` in the event store of the application, through the loan's own repository. */
+export async function storePaidOutLoan(
+  application: RunningApplication,
+  id: string,
+  paidOutAt: Date,
+  durationMonths: number = DURATION_MONTHS,
+): Promise<void> {
   const stores = application.persistence.eventSourcing(seedingScope());
   const loans = new EventStoreLoanRepository(stores.events, new PersonalDataCipher(stores.subjectKeys));
 
@@ -25,7 +30,7 @@ export async function storePaidOutLoan(application: RunningApplication, id: stri
   const schedule = LoanSchedule.of(
     Money.ofCents(ONE_THOUSAND_EUROS_IN_CENTS),
     ANNUAL_RATE_BASIS_POINTS,
-    DURATION_MONTHS,
+    durationMonths,
   );
 
   await loans.save(Loan.create(id, { paidOutAt, borrower, schedule }));

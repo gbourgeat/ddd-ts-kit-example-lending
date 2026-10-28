@@ -2426,6 +2426,110 @@ export function closeLoan(
   return send<CloseLoanResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RepayEarlyInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    capitalCents: number;
+  };
+}
+
+export type RepayEarlyResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'EARLY_REPAYMENT_TOO_HIGH' | 'INVALID_REPAYMENT' | 'LOAN_ALREADY_CLOSED' | 'UNKNOWN_LOAN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Repay early: `POST /loans/{id}/early-repayments`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), EARLY_REPAYMENT_TOO_HIGH (422), INVALID_REPAYMENT (422), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+ */
+export function repayEarly(
+  connection: Connection,
+  input: RepayEarlyInput,
+  options: CallOptions = {},
+): Promise<RepayEarlyResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/loans/{id}/early-repayments',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RepayEarlyResult>(connection, operation, { ...input, ...options });
+}
+
+export interface WriteOffLoanInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type WriteOffLoanResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'LOAN_ALREADY_CLOSED' | 'UNKNOWN_LOAN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Write off loan: `POST /loans/{id}/write-off`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_ALREADY_CLOSED (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+ */
+export function writeOffLoan(
+  connection: Connection,
+  input: WriteOffLoanInput,
+  options: CallOptions = {},
+): Promise<WriteOffLoanResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/loans/{id}/write-off',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<WriteOffLoanResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReverseWriteOffInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type ReverseWriteOffResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'LOAN_NOT_WRITTEN_OFF' | 'UNKNOWN_LOAN' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Reverse write off: `POST /loans/{id}/write-off-reversal`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), LOAN_NOT_WRITTEN_OFF (422), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+ */
+export function reverseWriteOff(
+  connection: Connection,
+  input: ReverseWriteOffInput,
+  options: CallOptions = {},
+): Promise<ReverseWriteOffResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/loans/{id}/write-off-reversal',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ReverseWriteOffResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AcceptOfferInput {
   readonly path: {
     readonly id: string;
