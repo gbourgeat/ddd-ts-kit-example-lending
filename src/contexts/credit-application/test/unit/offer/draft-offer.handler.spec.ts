@@ -32,6 +32,10 @@ class KnownApplications extends CreditApplicationRepository {
     return this.known.find((candidate) => candidate.id === id);
   }
 
+  async findRefusedOnOrBefore(): Promise<readonly CreditApplication[]> {
+    return [];
+  }
+
   async save(): Promise<void> {
     return undefined;
   }

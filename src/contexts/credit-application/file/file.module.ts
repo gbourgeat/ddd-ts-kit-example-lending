@@ -221,9 +221,13 @@ function registerDocumentRetentionHandlers(platform: Platform, repository: Credi
     context: 'credit-application',
   });
 
-  platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
-    context: 'credit-application',
-  });
+  platform.commands.register(
+    ErasePersonalDataPastRetentionCommand,
+    new ErasePersonalDataPastRetentionHandler(repository, platform.files.storage),
+    {
+      context: 'credit-application',
+    },
+  );
 }
 
 /** The product terms (kept and read), the check of a request against them and the findings it leaves, over the read model the module binds. */

@@ -20,5 +20,7 @@ export class FakeCreditApplicationRepository implements CreditApplicationReposit
     return this.adapter.save(saved);
   }
 
-  // TODO(domain): implement each lookup of CreditApplicationRepository over the events of `this.store`, so that handlers are tested against a working repository.
+  findRefusedOnOrBefore(instant: Date): Promise<readonly CreditApplication[]> {
+    return this.adapter.findRefusedOnOrBefore(instant);
+  }
 }

@@ -16,8 +16,8 @@ import type { RefusalConclusion } from '@/contexts/credit-application/file/domai
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
 import { DecisionCheckService } from '@/contexts/credit-application/file/domain/services/decision-check.service';
+import { DecisionRecord } from '@/contexts/credit-application/file/domain/values/decision-record';
 import type { DecisionInput } from '@/contexts/credit-application/file/domain/values/decision-input';
-import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 import { ProductTermsCheckService } from '@/contexts/credit-application/file/domain/services/product-terms-check.service';
@@ -76,9 +76,7 @@ export interface CreditApplicationState {
   /** The reviewer of the last refusal review: with the assessor, the person who prepared the file. */
   readonly refusalReviewerId: string;
   /** The decision taken on the application, undefined until the decider decides it. */
-  readonly decision:
-    | { readonly outcome: DecisionOutcome; readonly deciderId: string; readonly approvedAmountCents: number }
-    | undefined;
+  readonly decision: DecisionRecord | undefined;
 }
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
@@ -343,8 +341,6 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   }
 
   private applyDecided(event: CreditApplicationDecided): void {
-    this.applyEntryAppended({
-      decision: { outcome: event.outcome, deciderId: event.deciderId, approvedAmountCents: event.approvedAmountCents },
-    });
+    this.applyEntryAppended({ decision: DecisionRecord.of(event) });
   }
 }
