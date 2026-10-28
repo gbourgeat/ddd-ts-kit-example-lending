@@ -22,6 +22,7 @@ import type {
 import { CreditEligibilityAnswer } from '@/contexts/customer-due-diligence/infrastructure/external/credit-eligibility.answer';
 import { CustomerIdentityAnswer } from '@/contexts/customer-due-diligence/infrastructure/external/customer-identity.answer';
 import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
+import { AccessExplainer } from '@/platform/auth/authorization/access-explainer';
 import { accessPolicies } from '@/platform/auth/authorization/access-policies';
 import { createAuthorizer } from '@/platform/auth/authorization/create-authorizer';
 import { createRelationTuples } from '@/platform/auth/relationships/create-relation-tuples';
@@ -71,6 +72,7 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
     persistence,
     relations,
     ...contractsBetweenContexts(persistence, relations, foundations),
+    accessExplainer: new AccessExplainer(relations),
     access: new PolicyAccess({ authorizer, clock, policies: accessPolicies, onDecision: foundations.audit.decisions }),
     actors: new ScopedActorContext(scope, foundations.ids),
     adapter,
