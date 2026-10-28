@@ -12,6 +12,7 @@ import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligen
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
 import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
+import { CustomerDueDiligenceRefreshed } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-refreshed.event';
 
 interface CustomerBusinessRegisteredData {
   readonly legalName: string;
@@ -37,6 +38,13 @@ type CustomerRelationshipEndedData = Record<string, never>;
 
 interface CustomerPossibleMatchDismissedData {
   readonly reason: string;
+}
+
+interface CustomerDueDiligenceRefreshedData {
+  readonly possibleMatch: boolean;
+  readonly nextDueOn: string;
+  readonly riskRated: boolean;
+  readonly riskRating?: RiskRatingData;
 }
 
 /** The stored shape of the risk rating: its word of the vocabulary, read back by `ratingOf`. */
@@ -147,6 +155,23 @@ export const customerEvents: StoredEventTypes<CustomerEvent> = {
     encode: (event): CustomerRiskRatedData => ({ rating: { code: event.rating } }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CustomerRiskRated(aggregateId, occurredAt, ratingOf(data.record('rating').text('code'))),
+  }),
+  [CustomerDueDiligenceRefreshed.eventName]: defineStoredEvent(CustomerDueDiligenceRefreshed, {
+    version: 1,
+    encode: (event): CustomerDueDiligenceRefreshedData => ({
+      possibleMatch: event.possibleMatch,
+      nextDueOn: event.nextDueOn.toISOString(),
+      riskRated: event.riskRating !== undefined,
+      ...(event.riskRating === undefined ? {} : { riskRating: { code: event.riskRating } }),
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CustomerDueDiligenceRefreshed(
+        aggregateId,
+        occurredAt,
+        data.flag('possibleMatch'),
+        data.instant('nextDueOn'),
+        data.flag('riskRated') ? ratingOf(data.record('riskRating').text('code')) : undefined,
+      ),
   }),
 };
 

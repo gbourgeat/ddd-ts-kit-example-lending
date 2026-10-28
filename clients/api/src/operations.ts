@@ -226,6 +226,41 @@ export function submitApplication(
   return send<SubmitApplicationResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadAccountInformationInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type ReadAccountInformationResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'MISSING_ACCOUNT_CONSENT' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read account information: `POST /applications/{id}/account-information`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), MISSING_ACCOUNT_CONSENT (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function readAccountInformation(
+  connection: Connection,
+  input: ReadAccountInformationInput,
+  options: CallOptions = {},
+): Promise<ReadAccountInformationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/account-information',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ReadAccountInformationResult>(connection, operation, { ...input, ...options });
+}
+
 export interface NameCoBorrowerInput {
   readonly path: {
     readonly id: string;
@@ -859,6 +894,43 @@ export function declareDirectorsAndOwners(
   return send<DeclareDirectorsAndOwnersResult>(connection, operation, { ...input, ...options });
 }
 
+export interface GetCustomerDueDiligenceInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type GetCustomerDueDiligenceResult =
+  | Success<200, {
+    customerId: string;
+    refreshedOn?: string;
+    nextDueOn?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Get the date of the last refresh of the due diligence of a customer and the date it falls due again, when the caller may read it: `GET /customers/{id}/due-diligence`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function getCustomerDueDiligence(
+  connection: Connection,
+  input: GetCustomerDueDiligenceInput,
+  options: CallOptions = {},
+): Promise<GetCustomerDueDiligenceResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/customers/{id}/due-diligence',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<GetCustomerDueDiligenceResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ConfirmSanctionsMatchInput {
   readonly path: {
     readonly id: string;
@@ -927,6 +999,44 @@ export function dismissMatch(
   };
 
   return send<DismissMatchResult>(connection, operation, { ...input, ...options });
+}
+
+export interface RefreshDueDiligenceInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    name: string;
+    birthDate: string;
+  };
+}
+
+export type RefreshDueDiligenceResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CUSTOMER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Refresh due diligence: `POST /customers/{id}/refresh`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+ */
+export function refreshDueDiligence(
+  connection: Connection,
+  input: RefreshDueDiligenceInput,
+  options: CallOptions = {},
+): Promise<RefreshDueDiligenceResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/customers/{id}/refresh',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RefreshDueDiligenceResult>(connection, operation, { ...input, ...options });
 }
 
 export interface RateCustomerRiskInput {

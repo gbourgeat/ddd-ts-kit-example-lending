@@ -14,13 +14,24 @@ import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligen
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
 import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
 import { CustomerRiskRated } from '@/contexts/customer-due-diligence/domain/events/customer-risk-rated.event';
-import type { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
+import { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
+import { CustomerDueDiligenceRefreshed } from '@/contexts/customer-due-diligence/domain/events/customer-due-diligence-refreshed.event';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
 
 /** A proof of address is accepted for this many months after its date. */
 const PROOF_OF_ADDRESS_MAX_AGE_IN_MONTHS = 3;
+
+/** How many years a due diligence stays current, by the risk rating of the customer. */
+const REFRESH_CADENCE_IN_YEARS: Record<RiskRating, number> = {
+  [RiskRating.High]: 1,
+  [RiskRating.Medium]: 3,
+  [RiskRating.Low]: 5,
+};
+
+/** A customer never rated is refreshed yearly. */
+const NEVER_RATED_REFRESH_CADENCE_IN_YEARS = 1;
 
 export type CustomerEvent =
   | CustomerIdentified
@@ -31,7 +42,8 @@ export type CustomerEvent =
   | CustomerSanctionsMatchConfirmed
   | CustomerRelationshipEnded
   | CustomerPossibleMatchDismissed
-  | CustomerRiskRated;
+  | CustomerRiskRated
+  | CustomerDueDiligenceRefreshed;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -57,6 +69,8 @@ export interface CustomerState {
   readonly sanctionsMatchConfirmedAt?: Date;
   readonly relationshipEndedAt?: Date;
   readonly riskRating?: RiskRating;
+  readonly dueDiligenceRefreshedAt?: Date;
+  readonly dueDiligenceDueOn?: Date;
 }
 
 export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState> {
@@ -164,6 +178,25 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerRiskRated(this.id, now, rating));
   }
 
+  /** Refreshes the due diligence: the screening outcome is recorded, a possible match goes to review, the risk rating is restated only when the customer has one. */
+  refreshDueDiligence(possibleMatch: boolean, now: Date): void {
+    const riskRating = this.state.riskRating;
+
+    this.record(
+      new CustomerDueDiligenceRefreshed(
+        this.id,
+        now,
+        possibleMatch,
+        Customer.dueDiligenceDueOn(now, riskRating),
+        riskRating,
+      ),
+    );
+
+    if (possibleMatch) {
+      this.recordPossibleMatch(now);
+    }
+  }
+
   toState(): CustomerState {
     return { ...this.state };
   }
@@ -179,7 +212,20 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerRelationshipEnded.eventName]: (event) => this.applyRelationshipEnded(event),
       [CustomerPossibleMatchDismissed.eventName]: (event) => this.applyPossibleMatchDismissed(event),
       [CustomerRiskRated.eventName]: (event) => this.applyRiskRated(event),
+      [CustomerDueDiligenceRefreshed.eventName]: (event) => this.applyDueDiligenceRefreshed(event),
     };
+  }
+
+  /** The day the due diligence falls due again: the cadence of the risk rating of the customer, yearly while it is never rated. */
+  private static dueDiligenceDueOn(now: Date, riskRating: RiskRating | undefined): Date {
+    const years =
+      riskRating === undefined ? NEVER_RATED_REFRESH_CADENCE_IN_YEARS : REFRESH_CADENCE_IN_YEARS[riskRating];
+
+    const dueOn = new Date(now.getTime());
+
+    dueOn.setUTCFullYear(dueOn.getUTCFullYear() + years);
+
+    return dueOn;
   }
 
   private static checkIdentity(id: string, identity: PersonIdentity, now: Date): void {
@@ -254,5 +300,14 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
 
   private applyRiskRated(event: CustomerRiskRated): void {
     this.state = { ...this.state, riskRating: event.rating };
+  }
+
+  private applyDueDiligenceRefreshed(event: CustomerDueDiligenceRefreshed): void {
+    this.state = {
+      ...this.state,
+      dueDiligenceRefreshedAt: event.occurredAt,
+      dueDiligenceDueOn: event.nextDueOn,
+      ...(event.riskRating === undefined ? {} : { riskRating: event.riskRating }),
+    };
   }
 }
