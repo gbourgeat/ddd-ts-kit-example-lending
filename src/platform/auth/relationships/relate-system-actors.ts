@@ -53,6 +53,11 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'keeper',
     subject: 'system:system:credit-application.keep-legal-maximum-rate',
   },
+  {
+    object: 'context:customer-due-diligence',
+    relation: 'operator',
+    subject: 'system:system:customer-due-diligence.erase-personal-data-past-retention',
+  },
   // /ddd-ts-kit:system-grants
 ];
 

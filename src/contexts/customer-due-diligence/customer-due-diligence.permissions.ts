@@ -17,5 +17,6 @@ export const customerDueDiligencePermissions = definePermissions('customer-due-d
   'due-diligence.read': { description: 'Get customer due diligence' },
   'customer.approve-high-risk': { description: 'Approve high risk customer' },
   'due-diligence.flag-overdue': { description: 'Flag overdue due diligence' },
+  'customer.erase-past-retention': { description: 'Erase personal data past retention' },
   // /ddd-ts-kit:permissions
 });

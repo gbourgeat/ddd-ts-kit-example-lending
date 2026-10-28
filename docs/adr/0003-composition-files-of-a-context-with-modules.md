@@ -24,7 +24,7 @@ Raise the limit (refused by the owner); a file at the root of the context (refus
 
 ## Scope
 
-Only the context credit-application and the files named `register-*-reactions.module.ts` in `src/contexts/credit-application/composition/`; the integration handlers' consumers are not moved.
+The contexts credit-application and customer-due-diligence (its module reached the limit with the nightly erasure job) and the files named `register-*.module.ts` in their `composition/` directory; the integration handlers' consumers are not moved.
 
 ## Removal condition
 

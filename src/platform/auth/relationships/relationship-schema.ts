@@ -30,20 +30,14 @@ const elements: SchemaDefinition = {
     },
   },
   customer: {
-    relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'], context: ['context'] },
+    relations: { self: ['user'], portfolio: ['portfolio'], conflicted: ['user'] },
     derived: {
       'credit-application:application.submit': 'self',
       'data-protection:data-subject.request-copy': 'self',
       'branch-network:portfolio.search-customers': { anyOf: ['advisor'], butNot: ['conflicted'] },
-      // Compliance reads the risk and the due diligence of every customer as an operator of the context; the advisor of the customer, through the portfolio, reads them unless conflicted.
-      'customer-due-diligence:customer.read-risk': {
-        anyOf: [via('context', 'operator'), 'advisor'],
-        butNot: ['conflicted'],
-      },
-      'customer-due-diligence:due-diligence.read': {
-        anyOf: [via('context', 'operator'), 'advisor'],
-        butNot: ['conflicted'],
-      },
+      // The advisor of a customer, through the portfolio, views its risk and its due diligence unless conflicted; compliance reads them all as an operator of the context, on the permissions `customer.read-risk` and `due-diligence.read`.
+      'customer-due-diligence:customer.view-risk': { anyOf: ['advisor'], butNot: ['conflicted'] },
+      'customer-due-diligence:due-diligence.view': { anyOf: ['advisor'], butNot: ['conflicted'] },
       advisor: via('portfolio', 'advisor'),
     },
   },

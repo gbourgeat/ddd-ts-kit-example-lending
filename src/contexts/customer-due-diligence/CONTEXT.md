@@ -56,6 +56,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Calendar | The dates a due diligence falls due and is overdue, by the risk rating of the customer |  |
 | All | every customer the bank knows, at once, rather than one named customer |  |
 | Validity | whether the identity facts the bank checked still hold on the day: the document valid, the proof of address recent |  |
+| Erase personal data past retention | Destroy the key of the personal values of every customer whose relationship ended five years ago, so that the file can no longer be read | Delete a customer |
 
 ## Aggregates
 
@@ -94,6 +95,7 @@ No personal data declared.
 - `customer-due-diligence:due-diligence.read`
 - `customer-due-diligence:customer.approve-high-risk`
 - `customer-due-diligence:due-diligence.flag-overdue`
+- `customer-due-diligence:customer.erase-past-retention`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -101,6 +103,7 @@ No personal data declared.
 <!-- ddd-ts-kit:jobs -->
 | Job | Schedule | Command |
 |---|---|---|
+| `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
 | `FlagOverdueDueDiligenceJob` | `` | `FlagAllOverdueDueDiligence` |
 <!-- /ddd-ts-kit:jobs -->
 
@@ -148,6 +151,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
 | `DismissMatch` | command | `match.dismiss` |
 | `EndRelationship` | command | `relationship.end` |
+| `ErasePersonalDataPastRetention` | command | `customer.erase-past-retention` |
 | `FlagAllOverdueDueDiligence` | command | `due-diligence.flag-overdue` |
 | `FlagOverdueDueDiligence` | command | `due-diligence.flag-overdue` |
 | `GetCustomerDueDiligence` | query | `due-diligence.read` |

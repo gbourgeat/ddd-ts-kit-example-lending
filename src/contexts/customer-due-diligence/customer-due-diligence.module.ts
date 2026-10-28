@@ -52,7 +52,9 @@ import { FlagOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligenc
 import { FlagOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-overdue-due-diligence/flag-overdue-due-diligence.handler';
 import { FlagAllOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.command';
 import { FlagAllOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.handler';
-import { FlagOverdueDueDiligenceJob } from '@/contexts/customer-due-diligence/application/scheduling/flag-overdue-due-diligence.job';
+import { ErasePersonalDataPastRetentionCommand } from '@/contexts/customer-due-diligence/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
+import { ErasePersonalDataPastRetentionHandler } from '@/contexts/customer-due-diligence/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
+import { registerNightlyJobs } from '@/contexts/customer-due-diligence/composition/register-nightly-jobs.module';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -198,6 +200,12 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new FlagAllOverdueDueDiligenceHandler(customerRepository, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
+  platform.commands.register(
+    ErasePersonalDataPastRetentionCommand,
+    new ErasePersonalDataPastRetentionHandler(customerRepository, platform.ids, platform.clock),
+    { context: 'customer-due-diligence' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -262,14 +270,7 @@ function registerReactions(platform: Platform): void {
 /** The jobs of the context, scheduled and in the background. */
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
-  const flagOverdueDueDiligenceJob = new FlagOverdueDueDiligenceJob(platform.commands);
-
-  platform.jobs.register({
-    name: 'customer-due-diligence.flag-overdue-due-diligence',
-    schedule: { cron: '0 1 * * *', timeZone: 'Europe/Paris' },
-    tenancy: 'per-tenant',
-    run: (execution) => flagOverdueDueDiligenceJob.run(execution),
-  });
+  registerNightlyJobs(platform);
   // /ddd-ts-kit:jobs
 }
 
@@ -323,6 +324,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(FlagAllOverdueDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.flag-overdue'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(ErasePersonalDataPastRetentionCommand, customerDueDiligencePermissions['customer.erase-past-retention'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

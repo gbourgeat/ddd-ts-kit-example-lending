@@ -4,21 +4,24 @@ import { InMemoryRelationTupleStore, RelationBasedAuthorizer } from '@ddd-ts-kit
 import type { Actor } from '@ddd-ts-kit/kernel';
 import { relationshipSchema } from '@/platform/auth/relationships/relationship-schema';
 
-const readRisk: Permission = {
-  id: 'customer-due-diligence:customer.read-risk',
+const permissionOf = (name: string): Permission => ({
+  id: `customer-due-diligence:${name}`,
   context: 'customer-due-diligence',
-  name: 'customer.read-risk',
-  description: 'Read the risk rating of a customer',
-};
+  name,
+  description: name,
+});
 
-const readDueDiligence: Permission = {
-  id: 'customer-due-diligence:due-diligence.read',
-  context: 'customer-due-diligence',
-  name: 'due-diligence.read',
-  description: 'Read the due diligence of a customer',
-};
+const compliancePermissions = [
+  'match.dismiss',
+  'customer.rate-risk',
+  'customer.read-risk',
+  'due-diligence.refresh',
+  'due-diligence.read',
+].map(permissionOf);
 
-describe('customer.read-risk and due-diligence.read, derived on customer', () => {
+const advisorPermissions = ['customer.view-risk', 'due-diligence.view'].map(permissionOf);
+
+describe('the risk and the due diligence of a customer', () => {
   let authorizer: RelationBasedAuthorizer;
 
   beforeEach(async () => {
@@ -31,35 +34,34 @@ describe('customer.read-risk and due-diligence.read, derived on customer', () =>
       { object: 'portfolio:p1', relation: 'advisor', subject: 'user:ada' },
       { object: 'portfolio:p1', relation: 'advisor', subject: 'user:conflicted-ada' },
       { object: 'customer:c1', relation: 'portfolio', subject: 'portfolio:p1' },
-      { object: 'customer:c1', relation: 'context', subject: 'context:customer-due-diligence' },
       { object: 'customer:c1', relation: 'conflicted', subject: 'user:conflicted-ada' },
     ]);
   });
 
-  const allowed = async (permission: Permission, actorId: string) =>
-    (await authorizer.check({ actor: actorNamed(actorId), permission, resource: { type: 'customer', id: 'c1' } }))
-      .allowed;
+  const allowed = async (permission: Permission, actorId: string, resource: { type: string; id: string }) =>
+    (await authorizer.check({ actor: actorNamed(actorId), permission, resource })).allowed;
 
-  it.each([readRisk, readDueDiligence])(
-    'lets the compliance officer read through the context: %p',
-    async (permission) => {
-      expect(await allowed(permission, 'carol')).toBe(true);
-    },
-  );
-
-  it.each([readRisk, readDueDiligence])(
-    'lets the advisor of the customer read through the portfolio: %p',
-    async (permission) => {
-      expect(await allowed(permission, 'ada')).toBe(true);
-    },
-  );
-
-  it.each([readRisk, readDueDiligence])('refuses an advisor with a declared conflict: %p', async (permission) => {
-    expect(await allowed(permission, 'conflicted-ada')).toBe(false);
+  it.each(compliancePermissions)('is held by the compliance officer on the context: %p', async (permission) => {
+    expect(await allowed(permission, 'carol', { type: 'context', id: 'customer-due-diligence' })).toBe(true);
   });
 
-  it.each([readRisk, readDueDiligence])('refuses someone with no relation: %p', async (permission) => {
-    expect(await allowed(permission, 'carl')).toBe(false);
+  it.each(compliancePermissions)('is not held by an advisor on the context: %p', async (permission) => {
+    expect(await allowed(permission, 'ada', { type: 'context', id: 'customer-due-diligence' })).toBe(false);
+  });
+
+  it.each(advisorPermissions)(
+    'is viewed by the advisor of the customer through the portfolio: %p',
+    async (permission) => {
+      expect(await allowed(permission, 'ada', { type: 'customer', id: 'c1' })).toBe(true);
+    },
+  );
+
+  it.each(advisorPermissions)('is refused to an advisor with a declared conflict: %p', async (permission) => {
+    expect(await allowed(permission, 'conflicted-ada', { type: 'customer', id: 'c1' })).toBe(false);
+  });
+
+  it.each(advisorPermissions)('is refused to someone with no relation: %p', async (permission) => {
+    expect(await allowed(permission, 'carl', { type: 'customer', id: 'c1' })).toBe(false);
   });
 });
 

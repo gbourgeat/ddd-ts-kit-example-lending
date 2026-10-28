@@ -33,13 +33,6 @@ import { ReadDeclaredConflictsHandler } from '@/contexts/credit-application/deci
 import { ReadDeclaredConflictsQuery } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.query';
 import { AttachDocumentCommand } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.command';
 import { AttachDocumentHandler } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.handler';
-import { ReadAccountInformationCommand } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.command';
-import { ReadAccountInformationHandler } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.handler';
-import { SimulatedAccountInformationProvider } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-account-information-provider.adapter';
-import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
-import { ConsultRepaymentIncidentRegisterHandler } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.handler';
-import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-customer-identity.gateway';
-import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 import { ReadDocumentHandler } from '@/contexts/credit-application/file/application/queries/read-document/read-document.handler';
 import { ReadDocumentQuery } from '@/contexts/credit-application/file/application/queries/read-document/read-document.query';
 import { registerDecisionReactions } from '@/contexts/credit-application/composition/register-decision-reactions.module';
@@ -55,6 +48,12 @@ import { KeepDeciderLevelIntegrationHandler } from '@/contexts/credit-applicatio
 import { KeepDelegationTableIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-delegation-table.integration-handler';
 import { KeepLegalMaximumRateIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-legal-maximum-rate.integration-handler';
 import { KeepRateGridIntegrationHandler } from '@/contexts/credit-application/offer/application/integration/handlers/keep-rate-grid.integration-handler';
+import { registerAssessmentHandlers } from '@/contexts/credit-application/composition/register-assessment-handlers.module';
+import { ReadAccountInformationCommand } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.command';
+import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
+import { SimulatedAccountInformationProvider } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-account-information-provider.adapter';
+import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-customer-identity.gateway';
+import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -167,39 +166,24 @@ function registerHandlers(
     },
   );
 
-  platform.commands.register(
-    ReadAccountInformationCommand,
-    new ReadAccountInformationHandler(
-      creditApplicationRepository,
-      platform.adapter(new SimulatedAccountInformationProvider(), {
-        kind: 'external',
-        context: 'credit-application',
-        token: 'AccountInformationProvider',
-      }),
-      platform.files.storage,
-      platform.clock,
-    ),
-    { context: 'credit-application' },
-  );
-
-  platform.commands.register(
-    ConsultRepaymentIncidentRegisterCommand,
-    new ConsultRepaymentIncidentRegisterHandler(
-      creditApplicationRepository,
-      platform.adapter(new InProcessCustomerIdentityGateway(platform.customerIdentity), {
-        kind: 'gateway',
-        context: 'credit-application',
-        token: 'CustomerIdentityGateway',
-      }),
-      platform.adapter(new SimulatedRepaymentIncidentRegister(), {
-        kind: 'external',
-        context: 'credit-application',
-        token: 'RepaymentIncidentRegister',
-      }),
-      platform.clock,
-    ),
-    { context: 'credit-application' },
-  );
+  registerAssessmentHandlers(platform, {
+    repository: creditApplicationRepository,
+    accounts: platform.adapter(new SimulatedAccountInformationProvider(), {
+      kind: 'external',
+      context: 'credit-application',
+      token: 'AccountInformationProvider',
+    }),
+    identities: platform.adapter(new InProcessCustomerIdentityGateway(platform.customerIdentity), {
+      kind: 'gateway',
+      context: 'credit-application',
+      token: 'CustomerIdentityGateway',
+    }),
+    register: platform.adapter(new SimulatedRepaymentIncidentRegister(), {
+      kind: 'external',
+      context: 'credit-application',
+      token: 'RepaymentIncidentRegister',
+    }),
+  });
 
   platform.queries.register(
     ReadDocumentQuery,
