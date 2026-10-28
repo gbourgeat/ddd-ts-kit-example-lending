@@ -269,7 +269,7 @@ async function start({ database, config, credentials, register }: Wiring): Promi
   return {
     client: createHttpClient('http://127.0.0.1:' + server.port),
     relate: (tuple) => application.platform.relations.write([tuple]),
-    runJob: (name) => application.platform.jobs.runNow(name),
+    runJob: (name) => runJobReachingATenant(application, name),
     relateSystemActors: () => relateSystemActors(application.platform.relations),
     close: () => stop({ server, relay, application, redis, database }),
   };
@@ -326,4 +326,17 @@ async function stop(running: {
 
 function eventsOf(config: AppConfig): EventProvider {
   return config.kafkaBrokers === noBroker ? inProcessEvents() : createEventProvider(config);
+}
+
+/** Runs a per-tenant job now; a run that failed or reached no tenant (no organisation open) fails the spec. */
+async function runJobReachingATenant(
+  application: ReturnType<typeof composeApplication>,
+  name: string,
+): Promise<unknown> {
+  const run = await application.platform.jobs.runNow(name);
+
+  expect(run.outcome).toBe('succeeded');
+  expect(run.tenants).toBeGreaterThanOrEqual(1);
+
+  return run;
 }
