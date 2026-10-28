@@ -6,17 +6,21 @@ describe('SimulatedPaymentProvider', () => {
     expect(new SimulatedPaymentProvider()).toBeInstanceOf(SimulatedPaymentProvider);
   });
 
-  it('accepts a direct debit on a mandate it holds', async () => {
+  it('accepts a direct debit of a positive amount on a loan mandate', async () => {
     const provider = new SimulatedPaymentProvider();
 
-    provider.record('MANDATE-1');
-
-    await expect(provider.collectDirectDebit('MANDATE-1', 45000)).resolves.toEqual({ accepted: true });
+    await expect(provider.collectDirectDebit('loan-1', 45000)).resolves.toEqual({ accepted: true });
   });
 
-  it('rejects a direct debit on a mandate it does not hold', async () => {
+  it('rejects a direct debit on a mandate the payer bank refuses', async () => {
     const provider = new SimulatedPaymentProvider();
 
-    await expect(provider.collectDirectDebit('MANDATE-404', 45000)).resolves.toEqual({ accepted: false });
+    await expect(provider.collectDirectDebit('refused-loan-1', 45000)).resolves.toEqual({ accepted: false });
+  });
+
+  it('rejects a direct debit of no amount', async () => {
+    const provider = new SimulatedPaymentProvider();
+
+    await expect(provider.collectDirectDebit('loan-1', 0)).resolves.toEqual({ accepted: false });
   });
 });

@@ -13,6 +13,8 @@ import { LoanScheduled } from '@/contexts/servicing/ledger/domain/events/loan-sc
 import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
 import { Money } from '@/shared-kernel/money.vo';
 import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
+import { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
+import { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 import { LoanEarlyRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-early-repayment-recorded.event';
 import { LoanWrittenOff } from '@/contexts/servicing/ledger/domain/events/loan-written-off.event';
 import { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/loan-write-off-reversed.event';
@@ -70,6 +72,17 @@ interface LoanPaidOutData {
 }
 
 type LoanClosedData = Record<string, never>;
+
+/** An instalment whose direct debit was accepted: its number in the schedule and the money collected, in whole cents. */
+interface LoanPaymentReceivedData {
+  readonly number: number;
+  readonly amountCents: number;
+}
+
+/** An instalment whose direct debit was rejected: its number in the schedule. */
+interface LoanInstalmentMarkedUnpaidData {
+  readonly number: number;
+}
 
 /** How the events of Loan are kept in its stream: one entry per event, read back by `decode`. */
 export const loanEvents: StoredEventTypes<LoanEvent> = {
@@ -179,6 +192,23 @@ export const loanEvents: StoredEventTypes<LoanEvent> = {
         Money.ofCents(data.number('capitalCents')),
         Money.ofCents(data.number('interestCents')),
       ),
+  }),
+  [LoanPaymentReceived.eventName]: defineStoredEvent(LoanPaymentReceived, {
+    version: 1,
+    encode: (event): LoanPaymentReceivedData => ({ number: event.number, amountCents: event.amount.cents }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanPaymentReceived(
+        aggregateId,
+        occurredAt,
+        data.number('number'),
+        Money.ofCents(data.number('amountCents')),
+      ),
+  }),
+  [LoanInstalmentMarkedUnpaid.eventName]: defineStoredEvent(LoanInstalmentMarkedUnpaid, {
+    version: 1,
+    encode: (event): LoanInstalmentMarkedUnpaidData => ({ number: event.number }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanInstalmentMarkedUnpaid(aggregateId, occurredAt, data.number('number')),
   }),
 };
 

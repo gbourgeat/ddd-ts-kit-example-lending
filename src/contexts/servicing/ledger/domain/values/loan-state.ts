@@ -19,4 +19,8 @@ export interface LoanState {
   readonly earlyRepaid: Money;
   /** The outstanding capital written off, while the write-off stands; undefined once reversed or never written off. */
   readonly writtenOff: Money | undefined;
+  /** The numbers of the instalments whose direct debit was accepted: their money is received. */
+  readonly instalmentsPaid: readonly number[];
+  /** The numbers of the instalments whose direct debit was rejected: unpaid, and not retried. */
+  readonly instalmentsUnpaid: readonly number[];
 }

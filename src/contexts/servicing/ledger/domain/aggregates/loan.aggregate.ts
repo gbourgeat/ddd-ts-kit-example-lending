@@ -20,6 +20,8 @@ import { Money } from '@/shared-kernel/money.vo';
 import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
 import { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
 import { SimpleDailyInterestService } from '@/contexts/servicing/ledger/domain/services/simple-daily-interest.service';
+import { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
+import { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
 import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 
@@ -34,6 +36,8 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     instalmentsDue: [],
     earlyRepaid: Money.ofCents(0),
     writtenOff: undefined,
+    instalmentsPaid: [],
+    instalmentsUnpaid: [],
   };
 
   private constructor(id: string) {
@@ -184,7 +188,26 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     return this.state.closedAt !== undefined && this.state.closedAt.getTime() <= instant.getTime();
   }
 
-  // TODO(domain): add one method per remaining business intention (payments): it checks its invariants on `this.state`, then records what it decided, `this.record(new Loan<Fact>(this.id, now, ...))`, after `ddd-ts-kit generate domain-event servicing Loan <Fact>` added the event and its apply method. It never writes the state itself (event-sourcing/state-in-apply).
+  /** Whether the instalment is noted due and not settled yet: the only instalment a direct debit collects. */
+  isCollectable(number: number): boolean {
+    const { instalmentsDue, instalmentsPaid, instalmentsUnpaid } = this.state;
+
+    return instalmentsDue.includes(number) && !instalmentsPaid.includes(number) && !instalmentsUnpaid.includes(number);
+  }
+
+  /** Records the money of a due instalment received by direct debit; an instalment already settled records nothing. */
+  recordPayment(number: number, amount: Money, now: Date): void {
+    if (this.isCollectable(number)) {
+      this.record(new LoanPaymentReceived(this.id, now, number, amount));
+    }
+  }
+
+  /** Marks a due instalment unpaid after its direct debit was rejected: the instalment is not retried. */
+  markUnpaid(number: number, now: Date): void {
+    if (this.isCollectable(number)) {
+      this.record(new LoanInstalmentMarkedUnpaid(this.id, now, number));
+    }
+  }
 
   /** The capital still owed: the principal, less what the noted instalments repaid, the early repayments and the write-off. */
   get outstandingCapital(): Money {
@@ -226,6 +249,14 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     return this.state.instalmentsDue;
   }
 
+  get instalmentsPaid(): readonly number[] {
+    return this.state.instalmentsPaid;
+  }
+
+  get instalmentsUnpaid(): readonly number[] {
+    return this.state.instalmentsUnpaid;
+  }
+
   toState(): LoanState {
     return { ...this.state };
   }
@@ -241,6 +272,8 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
       [LoanWriteOffReversed.eventName]: () => this.applyWriteOffReversed(),
       [LoanRescheduled.eventName]: (event) => this.applyRescheduled(event),
       [LoanWithdrawalRepaymentRecorded.eventName]: (event) => this.applyWithdrawalRepaymentRecorded(event),
+      [LoanPaymentReceived.eventName]: (event) => this.applyPaymentReceived(event),
+      [LoanInstalmentMarkedUnpaid.eventName]: (event) => this.applyInstalmentMarkedUnpaid(event),
     };
   }
 
@@ -300,6 +333,14 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
       },
       rescheduledBy: [...this.state.rescheduledBy, event.decisionId],
     };
+  }
+
+  private applyPaymentReceived(event: LoanPaymentReceived): void {
+    this.state = { ...this.state, instalmentsPaid: [...this.state.instalmentsPaid, event.number] };
+  }
+
+  private applyInstalmentMarkedUnpaid(event: LoanInstalmentMarkedUnpaid): void {
+    this.state = { ...this.state, instalmentsUnpaid: [...this.state.instalmentsUnpaid, event.number] };
   }
 
   /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves here. */

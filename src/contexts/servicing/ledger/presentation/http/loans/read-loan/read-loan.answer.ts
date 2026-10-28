@@ -28,4 +28,12 @@ export class ReadLoanAnswer {
   /** The numbers, counted from one, of the instalments due by the last nightly computation. */
   @IsInt({ each: true })
   instalmentsDue: number[] = [];
+
+  /** The numbers, counted from one, of the instalments paid by direct debit. */
+  @IsInt({ each: true })
+  instalmentsPaid: number[] = [];
+
+  /** The numbers, counted from one, of the instalments whose direct debit was rejected: unpaid. */
+  @IsInt({ each: true })
+  instalmentsUnpaid: number[] = [];
 }

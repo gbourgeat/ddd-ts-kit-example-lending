@@ -28,6 +28,8 @@ export class ReadLoanController {
       durationMonths: loan.durationMonths,
       instalmentsCents: [...loan.instalmentsCents],
       instalmentsDue: [...loan.instalmentsDue],
+      instalmentsPaid: [...loan.instalmentsPaid],
+      instalmentsUnpaid: [...loan.instalmentsUnpaid],
     };
   }
 }

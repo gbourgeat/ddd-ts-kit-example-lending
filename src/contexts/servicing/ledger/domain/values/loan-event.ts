@@ -7,6 +7,8 @@ import type { LoanWrittenOff } from '@/contexts/servicing/ledger/domain/events/l
 import type { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/loan-write-off-reversed.event';
 import type { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
 import type { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
+import type { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
+import type { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 
 export type LoanEvent =
   | LoanPaidOut
@@ -17,4 +19,6 @@ export type LoanEvent =
   | LoanWrittenOff
   | LoanWriteOffReversed
   | LoanRescheduled
-  | LoanWithdrawalRepaymentRecorded;
+  | LoanWithdrawalRepaymentRecorded
+  | LoanPaymentReceived
+  | LoanInstalmentMarkedUnpaid;

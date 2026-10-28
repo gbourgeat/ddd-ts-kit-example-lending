@@ -64,6 +64,10 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Interest | Interest accrued from the payout to a withdrawal, simple and daily: principal times the annual rate, times the whole days elapsed, over 365 days, in whole cents rounded down |  |
 | Months | The months of a schedule, counted in whole calendar months |  |
 | Remaining | Still to run at an instant, not yet passed |  |
+| Received | Money collected from the payer for an instalment, by direct debit accepted by the payment provider |  |
+| Marked | Recorded as the state of an instalment: marked unpaid after a rejected debit |  |
+| Collect | Take the money of an instalment from the payer by direct debit |  |
+| Mandate | The direct debit authority of the payer, held by the payment provider; the simulated provider takes the loan id as its reference |  |
 
 ## Modules
 
@@ -103,6 +107,7 @@ No personal data declared.
 - `servicing:loan.write-off`
 - `servicing:loan.reschedule`
 - `servicing:loan.record-repayment`
+- `servicing:loan.collect`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -156,6 +161,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `CloseLoan` | command | `loan.close` |
+| `CollectInstalment` | command | `loan.collect` |
 | `ComputeDueInstalments` | command | `loan.compute-due` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `ReadLoan` | query | `loan.read` |

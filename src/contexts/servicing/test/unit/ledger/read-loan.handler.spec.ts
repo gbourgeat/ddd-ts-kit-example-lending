@@ -25,6 +25,8 @@ const loan: ReadLoanResult = {
   durationMonths: 12,
   instalmentsCents: [8_560],
   instalmentsDue: [1, 2],
+  instalmentsPaid: [1],
+  instalmentsUnpaid: [2],
 };
 
 describe('Read loan', () => {

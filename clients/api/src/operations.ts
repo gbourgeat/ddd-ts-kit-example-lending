@@ -2366,6 +2366,8 @@ export type ReadLoanResult =
     durationMonths: number;
     instalmentsCents: Array<number>;
     instalmentsDue: Array<number>;
+    instalmentsPaid: Array<number>;
+    instalmentsUnpaid: Array<number>;
   }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>

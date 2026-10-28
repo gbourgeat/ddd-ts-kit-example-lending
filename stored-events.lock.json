@@ -101,9 +101,15 @@
   "servicing.loan.instalment-due-noted": {
     "1": "sha256:93c79aef0844a567"
   },
+  "servicing.loan.instalment-marked-unpaid": {
+    "1": "sha256:c2889d0182fe0df1"
+  },
   "servicing.loan.paid-out": {
     "1": "sha256:733dac3b56fba725",
     "2": "sha256:a1d9654655ebb58f"
+  },
+  "servicing.loan.payment-received": {
+    "1": "sha256:4f15b4764949ab3f"
   },
   "servicing.loan.rescheduled": {
     "1": "sha256:4914db0ac40c6f51"

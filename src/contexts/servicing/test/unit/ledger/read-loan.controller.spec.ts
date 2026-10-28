@@ -20,6 +20,8 @@ describe('GET /loans/:id', () => {
         durationMonths: 12,
         instalmentsCents: [8_560],
         instalmentsDue: [1],
+        instalmentsPaid: [1],
+        instalmentsUnpaid: [],
       }),
     });
 

@@ -43,6 +43,11 @@ import { RescheduleLoanHandler } from '@/contexts/servicing/ledger/application/c
 import { RepayWithdrawnLoanIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/repay-withdrawn-loan.integration-handler';
 import { RecordWithdrawalRepaymentCommand } from '@/contexts/servicing/ledger/application/commands/record-withdrawal-repayment/record-withdrawal-repayment.command';
 import { RecordWithdrawalRepaymentHandler } from '@/contexts/servicing/ledger/application/commands/record-withdrawal-repayment/record-withdrawal-repayment.handler';
+import { CollectInstalmentCommand } from '@/contexts/servicing/instalments/application/commands/collect-instalment/collect-instalment.command';
+import { CollectInstalmentHandler } from '@/contexts/servicing/instalments/application/commands/collect-instalment/collect-instalment.handler';
+import { CollectDueInstalmentEventHandler } from '@/contexts/servicing/instalments/application/event-handlers/collect-due-instalment.event-handler';
+import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infrastructure/external/simulated-payment-provider.adapter';
+import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -126,6 +131,20 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(RecordWithdrawalRepaymentCommand, new RecordWithdrawalRepaymentHandler(loanRepository), {
     context: 'servicing',
   });
+
+  const paymentProvider = platform.adapter(new SimulatedPaymentProvider(), {
+    kind: 'external',
+    context: 'servicing',
+    token: 'PaymentProvider',
+  });
+
+  platform.commands.register(
+    CollectInstalmentCommand,
+    new CollectInstalmentHandler(loanRepository, paymentProvider, platform.clock),
+    {
+      context: 'servicing',
+    },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -196,6 +215,17 @@ function registerReactions(platform: Platform): void {
       (event) => repayWithdrawnLoanIntegrationHandler.handle(event),
     ),
   ]);
+
+  const collectDueInstalmentEventHandler = platform.adapter(new CollectDueInstalmentEventHandler(platform.commands), {
+    kind: 'domain-event-handler',
+    context: 'servicing',
+  });
+
+  platform.domainEvents.on(LoanInstalmentDueNoted.eventName, async (event) => {
+    if (event instanceof LoanInstalmentDueNoted) {
+      await collectDueInstalmentEventHandler.handle(event);
+    }
+  });
   // /ddd-ts-kit:reactions
 }
 
@@ -254,6 +284,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     requires(RecordWithdrawalRepaymentCommand, servicingPermissions['loan.record-repayment'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(CollectInstalmentCommand, servicingPermissions['loan.collect'], {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     // /ddd-ts-kit:authorization

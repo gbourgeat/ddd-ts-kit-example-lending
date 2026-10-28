@@ -8,4 +8,8 @@ export interface ReadLoanResult {
   readonly instalmentsCents: readonly number[];
   /** The numbers, counted from one, of the instalments the ledger recorded as due. */
   readonly instalmentsDue: readonly number[];
+  /** The numbers, counted from one, of the instalments whose direct debit was accepted: their money is received. */
+  readonly instalmentsPaid: readonly number[];
+  /** The numbers, counted from one, of the instalments whose direct debit was rejected: unpaid, and not retried. */
+  readonly instalmentsUnpaid: readonly number[];
 }
