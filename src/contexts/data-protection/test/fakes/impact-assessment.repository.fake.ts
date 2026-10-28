@@ -14,6 +14,4 @@ export class FakeImpactAssessmentRepository
       }),
     );
   }
-
-  // TODO(domain): implement each lookup of ImpactAssessmentRepository over `this.all()`, so that handlers are tested against a working repository.
 }

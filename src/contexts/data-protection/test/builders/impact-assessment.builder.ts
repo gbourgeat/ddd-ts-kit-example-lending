@@ -4,7 +4,8 @@ import { ImpactAssessment } from '@/contexts/data-protection/domain/aggregates/i
 interface ImpactAssessmentIngredients {
   readonly id: string;
   readonly bornAt: Date;
-  // TODO(domain): add one ingredient per fact a test may need to choose (a customer, lines, a status reached), each with a valid default below; for the ones no rule depends on, draw the default with `generated((faker) => ...)` of @ddd-ts-kit/testing/faker.
+  readonly scoringModelVersion: string;
+  readonly month: string;
 }
 
 export class ImpactAssessmentBuilder extends Builder<ImpactAssessmentIngredients, ImpactAssessment> {
@@ -16,14 +17,32 @@ export class ImpactAssessmentBuilder extends Builder<ImpactAssessmentIngredients
     return this.with('bornAt', instant);
   }
 
-  // TODO(domain): add one method per state a test needs, named in the ubiquitous language and never after a field, for example `issued(): this { return this.with('issued', true); }`, and replay it in `construct` through the public API of ImpactAssessment.
+  /** The scoring model version the assessment is about. */
+  forVersion(scoringModelVersion: string): this {
+    return this.with('scoringModelVersion', scoringModelVersion);
+  }
+
+  /** The month the assessment is for, written YYYY-MM. */
+  forMonth(month: string): this {
+    return this.with('month', month);
+  }
 
   protected defaults(): Defaults<ImpactAssessmentIngredients> {
-    return { id: sequence('impact-assessment'), bornAt: new Date('2026-01-01T00:00:00.000Z') };
+    return {
+      id: sequence('impact-assessment'),
+      bornAt: new Date('2026-01-01T00:00:00.000Z'),
+      scoringModelVersion: '2026.1',
+      month: '2026-01',
+    };
   }
 
   protected construct(ingredients: ImpactAssessmentIngredients): ImpactAssessment {
-    return ImpactAssessment.create(ingredients.id, ingredients.bornAt);
+    return ImpactAssessment.create(
+      ingredients.id,
+      ingredients.scoringModelVersion,
+      ingredients.month,
+      ingredients.bornAt,
+    );
   }
 }
 

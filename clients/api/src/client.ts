@@ -245,6 +245,12 @@ export interface Client {
    */
   flagAllOverdueDueDiligence(input: operations.FlagAllOverdueDueDiligenceInput, options?: CallOptions): Promise<operations.FlagAllOverdueDueDiligenceResult>;
   /**
+   * Record scoring impact assessment: `POST /impact-assessments`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IMPACT_ASSESSMENT_ALREADY_RECORDED (422), INVALID_SCORING_MODEL_VERSION (422), INVALID_YEAR_MONTH (422), VALIDATION_FAILED (422).
+   */
+  recordScoringImpactAssessment(input: operations.RecordScoringImpactAssessmentInput, options?: CallOptions): Promise<operations.RecordScoringImpactAssessmentResult>;
+  /**
    * Accept an invitation: `POST /invitations/acceptance`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), ALREADY_MEMBER (422), INVITATION_ADDRESSED_TO_ANOTHER (422), INVITATION_EXPIRED (422), INVITATION_NOT_FOUND (422), INVITATION_NOT_PENDING (422), VALIDATION_FAILED (422).
@@ -402,6 +408,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
     flagAllOverdueDueDiligence: (input, call) => operations.flagAllOverdueDueDiligence(connection, input, call),
+    recordScoringImpactAssessment: (input, call) => operations.recordScoringImpactAssessment(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),

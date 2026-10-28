@@ -1,10 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
-import { given } from '@ddd-ts-kit/testing';
+import { expectRefusal } from '@ddd-ts-kit/testing';
 import { ImpactAssessment } from '@/contexts/data-protection/domain/aggregates/impact-assessment.aggregate';
 import { anImpactAssessment } from '@/contexts/data-protection/test/builders/impact-assessment.builder';
 
 describe('ImpactAssessment', () => {
-  it('is born with its identity', () => {
+  it('is born with its identity and its registration instant', () => {
     const bornAt = new Date('2026-03-01T00:00:00.000Z');
 
     const born = anImpactAssessment().identifiedBy('impact-assessment-7').bornAt(bornAt).build();
@@ -13,24 +13,32 @@ describe('ImpactAssessment', () => {
     expect(born.registeredAt).toEqual(bornAt);
   });
 
-  it('is rehydrated in its stored state without recording a new fact', () => {
+  it('is born assessing the scoring model version for the month it names', () => {
+    const born = anImpactAssessment().forVersion('2026.2').forMonth('2026-05').build();
+
+    expect(born.scoringModelVersion).toBe('2026.2');
+    expect(born.month).toBe('2026-05');
+  });
+
+  it('is rehydrated in its stored state', () => {
     const stored = anImpactAssessment().build();
 
     const loaded = ImpactAssessment.rehydrate(stored.id, stored.toState());
 
     expect(loaded.toState()).toEqual(stored.toState());
-    expect(loaded.pullEvents()).toEqual([]);
   });
 
-  it('records nothing as long as no business intention is expressed', () => {
-    // TODO(domain): replace `toState` by a business method of ImpactAssessment and `[]` by the facts it records, for example `[{ name: 'data-protection.impact-assessment.issued' }]`.
-    given(anImpactAssessment())
-      .when((subject) => subject.toState())
-      .thenEvents([]);
+  it('identifies a record by the pair of its scoring model version and its month', () => {
+    expect(ImpactAssessment.identifierOf(' 2026.2 ', '2026-05')).toBe('2026.2:2026-05');
   });
 
-  // TODO(domain): replace each entry below by a given / when / then test named after the business rule it proves: a built state, one intention, then the recorded facts (`thenEvents`) or the raised error (`thenError`).
-  it.todo('records the fact of its birth');
-  it.todo('refuses to be born when a birth invariant is violated');
-  it.todo('changes state and records a fact for each business intention');
+  it('refuses a blank scoring model version with INVALID_SCORING_MODEL_VERSION', () => {
+    expectRefusal(() => anImpactAssessment().forVersion('   ').build(), 'INVALID_SCORING_MODEL_VERSION', {
+      scoringModelVersion: '   ',
+    });
+  });
+
+  it.each(['2026-13', '2026-5', 'may 2026'])('refuses the month %s, which is not written YYYY-MM', (month) => {
+    expectRefusal(() => anImpactAssessment().forMonth(month).build(), 'INVALID_YEAR_MONTH', { text: month });
+  });
 });

@@ -1449,6 +1449,41 @@ export function flagAllOverdueDueDiligence(
   return send<FlagAllOverdueDueDiligenceResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RecordScoringImpactAssessmentInput {
+  readonly body: {
+    scoringModelVersion: string;
+    month: string;
+  };
+}
+
+export type RecordScoringImpactAssessmentResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'IMPACT_ASSESSMENT_ALREADY_RECORDED' | 'INVALID_SCORING_MODEL_VERSION' | 'INVALID_YEAR_MONTH' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Record scoring impact assessment: `POST /impact-assessments`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IMPACT_ASSESSMENT_ALREADY_RECORDED (422), INVALID_SCORING_MODEL_VERSION (422), INVALID_YEAR_MONTH (422), VALIDATION_FAILED (422).
+ */
+export function recordScoringImpactAssessment(
+  connection: Connection,
+  input: RecordScoringImpactAssessmentInput,
+  options: CallOptions = {},
+): Promise<RecordScoringImpactAssessmentResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/impact-assessments',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RecordScoringImpactAssessmentResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AcceptInvitationInput {
   readonly body: Schemas.InvitationToken;
 }

@@ -6,8 +6,11 @@ export type ImpactAssessmentColumns = Omit<ImpactAssessmentRow, 'version' | keyo
 
 export const ImpactAssessmentMapper = {
   toDomain(row: ImpactAssessmentRow): ImpactAssessment {
-    // TODO(domain): rebuild each value object of ImpactAssessmentState from its fields.
-    const loaded = ImpactAssessment.rehydrate(row.id, { registeredAt: row.registeredAt });
+    const loaded = ImpactAssessment.rehydrate(row.id, {
+      registeredAt: row.registeredAt,
+      scoringModelVersion: row.scoringModelVersion,
+      month: row.month,
+    });
 
     loaded.version = row.version;
 
@@ -15,7 +18,8 @@ export const ImpactAssessmentMapper = {
   },
 
   toRow(saved: ImpactAssessment): ImpactAssessmentColumns {
-    // TODO(domain): flatten each value object of ImpactAssessmentState into its fields; nothing of the row type leaves this file.
-    return { id: saved.id, ...saved.toState() };
+    const { registeredAt, scoringModelVersion, month } = saved.toState();
+
+    return { id: saved.id, registeredAt, scoringModelVersion, month };
   },
 };
