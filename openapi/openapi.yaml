@@ -1525,6 +1525,84 @@ paths:
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
+  /applications/{id}/offer-draft:
+    post:
+      operationId: draftOffer
+      summary: Draft offer
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: APPLICATION_NOT_APPROVED, NO_RATE_FOR_OFFER, OFFER_ABOVE_LEGAL_MAXIMUM, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_LEGAL_MAXIMUM_RATE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - APPLICATION_NOT_APPROVED
+            - NO_RATE_FOR_OFFER
+            - OFFER_ABOVE_LEGAL_MAXIMUM
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_LEGAL_MAXIMUM_RATE
+            - VALIDATION_FAILED
   /applications/{id}/product-terms-findings:
     get:
       operationId: readProductTermsFindings
@@ -4287,6 +4365,95 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - UNKNOWN_LEGAL_MAXIMUM_RATE
+            - VALIDATION_FAILED
+  /offers/{id}/pre-contractual-sheet:
+    get:
+      operationId: readPreContractualSheet
+      summary: Read pre contractual sheet
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  offerId:
+                    type: string
+                  applicationId:
+                    type: string
+                  amountCents:
+                    type: integer
+                  durationMonths:
+                    type: integer
+                  rateBasisPoints:
+                    type: integer
+                  annualPercentageRate:
+                    type: string
+                  instalmentCents:
+                    type: integer
+                  arrangementFeeCents:
+                    type: integer
+                  totalToRepayCents:
+                    type: integer
+                type: object
+                required:
+                  - offerId
+                  - applicationId
+                  - amountCents
+                  - durationMonths
+                  - rateBasisPoints
+                  - annualPercentageRate
+                  - instalmentCents
+                  - arrangementFeeCents
+                  - totalToRepayCents
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_OFFER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_OFFER
             - VALIDATION_FAILED
   /organisations:
     post:

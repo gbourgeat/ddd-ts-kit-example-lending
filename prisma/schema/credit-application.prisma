@@ -4,7 +4,14 @@
 model CreditApplicationOffer {
   id           String   @id
   registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
-  // TODO(domain): add one field per field of OfferState, with the type and the constraints the storage must enforce; then run `npm run db:client` and `npm run db:generate <what-it-does>`.
+  applicationId              String @map("application_id")
+  amountCents                Int    @map("amount_cents")
+  durationMonths             Int    @map("duration_months")
+  rateBasisPoints            Int    @map("rate_basis_points")
+  annualPercentageRateTenths Int    @map("annual_percentage_rate_tenths")
+  instalmentCents            Int    @map("instalment_cents")
+  arrangementFeeCents        Int    @map("arrangement_fee_cents")
+  legalMaximumBasisPoints    Int    @map("legal_maximum_basis_points")
   version      Int
   tenantId     String   @map("tenant_id")
   createdAt    DateTime @map("created_at") @db.Timestamptz(3)

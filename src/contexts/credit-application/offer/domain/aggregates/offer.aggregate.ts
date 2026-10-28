@@ -1,8 +1,12 @@
 import { AggregateRoot } from '@ddd-ts-kit/kernel';
+import { OfferDrafted, type OfferedTerms } from '@/contexts/credit-application/offer/domain/events/offer-drafted.event';
+import { OfferAboveLegalMaximum } from '@/contexts/credit-application/offer/domain/errors/offer-above-legal-maximum.error';
+
+const BASIS_POINTS_PER_TENTH = 10;
 
 export interface OfferState {
   readonly registeredAt: Date;
-  // TODO(domain): declare the rest of the state of Offer with value objects (a Money, a Period), not primitives.
+  readonly terms: OfferedTerms;
 }
 
 export class Offer extends AggregateRoot<string> {
@@ -13,22 +17,32 @@ export class Offer extends AggregateRoot<string> {
     super(id);
   }
 
-  static create(id: string, now: Date): Offer {
-    // TODO(domain): take the facts known at birth as parameters, check each birth invariant and throw the refusal named after it when one is violated: `throw <Refusal>.for<Fact>(...)`, written with `ddd-ts-kit generate error credit-application <Refusal> <factory>`.
-    const created = new Offer(id, { registeredAt: now });
+  /** Drafts the offer with its price: refused when the annual percentage rate is above the legal maximum rate in force. */
+  static draft(id: string, terms: OfferedTerms, now: Date): Offer {
+    if (terms.annualPercentageRateTenths * BASIS_POINTS_PER_TENTH > terms.legalMaximumBasisPoints) {
+      throw OfferAboveLegalMaximum.forAboveLegalMaximum(
+        terms.annualPercentageRateTenths,
+        terms.legalMaximumBasisPoints,
+      );
+    }
 
-    // TODO(domain): record the birth fact with `created.record(new OfferCreated(id, now))` after `ddd-ts-kit generate domain-event credit-application Offer Created`.
-    return created;
+    const drafted = new Offer(id, { registeredAt: now, terms });
+
+    drafted.record(new OfferDrafted(id, now, terms));
+
+    return drafted;
   }
 
   static rehydrate(id: string, state: OfferState): Offer {
     return new Offer(id, state);
   }
 
-  // TODO(domain): add one method per business intention (issue, cancel, ...): each guards its invariants, replaces `this.state` and records the event of what happened.
-
   get registeredAt(): Date {
     return this.state.registeredAt;
+  }
+
+  get terms(): OfferedTerms {
+    return this.state.terms;
   }
 
   toState(): OfferState {

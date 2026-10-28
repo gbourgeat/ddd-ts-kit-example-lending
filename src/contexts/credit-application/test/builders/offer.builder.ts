@@ -4,7 +4,8 @@ import { Offer } from '@/contexts/credit-application/offer/domain/aggregates/off
 interface OfferIngredients {
   readonly id: string;
   readonly bornAt: Date;
-  // TODO(domain): add one ingredient per fact a test may need to choose (a customer, lines, a status reached), each with a valid default below; for the ones no rule depends on, draw the default with `generated((faker) => ...)` of @ddd-ts-kit/testing/faker.
+  readonly annualPercentageRateTenths: number;
+  readonly legalMaximumBasisPoints: number;
 }
 
 export class OfferBuilder extends Builder<OfferIngredients, Offer> {
@@ -16,14 +17,40 @@ export class OfferBuilder extends Builder<OfferIngredients, Offer> {
     return this.with('bornAt', instant);
   }
 
-  // TODO(domain): add one method per state a test needs, named in the ubiquitous language and never after a field, for example `issued(): this { return this.with('issued', true); }`, and replay it in `construct` through the public API of Offer.
+  /** Priced at an annual percentage rate, in tenths of a per cent. */
+  atAnnualPercentageRate(tenths: number): this {
+    return this.with('annualPercentageRateTenths', tenths);
+  }
+
+  /** Under the legal maximum rate in force, in basis points of a year. */
+  underMaximum(basisPoints: number): this {
+    return this.with('legalMaximumBasisPoints', basisPoints);
+  }
 
   protected defaults(): Defaults<OfferIngredients> {
-    return { id: sequence('offer'), bornAt: new Date('2026-01-01T00:00:00.000Z') };
+    return {
+      id: sequence('offer'),
+      bornAt: new Date('2026-01-01T00:00:00.000Z'),
+      annualPercentageRateTenths: 61,
+      legalMaximumBasisPoints: 1_250,
+    };
   }
 
   protected construct(ingredients: OfferIngredients): Offer {
-    return Offer.create(ingredients.id, ingredients.bornAt);
+    return Offer.draft(
+      ingredients.id,
+      {
+        applicationId: 'application-1',
+        amountCents: 1_000_000,
+        durationMonths: 60,
+        rateBasisPoints: 590,
+        annualPercentageRateTenths: ingredients.annualPercentageRateTenths,
+        instalmentCents: 19_286,
+        arrangementFeeCents: 0,
+        legalMaximumBasisPoints: ingredients.legalMaximumBasisPoints,
+      },
+      ingredients.bornAt,
+    );
   }
 }
 

@@ -32,6 +32,10 @@ export const CreditApplicationCodes = {
   DecisionAboveLimit: 'DECISION_ABOVE_LIMIT',
   ConflictedDecider: 'CONFLICTED_DECIDER',
   BrokerRegistrationLapsed: 'BROKER_REGISTRATION_LAPSED',
+  OfferAboveLegalMaximum: 'OFFER_ABOVE_LEGAL_MAXIMUM',
+  ApplicationNotApproved: 'APPLICATION_NOT_APPROVED',
+  NoRateForOffer: 'NO_RATE_FOR_OFFER',
+  UnknownOffer: 'UNKNOWN_OFFER',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

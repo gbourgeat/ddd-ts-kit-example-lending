@@ -683,6 +683,41 @@ export function nameGuarantor(
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
 }
 
+export interface DraftOfferInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type DraftOfferResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'APPLICATION_NOT_APPROVED' | 'NO_RATE_FOR_OFFER' | 'OFFER_ABOVE_LEGAL_MAXIMUM' | 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_LEGAL_MAXIMUM_RATE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Draft offer: `POST /applications/{id}/offer-draft`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), APPLICATION_NOT_APPROVED (422), NO_RATE_FOR_OFFER (422), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+ */
+export function draftOffer(
+  connection: Connection,
+  input: DraftOfferInput,
+  options: CallOptions = {},
+): Promise<DraftOfferResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/offer-draft',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DraftOfferResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadProductTermsFindingsInput {
   readonly path: {
     readonly id: string;
@@ -1960,6 +1995,49 @@ export function readLegalMaximumRate(
   };
 
   return send<ReadLegalMaximumRateResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadPreContractualSheetInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ReadPreContractualSheetResult =
+  | Success<200, {
+    offerId: string;
+    applicationId: string;
+    amountCents: number;
+    durationMonths: number;
+    rateBasisPoints: number;
+    annualPercentageRate: string;
+    instalmentCents: number;
+    arrangementFeeCents: number;
+    totalToRepayCents: number;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_OFFER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read pre contractual sheet: `GET /offers/{id}/pre-contractual-sheet`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+ */
+export function readPreContractualSheet(
+  connection: Connection,
+  input: ReadPreContractualSheetInput,
+  options: CallOptions = {},
+): Promise<ReadPreContractualSheetResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/offers/{id}/pre-contractual-sheet',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadPreContractualSheetResult>(connection, operation, { ...input, ...options });
 }
 
 export interface OpenOrganisationInput {

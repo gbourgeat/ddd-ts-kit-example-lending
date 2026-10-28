@@ -22,7 +22,9 @@ import { SearchApplicationsController } from '@/contexts/credit-application/file
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
 import { ReadBrokerRegistrationController } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.controller';
 import { ReadProductTermsController } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.controller';
+import { DraftOfferController } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.controller';
 import { ReadLegalMaximumRateController } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.controller';
+import { ReadPreContractualSheetController } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.controller';
 import { ReadRateGridController } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.controller';
 import { AssessApplicationParams } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.params';
 import { AssessApplicationAnswer } from '@/contexts/credit-application/assessment/presentation/http/applications/assess-application/assess-application.answer';
@@ -57,8 +59,12 @@ import { ReadBrokerRegistrationParams } from '@/contexts/credit-application/file
 import { ReadBrokerRegistrationAnswer } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.answer';
 import { ReadProductTermsParams } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.params';
 import { ReadProductTermsAnswer } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.answer';
+import { DraftOfferParams } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.params';
+import { DraftOfferBody } from '@/contexts/credit-application/offer/presentation/http/applications/draft-offer/draft-offer.body';
 import { ReadLegalMaximumRateParams } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.params';
 import { ReadLegalMaximumRateAnswer } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.answer';
+import { ReadPreContractualSheetParams } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.params';
+import { ReadPreContractualSheetAnswer } from '@/contexts/credit-application/offer/presentation/http/offers/read-pre-contractual-sheet/read-pre-contractual-sheet.answer';
 import { ReadRateGridParams } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.params';
 import { ReadRateGridAnswer } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.answer';
 
@@ -127,8 +133,14 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(ReadProductTermsController, {
     readProductTerms: { params: ReadProductTermsParams, answer: ReadProductTermsAnswer },
   }),
+  withSignatures(DraftOfferController, {
+    draftOffer: { params: DraftOfferParams, body: DraftOfferBody, answer: acceptedSchema },
+  }),
   withSignatures(ReadLegalMaximumRateController, {
     readLegalMaximumRate: { params: ReadLegalMaximumRateParams, answer: ReadLegalMaximumRateAnswer },
+  }),
+  withSignatures(ReadPreContractualSheetController, {
+    readPreContractualSheet: { params: ReadPreContractualSheetParams, answer: ReadPreContractualSheetAnswer },
   }),
   withSignatures(ReadRateGridController, { readRateGrid: { params: ReadRateGridParams, answer: ReadRateGridAnswer } }),
 ];

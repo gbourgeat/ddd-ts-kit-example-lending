@@ -21,12 +21,22 @@ import { ReadRateGridQuery } from '@/contexts/credit-application/offer/applicati
 import { InProcessCustomerDiligenceGateway } from '@/contexts/credit-application/offer/infrastructure/external/in-process-customer-diligence.gateway';
 import { PrismaLegalMaximumRates } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-legal-maximum-rates.repository';
 import { PrismaRateGrids } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-rate-grids.repository';
+import { PrismaOfferRepository } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-offer.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
+import { DraftOfferCommand } from '@/contexts/credit-application/offer/application/commands/draft-offer/draft-offer.command';
+import { DraftOfferHandler } from '@/contexts/credit-application/offer/application/commands/draft-offer/draft-offer.handler';
+import { ReadPreContractualSheetHandler } from '@/contexts/credit-application/offer/application/queries/read-pre-contractual-sheet/read-pre-contractual-sheet.handler';
+import { ReadPreContractualSheetQuery } from '@/contexts/credit-application/offer/application/queries/read-pre-contractual-sheet/read-pre-contractual-sheet.query';
+import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
+import { PrismaProductTerms } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-product-terms.repository';
+import { PrismaOfferPricing } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-offer-pricing.repository';
 // /ddd-ts-kit:imports
 
 /** What the module offer of the model registers; credit-application.module.ts composes it with the rest of the context. */
 export const offerModule = {
   /** The command and query handlers of the module, with the repositories and readers they are given. */
-  registerHandlers(platform: Platform): void {
+  registerHandlers(platform: Platform, given: { readonly repository: CreditApplicationRepository }): void {
     // ddd-ts-kit:handlers
     platform.adapter(new InProcessCustomerDiligenceGateway(platform.customerDiligence), {
       kind: 'gateway',
@@ -36,6 +46,33 @@ export const offerModule = {
 
     registerRateGridHandlers(platform);
     registerLegalMaximumRateHandlers(platform);
+
+    const offerRepository = platform.adapter(
+      new PrismaOfferRepository(platform.persistence.database, platform.scope, platform.clock),
+      { kind: 'repository', context: 'credit-application', token: 'OfferRepository' },
+    );
+
+    const pricing = platform.adapter(new PrismaOfferPricing(platform.persistence.database, platform.scope), {
+      kind: 'repository',
+      context: 'credit-application',
+      token: 'OfferPricing',
+    });
+
+    platform.commands.register(
+      DraftOfferCommand,
+      new DraftOfferHandler(offerRepository, {
+        applications: given.repository,
+        pricing,
+        productTerms: new PrismaProductTerms(platform.persistence.database, platform.scope),
+        ids: platform.ids,
+        clock: platform.clock,
+      }),
+      { context: 'credit-application' },
+    );
+
+    platform.queries.register(ReadPreContractualSheetQuery, new ReadPreContractualSheetHandler(offerRepository), {
+      context: 'credit-application',
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -57,6 +94,12 @@ export const offerModule = {
     return [
       // ddd-ts-kit:authorization
       ...declareOfferUseCases(),
+      requires(DraftOfferCommand, creditApplicationPermissions['offer.draft'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
+      requires(ReadPreContractualSheetQuery, creditApplicationPermissions['offer.read-sheet'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },

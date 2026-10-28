@@ -107,6 +107,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Limit | the most a level of staff may approve, the amount of its delegation |  |
 | Force | in effect on a day: the table of the latest date of effect not after that day |  |
 | Brought | an application a broker brings on behalf of a customer, recorded with the broker who brought it |  |
+| Draft | the offer in preparation, priced from the approved application and the rate grid, not yet issued |  |
 
 ## Modules
 
@@ -160,6 +161,8 @@ No personal data declared.
 - `credit-application:broker-registration.keep`
 - `credit-application:application.review-refusal`
 - `credit-application:application.bring`
+- `credit-application:offer.draft`
+- `credit-application:offer.read-sheet`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -219,6 +222,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
 | `DecideApplication` | command | not read |
+| `DraftOffer` | command | `offer.draft` |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
 | `KeepBrokerRegistration` | command | not read |
@@ -236,6 +240,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadDelegationTable` | query | not read |
 | `ReadDocument` | query | `application.read` |
 | `ReadLegalMaximumRate` | query | not read |
+| `ReadPreContractualSheet` | query | `offer.read-sheet` |
 | `ReadProductTerms` | query | not read |
 | `ReadProductTermsFindings` | query | not read |
 | `ReadRateGrid` | query | not read |
@@ -259,6 +264,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/offer-draft` | `draftOffer` | `ApplicationsRoutes` | `Authenticated` | `DraftOffer` | `offer.draft` | params: `DraftOfferParams`, body: `DraftOfferBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.ApplicationNotApproved`, `CreditApplicationCodes.NoRateForOffer`, `CreditApplicationCodes.UnknownLegalMaximumRate`, `CreditApplicationCodes.OfferAboveLegalMaximum` |
 | GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/refusal-review` | `reviewProposedRefusal` | `ApplicationsRoutes` | `Authenticated` | `ReviewProposedRefusal` | `application.review-refusal` | params: `ReviewProposedRefusalParams`, body: `ReviewProposedRefusalBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.InvalidReviewReason`, `CreditApplicationCodes.NoRefusalToReview`, `CreditApplicationCodes.RefusalAlreadyReviewed`, `CreditApplicationCodes.ReviewerCannotBeAssessor` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
@@ -267,6 +273,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | not read | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
 | GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | not read | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 | GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
+| GET | `/offers/:id/pre-contractual-sheet` | `readPreContractualSheet` | `OffersRoutes` | `Authenticated` | `ReadPreContractualSheet` | `offer.read-sheet` | params: `ReadPreContractualSheetParams` | 200: `ReadPreContractualSheetAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownOffer` |
 | GET | `/product-terms/:productId` | `readProductTerms` | `ProductTermsRoutes` | `Authenticated` | `ReadProductTerms` | not read | params: `ReadProductTermsParams` | 200: `ReadProductTermsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownProductTerms` |
 | GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | not read | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
 
@@ -324,7 +331,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DelegationTables` | not bound |  |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `LegalMaximumRates` | not bound |  |
-| `OfferRepository` | external | `PrismaOfferRepository` |
+| `OfferPricing` | repository | `PrismaOfferPricing` |
+| `OfferRepository` | repository | `PrismaOfferRepository` |
 | `ProductTerms` | not bound |  |
 | `RateGrids` | not bound |  |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
@@ -373,8 +381,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |
+| `ApplicationNotApproved` | `forApplication` | `APPLICATION_NOT_APPROVED` | `applicationId` |
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
+| `NoRateForOffer` | `forProductAndDuration` | `NO_RATE_FOR_OFFER` | `productId`, `durationMonths` |
+| `OfferAboveLegalMaximum` | `forAboveLegalMaximum` | `OFFER_ABOVE_LEGAL_MAXIMUM` | `annualPercentageRateTenths`, `legalMaximumBasisPoints` |
 | `UnknownLegalMaximumRate` | `forUnknownLegalMaximumRate` | `UNKNOWN_LEGAL_MAXIMUM_RATE` | none |
+| `UnknownOffer` | `forOffer` | `UNKNOWN_OFFER` | `offerId` |
 | `UnknownRateGrid` | `forUnknownRateGrid` | `UNKNOWN_RATE_GRID` | none |
 
 ### Gateways

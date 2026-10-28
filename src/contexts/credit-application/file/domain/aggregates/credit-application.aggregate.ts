@@ -76,7 +76,9 @@ export interface CreditApplicationState {
   /** The reviewer of the last refusal review: with the assessor, the person who prepared the file. */
   readonly refusalReviewerId: string;
   /** The decision taken on the application, undefined until the decider decides it. */
-  readonly decision: { readonly outcome: DecisionOutcome; readonly deciderId: string } | undefined;
+  readonly decision:
+    | { readonly outcome: DecisionOutcome; readonly deciderId: string; readonly approvedAmountCents: number }
+    | undefined;
 }
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
@@ -341,6 +343,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   }
 
   private applyDecided(event: CreditApplicationDecided): void {
-    this.applyEntryAppended({ decision: { outcome: event.outcome, deciderId: event.deciderId } });
+    this.applyEntryAppended({
+      decision: { outcome: event.outcome, deciderId: event.deciderId, approvedAmountCents: event.approvedAmountCents },
+    });
   }
 }

@@ -55,7 +55,7 @@ function registerHandlers(platform: Platform, shared: ReturnType<typeof sharedBi
   // ddd-ts-kit:handlers
   fileModule.registerHandlers(platform, shared);
   assessmentModule.registerHandlers(platform, shared);
-  offerModule.registerHandlers(platform);
+  offerModule.registerHandlers(platform, shared);
   decisionModule.registerHandlers(platform, shared);
   // /ddd-ts-kit:handlers
 }

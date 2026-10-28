@@ -6,8 +6,19 @@ export type OfferColumns = Omit<OfferRow, 'version' | keyof AuditStamp | keyof T
 
 export const OfferMapper = {
   toDomain(row: OfferRow): Offer {
-    // TODO(domain): rebuild each value object of OfferState from its fields.
-    const loaded = Offer.rehydrate(row.id, { registeredAt: row.registeredAt });
+    const loaded = Offer.rehydrate(row.id, {
+      registeredAt: row.registeredAt,
+      terms: {
+        applicationId: row.applicationId,
+        amountCents: row.amountCents,
+        durationMonths: row.durationMonths,
+        rateBasisPoints: row.rateBasisPoints,
+        annualPercentageRateTenths: row.annualPercentageRateTenths,
+        instalmentCents: row.instalmentCents,
+        arrangementFeeCents: row.arrangementFeeCents,
+        legalMaximumBasisPoints: row.legalMaximumBasisPoints,
+      },
+    });
 
     loaded.version = row.version;
 
@@ -15,7 +26,8 @@ export const OfferMapper = {
   },
 
   toRow(saved: Offer): OfferColumns {
-    // TODO(domain): flatten each value object of OfferState into its fields; nothing of the row type leaves this file.
-    return { id: saved.id, ...saved.toState() };
+    const { registeredAt, terms } = saved.toState();
+
+    return { id: saved.id, registeredAt, ...terms };
   },
 };

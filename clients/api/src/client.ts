@@ -125,6 +125,12 @@ export interface Client {
    */
   nameGuarantor(input: operations.NameGuarantorInput, options?: CallOptions): Promise<operations.NameGuarantorResult>;
   /**
+   * Draft offer: `POST /applications/{id}/offer-draft`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), APPLICATION_NOT_APPROVED (422), NO_RATE_FOR_OFFER (422), OFFER_ABOVE_LEGAL_MAXIMUM (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+   */
+  draftOffer(input: operations.DraftOfferInput, options?: CallOptions): Promise<operations.DraftOfferResult>;
+  /**
    * Read what the check of an application against its product found: `GET /applications/{id}/product-terms-findings`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -329,6 +335,12 @@ export interface Client {
    */
   readLegalMaximumRate(input: operations.ReadLegalMaximumRateInput, options?: CallOptions): Promise<operations.ReadLegalMaximumRateResult>;
   /**
+   * Read pre contractual sheet: `GET /offers/{id}/pre-contractual-sheet`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+   */
+  readPreContractualSheet(input: operations.ReadPreContractualSheetInput, options?: CallOptions): Promise<operations.ReadPreContractualSheetResult>;
+  /**
    * Open an organisation: `POST /organisations`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ACCOUNT_DEACTIVATED (422), ACCOUNT_NOT_FOUND (422), INVALID_ORGANISATION_NAME (422), INVALID_ORGANISATION_SLUG (422), ORGANISATION_SLUG_TAKEN (422), VALIDATION_FAILED (422).
@@ -466,6 +478,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     readDocument: (input, call) => operations.readDocument(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
+    draftOffer: (input, call) => operations.draftOffer(connection, input, call),
     readProductTermsFindings: (input, call) => operations.readProductTermsFindings(connection, input, call),
     reviewProposedRefusal: (input, call) => operations.reviewProposedRefusal(connection, input, call),
     consultRepaymentIncidentRegister: (input, call) => operations.consultRepaymentIncidentRegister(connection, input, call),
@@ -500,6 +513,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
     readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
+    readPreContractualSheet: (input, call) => operations.readPreContractualSheet(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
     grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),
     revokeDelegation: (input, call) => operations.revokeDelegation(connection, input, call),
