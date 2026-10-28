@@ -10,7 +10,7 @@ import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/in
 import { CustomerIdentifiedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-identified.publisher';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
-import { requires } from '@ddd-ts-kit/auth';
+import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { customerDueDiligencePermissions } from '@/contexts/customer-due-diligence/customer-due-diligence.permissions';
 import { RegisterBusinessCommand } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.command';
 import { RegisterBusinessHandler } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.handler';
@@ -316,15 +316,13 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(RateCustomerRiskCommand, customerDueDiligencePermissions['customer.rate-risk'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
-    requires(GetCustomerRiskRatingQuery, customerDueDiligencePermissions['customer.read-risk'], {
-      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
-    }),
+    // Public: the handler narrows the ratings to the operators of the context, or to the customers of the actor's portfolios.
+    publicUseCase(GetCustomerRiskRatingQuery),
     requires(RefreshDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.refresh'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
-    requires(GetCustomerDueDiligenceQuery, customerDueDiligencePermissions['due-diligence.read'], {
-      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
-    }),
+    // Public: the handler narrows the due diligences to the operators of the context, or to the customers of the actor's portfolios.
+    publicUseCase(GetCustomerDueDiligenceQuery),
     requires(ApproveHighRiskCustomerCommand, customerDueDiligencePermissions['customer.approve-high-risk'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
