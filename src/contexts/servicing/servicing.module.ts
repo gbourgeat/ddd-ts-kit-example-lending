@@ -10,6 +10,7 @@ import { servicingPermissions } from '@/contexts/servicing/servicing.permissions
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/servicing/ledger/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
 import { ErasePersonalDataPastRetentionHandler } from '@/contexts/servicing/ledger/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
 import { ErasePersonalDataPastRetentionJob } from '@/contexts/servicing/ledger/application/scheduling/erase-personal-data-past-retention.job';
+import { RemotePersonalDataErasure } from '@/contexts/servicing/ledger/infrastructure/external/remote-personal-data-erasure.adapter';
 import { CloseLoanCommand } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.command';
 import { CloseLoanHandler } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.handler';
 // /ddd-ts-kit:imports
@@ -43,9 +44,17 @@ function registerHandlers(platform: Platform): void {
     { kind: 'repository', context: 'servicing', token: 'LoanRepository' },
   );
 
-  platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
+  const personalDataErasure = platform.adapter(new RemotePersonalDataErasure(platform.eventSourcing.subjectKeys), {
+    kind: 'external',
     context: 'servicing',
+    token: 'PersonalDataErasure',
   });
+
+  platform.commands.register(
+    ErasePersonalDataPastRetentionCommand,
+    new ErasePersonalDataPastRetentionHandler(loanRepository, personalDataErasure),
+    { context: 'servicing' },
+  );
 
   platform.commands.register(CloseLoanCommand, new CloseLoanHandler(loanRepository, platform.clock), {
     context: 'servicing',

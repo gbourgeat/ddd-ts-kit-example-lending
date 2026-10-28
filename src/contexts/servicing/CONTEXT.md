@@ -140,12 +140,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BorrowerNotifier` | external | `SimulatedBorrowerNotifier` |
 | `LoanRepository` | repository | `EventStoreLoanRepository` |
 | `PaymentProvider` | external | `SimulatedPaymentProvider` |
+| `PersonalDataErasure` | external | `RemotePersonalDataErasure` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 
 ### Errors
 
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
+| `InvalidBorrower` | `forName` | `INVALID_BORROWER` | none |
 | `InvalidSchedule` | `forInvalidTerms` | `INVALID_SCHEDULE` | none |
 | `LoanAlreadyClosed` | `forLoan` | `LOAN_ALREADY_CLOSED` | none |
 | `UnknownLoan` | `forLoan` | `UNKNOWN_LOAN` | none |

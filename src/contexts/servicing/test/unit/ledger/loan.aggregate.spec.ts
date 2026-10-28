@@ -1,16 +1,18 @@
+import { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
 import { describe, expect, it } from '@jest/globals';
 import { givenEvents } from '@ddd-ts-kit/testing';
 import { Loan } from '@/contexts/servicing/ledger/domain/aggregates/loan.aggregate';
 import { LoanPaidOut } from '@/contexts/servicing/ledger/domain/events/loan-paid-out.event';
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
+const borrower = Borrower.create('Ada Lovelace', '1 rue de la Paix, 75002 Paris');
 
 describe('Loan', () => {
   it('records its birth, and holds the state that event gives', () => {
-    const born = Loan.create('loan-7', bornAt);
+    const born = Loan.create('loan-7', bornAt, borrower);
 
     expect(born.registeredAt).toEqual(bornAt);
-    expect(born.pullEvents()).toEqual([new LoanPaidOut('loan-7', bornAt)]);
+    expect(born.pullEvents()).toEqual([new LoanPaidOut('loan-7', bornAt, borrower)]);
   });
 
   it('is rebuilt from its history, recording nothing', () => {
