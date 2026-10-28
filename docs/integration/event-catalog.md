@@ -421,3 +421,17 @@ Consumers: `identity`
 | --- | --- | --- | --- |
 | `subjectId` | string | yes | The opaque identifier of the data subject. |
 | `erasedAt` | string (date-time) | yes | When the platform erased its copies. |
+
+## servicing
+
+### servicing.loan.paid-out
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.paid-out` | 1 | The money of a loan is paid out to its borrower and its schedule starts: the loan exists from this moment, under the identifier of the application it was granted for. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
