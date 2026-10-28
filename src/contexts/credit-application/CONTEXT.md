@@ -77,6 +77,9 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Branch | the branch of the advisor whose portfolio holds the applicant, on which the application is submitted |  |
 | Consult | to ask the repayment incident register whether each party of the application is listed there, and to record the answer in the file, with no copy of the names and birth dates it was asked with |  |
 | Unidentified | a party of the application whose identity customer-due-diligence does not answer: the register cannot be asked about it |  |
+| Delegation | the limits each level of staff may decide within, kept by credit-policy | not the delegation of a member of staff to another |
+| Table | the rows of the delegation table: one limit per level of staff, with its date of effect | not a database table |
+| Level | the level of authority of a member of staff, which bounds what they may decide | not a level of the bank hierarchy |
 
 ## Modules
 
@@ -197,6 +200,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
 
+### Consumed events
+
+| Event | Version | From | Handler | Consumer |
+|---|---|---|---|---|
+| `branch-network.staff-member.appointed` | 2 | `branch-network` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-decider-level` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
+
 ### Publishers
 
 | Event | Versions | Publisher |
@@ -207,8 +217,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Projection | Class | Applies |
 |---|---|---|
+| not read | `DeciderLevelProjection` |  |
 | not read | `DeclaredConflictRow` |  |
 | not read | `DeclaredConflictsProjection` |  |
+| not read | `DelegationTableProjection` |  |
 
 ### Ports
 

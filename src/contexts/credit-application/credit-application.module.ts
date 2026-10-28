@@ -28,7 +28,15 @@ import { NameGuarantorHandler } from '@/contexts/credit-application/file/applica
 import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
 import { CorrectEntryHandler } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.handler';
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
-import { conflictOfInterestDeclaredV1 as declaredConflictsDefinition } from '@/contexts/branch-network/published-language';
+import {
+  conflictOfInterestDeclaredV1 as declaredConflictsDefinition,
+  staffMemberAppointedV2 as deciderLevelDefinition,
+} from '@/contexts/branch-network/published-language';
+import { delegationTablePublishedV2 as delegationTableDefinition } from '@/contexts/credit-policy/published-language';
+import { DelegationTableProjection } from '@/contexts/credit-application/decision/application/projections/delegation-table.projection';
+import { DeciderLevelProjection } from '@/contexts/credit-application/decision/application/projections/decider-level.projection';
+import { KeepDelegationTableIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-delegation-table.integration-handler';
+import { KeepDeciderLevelIntegrationHandler } from '@/contexts/credit-application/decision/application/integration/handlers/keep-decider-level.integration-handler';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { DeclaredConflictsProjection } from '@/contexts/credit-application/decision/application/projections/declared-conflicts.projection';
 import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-declared-conflicts-store.repository';
@@ -242,6 +250,37 @@ function registerReactions(platform: Platform, declaredConflicts: DeclaredConfli
         scope: platform.scope,
       },
       (event) => declaredConflictsProjection.declared(event),
+    ),
+  ]);
+
+  const delegationTableProjection = new DelegationTableProjection();
+  const deciderLevelProjection = new DeciderLevelProjection();
+  const keepDelegationTableIntegrationHandler = new KeepDelegationTableIntegrationHandler(platform.commands);
+  const keepDeciderLevelIntegrationHandler = new KeepDeciderLevelIntegrationHandler(platform.commands);
+
+  const { processedEvents: processed, unitOfWork } = platform.persistence;
+  const { scope } = platform;
+
+  subscribeAll(platform.subscriberFor('credit-application'), [
+    consume(
+      delegationTableDefinition,
+      { consumer: 'credit-application.delegation-table', processed, unitOfWork, scope },
+      (event) => delegationTableProjection.published(event),
+    ),
+    consume(
+      deciderLevelDefinition,
+      { consumer: 'credit-application.decider-level', processed, unitOfWork, scope },
+      (event) => deciderLevelProjection.appointed(event),
+    ),
+    consume(
+      delegationTableDefinition,
+      { consumer: 'credit-application.keep-delegation-table', processed, unitOfWork, scope },
+      (event) => keepDelegationTableIntegrationHandler.handle(event),
+    ),
+    consume(
+      deciderLevelDefinition,
+      { consumer: 'credit-application.keep-decider-level', processed, unitOfWork, scope },
+      (event) => keepDeciderLevelIntegrationHandler.handle(event),
     ),
   ]);
   // /ddd-ts-kit:reactions
