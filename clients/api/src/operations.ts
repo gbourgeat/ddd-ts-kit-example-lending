@@ -779,6 +779,44 @@ export function registerBroker(
   return send<RegisterBrokerResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadBrokerRegistrationInput {
+  readonly path: {
+    readonly brokerId: string;
+  };
+}
+
+export type ReadBrokerRegistrationResult =
+  | Success<200, {
+    brokerId: string;
+    inForce: boolean;
+    since?: string;
+    until?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_BROKER_REGISTRATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read broker registration: `GET /brokers/{brokerId}/registration`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_BROKER_REGISTRATION (422), VALIDATION_FAILED (422).
+ */
+export function readBrokerRegistration(
+  connection: Connection,
+  input: ReadBrokerRegistrationInput,
+  options: CallOptions = {},
+): Promise<ReadBrokerRegistrationResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/brokers/{brokerId}/registration',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadBrokerRegistrationResult>(connection, operation, { ...input, ...options });
+}
+
 export interface RegisterBusinessInput {
   readonly body: {
     customerId: string;

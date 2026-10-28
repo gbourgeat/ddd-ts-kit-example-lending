@@ -14,6 +14,7 @@ export const CreditApplicationCodes = {
   UnknownRateGrid: 'UNKNOWN_RATE_GRID',
   UnknownLegalMaximumRate: 'UNKNOWN_LEGAL_MAXIMUM_RATE',
   UnknownProductTerms: 'UNKNOWN_PRODUCT_TERMS',
+  UnknownBrokerRegistration: 'UNKNOWN_BROKER_REGISTRATION',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

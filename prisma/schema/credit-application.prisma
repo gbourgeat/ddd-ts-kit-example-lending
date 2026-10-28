@@ -127,3 +127,19 @@ model CreditApplicationLegalMaximumRate {
   @@map("legal_maximum_rates")
   @@schema("credit_application")
 }
+
+/// The broker registrations read model: one row per broker, in force or lapsed since the event that last changed it.
+model CreditApplicationBrokerRegistration {
+  brokerId         String   @id @map("broker_id")
+  inForce          Boolean  @map("in_force")
+  changedAt        DateTime @map("changed_at") @db.Timestamptz(3)
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+  tenantId         String   @map("tenant_id")
+
+  @@index([tenantId, brokerId], map: "broker_registrations_tenant_idx")
+  @@map("broker_registrations")
+  @@schema("credit_application")
+}

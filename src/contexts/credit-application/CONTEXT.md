@@ -85,6 +85,9 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Erase personal data past retention | Destroy the key of the personal values of every application refused six months ago, so that the file can no longer be read | Delete an application |
 | Product | A credit offer of the bank, with the amounts, durations, fee and insurance it is sold with | Offer |
 | Terms | The amounts, durations, arrangement fee and insurance a product is sold with | Condition |
+| Broker | An outside intermediary who brings applications; not a staff member | Advisor |
+| Registration | The broker's registration with the intermediaries register, in force from its registration until it lapses | Repayment incident register |
+| Lapsed | The registration of a broker that is no longer valid: the broker may no longer bring applications | Refusal |
 
 ## Modules
 
@@ -133,6 +136,7 @@ No personal data declared.
 - `credit-application:rate-grid.keep`
 - `credit-application:legal-maximum-rate.keep`
 - `credit-application:product-terms.keep`
+- `credit-application:broker-registration.keep`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -190,6 +194,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CorrectEntry` | command | `application.correct` |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
+| `KeepBrokerRegistration` | command | `broker-registration.keep` |
 | `KeepDeciderLevel` | command | `decider-level.keep` |
 | `KeepDelegationTable` | command | `delegation-table.keep` |
 | `KeepLegalMaximumRate` | command | not read |
@@ -198,6 +203,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
 | `ReadAccountInformation` | command | `application.read-accounts` |
+| `ReadBrokerRegistration` | query | `application.decide` |
 | `ReadDeciderLevel` | query | `application.decide` |
 | `ReadDeclaredConflicts` | query | `application.decide` |
 | `ReadDelegationTable` | query | `application.decide` |
@@ -223,6 +229,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
+| GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | `application.decide` | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | `application.decide` | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
 | GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | `application.decide` | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 | GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
@@ -233,11 +240,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepProductTermsIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `branch-network.staff-member.appointed` | 2 | `branch-network` | `KeepDeciderLevelIntegrationHandler` | not read |
+| `brokerage.broker.registered` | 1 | `brokerage` | `KeepBrokerRegistrationIntegrationHandler` | `credit-application.broker-registered` |
+| `brokerage.broker.registered` | 1 | `brokerage` | `KeepBrokerRegistrationLapsedIntegrationHandler` | `credit-application.broker-registered` |
+| `brokerage.broker.registered` | 1 | `brokerage` | `KeepProductTermsIntegrationHandler` | `credit-application.broker-registered` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | not read |
+| `credit-policy.legal-maximum-rate.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | not read |
+| `credit-policy.rate-grid.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | not read |
 
 ### Publishers
 
@@ -249,6 +258,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Projection | Class | Applies |
 |---|---|---|
+| not read | not read |  |
 | not read | not read |  |
 | not read | not read |  |
 | not read | not read |  |
@@ -268,6 +278,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
 | `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
+| `BrokerRegistrations` | not bound |  |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
 | `CustomerAdvisorBranchGateway` | external | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerDiligenceGateway` | gateway | `InProcessCustomerDiligenceGateway` |
@@ -299,6 +310,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |
 | `InvalidDuration` | `forMonths` | `INVALID_DURATION` | none |
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
+| `UnknownBrokerRegistration` | `forUnknownBrokerRegistration` | `UNKNOWN_BROKER_REGISTRATION` | none |
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
 | `UnknownProductTerms` | `forUnknownProductTerms` | `UNKNOWN_PRODUCT_TERMS` | none |
