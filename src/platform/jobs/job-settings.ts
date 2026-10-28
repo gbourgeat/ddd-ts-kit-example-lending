@@ -36,6 +36,10 @@ export function jobSettings(environment: Environment, context?: string): Readonl
     'customer-due-diligence.erase-personal-data-past-retention': {
       enabled: environment['JOB_CUSTOMER_DUE_DILIGENCE_ERASE_PERSONAL_DATA_PAST_RETENTION_ENABLED'] !== 'false',
     },
+
+    'credit-application.erase-personal-data-past-retention': {
+      enabled: environment['JOB_CREDIT_APPLICATION_ERASE_PERSONAL_DATA_PAST_RETENTION_ENABLED'] !== 'false',
+    },
     // /ddd-ts-kit:jobs
   };
 

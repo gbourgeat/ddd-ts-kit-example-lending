@@ -82,6 +82,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Level | the level of authority of a member of staff, which bounds what they may decide | not a level of the bank hierarchy |
 | Grid | The nominal rate of each product by risk rating and duration, as credit-policy publishes it | Annual percentage rate |
 | Legal maximum rate | The highest annual rate for a category of loan in force on a day | Rate grid |
+| Erase personal data past retention | Destroy the key of the personal values of every application refused six months ago, so that the file can no longer be read | Delete an application |
 
 ## Modules
 
@@ -124,12 +125,15 @@ No personal data declared.
 - `credit-application:application.attach-document`
 - `credit-application:application.read-accounts`
 - `credit-application:application.consult-register`
+- `credit-application:application.erase-past-retention`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
 
 <!-- ddd-ts-kit:jobs -->
-No scheduled job.
+| Job | Schedule | Command |
+|---|---|---|
+| `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs
@@ -177,6 +181,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AttachDocument` | command | `application.attach-document` |
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
+| `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |

@@ -54,6 +54,10 @@ import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-appli
 import { SimulatedAccountInformationProvider } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-account-information-provider.adapter';
 import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-customer-identity.gateway';
 import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
+import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+import { ErasePersonalDataPastRetentionCommand } from '@/contexts/credit-application/file/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
+import { ErasePersonalDataPastRetentionHandler } from '@/contexts/credit-application/file/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
+import { registerNightlyJobs } from '@/contexts/credit-application/composition/register-nightly-jobs.module';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -190,6 +194,12 @@ function registerHandlers(
     new ReadDocumentHandler(creditApplicationRepository, platform.files.storage),
     { context: 'credit-application' },
   );
+
+  platform.commands.register(
+    ErasePersonalDataPastRetentionCommand,
+    new ErasePersonalDataPastRetentionHandler(creditApplicationRepository, platform.ids, platform.clock),
+    { context: 'credit-application' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -267,6 +277,7 @@ function keepReferenceData(platform: Platform): void {
 /** The jobs of the context, scheduled and in the background. */
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
+  registerNightlyJobs(platform);
   // /ddd-ts-kit:jobs
 }
 
@@ -305,6 +316,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(ReadDocumentQuery, creditApplicationPermissions['application.read'], {
       resource: (query) => ({ type: 'application', id: query.applicationId }),
+    }),
+    requires(ErasePersonalDataPastRetentionCommand, creditApplicationPermissions['application.erase-past-retention'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     // /ddd-ts-kit:authorization
   ];

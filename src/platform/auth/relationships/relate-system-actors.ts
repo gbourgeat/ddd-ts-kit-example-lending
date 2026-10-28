@@ -58,6 +58,11 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'operator',
     subject: 'system:system:customer-due-diligence.erase-personal-data-past-retention',
   },
+  {
+    object: 'context:credit-application',
+    relation: 'operator',
+    subject: 'system:system:credit-application.erase-personal-data-past-retention',
+  },
   // /ddd-ts-kit:system-grants
 ];
 

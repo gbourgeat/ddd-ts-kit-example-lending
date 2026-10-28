@@ -11,5 +11,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.attach-document': { description: 'Attach document' },
   'application.read-accounts': { description: 'Read account information' },
   'application.consult-register': { description: 'Consult repayment incident register' },
+  'application.erase-past-retention': { description: 'Erase personal data past retention' },
   // /ddd-ts-kit:permissions
 });
