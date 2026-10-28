@@ -13,4 +13,9 @@ export class GetCustomerDueDiligenceAnswer {
   @IsOptional()
   @IsDateString()
   nextDueOn?: string;
+
+  /** The day the due diligence was flagged overdue, absent while it is current or never flagged. */
+  @IsOptional()
+  @IsDateString()
+  flaggedOverdueOn?: string;
 }

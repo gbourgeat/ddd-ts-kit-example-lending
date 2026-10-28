@@ -9,6 +9,7 @@ import { AssignAdvisorController } from '@/contexts/customer-due-diligence/prese
 import { ConfirmSanctionsMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/confirm-sanctions-match/confirm-sanctions-match.controller';
 import { DeclareDirectorsAndOwnersController } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.controller';
 import { DismissMatchController } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.controller';
+import { FlagOverdueDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/flag-overdue-due-diligence/flag-overdue-due-diligence.controller';
 import { GetCustomerDueDiligenceController } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.controller';
 import { GetCustomerRiskRatingController } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-risk-rating/get-customer-risk-rating.controller';
 import { IdentifyCustomerController } from '@/contexts/customer-due-diligence/presentation/http/customers/identify-customer/identify-customer.controller';
@@ -24,6 +25,7 @@ import { DeclareDirectorsAndOwnersParams } from '@/contexts/customer-due-diligen
 import { DeclareDirectorsAndOwnersBody } from '@/contexts/customer-due-diligence/presentation/http/customers/declare-directors-and-owners/declare-directors-and-owners.body';
 import { DismissMatchParams } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.params';
 import { DismissMatchBody } from '@/contexts/customer-due-diligence/presentation/http/customers/dismiss-match/dismiss-match.body';
+import { FlagOverdueDueDiligenceParams } from '@/contexts/customer-due-diligence/presentation/http/customers/flag-overdue-due-diligence/flag-overdue-due-diligence.params';
 import { GetCustomerDueDiligenceParams } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.params';
 import { GetCustomerDueDiligenceAnswer } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-due-diligence/get-customer-due-diligence.answer';
 import { GetCustomerRiskRatingParams } from '@/contexts/customer-due-diligence/presentation/http/customers/get-customer-risk-rating/get-customer-risk-rating.params';
@@ -60,6 +62,9 @@ export const customerDueDiligenceControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(DismissMatchController, {
     dismissMatch: { params: DismissMatchParams, body: DismissMatchBody, answer: acceptedSchema },
+  }),
+  withSignatures(FlagOverdueDueDiligenceController, {
+    flagOverdueDueDiligence: { params: FlagOverdueDueDiligenceParams, answer: acceptedSchema },
   }),
   withSignatures(GetCustomerDueDiligenceController, {
     getCustomerDueDiligence: { params: GetCustomerDueDiligenceParams, answer: GetCustomerDueDiligenceAnswer },
