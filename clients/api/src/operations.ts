@@ -650,7 +650,9 @@ export interface RequestExceptionInput {
   readonly path: {
     readonly id: string;
   };
-  readonly body: Record<string, unknown>;
+  readonly body: {
+    justification: string;
+  };
 }
 
 export type RequestExceptionResult =
@@ -658,12 +660,12 @@ export type RequestExceptionResult =
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
   | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
-  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+  | Failure<422, 'ALREADY_DECIDED' | 'CONFLICTED_DECIDER' | 'EXCEPTION_ALREADY_REQUESTED' | 'EXCEPTION_NOT_ABOVE_LIMIT' | 'INVALID_EXCEPTION_JUSTIFICATION' | 'NOT_ASSESSED' | 'PREPARER_CANNOT_DECIDE' | 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_DECIDER_LEVEL' | 'UNKNOWN_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
 
 /**
  * Request exception: `POST /applications/{id}/exceptions`.
  *
- * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), CONFLICTED_DECIDER (422), EXCEPTION_ALREADY_REQUESTED (422), EXCEPTION_NOT_ABOVE_LIMIT (422), INVALID_EXCEPTION_JUSTIFICATION (422), NOT_ASSESSED (422), PREPARER_CANNOT_DECIDE (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
  */
 export function requestException(
   connection: Connection,

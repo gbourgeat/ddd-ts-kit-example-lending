@@ -2,6 +2,7 @@ import { Body, Controller, HttpCode, Inject, Param, Post } from '@nestjs/common'
 import { CurrentActor, KitRoute, KitRoutes } from '@ddd-ts-kit/http/nest';
 import { CommandBus, type Actor } from '@ddd-ts-kit/kernel';
 import { RequestExceptionCommand } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.command';
+import { CreditApplicationCodes } from '@/contexts/credit-application/credit-application.codes';
 import { ApplicationsRoutes } from '@/contexts/credit-application/presentation/http/applications.routes';
 import { RequestExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.params';
 import { RequestExceptionBody } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.body';
@@ -15,15 +16,24 @@ export class RequestExceptionController {
   @Post(':id/exceptions')
   @HttpCode(204)
   @KitRoute({
-    // TODO(domain): list the codes of the refusals "request exception" can raise, as their factories set them, so that they appear in the contract with their status (`errors/known-code`).
-    errors: [],
+    errors: [
+      CreditApplicationCodes.UnknownCreditApplication,
+      CreditApplicationCodes.NotAssessed,
+      CreditApplicationCodes.AlreadyDecided,
+      CreditApplicationCodes.ExceptionAlreadyRequested,
+      CreditApplicationCodes.InvalidExceptionJustification,
+      CreditApplicationCodes.ExceptionNotAboveLimit,
+      CreditApplicationCodes.PreparerCannotDecide,
+      CreditApplicationCodes.ConflictedDecider,
+      CreditApplicationCodes.UnknownDeciderLevel,
+      CreditApplicationCodes.UnknownDelegationTable,
+    ],
   })
   async requestException(
     @Param() params: RequestExceptionParams,
     @Body() body: RequestExceptionBody,
     @CurrentActor() actor: Actor,
   ): Promise<void> {
-    // TODO(domain): build the command from the parameters (body, params); the caller is already there.
-    await this.commands.execute(new RequestExceptionCommand(actor));
+    await this.commands.execute(new RequestExceptionCommand(actor, params.id, body.justification));
   }
 }

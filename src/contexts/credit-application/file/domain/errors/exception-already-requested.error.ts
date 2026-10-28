@@ -5,7 +5,8 @@ export class ExceptionAlreadyRequested extends DomainRefusal {
   readonly code = CreditApplicationCodes.ExceptionAlreadyRequested;
 
   static forExceptionAlreadyRequested() {
-    // TODO(domain): take as parameters what `forExceptionAlreadyRequested` names and the facts that explain the refusal (which credit application rule, which value), give them as the second argument and write a message a domain expert would recognise; a fact reaches the client only when named: `.exposing('<fact>')`. The code is the stable contract.
-    return ExceptionAlreadyRequested.refusal('Exception already requested.');
+    return ExceptionAlreadyRequested.refusal(
+      'An exception is already requested on this application: one at a time, until the level above answers.',
+    );
   }
 }

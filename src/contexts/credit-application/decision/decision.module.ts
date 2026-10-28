@@ -33,7 +33,6 @@ import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infr
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
-import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
 import { requires } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { RequestExceptionCommand } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.command';
@@ -68,14 +67,6 @@ export const decisionModule = {
     registerDelegationTableHandlers(platform, delegationTables);
     registerDecideApplication(platform, repository, { deciderLevels, delegationTables, declaredConflicts });
 
-    const creditApplicationRepository = platform.adapter(
-      new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
-      { kind: 'repository', context: 'credit-application', token: 'CreditApplicationRepository' },
-    );
-
-    platform.commands.register(RequestExceptionCommand, new RequestExceptionHandler(creditApplicationRepository), {
-      context: 'credit-application',
-    });
     // /ddd-ts-kit:handlers
   },
 
@@ -148,7 +139,7 @@ function registerDelegationTableHandlers(platform: Platform, delegationTables: D
   });
 }
 
-/** The command that decides an application, over the repository of the file and the read models of the limits. */
+/** The commands that decide an application and ask for an exception to it, over the repository of the file and the read models of the limits. */
 function registerDecideApplication(
   platform: Platform,
   repository: CreditApplicationRepository,
@@ -163,6 +154,12 @@ function registerDecideApplication(
   platform.commands.register(
     DecideApplicationCommand,
     new DecideApplicationHandler(repository, deciderLimits, platform.clock, readModels.declaredConflicts),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    RequestExceptionCommand,
+    new RequestExceptionHandler(repository, deciderLimits, platform.clock, readModels.declaredConflicts),
     { context: 'credit-application' },
   );
 }

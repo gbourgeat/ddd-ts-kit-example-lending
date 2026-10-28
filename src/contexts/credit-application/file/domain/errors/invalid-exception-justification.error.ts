@@ -5,7 +5,8 @@ export class InvalidExceptionJustification extends DomainRefusal {
   readonly code = CreditApplicationCodes.InvalidExceptionJustification;
 
   static forInvalidExceptionJustification() {
-    // TODO(domain): take as parameters what `forInvalidExceptionJustification` names and the facts that explain the refusal (which credit application rule, which value), give them as the second argument and write a message a domain expert would recognise; a fact reaches the client only when named: `.exposing('<fact>')`. The code is the stable contract.
-    return InvalidExceptionJustification.refusal('Invalid exception justification.');
+    return InvalidExceptionJustification.refusal(
+      'An exception needs its justification in words: the level above decides on the reasons given.',
+    );
   }
 }

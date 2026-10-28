@@ -4,8 +4,10 @@ import { CreditApplicationCodes } from '@/contexts/credit-application/credit-app
 export class ExceptionNotAboveLimit extends DomainRefusal {
   readonly code = CreditApplicationCodes.ExceptionNotAboveLimit;
 
-  static forExceptionNotAboveLimit() {
-    // TODO(domain): take as parameters what `forExceptionNotAboveLimit` names and the facts that explain the refusal (which credit application rule, which value), give them as the second argument and write a message a domain expert would recognise; a fact reaches the client only when named: `.exposing('<fact>')`. The code is the stable contract.
-    return ExceptionNotAboveLimit.refusal('Exception not above limit.');
+  static forExceptionNotAboveLimit(deciderLevel: string) {
+    return ExceptionNotAboveLimit.refusal(
+      "The amount is within the decider's limit: no exception is needed, the decider decides it.",
+      { deciderLevel },
+    ).exposing('deciderLevel');
   }
 }

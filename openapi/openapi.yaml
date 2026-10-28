@@ -1466,7 +1466,12 @@ paths:
         content:
           application/json:
             schema:
+              properties:
+                justification:
+                  type: string
               type: object
+              required:
+                - justification
       responses:
         '204':
           description: Done.
@@ -1501,12 +1506,22 @@ paths:
           x-error-codes:
             - UNSUPPORTED_MEDIA_TYPE
         '422':
-          description: 'Unprocessable Content. Error codes: VALIDATION_FAILED.'
+          description: 'Unprocessable Content. Error codes: ALREADY_DECIDED, CONFLICTED_DECIDER, EXCEPTION_ALREADY_REQUESTED, EXCEPTION_NOT_ABOVE_LIMIT, INVALID_EXCEPTION_JUSTIFICATION, NOT_ASSESSED, PREPARER_CANNOT_DECIDE, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_DECIDER_LEVEL, UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
+            - ALREADY_DECIDED
+            - CONFLICTED_DECIDER
+            - EXCEPTION_ALREADY_REQUESTED
+            - EXCEPTION_NOT_ABOVE_LIMIT
+            - INVALID_EXCEPTION_JUSTIFICATION
+            - NOT_ASSESSED
+            - PREPARER_CANNOT_DECIDE
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_DECIDER_LEVEL
+            - UNKNOWN_DELEGATION_TABLE
             - VALIDATION_FAILED
   /applications/{id}/guarantors:
     post:
