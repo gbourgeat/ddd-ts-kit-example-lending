@@ -30,6 +30,7 @@ export class EventStoreReadLoanReader implements ReadLoanReader {
       instalmentsUnpaid: [...loan.instalmentsUnpaid],
       arrearsBucket: loan.toState().arrearsBucket,
       defaulted: loan.toState().defaultedAt !== undefined,
+      incidentDeclared: loan.toState().repaymentIncidentDeclaredAt !== undefined,
     };
   }
 }

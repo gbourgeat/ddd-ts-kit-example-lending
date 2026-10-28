@@ -11,6 +11,9 @@ import type { LoanPaymentReceived } from '@/contexts/servicing/instalments/domai
 import type { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/domain/events/loan-instalment-marked-unpaid.event';
 import type { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
 import type { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-defaulted.event';
+import type { LoanRepaymentIncidentDeclared } from '@/contexts/servicing/arrears/domain/events/loan-repayment-incident-declared.event';
+import type { LoanRepaymentIncidentWithdrawn } from '@/contexts/servicing/arrears/domain/events/loan-repayment-incident-withdrawn.event';
+import type { LoanArrearsCleared } from '@/contexts/servicing/arrears/domain/events/loan-arrears-cleared.event';
 
 export type LoanEvent =
   | LoanPaidOut
@@ -25,4 +28,7 @@ export type LoanEvent =
   | LoanPaymentReceived
   | LoanInstalmentMarkedUnpaid
   | LoanArrearsBucketEntered
-  | LoanDefaulted;
+  | LoanDefaulted
+  | LoanRepaymentIncidentDeclared
+  | LoanRepaymentIncidentWithdrawn
+  | LoanArrearsCleared;

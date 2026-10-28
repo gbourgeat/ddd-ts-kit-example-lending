@@ -18,4 +18,6 @@ export interface ReadLoanResult {
   readonly arrearsBucket: ArrearsBucket;
   /** Declared in default: 90 days past due, and handed to collections. */
   readonly defaulted: boolean;
+  /** Declared to the repayment incident register, and not withdrawn since: the arrears of two instalments are reported. */
+  readonly incidentDeclared: boolean;
 }

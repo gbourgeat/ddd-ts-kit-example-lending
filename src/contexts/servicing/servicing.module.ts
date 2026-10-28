@@ -43,6 +43,8 @@ import { EventStoreReadLoanReader } from '@/contexts/servicing/ledger/infrastruc
 import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infrastructure/external/simulated-payment-provider.adapter';
 import { EventStoreGetLoanStatementReader } from '@/contexts/servicing/ledger/infrastructure/persistence/event-store-get-loan-statement.reader';
 import { arrearsModule } from '@/contexts/servicing/arrears/arrears.module';
+import { RecordLatePaymentCommand } from '@/contexts/servicing/instalments/application/commands/record-late-payment/record-late-payment.command';
+import { RecordLatePaymentHandler } from '@/contexts/servicing/instalments/application/commands/record-late-payment/record-late-payment.handler';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -109,6 +111,10 @@ function registerHandlers(platform: Platform): void {
   });
 
   arrearsModule.registerHandlers(platform, { loanRepository });
+
+  platform.commands.register(RecordLatePaymentCommand, new RecordLatePaymentHandler(loanRepository, platform.clock), {
+    context: 'servicing',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -272,6 +278,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: (query) => ({ type: 'loan', id: query.loanId }),
     }),
     ...arrearsModule.useCases(),
+    requires(RecordLatePaymentCommand, servicingPermissions['loan.record-repayment'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }

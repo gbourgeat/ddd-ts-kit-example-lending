@@ -14,5 +14,7 @@ export const servicingPermissions = definePermissions('servicing', {
   'loan.collect': { description: 'Collect instalment' },
   'loan.classify-arrears': { description: 'Classify arrears' },
   'loan.declare-default': { description: 'Declare default' },
+  'loan.declare-incident': { description: 'Declare repayment incident' },
+  'loan.withdraw-incident': { description: 'Withdraw repayment incident' },
   // /ddd-ts-kit:permissions
 });

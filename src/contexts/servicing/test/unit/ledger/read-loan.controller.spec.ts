@@ -25,6 +25,7 @@ describe('GET /loans/:id', () => {
         instalmentsUnpaid: [],
         arrearsBucket: ArrearsBucket.None,
         defaulted: false,
+        incidentDeclared: false,
       }),
     });
 

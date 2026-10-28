@@ -28,4 +28,6 @@ export interface LoanState {
   readonly arrearsBucket: ArrearsBucket;
   /** The instant the loan was declared in default, 90 days past due: undefined until then. */
   readonly defaultedAt: Date | undefined;
+  /** The instant the loan was declared to the repayment incident register: undefined until then, and once withdrawn. */
+  readonly repaymentIncidentDeclaredAt: Date | undefined;
 }

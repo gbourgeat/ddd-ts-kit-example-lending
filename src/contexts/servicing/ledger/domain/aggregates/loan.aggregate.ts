@@ -16,7 +16,7 @@ import { MonthsRemainingService } from '@/contexts/servicing/ledger/domain/servi
 import { OutstandingCapitalService } from '@/contexts/servicing/ledger/domain/services/outstanding-capital.service';
 import type { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
 import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
-import { Money } from '@/shared-kernel/money.vo';
+import type { Money } from '@/shared-kernel/money.vo';
 import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
 import { LoanWithdrawalRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-withdrawal-repayment-recorded.event';
 import { SimpleDailyInterestService } from '@/contexts/servicing/ledger/domain/services/simple-daily-interest.service';
@@ -25,11 +25,16 @@ import { LoanInstalmentMarkedUnpaid } from '@/contexts/servicing/instalments/dom
 import type { LoanEvent } from '@/contexts/servicing/ledger/domain/values/loan-event';
 import type { LoanState } from '@/contexts/servicing/ledger/domain/values/loan-state';
 import { initialLoanState } from '@/contexts/servicing/ledger/domain/values/initial-loan-state';
+import { loanStateChanges } from '@/contexts/servicing/ledger/domain/values/loan-state-changes';
 import { LoanArrearsBucketEntered } from '@/contexts/servicing/arrears/domain/events/loan-arrears-bucket-entered.event';
 import { ArrearsBucketService } from '@/contexts/servicing/ledger/domain/services/arrears-bucket.service';
 import { DaysPastDueService } from '@/contexts/servicing/ledger/domain/services/days-past-due.service';
 import { LoanDefaulted } from '@/contexts/servicing/arrears/domain/events/loan-defaulted.event';
 import { DefaultDecisionService } from '@/contexts/servicing/ledger/domain/services/default-decision.service';
+import { LoanRepaymentIncidentDeclared } from '@/contexts/servicing/arrears/domain/events/loan-repayment-incident-declared.event';
+import { LoanRepaymentIncidentWithdrawn } from '@/contexts/servicing/arrears/domain/events/loan-repayment-incident-withdrawn.event';
+import { LoanArrearsCleared } from '@/contexts/servicing/arrears/domain/events/loan-arrears-cleared.event';
+import { UnpaidInstalmentsService } from '@/contexts/servicing/arrears/domain/services/unpaid-instalments.service';
 
 export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
   private state: LoanState = initialLoanState();
@@ -207,6 +212,47 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
     }
   }
 
+  /** Declares the loan to the repayment incident register once two consecutive instalments are unpaid: once only. */
+  declareRepaymentIncident(now: Date): boolean {
+    const unpaidInstalments = new UnpaidInstalmentsService();
+    const unpaid = unpaidInstalments.unpaidOf(this.state.instalmentsUnpaid, this.state.instalmentsPaid);
+
+    if (this.state.repaymentIncidentDeclaredAt !== undefined || !unpaidInstalments.hasTwoConsecutive(unpaid)) {
+      return false;
+    }
+
+    this.record(new LoanRepaymentIncidentDeclared(this.id, now));
+
+    return true;
+  }
+
+  /** Withdraws the declaration once the arrears are paid: a loan not declared records nothing. */
+  withdrawRepaymentIncident(now: Date): boolean {
+    if (this.state.repaymentIncidentDeclaredAt === undefined) {
+      return false;
+    }
+
+    this.record(new LoanRepaymentIncidentWithdrawn(this.id, now));
+
+    return true;
+  }
+
+  /** Receives the money of an instalment marked unpaid, late: the arrears are cleared once no unpaid instalment remains. */
+  recordLatePayment(number: number, amount: Money, now: Date): void {
+    const unpaidInstalments = new UnpaidInstalmentsService();
+    const { instalmentsUnpaid, instalmentsPaid } = this.state;
+
+    if (!unpaidInstalments.unpaidOf(instalmentsUnpaid, instalmentsPaid).includes(number)) {
+      return;
+    }
+
+    this.record(new LoanPaymentReceived(this.id, now, number, amount));
+
+    if (unpaidInstalments.unpaidOf(instalmentsUnpaid, [...instalmentsPaid, number]).length === 0) {
+      this.record(new LoanArrearsCleared(this.id, now));
+    }
+  }
+
   /** The capital still owed: the principal, less what the noted instalments repaid, the early repayments and the write-off. */
   get outstandingCapital(): Money {
     return new OutstandingCapitalService().ofLoan(this.state);
@@ -251,19 +297,30 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
 
   protected appliers(): Appliers<LoanEvent> {
     return {
-      [LoanPaidOut.eventName]: (event) => this.applyPaidOut(event),
-      [LoanScheduled.eventName]: (event) => this.applyScheduled(event),
-      [LoanClosed.eventName]: (event) => this.applyClosed(event),
-      [LoanInstalmentDueNoted.eventName]: (event) => this.applyInstalmentDueNoted(event),
-      [LoanEarlyRepaymentRecorded.eventName]: (event) => this.applyEarlyRepaymentRecorded(event),
-      [LoanWrittenOff.eventName]: (event) => this.applyWrittenOff(event),
-      [LoanWriteOffReversed.eventName]: () => this.applyWriteOffReversed(),
-      [LoanRescheduled.eventName]: (event) => this.applyRescheduled(event),
-      [LoanWithdrawalRepaymentRecorded.eventName]: (event) => this.applyWithdrawalRepaymentRecorded(event),
-      [LoanPaymentReceived.eventName]: (event) => this.applyPaymentReceived(event),
-      [LoanInstalmentMarkedUnpaid.eventName]: (event) => this.applyInstalmentMarkedUnpaid(event),
-      [LoanArrearsBucketEntered.eventName]: (event) => this.applyArrearsBucketEntered(event),
-      [LoanDefaulted.eventName]: (event) => this.applyDefaulted(event),
+      [LoanPaidOut.eventName]: (event) => this.restore(loanStateChanges.paidOut(this.state, event)),
+      [LoanScheduled.eventName]: (event) => this.restore(loanStateChanges.scheduled(this.state, event)),
+      [LoanClosed.eventName]: (event) => this.restore(loanStateChanges.closed(this.state, event)),
+      [LoanInstalmentDueNoted.eventName]: (event) =>
+        this.restore(loanStateChanges.instalmentDueNoted(this.state, event)),
+      [LoanEarlyRepaymentRecorded.eventName]: (event) =>
+        this.restore(loanStateChanges.earlyRepaymentRecorded(this.state, event)),
+      [LoanWrittenOff.eventName]: (event) => this.restore(loanStateChanges.writtenOff(this.state, event)),
+      [LoanWriteOffReversed.eventName]: () => this.restore(loanStateChanges.writeOffReversed(this.state)),
+      [LoanRescheduled.eventName]: (event) => this.restore(loanStateChanges.rescheduled(this.state, event)),
+      /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves. */
+      [LoanWithdrawalRepaymentRecorded.eventName]: () =>
+        this.restore(loanStateChanges.withdrawalRepaymentRecorded(this.state)),
+      [LoanPaymentReceived.eventName]: (event) => this.restore(loanStateChanges.paymentReceived(this.state, event)),
+      [LoanInstalmentMarkedUnpaid.eventName]: (event) =>
+        this.restore(loanStateChanges.instalmentMarkedUnpaid(this.state, event)),
+      [LoanArrearsBucketEntered.eventName]: (event) =>
+        this.restore(loanStateChanges.arrearsBucketEntered(this.state, event)),
+      [LoanDefaulted.eventName]: (event) => this.restore(loanStateChanges.defaulted(this.state, event)),
+      [LoanRepaymentIncidentDeclared.eventName]: (event) =>
+        this.restore(loanStateChanges.repaymentIncidentDeclared(this.state, event)),
+      [LoanRepaymentIncidentWithdrawn.eventName]: () =>
+        this.restore(loanStateChanges.repaymentIncidentWithdrawn(this.state)),
+      [LoanArrearsCleared.eventName]: () => this.restore(loanStateChanges.arrearsCleared(this.state)),
     };
   }
 
@@ -281,67 +338,5 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
   /** The instalments noted due before the schedule in force: its instalments are numbered after them. */
   private get notedBefore(): number {
     return this.state.rescheduling?.notedBefore ?? 0;
-  }
-
-  private applyPaidOut(event: LoanPaidOut): void {
-    this.state = { ...this.state, registeredAt: event.occurredAt, borrower: event.borrower };
-  }
-
-  private applyScheduled(event: LoanScheduled): void {
-    this.state = { ...this.state, schedule: event.schedule };
-  }
-
-  private applyClosed(event: LoanClosed): void {
-    this.state = { ...this.state, closedAt: event.occurredAt };
-  }
-
-  private applyInstalmentDueNoted(event: LoanInstalmentDueNoted): void {
-    this.state = { ...this.state, instalmentsDue: [...this.state.instalmentsDue, event.number] };
-  }
-
-  private applyEarlyRepaymentRecorded(event: LoanEarlyRepaymentRecorded): void {
-    this.state = { ...this.state, earlyRepaid: Money.ofCents(this.state.earlyRepaid.cents + event.capital.cents) };
-  }
-
-  private applyWrittenOff(event: LoanWrittenOff): void {
-    this.state = { ...this.state, writtenOff: event.amount, closedAt: event.occurredAt };
-  }
-
-  private applyWriteOffReversed(): void {
-    this.state = { ...this.state, writtenOff: undefined, closedAt: undefined };
-  }
-
-  /** The new schedule is numbered after the instalments noted so far, and counts the early repayments from now on. */
-  private applyRescheduled(event: LoanRescheduled): void {
-    this.state = {
-      ...this.state,
-      rescheduling: {
-        schedule: event.schedule,
-        notedBefore: this.state.instalmentsDue.length,
-        earlyRepaidBefore: this.state.earlyRepaid,
-      },
-      rescheduledBy: [...this.state.rescheduledBy, event.decisionId],
-    };
-  }
-
-  private applyPaymentReceived(event: LoanPaymentReceived): void {
-    this.state = { ...this.state, instalmentsPaid: [...this.state.instalmentsPaid, event.number] };
-  }
-
-  private applyInstalmentMarkedUnpaid(event: LoanInstalmentMarkedUnpaid): void {
-    this.state = { ...this.state, instalmentsUnpaid: [...this.state.instalmentsUnpaid, event.number] };
-  }
-
-  private applyArrearsBucketEntered(event: LoanArrearsBucketEntered): void {
-    this.state = { ...this.state, arrearsBucket: event.bucket };
-  }
-
-  private applyDefaulted(event: LoanDefaulted): void {
-    this.state = { ...this.state, defaultedAt: event.occurredAt };
-  }
-
-  /** The capital and the interest are paid: the loan ends with the closure recorded right after, so no state moves here. */
-  private applyWithdrawalRepaymentRecorded(_event: LoanWithdrawalRepaymentRecorded): void {
-    return;
   }
 }

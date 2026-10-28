@@ -73,6 +73,13 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Classify | Place a loan in the arrears bucket its days past due put it in |  |
 | Declare | State to the register or to collections that a loan is in default |  |
 | Entered | the loan was placed in an arrears bucket by a classification of its days past due |  |
+| Incident | A repayment incident: the report of a loan with two consecutive unpaid instalments to the register, withdrawn when the arrears are paid |  |
+| After | Once the event has happened, a reaction of the loan answers it |  |
+| Two | The number of consecutive instalments whose arrears declare a repayment incident |  |
+| Cleared | The arrears of a loan are paid: no unpaid instalment remains unpaid |  |
+| Withdraw | To take back a declaration to the repayment incident register once the arrears are paid |  |
+| When | On the occurrence of a fact, the reaction runs |  |
+| Paid | The arrears are paid: the loan is paid up on its unpaid instalments |  |
 
 ## Modules
 
@@ -118,6 +125,8 @@ No personal data declared.
 - `servicing:loan.collect`
 - `servicing:loan.classify-arrears`
 - `servicing:loan.declare-default`
+- `servicing:loan.declare-incident`
+- `servicing:loan.withdraw-incident`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -177,14 +186,17 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CollectInstalment` | command | `loan.collect` |
 | `ComputeDueInstalments` | command | `loan.compute-due` |
 | `DeclareDefault` | command | `loan.declare-default` |
+| `DeclareRepaymentIncident` | command | `loan.declare-incident` |
 | `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
 | `GetLoanStatement` | query | `loan.read` |
 | `ReadLoan` | query | `loan.read` |
+| `RecordLatePayment` | command | `loan.record-repayment` |
 | `RecordPayout` | command | `loan.record-payout` |
 | `RecordWithdrawalRepayment` | command | `loan.record-repayment` |
 | `RepayEarly` | command | `loan.repay-early` |
 | `RescheduleLoan` | command | `loan.reschedule` |
 | `ReverseWriteOff` | command | `loan.write-off` |
+| `WithdrawRepaymentIncident` | command | `loan.withdraw-incident` |
 | `WriteOffLoan` | command | `loan.write-off` |
 
 ### Routes
@@ -194,6 +206,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/loans/:id` | `readLoan` | `LoansRoutes` | `Authenticated` | `ReadLoan` | `loan.read` | params: `ReadLoanParams` | 200: `ReadLoanAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | POST | `/loans/:id/closure` | `closeLoan` | `LoansRoutes` | `Authenticated` | `CloseLoan` | `loan.close` | params: `CloseLoanParams`, body: `CloseLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
 | POST | `/loans/:id/early-repayments` | `repayEarly` | `LoansRoutes` | `Authenticated` | `RepayEarly` | `loan.repay-early` | params: `RepayEarlyParams`, body: `RepayEarlyBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed`, `ServicingCodes.InvalidRepayment`, `ServicingCodes.EarlyRepaymentTooHigh` |
+| POST | `/loans/:id/instalments/:number/payments` | `recordLatePayment` | `LoansRoutes` | `Authenticated` | `RecordLatePayment` | `loan.record-repayment` | params: `RecordLatePaymentParams`, body: `RecordLatePaymentBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | GET | `/loans/:id/statement` | `getLoanStatement` | `LoansRoutes` | `Authenticated` | `GetLoanStatement` | `loan.read` | params: `GetLoanStatementParams`, query: `GetLoanStatementQueryParams` | 200: `GetLoanStatementAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan` |
 | POST | `/loans/:id/write-off` | `writeOffLoan` | `LoansRoutes` | `Authenticated` | `WriteOffLoan` | `loan.write-off` | params: `WriteOffLoanParams`, body: `WriteOffLoanBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanAlreadyClosed` |
 | POST | `/loans/:id/write-off-reversal` | `reverseWriteOff` | `LoansRoutes` | `Authenticated` | `ReverseWriteOff` | `loan.write-off` | params: `ReverseWriteOffParams`, body: `ReverseWriteOffBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `ServicingCodes.UnknownLoan`, `ServicingCodes.LoanNotWrittenOff` |

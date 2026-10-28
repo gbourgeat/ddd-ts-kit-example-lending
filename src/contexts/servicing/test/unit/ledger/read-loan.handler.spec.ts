@@ -30,6 +30,7 @@ const loan: ReadLoanResult = {
   instalmentsUnpaid: [2],
   arrearsBucket: ArrearsBucket.None,
   defaulted: false,
+  incidentDeclared: false,
 };
 
 describe('Read loan', () => {

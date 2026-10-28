@@ -413,6 +413,12 @@ export interface Client {
    */
   repayEarly(input: operations.RepayEarlyInput, options?: CallOptions): Promise<operations.RepayEarlyResult>;
   /**
+   * Record late payment: `POST /loans/{id}/instalments/{number}/payments`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
+   */
+  recordLatePayment(input: operations.RecordLatePaymentInput, options?: CallOptions): Promise<operations.RecordLatePaymentResult>;
+  /**
    * Get loan statement: `GET /loans/{id}/statement`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LOAN (422), VALIDATION_FAILED (422).
@@ -646,6 +652,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     readLoan: (input, call) => operations.readLoan(connection, input, call),
     closeLoan: (input, call) => operations.closeLoan(connection, input, call),
     repayEarly: (input, call) => operations.repayEarly(connection, input, call),
+    recordLatePayment: (input, call) => operations.recordLatePayment(connection, input, call),
     getLoanStatement: (input, call) => operations.getLoanStatement(connection, input, call),
     writeOffLoan: (input, call) => operations.writeOffLoan(connection, input, call),
     reverseWriteOff: (input, call) => operations.reverseWriteOff(connection, input, call),
