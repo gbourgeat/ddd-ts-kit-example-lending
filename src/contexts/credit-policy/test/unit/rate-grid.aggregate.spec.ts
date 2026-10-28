@@ -18,7 +18,12 @@ describe('RateGrid', () => {
 
     const recorded = aRateGrid().identifiedBy('rate-grid-7').bornAt(bornAt).build();
 
-    expect(recorded.pullEvents()).toEqual([new RateGridPublished('rate-grid-7', bornAt)]);
+    expect(recorded.pullEvents()).toEqual([
+      new RateGridPublished('rate-grid-7', bornAt, {
+        productId: recorded.productId,
+        effectiveFrom: recorded.effectiveFrom,
+      }),
+    ]);
   });
 
   it('is rehydrated in its stored state without recording a new fact', () => {

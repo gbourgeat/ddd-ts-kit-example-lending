@@ -18,7 +18,7 @@ export class RateGrid extends AggregateRoot<string> {
   static create(id: string, productId: string, effectiveFrom: Date, now: Date): RateGrid {
     const created = new RateGrid(id, { registeredAt: now, productId, effectiveFrom });
 
-    created.record(new RateGridPublished(id, now));
+    created.record(new RateGridPublished(id, now, { productId, effectiveFrom }));
 
     return created;
   }

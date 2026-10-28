@@ -4,19 +4,30 @@ import { LegalMaximumRatePublishedPublisher } from '@/contexts/credit-policy/app
 import { LegalMaximumRatePublished } from '@/contexts/credit-policy/domain/events/legal-maximum-rate-published.event';
 
 describe('Publishing "legal maximum rate published" to other contexts', () => {
-  it('publishes version 1 of credit-policy.legal-maximum-rate.published', async () => {
+  it('publishes version 2 of credit-policy.legal-maximum-rate.published with its category, rate and date of effect', async () => {
     const bus = new InMemoryEventBus();
     const publisher = new LegalMaximumRatePublishedPublisher(bus, new SequentialIdGenerator('event'));
 
-    await publisher.handle(new LegalMaximumRatePublished('legal-maximum-rate-1', new Date('2026-01-01T00:00:00.000Z')));
+    await publisher.handle(
+      new LegalMaximumRatePublished('legal-maximum-rate-1', new Date('2026-01-01T00:00:00.000Z'), {
+        category: 'car-loan',
+        rateBasisPoints: 2400,
+        effectiveFrom: new Date('2026-04-01T00:00:00.000Z'),
+      }),
+    );
 
     expect(bus.published).toEqual([
       {
         id: 'event-1',
         type: 'credit-policy.legal-maximum-rate.published',
-        version: 1,
+        version: 2,
         occurredAt: '2026-01-01T00:00:00.000Z',
-        payload: { legalMaximumRateId: 'legal-maximum-rate-1' },
+        payload: {
+          legalMaximumRateId: 'legal-maximum-rate-1',
+          category: 'car-loan',
+          rateBasisPoints: 2400,
+          effectiveFrom: '2026-04-01',
+        },
       },
     ]);
   });
@@ -25,12 +36,21 @@ describe('Publishing "legal maximum rate published" to other contexts', () => {
     const bus = new InMemoryEventBus();
     const publisher = new LegalMaximumRatePublishedPublisher(bus, new SequentialIdGenerator('event'));
 
-    await publisher.handle(new LegalMaximumRatePublished('first-1', new Date('2026-01-01T00:00:00.000Z')));
-    await publisher.handle(new LegalMaximumRatePublished('second-2', new Date('2026-01-01T00:00:00.000Z')));
+    const publication = {
+      category: 'personal-loan',
+      rateBasisPoints: 1800,
+      effectiveFrom: new Date('2026-04-01T00:00:00.000Z'),
+    };
+
+    await publisher.handle(new LegalMaximumRatePublished('first-1', new Date('2026-01-01T00:00:00.000Z'), publication));
+
+    await publisher.handle(
+      new LegalMaximumRatePublished('second-2', new Date('2026-01-01T00:00:00.000Z'), publication),
+    );
 
     expect(bus.published.map((event) => event.payload)).toEqual([
-      { legalMaximumRateId: 'first-1' },
-      { legalMaximumRateId: 'second-2' },
+      { legalMaximumRateId: 'first-1', category: 'personal-loan', rateBasisPoints: 1800, effectiveFrom: '2026-04-01' },
+      { legalMaximumRateId: 'second-2', category: 'personal-loan', rateBasisPoints: 1800, effectiveFrom: '2026-04-01' },
     ]);
   });
 });

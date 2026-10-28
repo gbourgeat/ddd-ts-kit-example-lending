@@ -4,6 +4,10 @@ export class DelegationTablePublished extends NamedDomainEvent('credit-policy.de
   constructor(
     readonly aggregateId: string,
     readonly occurredAt: Date,
+    readonly publication: {
+      readonly effectiveFrom: Date;
+      readonly levels: readonly { readonly level: string; readonly amountCents: number }[];
+    },
   ) {
     super();
   }

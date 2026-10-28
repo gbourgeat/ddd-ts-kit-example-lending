@@ -22,13 +22,15 @@ export class DelegationTable extends AggregateRoot<string> {
   }
 
   static create(id: string, terms: DelegationTableTerms, now: Date): DelegationTable {
+    const levels = terms.limits.map((limit) => ({ level: limit.level, amountCents: limit.amountCents }));
+
     const created = new DelegationTable(id, {
       registeredAt: now,
       effectiveFrom: terms.effectiveFrom,
-      levels: terms.limits.map((limit) => ({ level: limit.level, amountCents: limit.amountCents })),
+      levels,
     });
 
-    created.record(new DelegationTablePublished(id, now));
+    created.record(new DelegationTablePublished(id, now, { effectiveFrom: terms.effectiveFrom, levels }));
 
     return created;
   }
