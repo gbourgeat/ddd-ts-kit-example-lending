@@ -17,4 +17,4 @@ Each page lists, in the words of the test titles, the rules a context holds: a p
 | [identity](identity.md) | 175 | 0 | 60 |
 | [reporting](reporting.md) | 49 | 0 | 17 |
 | [servicing](servicing.md) | 268 | 11 | 91 |
-| [the application](application.md) | 501 | 4 | 119 |
+| [the application](application.md) | 505 | 4 | 120 |

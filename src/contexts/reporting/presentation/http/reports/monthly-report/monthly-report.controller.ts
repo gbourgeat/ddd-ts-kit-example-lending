@@ -28,6 +28,7 @@ export class MonthlyReportController {
   /** The report is the context itself: its refusals are the permission of the group's guards, none of its own. */
   @Get('monthly')
   @KitRoute({
+    produces: ['text/csv'],
     request: { query },
     response: {
       description: 'One page of the monthly report: one line per branch with a figure in the month.',
