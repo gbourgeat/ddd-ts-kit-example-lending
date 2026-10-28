@@ -4,7 +4,6 @@ import { expectJobAuditedFor } from '$test/e2e/support/job-audit';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { servicingOperatorAt } from '$test/e2e/support/servicing/loan-retention';
 import { BANK_TENANT, openBank } from '$test/e2e/support/servicing/bank';
-import { grantDueInstalmentCollection } from '$test/e2e/support/servicing/nightly-run';
 import { borrowerOf, publishPayoutAuthorised } from '$test/e2e/support/servicing/payout-authorised';
 import { operatorOf, registeredCustomer } from '$test/e2e/support/customer-due-diligence/customer-files';
 
@@ -34,7 +33,6 @@ describe('Compute the instalments due each night, per bank, end to end', () => {
   beforeEach(async () => {
     await application.reset();
     await openBank(application);
-    await grantDueInstalmentCollection(application);
   });
 
   afterEach(() => {

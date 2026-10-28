@@ -165,6 +165,12 @@ channels:
     messages:
       v1:
         $ref: '#/components/messages/servicing.loan.paid-out.v1'
+  servicing.loan.payment-received:
+    address: servicing.loan.payment-received
+    description: 'The instalment of a loan is received by direct debit: its number in the schedule and the amount collected, for those who watch the repayments.'
+    messages:
+      v1:
+        $ref: '#/components/messages/servicing.loan.payment-received.v1'
 operations:
   send.branch-network.conflict-of-interest.declared:
     action: send
@@ -322,6 +328,12 @@ operations:
       $ref: '#/channels/servicing.loan.paid-out'
     messages:
       - $ref: '#/channels/servicing.loan.paid-out/messages/v1'
+  send.servicing.loan.payment-received:
+    action: send
+    channel:
+      $ref: '#/channels/servicing.loan.payment-received'
+    messages:
+      - $ref: '#/channels/servicing.loan.payment-received/messages/v1'
 components:
   messages:
     branch-network.conflict-of-interest.declared.v1:
@@ -1779,6 +1791,53 @@ components:
             type: object
             required:
               - loanId
+          traceparent:
+            type: string
+            description: W3C traceparent captured at publication.
+          correlationId:
+            type: string
+    servicing.loan.payment-received.v1:
+      name: servicing.loan.payment-received
+      title: servicing.loan.payment-received v1
+      summary: 'The instalment of a loan is received by direct debit: its number in the schedule and the amount collected, for those who watch the repayments.'
+      contentType: application/json
+      tags:
+        - name: servicing
+      payload:
+        type: object
+        required:
+          - id
+          - type
+          - version
+          - occurredAt
+          - payload
+        properties:
+          id:
+            type: string
+            description: 'Unique id of the event: the idempotency key.'
+          type:
+            type: string
+            const: servicing.loan.payment-received
+          version:
+            type: integer
+            const: 1
+          occurredAt:
+            type: string
+            format: date-time
+          payload:
+            properties:
+              loanId:
+                type: string
+              instalmentNumber:
+                minimum: 1
+                type: integer
+              amountCents:
+                type: integer
+            type: object
+            required:
+              - loanId
+              - instalmentNumber
+              - amountCents
           traceparent:
             type: string
             description: W3C traceparent captured at publication.

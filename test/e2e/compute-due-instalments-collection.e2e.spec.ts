@@ -1,12 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import { collectEvents } from '@ddd-ts-kit/testing/e2e';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { BANK_TENANT, openBank } from '$test/e2e/support/servicing/bank';
-import {
-  grantDueInstalmentCollection,
-  payOutLoan,
-  readLoanAsBorrower,
-  runNightlyComputation,
-} from '$test/e2e/support/servicing/nightly-run';
+import { payOutLoan, readLoanAsBorrower, runNightlyComputation } from '$test/e2e/support/servicing/nightly-run';
 
 /** A loan whose mandate the payer's bank refuses: the simulated provider refuses the mandates prefixed `refused-`. */
 const REFUSED_LOAN_ID = 'refused-loan-1';
@@ -29,7 +25,6 @@ describe('Collect each due instalment by direct debit, end to end', () => {
   beforeEach(async () => {
     await application.reset();
     await openBank(application, BANK_TENANT);
-    await grantDueInstalmentCollection(application);
   });
 
   it('records the payment of each instalment noted due, and lets the borrower read it', async () => {
@@ -42,6 +37,20 @@ describe('Collect each due instalment by direct debit, end to end', () => {
       instalmentsPaid: [1, 2],
       instalmentsUnpaid: [],
     });
+  });
+
+  it('publishes each payment received for those who watch the repayments', async () => {
+    const received = collectEvents(application.events, ['servicing.loan.payment-received']);
+
+    await payOutLoan(application, ACCEPTED_LOAN_ID);
+
+    await runNightlyComputation(application, NIGHTLY_RUN_ON_THE_TENTH_OF_MARCH);
+    received.stop();
+
+    expect(received.received('servicing.loan.payment-received').map((event) => event.payload)).toEqual([
+      expect.objectContaining({ loanId: ACCEPTED_LOAN_ID, instalmentNumber: 1 }),
+      expect.objectContaining({ loanId: ACCEPTED_LOAN_ID, instalmentNumber: 2 }),
+    ]);
   });
 
   it('marks the instalment unpaid when its direct debit is rejected', async () => {

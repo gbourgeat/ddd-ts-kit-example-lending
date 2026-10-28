@@ -48,6 +48,8 @@ import { CollectInstalmentHandler } from '@/contexts/servicing/instalments/appli
 import { CollectDueInstalmentEventHandler } from '@/contexts/servicing/instalments/application/event-handlers/collect-due-instalment.event-handler';
 import { SimulatedPaymentProvider } from '@/contexts/servicing/instalments/infrastructure/external/simulated-payment-provider.adapter';
 import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/events/loan-instalment-due-noted.event';
+import { LoanPaymentReceivedPublisher } from '@/contexts/servicing/instalments/application/integration/publishers/loan-payment-received.publisher';
+import { LoanPaymentReceived } from '@/contexts/servicing/instalments/domain/events/loan-payment-received.event';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -224,6 +226,17 @@ function registerReactions(platform: Platform): void {
   platform.domainEvents.on(LoanInstalmentDueNoted.eventName, async (event) => {
     if (event instanceof LoanInstalmentDueNoted) {
       await collectDueInstalmentEventHandler.handle(event);
+    }
+  });
+
+  const loanPaymentReceivedPublisher = platform.adapter(
+    new LoanPaymentReceivedPublisher(platform.publisher, platform.ids),
+    { kind: 'domain-event-handler', context: 'servicing' },
+  );
+
+  platform.domainEvents.on(LoanPaymentReceived.eventName, async (event) => {
+    if (event instanceof LoanPaymentReceived) {
+      await loanPaymentReceivedPublisher.handle(event);
     }
   });
   // /ddd-ts-kit:reactions

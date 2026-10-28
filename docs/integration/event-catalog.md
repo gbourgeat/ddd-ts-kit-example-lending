@@ -435,3 +435,17 @@ Consumers: `identity`
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `loanId` | string | yes |  |
+
+### servicing.loan.payment-received
+
+| Type | Version | Description | Deprecated |
+| --- | --- | --- | --- |
+| `servicing.loan.payment-received` | 1 | The instalment of a loan is received by direct debit: its number in the schedule and the amount collected, for those who watch the repayments. | no |
+
+#### Payload of version 1
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `loanId` | string | yes |  |
+| `instalmentNumber` | integer | yes |  |
+| `amountCents` | integer | yes |  |

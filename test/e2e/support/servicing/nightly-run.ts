@@ -4,17 +4,6 @@ import type { RunningApplication } from '$test/e2e/support/start-application';
 import { servicingOperatorAt } from '$test/e2e/support/servicing/loan-retention';
 import { borrowerOf, publishPayoutAuthorised } from '$test/e2e/support/servicing/payout-authorised';
 
-/** The subject of the system actor that collects the instalments noted due: its relation is granted to the context. */
-const COLLECT_DUE_INSTALMENT_SUBJECT = 'system:system:CollectDueInstalmentEventHandler';
-
-/**
- * Grants the system actor of the due-instalment reaction the operator relation on servicing, as the platform does for the
- * actors it knows: a nightly run that notes an instalment due sends its collection as this actor.
- */
-export async function grantDueInstalmentCollection(app: RunningApplication): Promise<void> {
-  await app.relate({ object: 'context:servicing', relation: 'operator', subject: COLLECT_DUE_INSTALMENT_SUBJECT });
-}
-
 /** The job that notes the instalments due each night, by its name in the application. */
 export const COMPUTE_JOB = 'servicing.compute-due-instalments';
 
