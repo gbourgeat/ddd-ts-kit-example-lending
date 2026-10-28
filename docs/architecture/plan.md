@@ -413,6 +413,7 @@ the code later becomes a record in `docs/adr/` once the project exists.
 - 2026-10-28 Owner, wave 6e, US0.08: binding the branch-network answer of the advisor's branch in the composition root is the conductor's step; then US0.08 and US1.16 are proven end to end, then US12.01 (owner)
 - 2026-10-28 Owner, wave 6e, grants: the grants of the last part's answers (compliance officer, the advisor through the portfolio relation, the data protection officer) are written in the relationship schema of the project, where the other grants live, each with its proof (owner)
 - 2026-10-28 Owner, wave 6e, US7.04 and US8.05 depend on rows of a later wave (US5.03 to US6.11): left to their wave, not blocked. This supersedes the wave 6d decision that US7.04 is built in this part (owner)
+- 2026-10-28 Conductor, owner brief, US5.03, to confirm: the band of a score on the model's 0 to 100 scale is red below 40, amber from 40 to 69, green from 70 (a borderline applicant is never shown green); the factors that lowered the score are listed in words, most harmful first, at most five (the most protective reading of a rule nobody stated)
 
 ## For the owner
 
