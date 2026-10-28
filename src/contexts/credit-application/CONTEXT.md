@@ -274,13 +274,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepBrokerRegistrationIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepBrokerRegistrationLapsedIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepProductTermsIntegrationHandler` | `credit-application.keep-delegation-table` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.product.defined` | 2 | `credit-policy` | `KeepBrokerRegistrationIntegrationHandler` | `credit-application.keep-product-terms` |
+| `credit-policy.product.defined` | 2 | `credit-policy` | `KeepBrokerRegistrationLapsedIntegrationHandler` | `credit-application.keep-product-terms` |
+| `credit-policy.product.defined` | 2 | `credit-policy` | `KeepProductTermsIntegrationHandler` | `credit-application.keep-product-terms` |
+| `credit-policy.rate-grid.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | `credit-application.keep-rate-grid` |
+| `credit-policy.rate-grid.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | `credit-application.keep-rate-grid` |
 
 ### Publishers
 
@@ -320,7 +320,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CustomerDiligenceGateway` | gateway | `InProcessCustomerDiligenceGateway` |
 | `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeciderLevels` | not bound |  |
-| `DeclaredConflictsStore` | external | `PrismaDeclaredConflictsStore` |
+| `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
 | `DelegationTables` | not bound |  |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `LegalMaximumRates` | not bound |  |

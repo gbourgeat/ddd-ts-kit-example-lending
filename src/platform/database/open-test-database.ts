@@ -1,3 +1,4 @@
+import { openAsBlob } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { PGLiteSocketServer } from '@electric-sql/pglite-socket';
@@ -28,7 +29,7 @@ export function openTestDatabase(url?: string): Promise<TestDatabase> {
 }
 
 async function openInProcess(): Promise<TestDatabase> {
-  const engine = await PGlite.create();
+  const engine = await inProcessPostgres();
   const server = new PGLiteSocketServer({ db: engine, host: '127.0.0.1', port: 0, maxConnections: 10 });
 
   await server.start();
@@ -47,6 +48,17 @@ async function openInProcess(): Promise<TestDatabase> {
   };
 
   return { persistence: persistenceOver(client), reset: () => emptyTables(client), close };
+}
+
+/**
+ * A copy of the cluster the global setup of the run initialised once (test/support/test-database-template.ts),
+ * which spares each spec the initdb of its own; a cluster initialised here when the run names no
+ * global setup. The tables are created on it by the caller, every time.
+ */
+async function inProcessPostgres(): Promise<PGlite> {
+  const template = process.env['TEST_DATABASE_TEMPLATE'];
+
+  return PGlite.create(template === undefined ? {} : { loadDataDir: await openAsBlob(template) });
 }
 
 async function openServer(url: string): Promise<TestDatabase> {
