@@ -12,6 +12,7 @@ interface CreditApplicationSubmittedData {
   readonly applicantId: string;
   readonly amountInCents: number;
   readonly durationMonths: number;
+  readonly branchId: string;
 }
 
 interface CreditApplicationAccountConsentGivenData {
@@ -40,11 +41,16 @@ interface CreditApplicationDocumentAttachedData {
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
 export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> = {
   [CreditApplicationSubmitted.eventName]: defineStoredEvent(CreditApplicationSubmitted, {
-    version: 1,
+    version: 2,
+    upcasters: {
+      // A submission of version 1 recorded no branch: it is read with an empty one, which no version 2 carries.
+      1: () => ({ branchId: '' }),
+    },
     encode: (event): CreditApplicationSubmittedData => ({
       applicantId: event.applicantId,
       amountInCents: event.amount.cents,
       durationMonths: event.durationMonths,
+      branchId: event.branchId,
     }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationSubmitted(
@@ -53,6 +59,7 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         Money.ofCents(data.number('amountInCents')),
         data.number('durationMonths'),
         occurredAt,
+        data.text('branchId'),
       ),
   }),
   [CreditApplicationAccountConsentGiven.eventName]: defineStoredEvent(CreditApplicationAccountConsentGiven, {
