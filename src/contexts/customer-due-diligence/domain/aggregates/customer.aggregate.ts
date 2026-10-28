@@ -4,6 +4,7 @@ import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/do
 import { BusinessAlreadyRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-already-registered.error';
 import { BusinessNotRegistered } from '@/contexts/customer-due-diligence/domain/errors/business-not-registered.error';
 import { IdentityDocumentExpired } from '@/contexts/customer-due-diligence/domain/errors/identity-document-expired.error';
+import { MissingReason } from '@/contexts/customer-due-diligence/domain/errors/missing-reason.error';
 import { NoPossibleMatch } from '@/contexts/customer-due-diligence/domain/errors/no-possible-match.error';
 import { ProofOfAddressTooOld } from '@/contexts/customer-due-diligence/domain/errors/proof-of-address-too-old.error';
 import { CustomerDirectorsAndOwnersDeclared } from '@/contexts/customer-due-diligence/domain/events/customer-directors-and-owners-declared.event';
@@ -11,6 +12,7 @@ import { CustomerAdvisorAssigned } from '@/contexts/customer-due-diligence/domai
 import { CustomerPossibleMatchFound } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-found.event';
 import { CustomerSanctionsMatchConfirmed } from '@/contexts/customer-due-diligence/domain/events/customer-sanctions-match-confirmed.event';
 import { CustomerRelationshipEnded } from '@/contexts/customer-due-diligence/domain/events/customer-relationship-ended.event';
+import { CustomerPossibleMatchDismissed } from '@/contexts/customer-due-diligence/domain/events/customer-possible-match-dismissed.event';
 
 /** The facts the bank checked to know a person. */
 type PersonIdentity = NonNullable<CustomerIdentified['identity']>;
@@ -25,7 +27,8 @@ export type CustomerEvent =
   | CustomerAdvisorAssigned
   | CustomerPossibleMatchFound
   | CustomerSanctionsMatchConfirmed
-  | CustomerRelationshipEnded;
+  | CustomerRelationshipEnded
+  | CustomerPossibleMatchDismissed;
 
 /** The facts of the registration of a business, as the bank records them. */
 export interface BusinessRegistration {
@@ -47,6 +50,7 @@ export interface CustomerState {
   readonly ownersDeclaredAt?: Date;
   readonly advisorId?: string;
   readonly possibleMatchFoundAt?: Date;
+  readonly possibleMatchDismissedAt?: Date | undefined;
   readonly sanctionsMatchConfirmedAt?: Date;
   readonly relationshipEndedAt?: Date;
 }
@@ -129,6 +133,19 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
     this.record(new CustomerSanctionsMatchConfirmed(this.id, now));
   }
 
+  /** Compliance clears the possible match waiting for review, with its reason: the customer is not on the list. Only a pending possible match can be dismissed. */
+  dismissMatch(reason: string, now: Date): void {
+    if (reason.trim() === '') {
+      throw MissingReason.forDismissal(this.id);
+    }
+
+    if (!this.hasPendingPossibleMatch()) {
+      throw NoPossibleMatch.forCustomer(this.id);
+    }
+
+    this.record(new CustomerPossibleMatchDismissed(this.id, now, reason));
+  }
+
   /** Ends the business relationship with the customer; ending one already ended records nothing, so a repeated reaction is safe. */
   endRelationship(now: Date): void {
     if (this.state.relationshipEndedAt !== undefined) {
@@ -151,6 +168,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
       [CustomerPossibleMatchFound.eventName]: (event) => this.applyPossibleMatchFound(event),
       [CustomerSanctionsMatchConfirmed.eventName]: (event) => this.applySanctionsMatchConfirmed(event),
       [CustomerRelationshipEnded.eventName]: (event) => this.applyRelationshipEnded(event),
+      [CustomerPossibleMatchDismissed.eventName]: (event) => this.applyPossibleMatchDismissed(event),
     };
   }
 
@@ -201,7 +219,7 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   private applyPossibleMatchFound(event: CustomerPossibleMatchFound): void {
-    this.state = { ...this.state, possibleMatchFoundAt: event.occurredAt };
+    this.state = { ...this.state, possibleMatchFoundAt: event.occurredAt, possibleMatchDismissedAt: undefined };
   }
 
   private applySanctionsMatchConfirmed(event: CustomerSanctionsMatchConfirmed): void {
@@ -209,10 +227,18 @@ export class Customer extends EventSourcedAggregate<CustomerEvent, CustomerState
   }
 
   private hasPendingPossibleMatch(): boolean {
-    return this.state.possibleMatchFoundAt !== undefined && this.state.sanctionsMatchConfirmedAt === undefined;
+    return (
+      this.state.possibleMatchFoundAt !== undefined &&
+      this.state.sanctionsMatchConfirmedAt === undefined &&
+      this.state.possibleMatchDismissedAt === undefined
+    );
   }
 
   private applyRelationshipEnded(event: CustomerRelationshipEnded): void {
     this.state = { ...this.state, relationshipEndedAt: event.occurredAt };
+  }
+
+  private applyPossibleMatchDismissed(event: CustomerPossibleMatchDismissed): void {
+    this.state = { ...this.state, possibleMatchDismissedAt: event.occurredAt };
   }
 }
