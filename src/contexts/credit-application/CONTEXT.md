@@ -109,6 +109,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Brought | an application a broker brings on behalf of a customer, recorded with the broker who brought it |  |
 | Draft | the offer in preparation, priced from the approved application and the rate grid, not yet issued |  |
 | Issue | the offer sent to the borrower after its pre-contractual sheet, refused when its annual percentage rate is at or above the legal maximum rate in force that day |  |
+| Show | to give back, to a decider or a reviewer, what a decision rests on, read from the file as it was recorded |  |
+| View | what the decider saw of an application when they decided: the decision with the assessment, the register answer and the refusal review it rested on, as the file recorded them, never the current data |  |
 
 ## Modules
 
@@ -250,6 +252,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadRateGrid` | query | not read |
 | `ReviewProposedRefusal` | command | `application.review-refusal` |
 | `SearchApplications` | query | `public` |
+| `ShowDecisionView` | query | `application.decide` |
 | `SubmitApplication` | command | `application.submit` |
 
 ### Routes
@@ -264,6 +267,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | POST | `/applications/:id/decision` | `decideApplication` | `ApplicationsRoutes` | `Authenticated` | `DecideApplication` | not read | params: `DecideApplicationParams`, body: `DecideApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotAssessed`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.RefusalNotReviewed`, `CreditApplicationCodes.RefusalProposalStands`, `CreditApplicationCodes.InvalidDecisionReasons`, `CreditApplicationCodes.InvalidDecisionConditions`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable`, `CreditApplicationCodes.DecisionAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide` |
+| GET | `/applications/:id/decision-view` | `showDecisionView` | `ApplicationsRoutes` | `Authenticated` | `ShowDecisionView` | `application.decide` | params: `ShowDecisionViewParams` | 200: `ShowDecisionViewAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotDecided` |
 | GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | not read | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
@@ -311,6 +315,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | not read | not read |  |
 | not read | not read |  |
 | not read | `DeciderLimitReader` |  |
+| not read | not read |  |
 | not read | `DeclaredConflictRow` |  |
 | not read | `DeclaredConflictsProjection` |  |
 | not read | not read |  |
@@ -343,6 +348,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 | `ScoringGateway` | gateway | `InProcessScoringGateway` |
 | `SearchApplicationsReader` | external | `PrismaSearchApplicationsReader` |
+| `ShowDecisionViewReader` | repository | `RepositoryShowDecisionViewReader` |
 
 ### Policies
 
@@ -383,6 +389,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
 | `ConflictedDecider` | `forConflictedDecider` | `CONFLICTED_DECIDER` | none |
 | `DecisionAboveLimit` | `forAboveLimit` | `DECISION_ABOVE_LIMIT` | `levelNeeded` |
+| `NotDecided` | `forNotDecided` | `NOT_DECIDED` | none |
 | `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |
 | `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |

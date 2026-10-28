@@ -101,6 +101,12 @@ export interface Client {
    */
   decideApplication(input: operations.DecideApplicationInput, options?: CallOptions): Promise<operations.DecideApplicationResult>;
   /**
+   * Show decision view: `GET /applications/{id}/decision-view`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), NOT_DECIDED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  showDecisionView(input: operations.ShowDecisionViewInput, options?: CallOptions): Promise<operations.ShowDecisionViewResult>;
+  /**
    * Read declared conflicts: `GET /applications/{id}/declared-conflicts`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
@@ -486,6 +492,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
     decideApplication: (input, call) => operations.decideApplication(connection, input, call),
+    showDecisionView: (input, call) => operations.showDecisionView(connection, input, call),
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     readDocument: (input, call) => operations.readDocument(connection, input, call),

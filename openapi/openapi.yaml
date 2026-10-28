@@ -1202,6 +1202,81 @@ paths:
             - UNKNOWN_DECIDER_LEVEL
             - UNKNOWN_DELEGATION_TABLE
             - VALIDATION_FAILED
+  /applications/{id}/decision-view:
+    get:
+      operationId: showDecisionView
+      summary: Show decision view
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  applicationId:
+                    type: string
+                  decision:
+                    $ref: '#/components/schemas/DecisionShownLine'
+                  assessment:
+                    $ref: '#/components/schemas/AssessmentShownLine'
+                  register:
+                    $ref: '#/components/schemas/RegisterShownLine'
+                  refusalReview:
+                    $ref: '#/components/schemas/RefusalReviewShownLine'
+                type: object
+                required:
+                  - applicationId
+                  - decision
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: NOT_DECIDED, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_DECIDED
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /applications/{id}/declared-conflicts:
     get:
       operationId: readDeclaredConflicts
@@ -6248,6 +6323,42 @@ components:
           type: string
           description: The identifier of what the command created or changed.
       additionalProperties: false
+    AssessmentShownLine:
+      properties:
+        assessorId:
+          type: string
+        assessedAt:
+          type: string
+        modelVersion:
+          type: string
+        debtToIncomePercent:
+          type: integer
+        repaymentIncidents:
+          type: integer
+        residualIncomeCents:
+          type: integer
+        score:
+          type: integer
+        band:
+          type: string
+        factors:
+          items:
+            type: string
+          type: array
+        proposedOutcome:
+          type: string
+      type: object
+      required:
+        - assessorId
+        - assessedAt
+        - modelVersion
+        - debtToIncomePercent
+        - repaymentIncidents
+        - residualIncomeCents
+        - score
+        - band
+        - factors
+        - proposedOutcome
     ConsultedPartyLine:
       properties:
         customerId:
@@ -6264,6 +6375,37 @@ components:
         - name
         - birthDate
         - listed
+    DecisionShownLine:
+      properties:
+        outcome:
+          type: string
+        deciderId:
+          type: string
+        level:
+          type: string
+        reasons:
+          type: string
+        conditions:
+          type: string
+        approvedAmountCents:
+          type: integer
+        branchId:
+          type: string
+        exception:
+          type: boolean
+        decidedAt:
+          type: string
+      type: object
+      required:
+        - outcome
+        - deciderId
+        - level
+        - reasons
+        - conditions
+        - approvedAmountCents
+        - branchId
+        - exception
+        - decidedAt
     DeclaredConflictLine:
       properties:
         conflictOfInterestId:
@@ -6424,6 +6566,41 @@ components:
       required:
         - upToMonths
         - rateBasisPoints
+    RefusalReviewShownLine:
+      properties:
+        reviewerId:
+          type: string
+        conclusion:
+          type: string
+        reason:
+          type: string
+        reviewedAt:
+          type: string
+      type: object
+      required:
+        - reviewerId
+        - conclusion
+        - reason
+        - reviewedAt
+    RegisterPartyLine:
+      properties:
+        customerId:
+          type: string
+        listed:
+          type: boolean
+      type: object
+      required:
+        - customerId
+        - listed
+    RegisterShownLine:
+      properties:
+        parties:
+          items:
+            $ref: '#/components/schemas/RegisterPartyLine'
+          type: array
+      type: object
+      required:
+        - parties
     RequestedAmountBody:
       properties:
         cents:

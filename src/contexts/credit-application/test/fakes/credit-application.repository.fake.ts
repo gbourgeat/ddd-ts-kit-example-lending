@@ -1,5 +1,8 @@
 import { InMemoryEventStore, InMemorySubjectKeyStore, PersonalDataCipher } from '@ddd-ts-kit/kernel';
-import type { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
+import type {
+  CreditApplication,
+  CreditApplicationEvent,
+} from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
 import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
 
@@ -22,5 +25,9 @@ export class FakeCreditApplicationRepository implements CreditApplicationReposit
 
   findRefusedOnOrBefore(instant: Date): Promise<readonly CreditApplication[]> {
     return this.adapter.findRefusedOnOrBefore(instant);
+  }
+
+  historyOf(id: string): Promise<readonly CreditApplicationEvent[]> {
+    return this.adapter.historyOf(id);
   }
 }
