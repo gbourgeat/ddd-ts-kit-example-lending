@@ -1,7 +1,10 @@
 import type { StoredEventData } from '@ddd-ts-kit/kernel';
 import { defineStoredEvent, personalData, type PersonalValue, type StoredEventTypes } from '@ddd-ts-kit/kernel';
 import type { CustomerEvent } from '@/contexts/customer-due-diligence/domain/aggregates/customer.aggregate';
-import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
+import {
+  CustomerIdentified,
+  type IdentifiedPerson,
+} from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { CustomerBusinessRegistered } from '@/contexts/customer-due-diligence/domain/events/customer-business-registered.event';
 import { IdentityDocumentKind } from '@/contexts/customer-due-diligence/domain/vocabularies/identity-document-kind.vocabulary';
 import { RiskRating } from '@/contexts/customer-due-diligence/domain/vocabularies/risk-rating.vocabulary';
@@ -72,29 +75,50 @@ interface PersonIdentityData {
   readonly addressProofDatedOn: string;
 }
 
-/** Version 2 of the birth: `identityRecorded` is false for a birth upcast from version 1, which has no identity. */
-interface CustomerIdentifiedData {
+/** The name and the birth date of the identification: personal, sealed by subject, read back by `personOf`. */
+interface IdentifiedPersonData {
+  readonly name: PersonalValue;
+  readonly birthDate: PersonalValue;
+}
+
+/** Version 2 of the birth, before the name and the birth date were recorded. */
+interface CustomerIdentifiedV2Data {
   readonly identityRecorded: boolean;
   readonly identity: PersonIdentityData | null;
+}
+
+/** Version 3 of the birth: `identityRecorded` and `personRecorded` are false for a birth upcast from an earlier version. */
+interface CustomerIdentifiedData extends CustomerIdentifiedV2Data {
+  readonly personRecorded: boolean;
+  readonly person: IdentifiedPersonData | null;
 }
 
 /** How the events of Customer are kept in its stream: one entry per event, read back by `decode`. */
 export const customerEvents: StoredEventTypes<CustomerEvent> = {
   [CustomerIdentified.eventName]: defineStoredEvent(CustomerIdentified, {
-    version: 2,
+    version: 3,
     upcasters: {
-      // A birth of version 1 recorded no identity fact: it is read as not recorded, and identifies no one.
-      1: () => ({ identityRecorded: false, identity: null }),
+      // A birth of version 1 recorded no identity fact nor person: it is read as not recorded, and identifies no one.
+      1: () => ({ identityRecorded: false, identity: null, personRecorded: false, person: null }),
+      // A birth of version 2 recorded no name nor birth date: it identifies its customer without them.
+      2: (data) => ({
+        ...data,
+        personRecorded: false,
+        person: null,
+      }),
     },
     encode: (event): CustomerIdentifiedData => ({
       identityRecorded: event.identity !== undefined,
       identity: event.identity === undefined ? null : identityDataOf(event.aggregateId, event.identity),
+      personRecorded: event.person !== undefined,
+      person: event.person === undefined ? null : personDataOf(event.aggregateId, event.person),
     }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CustomerIdentified(
         aggregateId,
         occurredAt,
         data.flag('identityRecorded') ? identityOf(data.record('identity')) : undefined,
+        data.flag('personRecorded') ? personOf(data.record('person')) : undefined,
       ),
   }),
   [CustomerBusinessRegistered.eventName]: defineStoredEvent(CustomerBusinessRegistered, {
@@ -201,6 +225,21 @@ function identityDataOf(subject: string, identity: PersonIdentity): PersonIdenti
     documentExpiresOn: identity.documentExpiresOn.toISOString(),
     address: personalData(subject, identity.address),
     addressProofDatedOn: identity.addressProofDatedOn.toISOString(),
+  };
+}
+
+/** The name and the birth date sealed by the subject of the customer: the birth date is stored as its instant. */
+function personDataOf(subject: string, person: IdentifiedPerson): IdentifiedPersonData {
+  return {
+    name: personalData(subject, person.name),
+    birthDate: personalData(subject, person.birthDate.toISOString()),
+  };
+}
+
+function personOf(data: StoredEventData): IdentifiedPerson {
+  return {
+    name: data.text('name'),
+    birthDate: new Date(data.text('birthDate')),
   };
 }
 
