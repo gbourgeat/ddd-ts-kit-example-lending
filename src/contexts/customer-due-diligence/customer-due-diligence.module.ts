@@ -4,6 +4,7 @@ import { customerDueDiligenceControllers } from '@/contexts/customer-due-diligen
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 import type { ScreeningProvider } from '@/contexts/customer-due-diligence/application/ports/screening-provider.port';
+import type { CustomerRepository } from '@/contexts/customer-due-diligence/domain/repositories/customer.repository';
 // ddd-ts-kit:imports
 import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/infrastructure/external/simulated-screening-provider.adapter';
 import { CustomerIdentifiedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-identified.publisher';
@@ -53,7 +54,8 @@ import { FlagOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligenc
 import { FlagAllOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.command';
 import { FlagAllOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.handler';
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/customer-due-diligence/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
-import { ErasePersonalDataPastRetentionHandler } from '@/contexts/customer-due-diligence/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.handler';
+import { RemotePersonalDataErasure } from '@/contexts/customer-due-diligence/infrastructure/external/remote-personal-data-erasure.adapter';
+import { registerPersonalDataErasure } from '@/contexts/customer-due-diligence/composition/register-personal-data-erasure.module';
 import { registerNightlyJobs } from '@/contexts/customer-due-diligence/composition/register-nightly-jobs.module';
 // /ddd-ts-kit:imports
 
@@ -201,12 +203,18 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     { context: 'customer-due-diligence' },
   );
 
-  platform.commands.register(
-    ErasePersonalDataPastRetentionCommand,
-    new ErasePersonalDataPastRetentionHandler(customerRepository, platform.ids, platform.clock),
-    { context: 'customer-due-diligence' },
-  );
   // /ddd-ts-kit:handlers
+  registerErasure(platform, customerRepository);
+}
+
+function registerErasure(platform: Platform, customerRepository: CustomerRepository): void {
+  const personalDataErasure = platform.adapter(new RemotePersonalDataErasure(platform.eventSourcing.subjectKeys), {
+    kind: 'external',
+    context: 'customer-due-diligence',
+    token: 'PersonalDataErasure',
+  });
+
+  registerPersonalDataErasure(platform, customerRepository, personalDataErasure);
 }
 
 /** What the context does when an event happens: its own events and those of the other contexts. */

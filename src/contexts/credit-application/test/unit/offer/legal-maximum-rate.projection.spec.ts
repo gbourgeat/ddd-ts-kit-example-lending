@@ -8,7 +8,12 @@ describe('Legal maximum rate, kept from what credit-policy announces', () => {
 
     // TODO(domain): give the payload every field credit-policy declares, hand the projection the fake of its read model and assert the line it keeps.
     const event = legalMaximumRatePublishedV2.create(
-      { legalMaximumRateId: 'legal-maximum-rate-1' },
+      {
+        legalMaximumRateId: 'legal-maximum-rate-1',
+        category: 'consumer',
+        rateBasisPoints: 700,
+        effectiveFrom: '2026-01-01',
+      },
       { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' },
     );
 

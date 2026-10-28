@@ -245,6 +245,12 @@ export interface Client {
    */
   setDelegationTable(input: operations.SetDelegationTableInput, options?: CallOptions): Promise<operations.SetDelegationTableResult>;
   /**
+   * Read delegation table: `GET /delegation-tables/{delegationTableId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  readDelegationTable(input: operations.ReadDelegationTableInput, options?: CallOptions): Promise<operations.ReadDelegationTableResult>;
+  /**
    * Flag overdue every due diligence that falls due before the instant, for all customers: `POST /due-diligence/flag-overdue`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), VALIDATION_FAILED (422).
@@ -414,6 +420,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
+    readDelegationTable: (input, call) => operations.readDelegationTable(connection, input, call),
     flagAllOverdueDueDiligence: (input, call) => operations.flagAllOverdueDueDiligence(connection, input, call),
     recordScoringImpactAssessment: (input, call) => operations.recordScoringImpactAssessment(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),

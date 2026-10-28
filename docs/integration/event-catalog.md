@@ -145,12 +145,25 @@ Generated from the integration event declarations. Do not edit by hand: regenera
 | Type | Version | Description | Deprecated |
 | --- | --- | --- | --- |
 | `credit-policy.product.defined` | 1 | A product of the bank catalogue has been defined; the other contexts read its terms from credit-policy by its identifier. | no |
+| `credit-policy.product.defined` | 2 | A product was defined, with the amounts, durations, arrangement fee and insurance it is sold with. | no |
 
 #### Payload of version 1
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `productId` | string | yes |  |
+
+#### Payload of version 2
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `productId` | string | yes |  |
+| `amountMinimumCents` | integer | yes |  |
+| `amountMaximumCents` | integer | yes |  |
+| `durationMinimumMonths` | integer | yes |  |
+| `durationMaximumMonths` | integer | yes |  |
+| `arrangementFeeCents` | integer | yes |  |
+| `insuranceMandatory` | boolean | yes |  |
 
 ### credit-policy.rate-grid.published
 

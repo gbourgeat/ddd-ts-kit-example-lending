@@ -20,8 +20,12 @@ describe('When credit-policy publishes credit-policy.rate-grid.published', () =>
   it('receives the event as credit-policy publishes it', async () => {
     const handler = new KeepRateGridIntegrationHandler(new InMemoryCommandBus());
     const meta = { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' };
+
     // TODO(domain): give the payload every field credit-policy declares, register the command the handler executes and assert what credit-application did.
-    const event = rateGridPublishedV2.create({ rateGridId: 'rate-grid-1' }, meta);
+    const event = rateGridPublishedV2.create(
+      { rateGridId: 'rate-grid-1', productId: 'product-1', effectiveFrom: '2026-01-01' },
+      meta,
+    );
 
     await expect(handler.handle(event)).resolves.toBeUndefined();
   });

@@ -26,9 +26,25 @@ describe('Erase personal data past retention, when its time comes', () => {
     });
   });
 
-  // TODO(domain): replace each entry below by a test of what "erase personal data past retention" asks of the use case: the period it names from `scheduledAt`, and that a second run of the same occurrence changes nothing.
-  it.todo('names the period of the occurrence, never the instant it really runs');
-  it.todo('has the same outcome when the same occurrence runs twice');
+  it('gives the command the instant the occurrence was scheduled for, never the instant it really runs', async () => {
+    const { job, sent } = arrange();
+
+    await job.run(occurrence);
+
+    expect(sent[0]).toMatchObject({ asOf: occurrence.scheduledAt });
+  });
+
+  it('sends the same instant when the same occurrence runs twice', async () => {
+    const { job, sent } = arrange();
+
+    await job.run(occurrence);
+    await job.run(occurrence);
+
+    expect(sent.map((message) => (message as { asOf: Date }).asOf)).toEqual([
+      occurrence.scheduledAt,
+      occurrence.scheduledAt,
+    ]);
+  });
 });
 
 function arrange() {

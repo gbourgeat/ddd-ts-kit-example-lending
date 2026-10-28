@@ -20,8 +20,17 @@ describe('When credit-policy publishes credit-policy.legal-maximum-rate.publishe
   it('receives the event as credit-policy publishes it', async () => {
     const handler = new KeepLegalMaximumRateIntegrationHandler(new InMemoryCommandBus());
     const meta = { id: 'event-1', occurredAt: '2026-01-01T00:00:00.000Z' };
+
     // TODO(domain): give the payload every field credit-policy declares, register the command the handler executes and assert what credit-application did.
-    const event = legalMaximumRatePublishedV2.create({ legalMaximumRateId: 'legal-maximum-rate-1' }, meta);
+    const event = legalMaximumRatePublishedV2.create(
+      {
+        legalMaximumRateId: 'legal-maximum-rate-1',
+        category: 'consumer',
+        rateBasisPoints: 700,
+        effectiveFrom: '2026-01-01',
+      },
+      meta,
+    );
 
     await expect(handler.handle(event)).resolves.toBeUndefined();
   });

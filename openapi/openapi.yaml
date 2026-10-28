@@ -3187,6 +3187,83 @@ paths:
           x-error-codes:
             - INVALID_DELEGATION_TABLE
             - VALIDATION_FAILED
+  /delegation-tables/{delegationTableId}:
+    get:
+      operationId: readDelegationTable
+      summary: Read delegation table
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: delegationTableId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  delegationTableId:
+                    type: string
+                  effectiveFrom:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                  levels:
+                    items:
+                      $ref: '#/components/schemas/DelegationTableLevelAnswer'
+                    type: array
+                type: object
+                required:
+                  - delegationTableId
+                  - effectiveFrom
+                  - levels
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_DELEGATION_TABLE
+            - VALIDATION_FAILED
   /due-diligence/flag-overdue:
     post:
       operationId: flagAllOverdueDueDiligence
@@ -4974,6 +5051,16 @@ components:
         - conflictOfInterestId
         - staffMemberId
         - customerId
+    DelegationTableLevelAnswer:
+      properties:
+        level:
+          type: string
+        amountCents:
+          type: integer
+      type: object
+      required:
+        - level
+        - amountCents
     IdentifierLine:
       properties:
         id:

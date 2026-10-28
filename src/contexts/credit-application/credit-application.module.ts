@@ -60,6 +60,7 @@ import { KeepDelegationTableCommand } from '@/contexts/credit-application/decisi
 import { ReadDelegationTableQuery } from '@/contexts/credit-application/decision/application/queries/read-delegation-table/read-delegation-table.query';
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { registerDelegationTableHandlers } from '@/contexts/credit-application/composition/register-delegation-table-handlers.module';
+import { InProcessCustomerDiligenceGateway } from '@/contexts/credit-application/offer/infrastructure/external/in-process-customer-diligence.gateway';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -87,6 +88,12 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
   });
 
   const customerAdvisorBranch = registerGateways(platform);
+
+  platform.adapter(new InProcessCustomerDiligenceGateway(platform.customerDiligence), {
+    kind: 'gateway',
+    context: 'credit-application',
+    token: 'CustomerDiligenceGateway',
+  });
 
   registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
   registerDelegationTableHandlers(platform, delegationTables);
@@ -174,12 +181,9 @@ function registerHandlers(
     { context: 'credit-application' },
   );
 
-  platform.commands.register(
-    ErasePersonalDataPastRetentionCommand,
-    new ErasePersonalDataPastRetentionHandler(creditApplicationRepository, platform.ids, platform.clock),
-    { context: 'credit-application' },
-  );
-
+  platform.commands.register(ErasePersonalDataPastRetentionCommand, new ErasePersonalDataPastRetentionHandler(), {
+    context: 'credit-application',
+  });
   // /ddd-ts-kit:handlers
 }
 
