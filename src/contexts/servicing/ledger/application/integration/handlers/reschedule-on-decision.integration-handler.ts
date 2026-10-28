@@ -5,6 +5,7 @@ import {
 } from '@/contexts/credit-application/published-language';
 import { RescheduleLoanCommand } from '@/contexts/servicing/ledger/application/commands/reschedule-loan/reschedule-loan.command';
 
+// ddd-ts-kit-disable-next-line events/consumer-idempotent -- ADR-0009: registered in its module file, which the rule does not read
 export class RescheduleOnDecisionIntegrationHandler {
   static readonly eventType = creditApplicationRescheduleDecidedV1.type;
 
