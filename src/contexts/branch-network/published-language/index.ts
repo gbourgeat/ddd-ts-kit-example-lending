@@ -4,3 +4,4 @@ export * from '@/contexts/branch-network/published-language/staff-member-appoint
 export * from '@/contexts/branch-network/published-language/staff-member-appointed.v1.integration-event';
 export * from '@/contexts/branch-network/published-language/staff-member-appointed.v2.payload';
 export * from '@/contexts/branch-network/published-language/staff-member-appointed.v2.integration-event';
+export * from '@/contexts/branch-network/published-language/customer-advisor-branch.contract';
