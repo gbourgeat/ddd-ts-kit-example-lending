@@ -38,6 +38,7 @@ A credential is given per security scheme of the contract, as a value or as a fu
 | `attachDocument` | `POST /applications/{id}/documents` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, FILE_TOO_LARGE, UNSUPPORTED_MEDIA_TYPE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
 | `readDocument` | `GET /applications/{id}/documents/{documentKey}` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_ENTRY, VALIDATION_FAILED |
 | `nameGuarantor` | `POST /applications/{id}/guarantors` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
+| `readProductTermsFindings` | `GET /applications/{id}/product-terms-findings` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
 | `consultRepaymentIncidentRegister` | `POST /applications/{id}/register-consultations` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNIDENTIFIED_PARTY, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED |
 | `searchAuditEntries` | `GET /audit/entries` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, VALIDATION_FAILED |
 | `openBranch` | `POST /branches` | UNAUTHORIZED, FORBIDDEN, NOT_ACCEPTABLE, UNSUPPORTED_MEDIA_TYPE, VALIDATION_FAILED |

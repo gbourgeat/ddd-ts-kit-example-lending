@@ -88,6 +88,13 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Broker | An outside intermediary who brings applications; not a staff member | Advisor |
 | Registration | The broker's registration with the intermediaries register, in force from its registration until it lapses | Repayment incident register |
 | Lapsed | The registration of a broker that is no longer valid: the broker may no longer bring applications | Refusal |
+| Check | The verification that a submitted request lies within the limits of its product, recorded as a finding when it does not | Assessment |
+| Against | Compared with the limits the product sets: its minimum and maximum amount and duration |  |
+| Outside | Beyond the limit that a product sets: a request that is not within it | Inside |
+| Found | A finding: a fact noticed by a check and kept in the file | Founded |
+| Unknown | Not known: the terms of a product that have not been kept yet | Unidentified |
+| Checked | A check was run and its answer is kept in the file | Checking |
+| Findings | What the checks of an application against its product found, kept in its file | Results |
 
 ## Modules
 
@@ -190,26 +197,28 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `AttachDocument` | command | `application.attach-document` |
+| `CheckRequestAgainstProduct` | command | not read |
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
-| `KeepBrokerRegistration` | command | `broker-registration.keep` |
+| `KeepBrokerRegistration` | command | not read |
 | `KeepDeciderLevel` | command | `decider-level.keep` |
 | `KeepDelegationTable` | command | `delegation-table.keep` |
 | `KeepLegalMaximumRate` | command | not read |
-| `KeepProductTerms` | command | `product-terms.keep` |
+| `KeepProductTerms` | command | not read |
 | `KeepRateGrid` | command | not read |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
 | `ReadAccountInformation` | command | `application.read-accounts` |
-| `ReadBrokerRegistration` | query | `application.decide` |
+| `ReadBrokerRegistration` | query | not read |
 | `ReadDeciderLevel` | query | `application.decide` |
 | `ReadDeclaredConflicts` | query | `application.decide` |
 | `ReadDelegationTable` | query | `application.decide` |
 | `ReadDocument` | query | `application.read` |
 | `ReadLegalMaximumRate` | query | not read |
-| `ReadProductTerms` | query | `application.decide` |
+| `ReadProductTerms` | query | not read |
+| `ReadProductTermsFindings` | query | not read |
 | `ReadRateGrid` | query | not read |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
@@ -228,25 +237,26 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
-| GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | `application.decide` | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
+| GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | not read | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | `application.decide` | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
 | GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | `application.decide` | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 | GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
-| GET | `/product-terms/:productId` | `readProductTerms` | `ProductTermsRoutes` | `Authenticated` | `ReadProductTerms` | `application.decide` | params: `ReadProductTermsParams` | 200: `ReadProductTermsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownProductTerms` |
+| GET | `/product-terms/:productId` | `readProductTerms` | `ProductTermsRoutes` | `Authenticated` | `ReadProductTerms` | not read | params: `ReadProductTermsParams` | 200: `ReadProductTermsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownProductTerms` |
 | GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | not read | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
 
 ### Consumed events
 
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
-| `branch-network.staff-member.appointed` | 2 | `branch-network` | `KeepDeciderLevelIntegrationHandler` | not read |
-| `brokerage.broker.registered` | 1 | `brokerage` | `KeepBrokerRegistrationIntegrationHandler` | `credit-application.broker-registered` |
-| `brokerage.broker.registered` | 1 | `brokerage` | `KeepBrokerRegistrationLapsedIntegrationHandler` | `credit-application.broker-registered` |
-| `brokerage.broker.registered` | 1 | `brokerage` | `KeepProductTermsIntegrationHandler` | `credit-application.broker-registered` |
-| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | not read |
-| `credit-policy.legal-maximum-rate.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | not read |
-| `credit-policy.rate-grid.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | not read |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepBrokerRegistrationIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepBrokerRegistrationLapsedIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepProductTermsIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | `credit-application.keep-delegation-table` |
 
 ### Publishers
 
@@ -277,14 +287,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
-| `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
+| `ApplicationListProjection` | external | `PrismaApplicationListProjection` |
 | `BrokerRegistrations` | not bound |  |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
 | `CustomerAdvisorBranchGateway` | external | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerDiligenceGateway` | gateway | `InProcessCustomerDiligenceGateway` |
 | `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeciderLevels` | not bound |  |
-| `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
+| `DeclaredConflictsStore` | external | `PrismaDeclaredConflictsStore` |
 | `DelegationTables` | not bound |  |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `LegalMaximumRates` | not bound |  |
@@ -293,12 +303,13 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `RateGrids` | not bound |  |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 | `ScoringGateway` | gateway | `InProcessScoringGateway` |
-| `SearchApplicationsReader` | repository | `PrismaSearchApplicationsReader` |
+| `SearchApplicationsReader` | external | `PrismaSearchApplicationsReader` |
 
 ### Policies
 
 | Policy | Permission |
 |---|---|
+| `DeclareFileReferenceUseCases` | `broker-registration.keep` |
 | `DeclareOfferUseCases` | `rate-grid.keep` |
 
 ### Errors

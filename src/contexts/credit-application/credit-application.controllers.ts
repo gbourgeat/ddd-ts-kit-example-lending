@@ -13,6 +13,7 @@ import { GiveAccountConsentController } from '@/contexts/credit-application/file
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
 import { NameGuarantorController } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.controller';
 import { ReadDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/read-document/read-document.controller';
+import { ReadProductTermsFindingsController } from '@/contexts/credit-application/file/presentation/http/applications/read-product-terms-findings/read-product-terms-findings.controller';
 import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
 import { ReadBrokerRegistrationController } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.controller';
@@ -38,6 +39,8 @@ import { NameCoBorrowerParams } from '@/contexts/credit-application/file/present
 import { NameCoBorrowerBody } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.body';
 import { NameGuarantorParams } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.params';
 import { NameGuarantorBody } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.body';
+import { ReadProductTermsFindingsParams } from '@/contexts/credit-application/file/presentation/http/applications/read-product-terms-findings/read-product-terms-findings.params';
+import { ReadProductTermsFindingsAnswer } from '@/contexts/credit-application/file/presentation/http/applications/read-product-terms-findings/read-product-terms-findings.answer';
 import { SubmitApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.body';
 import { ReadBrokerRegistrationParams } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.params';
 import { ReadBrokerRegistrationAnswer } from '@/contexts/credit-application/file/presentation/http/brokers/read-broker-registration/read-broker-registration.answer';
@@ -86,6 +89,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
     nameGuarantor: { params: NameGuarantorParams, body: NameGuarantorBody, answer: acceptedSchema },
   }),
   withSignatures(ReadDocumentController, {}),
+  withSignatures(ReadProductTermsFindingsController, {
+    readProductTermsFindings: { params: ReadProductTermsFindingsParams, answer: ReadProductTermsFindingsAnswer },
+  }),
   withSignatures(SearchApplicationsController, {}),
   withSignatures(SubmitApplicationController, { submitApplication: { body: SubmitApplicationBody } }),
   withSignatures(ReadBrokerRegistrationController, {

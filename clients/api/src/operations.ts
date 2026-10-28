@@ -563,6 +563,39 @@ export function nameGuarantor(
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadProductTermsFindingsInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ReadProductTermsFindingsResult =
+  | Success<200, Record<string, unknown>>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read what the check of an application against its product found: `GET /applications/{id}/product-terms-findings`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function readProductTermsFindings(
+  connection: Connection,
+  input: ReadProductTermsFindingsInput,
+  options: CallOptions = {},
+): Promise<ReadProductTermsFindingsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/product-terms-findings',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadProductTermsFindingsResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ConsultRepaymentIncidentRegisterInput {
   readonly path: {
     readonly id: string;
