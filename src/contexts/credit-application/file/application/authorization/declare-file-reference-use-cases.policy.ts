@@ -1,5 +1,6 @@
 import { publicUseCase, requires, type UseCaseDeclaration } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
+import { BringApplicationCommand } from '@/contexts/credit-application/file/application/commands/bring-application/bring-application.command';
 import { CheckRequestAgainstProductCommand } from '@/contexts/credit-application/file/application/commands/check-request-against-product/check-request-against-product.command';
 import { KeepBrokerRegistrationCommand } from '@/contexts/credit-application/file/application/commands/keep-broker-registration/keep-broker-registration.command';
 import { KeepProductTermsCommand } from '@/contexts/credit-application/file/application/commands/keep-product-terms/keep-product-terms.command';
@@ -25,6 +26,9 @@ export function declareFileReferenceUseCases(): UseCaseDeclaration[] {
     publicUseCase(CheckRequestAgainstProductCommand),
     requires(ReadProductTermsFindingsQuery, creditApplicationPermissions['application.read'], {
       resource: (query) => ({ type: 'application', id: query.applicationId }),
+    }),
+    requires(BringApplicationCommand, creditApplicationPermissions['application.bring'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
   ];
 }

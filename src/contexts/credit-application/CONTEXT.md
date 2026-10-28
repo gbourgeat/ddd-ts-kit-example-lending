@@ -106,6 +106,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Above | beyond the amount a level may approve |  |
 | Limit | the most a level of staff may approve, the amount of its delegation |  |
 | Force | in effect on a day: the table of the latest date of effect not after that day |  |
+| Brought | an application a broker brings on behalf of a customer, recorded with the broker who brought it |  |
 
 ## Modules
 
@@ -158,6 +159,7 @@ No personal data declared.
 - `credit-application:product-terms.keep`
 - `credit-application:broker-registration.keep`
 - `credit-application:application.review-refusal`
+- `credit-application:application.bring`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -212,6 +214,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `AssessApplication` | command | `application.assess` |
 | `AttachDocument` | command | `application.attach-document` |
+| `BringApplication` | command | not read |
 | `CheckRequestAgainstProduct` | command | not read |
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
@@ -259,6 +262,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/product-terms-findings` | `readProductTermsFindings` | `ApplicationsRoutes` | `Authenticated` | `ReadProductTermsFindings` | not read | params: `ReadProductTermsFindingsParams` | 200: `ReadProductTermsFindingsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/refusal-review` | `reviewProposedRefusal` | `ApplicationsRoutes` | `Authenticated` | `ReviewProposedRefusal` | `application.review-refusal` | params: `ReviewProposedRefusalParams`, body: `ReviewProposedRefusalBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.InvalidReviewReason`, `CreditApplicationCodes.NoRefusalToReview`, `CreditApplicationCodes.RefusalAlreadyReviewed`, `CreditApplicationCodes.ReviewerCannotBeAssessor` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
+| POST | `/applications/bring` | `bringApplication` | `ApplicationsRoutes` | `Authenticated` | `BringApplication` | not read | body: `BringApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.BrokerRegistrationLapsed`, `CreditApplicationCodes.InvalidAmount`, `CreditApplicationCodes.InvalidDuration` |
 | GET | `/brokers/:brokerId/registration` | `readBrokerRegistration` | `BrokersRoutes` | `Authenticated` | `ReadBrokerRegistration` | not read | params: `ReadBrokerRegistrationParams` | 200: `ReadBrokerRegistrationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownBrokerRegistration` |
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | not read | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
 | GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | not read | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
@@ -340,6 +344,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
 | `AlreadyDecided` | `forAlreadyDecided` | `ALREADY_DECIDED` | none |
+| `BrokerRegistrationLapsed` | `forBroker` | `BROKER_REGISTRATION_LAPSED` | `brokerId` |
 | `CorrectionAlreadyRecorded` | `forEntry` | `CORRECTION_ALREADY_RECORDED` | none |
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
 | `InvalidCorrectionReason` | `forReason` | `INVALID_CORRECTION_REASON` | none |

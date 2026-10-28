@@ -31,6 +31,7 @@ export const CreditApplicationCodes = {
   RefusalProposalStands: 'REFUSAL_PROPOSAL_STANDS',
   DecisionAboveLimit: 'DECISION_ABOVE_LIMIT',
   ConflictedDecider: 'CONFLICTED_DECIDER',
+  BrokerRegistrationLapsed: 'BROKER_REGISTRATION_LAPSED',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

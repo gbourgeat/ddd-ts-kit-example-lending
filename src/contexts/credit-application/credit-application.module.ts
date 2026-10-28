@@ -165,10 +165,13 @@ function registerHandlers(
     { context: 'credit-application' },
   );
 
+  const brokerRegistrations = readModel(platform, 'BrokerRegistrations', PrismaBrokerRegistrations);
+
   registerSubmissionAndConflictsHandlers(platform, {
     repository: creditApplicationRepository,
     declaredConflicts,
     customerAdvisorBranch,
+    brokerRegistrations,
   });
 
   registerAssessmentHandlers(platform, {
@@ -208,8 +211,6 @@ function registerHandlers(
   const productTerms = readModel(platform, 'ProductTerms', PrismaProductTerms);
 
   registerProductTermsHandlers(platform, productTerms, creditApplicationRepository);
-
-  const brokerRegistrations = readModel(platform, 'BrokerRegistrations', PrismaBrokerRegistrations);
 
   registerBrokerRegistrationHandlers(platform, brokerRegistrations);
   // /ddd-ts-kit:handlers

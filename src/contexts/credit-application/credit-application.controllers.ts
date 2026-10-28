@@ -11,6 +11,7 @@ import { ReadDeclaredConflictsController } from '@/contexts/credit-application/d
 import { ReadDeciderLevelController } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.controller';
 import { ReadDelegationTableController } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.controller';
 import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
+import { BringApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.controller';
 import { CorrectEntryController } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.controller';
 import { GiveAccountConsentController } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.controller';
 import { NameCoBorrowerController } from '@/contexts/credit-application/file/presentation/http/applications/name-co-borrower/name-co-borrower.controller';
@@ -40,6 +41,7 @@ import { ReadDeciderLevelAnswer } from '@/contexts/credit-application/decision/p
 import { ReadDelegationTableParams } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.params';
 import { ReadDelegationTableAnswer } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.answer';
 import { AttachDocumentAnswer } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.answer';
+import { BringApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/bring-application/bring-application.body';
 import { CorrectEntryParams } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.params';
 import { CorrectEntryBody } from '@/contexts/credit-application/file/presentation/http/applications/correct-entry/correct-entry.body';
 import { GiveAccountConsentParams } from '@/contexts/credit-application/file/presentation/http/applications/give-account-consent/give-account-consent.params';
@@ -98,6 +100,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
     readDelegationTable: { params: ReadDelegationTableParams, answer: ReadDelegationTableAnswer },
   }),
   withSignatures(AttachDocumentController, { attachDocument: { answer: AttachDocumentAnswer } }),
+  withSignatures(BringApplicationController, {
+    bringApplication: { body: BringApplicationBody, answer: acceptedSchema },
+  }),
   withSignatures(CorrectEntryController, {
     correctEntry: { params: CorrectEntryParams, body: CorrectEntryBody, answer: acceptedSchema },
   }),
