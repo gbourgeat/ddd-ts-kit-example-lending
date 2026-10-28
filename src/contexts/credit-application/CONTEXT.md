@@ -73,6 +73,10 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Attach | to add a document to the application file, as an entry of it, its content stored in the object store |  |
 | Document attached | a document of the application was stored in the object store and recorded in the file |  |
 | Information | what an account information provider tells about the applicant's accounts: the income and expenses read for an application, kept as a document of its file |  |
+| Advisor | the staff member whose portfolio holds a customer, who gives the customer's branch |  |
+| Branch | the branch of the advisor whose portfolio holds the applicant, on which the application is submitted |  |
+| Consult | to ask the repayment incident register whether each party of the application is listed there, and to record the answer in the file, with no copy of the names and birth dates it was asked with |  |
+| Unidentified | a party of the application whose identity customer-due-diligence does not answer: the register cannot be asked about it |  |
 
 ## Modules
 
@@ -114,6 +118,7 @@ No personal data declared.
 - `credit-application:application.decide`
 - `credit-application:application.attach-document`
 - `credit-application:application.read-accounts`
+- `credit-application:application.consult-register`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -165,12 +170,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `AttachDocument` | command | `application.attach-document` |
+| `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
 | `CorrectEntry` | command | `application.correct` |
 | `GiveAccountConsent` | command | `application.consent` |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
 | `ReadAccountInformation` | command | `application.read-accounts` |
 | `ReadDeclaredConflicts` | query | `application.decide` |
+| `ReadDocument` | query | `application.read` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
 
@@ -185,8 +192,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | `application.decide` | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
-| POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
 
 ### Publishers
 
@@ -208,7 +217,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `AccountInformationProvider` | external | `SimulatedAccountInformationProvider` |
 | `ApplicationListProjection` | repository | `PrismaApplicationListProjection` |
 | `CreditApplicationRepository` | repository | `EventStoreCreditApplicationRepository` |
-| `CustomerAdvisorBranchGateway` | gateway | `InProcessCustomerAdvisorBranchGateway` |
+| `CustomerAdvisorBranchGateway` | external | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
@@ -228,12 +237,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
+| `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
 
 ### Gateways
 
 | Gateway | Upstream | Adapters |
 |---|---|---|
-| `CustomerAdvisorBranchGateway` | `branch-network` | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerIdentityGateway` | `customer-due-diligence` | `InProcessCustomerIdentityGateway` |
 <!-- /ddd-ts-kit:reference -->

@@ -136,6 +136,7 @@ async function arrange() {
     amount: Money.ofCents(1234567),
     durationMonths: 60,
     registeredAt: clock.now(),
+    branchId: 'branch-1',
   });
 
   application.giveAccountConsent(clock.now());

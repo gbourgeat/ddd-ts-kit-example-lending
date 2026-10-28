@@ -7,7 +7,14 @@ import {
   reportAfterCommitFailures,
   type DomainEventDispatcher,
 } from '@ddd-ts-kit/kernel';
+import type { RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 import type { TracedApplication } from '@ddd-ts-kit/tracing';
+import type { CustomerAdvisorBranchContract } from '@/contexts/branch-network/published-language';
+import { CustomerAdvisorBranchAnswer } from '@/contexts/branch-network/infrastructure/external/customer-advisor-branch.answer';
+import { PrismaPortfolioRepository } from '@/contexts/branch-network/infrastructure/persistence/prisma-portfolio.repository';
+import type { CustomerIdentityContract } from '@/contexts/customer-due-diligence/published-language';
+import { CustomerIdentityAnswer } from '@/contexts/customer-due-diligence/infrastructure/external/customer-identity.answer';
+import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
 import { accessPolicies } from '@/platform/auth/authorization/access-policies';
 import { createAuthorizer } from '@/platform/auth/authorization/create-authorizer';
 import { createRelationTuples } from '@/platform/auth/relationships/create-relation-tuples';
@@ -35,14 +42,11 @@ import type { ResilienceSettings } from '@/platform/resilience/resilience-settin
 export function createPlatform(persistence: Persistence, options: PlatformOptions): Platform {
   const foundations = layFoundations(persistence, options);
   const { traced, ...founded } = foundations;
-  const onDecision = foundations.audit.decisions;
-  const { clock, logger, scope } = foundations;
-  // A handler of the after-commit phase that fails is logged and reported: the command it follows is committed, and answers.
-  const afterCommitFailed = reportAfterCommitFailures({ reporter: foundations.errors, logger, scope });
-  const domainEvents = traced.domainEvents(new InMemoryDomainEventDispatcher(afterCommitFailed));
+  const { clock, scope } = foundations;
+  const domainEvents = domainEventsOf(foundations);
   const relations = createRelationTuples(persistence.database);
   const authorizer = createAuthorizer(relations);
-  const protection = new UseCaseProtection(authorizer, onDecision);
+  const protection = new UseCaseProtection(authorizer, foundations.audit.decisions);
   const adapter = adapterOf(options.resilience ?? defaultResilienceSettings, { traced, domainEvents });
   const files = filesOf(options, foundations);
   const commands = createCommandBus(foundations, { guard: protection.guard, persistence, files, redis: options.redis });
@@ -59,13 +63,41 @@ export function createPlatform(persistence: Persistence, options: PlatformOption
     domainEvents,
     persistence,
     relations,
-    access: new PolicyAccess({ authorizer, clock, policies: accessPolicies, onDecision }),
+    customerAdvisorBranch: customerAdvisorBranchOf(persistence, relations, foundations),
+    customerIdentity: customerIdentityOf(foundations),
+    access: new PolicyAccess({ authorizer, clock, policies: accessPolicies, onDecision: foundations.audit.decisions }),
     actors: new ScopedActorContext(scope, foundations.ids),
     adapter,
     selfGoverned: (instance, info) => adapter(ownPolicy()(instance, info), info),
     protection,
     files,
   };
+}
+
+/**
+ * The domain events of the traced application; a handler of the after-commit phase that fails is
+ * logged and reported: the command it follows is committed, and answers.
+ */
+function domainEventsOf({ traced, errors, logger, scope }: Foundations): DomainEventDispatcher {
+  const afterCommitFailed = reportAfterCommitFailures({ reporter: errors, logger, scope });
+
+  return traced.domainEvents(new InMemoryDomainEventDispatcher(afterCommitFailed));
+}
+
+/** The branch of a customer's advisor, answered from the portfolios of branch-network. */
+function customerAdvisorBranchOf(
+  persistence: Persistence,
+  relations: RelationTupleStore,
+  { scope, clock }: Foundations,
+): CustomerAdvisorBranchContract {
+  return new CustomerAdvisorBranchAnswer(relations, new PrismaPortfolioRepository(persistence.database, scope, clock));
+}
+
+/** The identity of an identified customer, answered from the customer streams of customer-due-diligence. */
+function customerIdentityOf({ eventSourcing }: Foundations): CustomerIdentityContract {
+  const customers = new EventStoreCustomerRepository(eventSourcing.events, eventSourcing.cipher);
+
+  return new CustomerIdentityAnswer(customers);
 }
 
 /** Where the content of files lives: the storage of `main.ts`; left out (the tools, the tests), the memory of the process. */

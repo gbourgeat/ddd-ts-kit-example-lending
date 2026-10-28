@@ -10,5 +10,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.decide': { description: 'Decide an application: read its declared conflicts first' },
   'application.attach-document': { description: 'Attach document' },
   'application.read-accounts': { description: 'Read account information' },
+  'application.consult-register': { description: 'Consult repayment incident register' },
   // /ddd-ts-kit:permissions
 });

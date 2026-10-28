@@ -1,6 +1,6 @@
 import type { IdGenerator, IntegrationEventPublisher } from '@ddd-ts-kit/kernel';
 import type { CreditApplicationSubmitted } from '@/contexts/credit-application/file/domain/events/credit-application-submitted.event';
-import { creditApplicationSubmittedV1 } from '@/contexts/credit-application/published-language/credit-application-submitted.v1.integration-event';
+import { creditApplicationSubmittedV2 } from '@/contexts/credit-application/published-language/credit-application-submitted.v2.integration-event';
 
 export class CreditApplicationSubmittedPublisher {
   constructor(
@@ -9,12 +9,13 @@ export class CreditApplicationSubmittedPublisher {
   ) {}
 
   async handle(event: CreditApplicationSubmitted): Promise<void> {
-    const published = creditApplicationSubmittedV1.create(
+    const published = creditApplicationSubmittedV2.create(
       {
         creditApplicationId: event.aggregateId,
         applicantId: event.applicantId,
         requestedAmountCents: event.amount.cents,
         durationMonths: event.durationMonths,
+        branchId: event.branchId,
       },
       { id: this.ids.next(), occurredAt: event.occurredAt },
     );

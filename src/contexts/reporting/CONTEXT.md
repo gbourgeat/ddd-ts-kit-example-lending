@@ -84,4 +84,23 @@ No process manager.
 Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-kit describe reporting --json`. The fields of each schema are in the generated contracts: [OpenAPI](../../../openapi/openapi.yaml), [event catalog](../../../docs/integration/event-catalog.md).
 
 **Dependencies**: upstreams: `credit-application` (published-language), `servicing` (published-language), `branch-network` (published-language), `identity` (conformist); downstreams: none.
+
+### Projections
+
+| Projection | Class | Applies |
+|---|---|---|
+| not read | not read |  |
+| not read | `ApplicationCountProjection` |  |
+
+### Ports
+
+| Port | Kind | Adapters |
+|---|---|---|
+| `ApplicationCounts` | not bound |  |
+
+### Errors
+
+| Refusal | Factory | Code | Exposed facts |
+|---|---|---|---|
+| `ApplicationCount` | `forSubmissionWithoutTenant` | `APPLICATION_COUNT` | none |
 <!-- /ddd-ts-kit:reference -->

@@ -3,6 +3,8 @@ import type { Type } from '@nestjs/common';
 import { creditApplicationControllers } from '@/contexts/credit-application/credit-application.controllers';
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
+import { InProcessCustomerAdvisorBranchGateway } from '@/contexts/credit-application/file/infrastructure/external/in-process-customer-advisor-branch.gateway';
+import type { CustomerAdvisorBranchGateway } from '@/contexts/credit-application/file/application/ports/customer-advisor-branch-gateway.port';
 // ddd-ts-kit:imports
 
 import { publicUseCase, requires } from '@ddd-ts-kit/auth';
@@ -37,6 +39,12 @@ import { AttachDocumentHandler } from '@/contexts/credit-application/file/applic
 import { ReadAccountInformationCommand } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.command';
 import { ReadAccountInformationHandler } from '@/contexts/credit-application/assessment/application/commands/read-account-information/read-account-information.handler';
 import { SimulatedAccountInformationProvider } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-account-information-provider.adapter';
+import { ConsultRepaymentIncidentRegisterCommand } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.command';
+import { ConsultRepaymentIncidentRegisterHandler } from '@/contexts/credit-application/assessment/application/commands/consult-repayment-incident-register/consult-repayment-incident-register.handler';
+import { InProcessCustomerIdentityGateway } from '@/contexts/credit-application/assessment/infrastructure/external/in-process-customer-identity.gateway';
+import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-application/assessment/infrastructure/external/simulated-repayment-incident-register.adapter';
+import { ReadDocumentHandler } from '@/contexts/credit-application/file/application/queries/read-document/read-document.handler';
+import { ReadDocumentQuery } from '@/contexts/credit-application/file/application/queries/read-document/read-document.query';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -57,7 +65,9 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     },
   );
 
-  registerHandlers(platform, declaredConflicts);
+  const customerAdvisorBranch = registerGateways(platform);
+
+  registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 
@@ -69,8 +79,21 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
   };
 }
 
+/** The gateways to the other contexts: the branch of an advisor is answered by branch-network, bound by the platform. */
+function registerGateways(platform: Platform): CustomerAdvisorBranchGateway {
+  return platform.adapter(new InProcessCustomerAdvisorBranchGateway(platform.customerAdvisorBranch), {
+    kind: 'external',
+    context: 'credit-application',
+    token: 'CustomerAdvisorBranchGateway',
+  });
+}
+
 /** The command and query handlers of the context, with the repositories and readers they are given. */
-function registerHandlers(platform: Platform, declaredConflicts: DeclaredConflictsStore): void {
+function registerHandlers(
+  platform: Platform,
+  declaredConflicts: DeclaredConflictsStore,
+  customerAdvisorBranch: CustomerAdvisorBranchGateway,
+): void {
   // ddd-ts-kit:handlers
   const creditApplicationRepository = platform.adapter(
     new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
@@ -79,7 +102,7 @@ function registerHandlers(platform: Platform, declaredConflicts: DeclaredConflic
 
   platform.commands.register(
     SubmitApplicationCommand,
-    new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock),
+    new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock, customerAdvisorBranch),
     { context: 'credit-application' },
   );
 
@@ -146,6 +169,31 @@ function registerHandlers(platform: Platform, declaredConflicts: DeclaredConflic
       platform.files.storage,
       platform.clock,
     ),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(
+    ConsultRepaymentIncidentRegisterCommand,
+    new ConsultRepaymentIncidentRegisterHandler(
+      creditApplicationRepository,
+      platform.adapter(new InProcessCustomerIdentityGateway(platform.customerIdentity), {
+        kind: 'gateway',
+        context: 'credit-application',
+        token: 'CustomerIdentityGateway',
+      }),
+      platform.adapter(new SimulatedRepaymentIncidentRegister(), {
+        kind: 'external',
+        context: 'credit-application',
+        token: 'RepaymentIncidentRegister',
+      }),
+      platform.clock,
+    ),
+    { context: 'credit-application' },
+  );
+
+  platform.queries.register(
+    ReadDocumentQuery,
+    new ReadDocumentHandler(creditApplicationRepository, platform.files.storage),
     { context: 'credit-application' },
   );
   // /ddd-ts-kit:handlers
@@ -234,6 +282,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
     }),
     requires(ReadAccountInformationCommand, creditApplicationPermissions['application.read-accounts'], {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
+    }),
+    requires(ConsultRepaymentIncidentRegisterCommand, creditApplicationPermissions['application.consult-register'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(ReadDocumentQuery, creditApplicationPermissions['application.read'], {
+      resource: (query) => ({ type: 'application', id: query.applicationId }),
     }),
     // /ddd-ts-kit:authorization
   ];

@@ -16,4 +16,21 @@ model DataProtectionRetentionPeriod {
   @@map("retention_periods")
   @@schema("data_protection")
 }
+
+model DataProtectionImpactAssessment {
+  id           String   @id
+  registeredAt DateTime @map("registered_at") @db.Timestamptz(3)
+  scoringModelVersion String @map("scoring_model_version")
+  month        String   @db.VarChar(7)
+  version      Int
+  tenantId     String   @map("tenant_id")
+  createdAt    DateTime @map("created_at") @db.Timestamptz(3)
+  createdBy    String   @map("created_by")
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz(3)
+  updatedBy    String   @map("updated_by")
+
+  @@index([tenantId, id], map: "impact_assessments_tenant_idx")
+  @@map("impact_assessments")
+  @@schema("data_protection")
+}
 // /ddd-ts-kit:models

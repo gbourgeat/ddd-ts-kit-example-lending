@@ -27,6 +27,6 @@ export class AttachDocumentHandler implements CommandHandler<AttachDocumentComma
     await this.creditApplicationRepository.save(creditApplication);
     await this.staging.promoteOnCommit(file.key);
 
-    return creditApplication.id;
+    return file.key;
   }
 }

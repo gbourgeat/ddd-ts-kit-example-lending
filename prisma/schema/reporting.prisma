@@ -1,0 +1,18 @@
+// ddd-ts-kit:models
+/// The applications of a branch in a month, counted and summed from the submissions: one row per tenant, branch and month.
+model ReportingApplicationCount {
+  key              String   @id
+  branchId         String   @map("branch_id")
+  month            String   @map("month")
+  applicationCount Int      @map("application_count")
+  amountCents      BigInt   @map("amount_cents")
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+  tenantId         String   @map("tenant_id")
+
+  @@index([tenantId, branchId, month], map: "application_counts_tenant_idx")
+  @@map("application_counts")
+  @@schema("reporting")
+}

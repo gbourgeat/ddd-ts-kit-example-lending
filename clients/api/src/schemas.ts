@@ -5,6 +5,13 @@ export type Accepted = {
   id: string;
 };
 
+export type ConsultedPartyLine = {
+  customerId: string;
+  name: string;
+  birthDate: string;
+  listed: boolean;
+};
+
 export type DeclaredConflictLine = {
   conflictOfInterestId: string;
   staffMemberId: string;

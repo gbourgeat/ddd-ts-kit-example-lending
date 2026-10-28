@@ -11,6 +11,7 @@ import { InvalidCorrectionReason } from '@/contexts/credit-application/file/doma
 import { CorrectionAlreadyRecorded } from '@/contexts/credit-application/file/domain/errors/correction-already-recorded.error';
 import { UnknownEntry } from '@/contexts/credit-application/file/domain/errors/unknown-entry.error';
 import { CreditApplicationDocumentAttached } from '@/contexts/credit-application/file/domain/events/credit-application-document-attached.event';
+import { CreditApplicationRegisterConsulted } from '@/contexts/credit-application/file/domain/events/credit-application-register-consulted.event';
 import {
   AccountConsent,
   type AccountConsentState,
@@ -22,13 +23,16 @@ export type CreditApplicationEvent =
   | CreditApplicationCoBorrowerNamed
   | CreditApplicationGuarantorNamed
   | CreditApplicationEntryCorrected
-  | CreditApplicationDocumentAttached;
+  | CreditApplicationDocumentAttached
+  | CreditApplicationRegisterConsulted;
 
 export interface CreditApplicationState {
   readonly applicantId: string;
   readonly amount: Money;
   readonly durationMonths: number;
   readonly registeredAt: Date;
+  /** The branch the application was submitted on: empty when no advisor holds the applicant, or when it was submitted before the branch was recorded. */
+  readonly branchId: string;
   readonly accountConsent: AccountConsentState | undefined;
   readonly coBorrowerIds: readonly string[];
   readonly guarantorIds: readonly string[];
@@ -45,6 +49,7 @@ export interface LoanRequest {
   readonly amount: Money;
   readonly durationMonths: number;
   readonly registeredAt: Date;
+  readonly branchId: string;
 }
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
@@ -53,6 +58,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     amount: Money.ofCents(0),
     durationMonths: 0,
     registeredAt: new Date(0),
+    branchId: '',
     accountConsent: undefined,
     coBorrowerIds: [],
     guarantorIds: [],
@@ -77,7 +83,14 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     const created = new CreditApplication(id);
 
     created.record(
-      new CreditApplicationSubmitted(id, applicantId, request.amount, request.durationMonths, request.registeredAt),
+      new CreditApplicationSubmitted(
+        id,
+        applicantId,
+        request.amount,
+        request.durationMonths,
+        request.registeredAt,
+        request.branchId,
+      ),
     );
 
     return created;
@@ -136,6 +149,14 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new CreditApplicationEntryCorrected(this.id, correctedAt, correctedEntryId, reason));
   }
 
+  /** The repayment incident register was consulted for the parties of the application: the answer is kept, never the names. */
+  recordRegisterConsultation(
+    parties: readonly { readonly customerId: string; readonly listed: boolean }[],
+    consultedAt: Date,
+  ): void {
+    this.record(new CreditApplicationRegisterConsulted(this.id, consultedAt, parties));
+  }
+
   /** Whether the applicant's consent to read the accounts is given and not yet expired at `instant`. */
   hasValidAccountConsentAt(instant: Date): boolean {
     if (this.state.accountConsent === undefined) {
@@ -161,8 +182,17 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     return this.state.registeredAt;
   }
 
+  get branchId(): string {
+    return this.state.branchId;
+  }
+
   get coBorrowerIds(): readonly string[] {
     return this.state.coBorrowerIds;
+  }
+
+  /** The keys of the documents stored for the file, in the order they were attached. */
+  get documentKeys(): readonly string[] {
+    return this.state.documentKeys;
   }
 
   get guarantorIds(): readonly string[] {
@@ -181,6 +211,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationGuarantorNamed.eventName]: (event) => this.applyGuarantorNamed(event),
       [CreditApplicationEntryCorrected.eventName]: (event) => this.applyEntryCorrected(event),
       [CreditApplicationDocumentAttached.eventName]: (event) => this.applyDocumentAttached(event),
+      [CreditApplicationRegisterConsulted.eventName]: (event) => this.applyRegisterConsulted(event),
     };
   }
 
@@ -213,6 +244,7 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       amount: event.amount,
       durationMonths: event.durationMonths,
       registeredAt: event.occurredAt,
+      branchId: event.branchId,
       entryCount: this.state.entryCount + 1,
     };
   }
@@ -253,6 +285,13 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.state = {
       ...this.state,
       documentKeys: [...this.state.documentKeys, event.documentKey],
+      entryCount: this.state.entryCount + 1,
+    };
+  }
+
+  private applyRegisterConsulted(_event: CreditApplicationRegisterConsulted): void {
+    this.state = {
+      ...this.state,
       entryCount: this.state.entryCount + 1,
     };
   }

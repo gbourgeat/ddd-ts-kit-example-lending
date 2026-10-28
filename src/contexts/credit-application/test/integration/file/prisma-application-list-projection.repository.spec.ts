@@ -63,7 +63,7 @@ describe('PrismaApplicationListProjection', () => {
 });
 
 function submitted(id: string): CreditApplicationSubmitted {
-  return new CreditApplicationSubmitted(id, 'applicant-1', Money.ofCents(1234567), 60, submittedAt);
+  return new CreditApplicationSubmitted(id, 'applicant-1', Money.ofCents(1234567), 60, submittedAt, 'branch-1');
 }
 
 function listedRows() {

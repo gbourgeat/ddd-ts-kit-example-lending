@@ -16,7 +16,7 @@ describe('POST /applications/:id/documents', () => {
       execute: async ({ upload }) => {
         received.push(upload.fileName);
 
-        return 'file-1';
+        return 'files/attach-document/scan-1.pdf';
       },
     });
 

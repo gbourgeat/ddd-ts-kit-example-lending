@@ -7,16 +7,20 @@ import { aPersonIdentity } from '@/contexts/customer-due-diligence/test/builders
 
 const bornAt = new Date('2026-03-01T00:00:00.000Z');
 const registeredOn = new Date('2026-02-14T00:00:00.000Z');
+const birthDate = new Date('1980-05-01T00:00:00.000Z');
 
 describe('customerEvents', () => {
-  it('stores the birth of a customer as version 2, and reads back the identity it was checked on', async () => {
+  it('stores the birth of a customer as version 3, and reads back the identity and the name it was checked on', async () => {
     const stored = customerEvents[CustomerIdentified.eventName];
 
     const serializer = new EventSerializer(customerEvents, {
       cipher: new PersonalDataCipher(new InMemorySubjectKeyStore()),
     });
 
-    const identified = new CustomerIdentified('customer-7', bornAt, aPersonIdentity());
+    const identified = new CustomerIdentified('customer-7', bornAt, aPersonIdentity(), {
+      name: 'Ada Lovelace',
+      birthDate,
+    });
 
     const data = await serializer.open(await serializer.seal(stored.encode(identified)));
 
@@ -24,11 +28,25 @@ describe('customerEvents', () => {
       id: 'event-1',
       aggregateId: 'customer-7',
       occurredAt: bornAt,
-      version: 2,
+      version: 3,
     });
 
-    expect(stored.version).toBe(2);
+    expect(stored.version).toBe(3);
     expect(decoded).toEqual(identified);
+  });
+
+  it('reads a birth of version 2, which recorded no name nor birth date, as identified without them', () => {
+    const stored = customerEvents[CustomerIdentified.eventName];
+
+    const decoded = stored.decode(
+      new StoredEventData(
+        stored.upcasters[2]?.({ identityRecorded: false, identity: null }) ?? {},
+        'customer-identified',
+      ),
+      { id: 'event-1', aggregateId: 'customer-7', occurredAt: bornAt, version: 2 },
+    );
+
+    expect(decoded).toEqual(new CustomerIdentified('customer-7', bornAt));
   });
 
   it('reads a birth of version 1, which recorded no identity, as not identified', () => {

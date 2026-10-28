@@ -66,6 +66,55 @@ export function deactivateAccount(
   return send<DeactivateAccountResult>(connection, operation, { ...input, ...options });
 }
 
+export interface SearchAlertsInput {
+  readonly query?: {
+    /** Size of the page. */
+    readonly limit?: number;
+    /** Items to skip. Not with `cursor`. */
+    readonly offset?: number;
+    /** The `nextCursor` of the previous page. Not with `offset`. */
+    readonly cursor?: string;
+    /** Comma-separated fields, a leading "-" for descending. Sortable: id. */
+    readonly sort?: string;
+  };
+}
+
+export type SearchAlertsResult =
+  | Success<200, {
+    items: Array<{
+      id: string;
+      repaymentReference: string;
+    }>;
+    /** Present when it is cheap to count. */
+    total?: number;
+    /** Present when more items follow. */
+    nextCursor?: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Search alerts: `GET /alerts`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), VALIDATION_FAILED (422).
+ */
+export function searchAlerts(
+  connection: Connection,
+  input: SearchAlertsInput = {},
+  options: CallOptions = {},
+): Promise<SearchAlertsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/alerts',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<SearchAlertsResult>(connection, operation, { ...input, ...options });
+}
+
 export interface CloseAlertInput {
   readonly path: {
     readonly id: string;
@@ -413,9 +462,12 @@ export interface AttachDocumentInput {
 }
 
 export type AttachDocumentResult =
-  | Success<201, undefined>
+  | Success<201, {
+    key: string;
+  }>
   | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
   | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
   | Failure<413, 'FILE_TOO_LARGE', Schemas.Problem>
   | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
   | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
@@ -423,7 +475,7 @@ export type AttachDocumentResult =
 /**
  * Attach document: `POST /applications/{id}/documents`.
  *
- * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), FILE_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
  */
 export function attachDocument(
   connection: Connection,
@@ -434,10 +486,44 @@ export function attachDocument(
     method: 'POST',
     path: '/applications/{id}/documents',
     security: [['bearer']],
-    responses: { 201: 'none', 401: 'json', 403: 'json', 413: 'json', 415: 'json', 422: 'json' },
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 413: 'json', 415: 'json', 422: 'json' },
   };
 
   return send<AttachDocumentResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadDocumentInput {
+  readonly path: {
+    readonly id: string;
+    readonly documentKey: string;
+  };
+}
+
+export type ReadDocumentResult =
+  | Success<200, string>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_ENTRY' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read a document of an application back: `GET /applications/{id}/documents/{documentKey}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
+ */
+export function readDocument(
+  connection: Connection,
+  input: ReadDocumentInput,
+  options: CallOptions = {},
+): Promise<ReadDocumentResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/applications/{id}/documents/{documentKey}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDocumentResult>(connection, operation, { ...input, ...options });
 }
 
 export interface NameGuarantorInput {
@@ -475,6 +561,42 @@ export function nameGuarantor(
   };
 
   return send<NameGuarantorResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ConsultRepaymentIncidentRegisterInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type ConsultRepaymentIncidentRegisterResult =
+  | Success<201, {
+    applicationId: string;
+    parties: Array<Schemas.ConsultedPartyLine>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNIDENTIFIED_PARTY' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Consult repayment incident register: `POST /applications/{id}/register-consultations`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNIDENTIFIED_PARTY (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function consultRepaymentIncidentRegister(
+  connection: Connection,
+  input: ConsultRepaymentIncidentRegisterInput,
+  options: CallOptions = {},
+): Promise<ConsultRepaymentIncidentRegisterResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/register-consultations',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ConsultRepaymentIncidentRegisterResult>(connection, operation, { ...input, ...options });
 }
 
 export interface SearchAuditEntriesInput {
@@ -1364,6 +1486,41 @@ export function flagAllOverdueDueDiligence(
   return send<FlagAllOverdueDueDiligenceResult>(connection, operation, { ...input, ...options });
 }
 
+export interface RecordScoringImpactAssessmentInput {
+  readonly body: {
+    scoringModelVersion: string;
+    month: string;
+  };
+}
+
+export type RecordScoringImpactAssessmentResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'IMPACT_ASSESSMENT_ALREADY_RECORDED' | 'INVALID_SCORING_MODEL_VERSION' | 'INVALID_YEAR_MONTH' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Record scoring impact assessment: `POST /impact-assessments`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), IMPACT_ASSESSMENT_ALREADY_RECORDED (422), INVALID_SCORING_MODEL_VERSION (422), INVALID_YEAR_MONTH (422), VALIDATION_FAILED (422).
+ */
+export function recordScoringImpactAssessment(
+  connection: Connection,
+  input: RecordScoringImpactAssessmentInput,
+  options: CallOptions = {},
+): Promise<RecordScoringImpactAssessmentResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/impact-assessments',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<RecordScoringImpactAssessmentResult>(connection, operation, { ...input, ...options });
+}
+
 export interface AcceptInvitationInput {
   readonly body: Schemas.InvitationToken;
 }
@@ -2040,4 +2197,39 @@ export function publishScoringModelVersion(
   };
 
   return send<PublishScoringModelVersionResult>(connection, operation, { ...input, ...options });
+}
+
+export interface GetSuspiciousActivityReportInput {
+  readonly path: {
+    readonly id: string;
+  };
+}
+
+export type GetSuspiciousActivityReportResult =
+  | Success<200, {
+    id: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_SUSPICIOUS_ACTIVITY_REPORT' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Get suspicious activity report: `GET /suspicious-activity-reports/{id}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_SUSPICIOUS_ACTIVITY_REPORT (422), VALIDATION_FAILED (422).
+ */
+export function getSuspiciousActivityReport(
+  connection: Connection,
+  input: GetSuspiciousActivityReportInput,
+  options: CallOptions = {},
+): Promise<GetSuspiciousActivityReportResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/suspicious-activity-reports/{id}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<GetSuspiciousActivityReportResult>(connection, operation, { ...input, ...options });
 }

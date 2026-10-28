@@ -3,7 +3,10 @@ import type { IntegrationEvent, IntegrationEventSubscriber } from '@ddd-ts-kit/k
 import { createHttpClient, settled, type HttpClient, type SettledOptions } from '@ddd-ts-kit/testing/e2e';
 import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/infrastructure/external/simulated-screening-provider.adapter';
 import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
+import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
+import { FakeIntermediariesRegister } from '@/contexts/brokerage/test/fakes/intermediaries-register.fake';
 import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
+import type { Platform } from '@/platform/composition/platform';
 import type { AppConfig } from '@/platform/config/app-config';
 import type { Persistence } from '@/platform/database/persistence';
 import { loadConfig } from '@/platform/config/load-config';
@@ -53,6 +56,12 @@ export interface RunningApplication {
   /** Stores a relationship, as the application does when an element is created or shared. */
   relate(tuple: RelationTuple): Promise<void>;
 
+  /** The intermediaries register of brokerage: a spec revokes a registration with `register.revoke(number)`. */
+  readonly register: FakeIntermediariesRegister;
+
+  /** Runs a background job of the application now, by its name (`brokerage.check-registration`). */
+  runJob(name: string): Promise<unknown>;
+
   /** Empties the database: call it before each test. */
   reset(): Promise<void>;
 
@@ -70,12 +79,15 @@ export async function startApplication(): Promise<RunningApplication> {
   const config = loadConfig(testEnvironment({ DATABASE_URL: url ?? 'postgres://in-process/tests' }));
   const credentials = await createCredentials();
   const screening = new SimulatedScreeningProvider();
-  const started = await start({ database, config, credentials, screening });
+  const register = new FakeIntermediariesRegister();
+  const started = await start({ database, config, credentials, screening, register });
 
   return {
     client: started.client,
     events: started.events,
     screening,
+    register,
+    runJob: (name) => started.runJob(name),
     persistence: database.persistence,
     as: async (actor) => started.client.withHeaders(await credentials.headersOf(actor)),
     publish: (events) => started.publish(events),
@@ -94,6 +106,8 @@ interface Started {
 
   relate(tuple: RelationTuple): Promise<void>;
 
+  runJob(name: string): Promise<unknown>;
+
   settled(options?: SettledOptions): Promise<void>;
 
   close(): Promise<void>;
@@ -104,12 +118,13 @@ interface StartProps {
   readonly config: AppConfig;
   readonly credentials: Credentials;
   readonly screening: SimulatedScreeningProvider;
+  readonly register: FakeIntermediariesRegister;
 }
 
 /** The application on the test database, listening on a free port; closing it closes the database last. */
-async function start({ database, config, credentials, screening }: StartProps): Promise<Started> {
+async function start({ database, config, credentials, screening, register }: StartProps): Promise<Started> {
   const redis = config.redisUrl === noRedis ? undefined : openRedis(config);
-  const selection = contextsWith(screening);
+  const selection = contextsWith(screening, register);
 
   const application = composeApplication(
     database.persistence,
@@ -133,6 +148,7 @@ async function start({ database, config, credentials, screening }: StartProps): 
     events: application.eventSubscriber,
     publish: (events) => application.eventBus.publish(events),
     relate: (tuple) => application.platform.relations.write([tuple]),
+    runJob: (name) => application.platform.jobs.runNow(name),
     settled: (options) => settled({ outbox: () => database.persistence.outbox.stats() }, options),
     close: async () => {
       await server.close();
@@ -157,11 +173,40 @@ function applicationOptions(
   };
 }
 
-/** Every context of the application, with customer-due-diligence screening against the records the spec lists. */
-function contextsWith(screening: SimulatedScreeningProvider): typeof everyContext {
-  return everyContext.map((context) =>
-    context === customerDueDiligenceModule ? (platform) => customerDueDiligenceModule(platform, screening) : context,
-  );
+/**
+ * Every context of the application, with customer-due-diligence screening against the records the spec lists,
+ * and brokerage's intermediaries register answered by the fake the spec drives.
+ */
+function contextsWith(
+  screening: SimulatedScreeningProvider,
+  register: FakeIntermediariesRegister,
+): typeof everyContext {
+  return everyContext.map((context) => {
+    if (context === customerDueDiligenceModule) {
+      return (platform: Platform) => customerDueDiligenceModule(platform, screening);
+    }
+
+    if (context === brokerageModule) {
+      return brokerageWithRegister(register);
+    }
+
+    return context;
+  });
+}
+
+/** The brokerage context as the application wires it, except that its intermediaries register is the fake. */
+function brokerageWithRegister(register: FakeIntermediariesRegister) {
+  return (platform: Platform): ReturnType<typeof brokerageModule> => {
+    const adapter: Platform['adapter'] = (instance, info) => {
+      if (info.token === 'IntermediariesRegister') {
+        return register as unknown as typeof instance;
+      }
+
+      return platform.adapter(instance, info);
+    };
+
+    return brokerageModule({ ...platform, adapter });
+  };
 }
 
 function eventsOf(config: AppConfig): EventProvider {

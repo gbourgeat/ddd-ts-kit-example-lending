@@ -47,5 +47,6 @@ function aSubmission(id: string): CreditApplicationSubmitted {
     Money.ofCents(1234567),
     60,
     new Date('2026-01-01T00:00:00.000Z'),
+    'branch-1',
   );
 }

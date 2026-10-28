@@ -8,6 +8,8 @@ export class CreditApplicationSubmitted extends NamedDomainEvent('credit-applica
     readonly amount: Money,
     readonly durationMonths: number,
     readonly occurredAt: Date,
+    /** The branch of the advisor whose portfolio holds the applicant: never posted by the client. */
+    readonly branchId: string,
   ) {
     super();
   }

@@ -62,6 +62,55 @@ describe('Read account information', () => {
     expect(documentKeys).toHaveLength(1);
     expect(storage.keys()).toEqual(documentKeys);
   });
+
+  it('stores the figures as a JSON document under the application they were read for', async () => {
+    const { commandBus, creditApplicationRepository, storage, clock } = arrange();
+    const application = seededApplication(clock.now());
+
+    application.giveAccountConsent(clock.now());
+    await creditApplicationRepository.save(application);
+
+    await commandBus.execute(new ReadAccountInformationCommand(holder, APPLICATION_ID));
+
+    const [key] = storage.keys();
+
+    expect(key?.startsWith(`${APPLICATION_ID}/accounts/`)).toBe(true);
+    expect(await storage.stat(key ?? '')).toMatchObject({ mediaType: 'application/json' });
+  });
+
+  it('answers the id of the application whose accounts were read', async () => {
+    const { commandBus, creditApplicationRepository, clock } = arrange();
+    const application = seededApplication(clock.now());
+
+    application.giveAccountConsent(clock.now());
+    await creditApplicationRepository.save(application);
+
+    const answer = await commandBus.execute(new ReadAccountInformationCommand(holder, APPLICATION_ID));
+
+    expect(answer).toBe(APPLICATION_ID);
+  });
+
+  it('stores nothing in the object store when the applicant gave no consent', async () => {
+    const { commandBus, creditApplicationRepository, storage, clock } = arrange();
+
+    await creditApplicationRepository.save(seededApplication(clock.now()));
+
+    await expect(commandBus.execute(new ReadAccountInformationCommand(holder, APPLICATION_ID))).rejects.toMatchObject({
+      code: 'MISSING_ACCOUNT_CONSENT',
+    });
+
+    expect(storage.keys()).toEqual([]);
+  });
+
+  it('stores nothing in the object store when the application does not exist', async () => {
+    const { commandBus, storage } = arrange();
+
+    await expect(
+      commandBus.execute(new ReadAccountInformationCommand(holder, 'credit-application-404')),
+    ).rejects.toMatchObject({ code: 'UNKNOWN_CREDIT_APPLICATION' });
+
+    expect(storage.keys()).toEqual([]);
+  });
 });
 
 function arrange() {
@@ -87,5 +136,6 @@ function seededApplication(registeredAt: Date): CreditApplication {
     amount: Money.ofCents(1234567),
     durationMonths: 60,
     registeredAt,
+    branchId: 'branch-1',
   });
 }
