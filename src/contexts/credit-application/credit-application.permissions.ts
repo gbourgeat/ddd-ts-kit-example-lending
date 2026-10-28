@@ -27,5 +27,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'application.request-exception': { description: 'Request exception' },
   'offer.issue': { description: 'Issue offer' },
   'application.request-review': { description: 'Request human review' },
+  'offer.accept': { description: 'Accept offer' },
   // /ddd-ts-kit:permissions
 });

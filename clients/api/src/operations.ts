@@ -2172,6 +2172,40 @@ export function closeLoan(
   return send<CloseLoanResult>(connection, operation, { ...input, ...options });
 }
 
+export interface AcceptOfferInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: Record<string, unknown>;
+}
+
+export type AcceptOfferResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'OFFER_ALREADY_ACCEPTED' | 'OFFER_EXPIRED' | 'OFFER_NOT_ISSUED' | 'UNKNOWN_OFFER' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Accept offer: `POST /offers/{id}/acceptance`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), OFFER_ALREADY_ACCEPTED (422), OFFER_EXPIRED (422), OFFER_NOT_ISSUED (422), UNKNOWN_OFFER (422), VALIDATION_FAILED (422).
+ */
+export function acceptOffer(
+  connection: Connection,
+  input: AcceptOfferInput,
+  options: CallOptions = {},
+): Promise<AcceptOfferResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/offers/{id}/acceptance',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<AcceptOfferResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadPreContractualSheetInput {
   readonly path: {
     readonly id: string;

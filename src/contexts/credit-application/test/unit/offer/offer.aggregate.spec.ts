@@ -3,6 +3,10 @@ import { expectRefusal } from '@ddd-ts-kit/testing';
 import { Offer } from '@/contexts/credit-application/offer/domain/aggregates/offer.aggregate';
 import { anOffer } from '@/contexts/credit-application/test/builders/offer.builder';
 
+const april = new Date('2026-04-01T00:00:00.000Z');
+const fifteenDaysAfterApril = new Date('2026-04-16T00:00:00.000Z');
+const oneMillisecondTooLate = new Date(fifteenDaysAfterApril.getTime() + 1);
+
 describe('Offer', () => {
   it('is drafted with its identity and the instant of the draft', () => {
     const draftedAt = new Date('2026-03-01T00:00:00.000Z');
@@ -59,4 +63,51 @@ describe('Offer', () => {
     expectRefusal(() => drafted.issue(new Date('2026-04-01T00:00:00.000Z'), 610), 'OFFER_ABOVE_LEGAL_MAXIMUM');
     expect(drafted.issuedAt).toBeUndefined();
   });
+
+  it('records the day the borrower signs an issued offer as its signing date', () => {
+    const signed = issuedOffer();
+
+    signed.accept(new Date('2026-04-03T10:00:00.000Z'));
+
+    expect(signed.signedAt).toEqual(new Date('2026-04-03T10:00:00.000Z'));
+  });
+
+  it('accepts a signature on the fifteenth day after its issue', () => {
+    const signed = issuedOffer();
+
+    signed.accept(fifteenDaysAfterApril);
+
+    expect(signed.signedAt).toEqual(fifteenDaysAfterApril);
+  });
+
+  it('is refused to be signed after its fifteen days of validity, with the expiry it carries', () => {
+    const late = issuedOffer();
+
+    expectRefusal(() => late.accept(oneMillisecondTooLate), 'OFFER_EXPIRED');
+    expect(late.signedAt).toBeUndefined();
+  });
+
+  it('is refused to be signed before it was issued to the borrower', () => {
+    const drafted = anOffer().atAnnualPercentageRate(61).underMaximum(1_250).build();
+
+    expectRefusal(() => drafted.accept(april), 'OFFER_NOT_ISSUED');
+  });
+
+  it('is refused a second signature, and keeps the first signing date', () => {
+    const signed = issuedOffer();
+
+    signed.accept(new Date('2026-04-03T10:00:00.000Z'));
+
+    expectRefusal(() => signed.accept(new Date('2026-04-04T10:00:00.000Z')), 'OFFER_ALREADY_ACCEPTED');
+    expect(signed.signedAt).toEqual(new Date('2026-04-03T10:00:00.000Z'));
+  });
 });
+
+/** An offer drafted under the maximum in force, and issued on the first of April. */
+function issuedOffer(): Offer {
+  const offer = anOffer().atAnnualPercentageRate(61).underMaximum(1_250).build();
+
+  offer.issue(april, 1_250);
+
+  return offer;
+}
