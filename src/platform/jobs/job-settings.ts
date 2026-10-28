@@ -40,6 +40,10 @@ export function jobSettings(environment: Environment, context?: string): Readonl
     'credit-application.erase-personal-data-past-retention': {
       enabled: environment['JOB_CREDIT_APPLICATION_ERASE_PERSONAL_DATA_PAST_RETENTION_ENABLED'] !== 'false',
     },
+
+    'servicing.erase-personal-data-past-retention': {
+      enabled: environment['JOB_SERVICING_ERASE_PERSONAL_DATA_PAST_RETENTION_ENABLED'] !== 'false',
+    },
     // /ddd-ts-kit:jobs
   };
 

@@ -41,6 +41,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | Daily run | The night computation of the instalments due, for each bank | Direct debit |
 | Instalments | Direct debits and rejected debits. |  |
 | Paid out | The loan has been paid to the borrower and its schedule has started | Paid off, the loan repaid in full |
+| Erase personal data past retention | Destroy the key of the personal values of every loan closed ten years ago, so that the ledger can no longer be read | Delete a loan |
 
 ## Modules
 
@@ -70,13 +71,15 @@ No personal data declared.
 ## Permissions
 
 <!-- ddd-ts-kit:permissions -->
-No permission declared.
+- `servicing:loan.erase-past-retention`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
 
 <!-- ddd-ts-kit:jobs -->
-No scheduled job.
+| Job | Schedule | Command |
+|---|---|---|
+| `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
 <!-- /ddd-ts-kit:jobs -->
 
 ## Background jobs
@@ -115,12 +118,18 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 **Dependencies**: upstreams: `credit-application` (published-language), `credit-policy` (published-language), `identity` (conformist), `data-protection` (customer-supplier); downstreams: `financial-crime` (published-language), `reporting` (published-language).
 
+### Use cases
+
+| Use case | Kind | Permission |
+|---|---|---|
+| `ErasePersonalDataPastRetention` | command | `loan.erase-past-retention` |
+
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
 | `BorrowerNotifier` | external | `SimulatedBorrowerNotifier` |
-| `LoanRepository` | external | `EventStoreLoanRepository` |
+| `LoanRepository` | repository | `EventStoreLoanRepository` |
 | `PaymentProvider` | external | `SimulatedPaymentProvider` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 
