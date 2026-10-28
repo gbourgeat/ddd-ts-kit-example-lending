@@ -14,8 +14,9 @@ import { InstalmentDueDateService } from '@/contexts/servicing/ledger/domain/ser
 import { EarlyRepaymentFeeService } from '@/contexts/servicing/ledger/domain/services/early-repayment-fee.service';
 import { OutstandingCapitalService } from '@/contexts/servicing/ledger/domain/services/outstanding-capital.service';
 import type { Borrower } from '@/contexts/servicing/ledger/domain/value-objects/borrower.vo';
-import type { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
+import { LoanSchedule } from '@/contexts/servicing/ledger/domain/value-objects/loan-schedule.vo';
 import { Money } from '@/shared-kernel/money.vo';
+import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
 
 export type LoanEvent =
   | LoanPaidOut
@@ -24,13 +25,28 @@ export type LoanEvent =
   | LoanInstalmentDueNoted
   | LoanEarlyRepaymentRecorded
   | LoanWrittenOff
-  | LoanWriteOffReversed;
+  | LoanWriteOffReversed
+  | LoanRescheduled;
+
+/** The schedule that replaced the one of the payout, from the instalments noted due before it and the capital repaid before it. */
+export interface Rescheduling {
+  readonly schedule: LoanSchedule;
+  /** The instalments noted due before the rescheduling: the new schedule is numbered after them. */
+  readonly notedBefore: number;
+  /** The capital repaid early before the rescheduling, already out of the capital it covers. */
+  readonly earlyRepaidBefore: Money;
+}
 
 export interface LoanState {
   readonly registeredAt: Date;
   readonly closedAt: Date | undefined;
   readonly borrower: Borrower | undefined;
+  /** The schedule of the payout: its principal is the amount paid out, its rate is kept by the loan. */
   readonly schedule: LoanSchedule | undefined;
+  /** The schedule in force once the loan has been rescheduled; undefined while the schedule of the payout is in force. */
+  readonly rescheduling: Rescheduling | undefined;
+  /** The decisions, by their event id, whose rescheduling the loan already recorded: a delivery seen again records nothing. */
+  readonly rescheduledBy: readonly string[];
   /** The numbers, counted from one, of the instalments already recorded as due. */
   readonly instalmentsDue: readonly number[];
   /** The capital repaid early, over the life of the loan. */
@@ -45,6 +61,8 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     closedAt: undefined,
     borrower: undefined,
     schedule: undefined,
+    rescheduling: undefined,
+    rescheduledBy: [],
     instalmentsDue: [],
     earlyRepaid: Money.ofCents(0),
     writtenOff: undefined,
@@ -87,12 +105,14 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
    * again records nothing new; a closed loan has no instalment left to fall due.
    */
   computeDueInstalments(now: Date): void {
-    if (this.state.closedAt !== undefined || this.state.schedule === undefined) {
+    const schedule = this.currentSchedule;
+
+    if (this.state.closedAt !== undefined || schedule === undefined) {
       return;
     }
 
-    for (const [index, amount] of this.state.schedule.instalments.entries()) {
-      const number = index + 1;
+    for (const [index, amount] of schedule.instalments.entries()) {
+      const number = this.notedBefore + index + 1;
       const dueOn = new InstalmentDueDateService().dueOn(this.state.registeredAt, number);
 
       if (dueOn.getTime() <= now.getTime() && !this.state.instalmentsDue.includes(number)) {
@@ -147,27 +167,53 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     this.record(new LoanWriteOffReversed(this.id, now, this.state.writtenOff));
   }
 
+  /**
+   * Reschedules the outstanding capital over the new duration, at the rate of the loan. The instalments noted due keep
+   * their record; the earlier schedule stays in the ledger. A decision already recorded is not recorded again.
+   */
+  reschedule(
+    decision: { readonly id: string; readonly capital: Money; readonly durationMonths: number },
+    now: Date,
+  ): void {
+    if (this.state.rescheduledBy.includes(decision.id)) {
+      return;
+    }
+
+    if (this.state.closedAt !== undefined) {
+      throw LoanAlreadyClosed.forLoan(this.id);
+    }
+
+    const rate = this.state.schedule?.annualRateBasisPoints ?? 0;
+    const schedule = LoanSchedule.of(decision.capital, rate, decision.durationMonths);
+
+    this.record(new LoanRescheduled(this.id, now, decision.id, schedule));
+  }
+
   /** Whether the loan was closed on or before the instant: its retention then runs out. */
   closedOnOrBefore(instant: Date): boolean {
     return this.state.closedAt !== undefined && this.state.closedAt.getTime() <= instant.getTime();
   }
 
-  // TODO(domain): add one method per remaining business intention (payments, rescheduling): it checks its invariants on `this.state`, then records what it decided, `this.record(new Loan<Fact>(this.id, now, ...))`, after `ddd-ts-kit generate domain-event servicing Loan <Fact>` added the event and its apply method. It never writes the state itself (event-sourcing/state-in-apply).
+  // TODO(domain): add one method per remaining business intention (payments): it checks its invariants on `this.state`, then records what it decided, `this.record(new Loan<Fact>(this.id, now, ...))`, after `ddd-ts-kit generate domain-event servicing Loan <Fact>` added the event and its apply method. It never writes the state itself (event-sourcing/state-in-apply).
 
   /** The capital still owed: the principal, less what the noted instalments repaid, the early repayments and the write-off. */
   get outstandingCapital(): Money {
-    const schedule = this.state.schedule;
+    const schedule = this.currentSchedule;
 
     if (schedule === undefined) {
       return Money.ofCents(0);
     }
 
     const writtenOff = this.state.writtenOff === undefined ? [] : [this.state.writtenOff];
+    const earlyRepaid = this.state.earlyRepaid.cents - (this.state.rescheduling?.earlyRepaidBefore.cents ?? 0);
+    const notedInForce = this.state.instalmentsDue.length - this.notedBefore;
 
-    return new OutstandingCapitalService().of(schedule, this.state.instalmentsDue.length, [
-      this.state.earlyRepaid,
-      ...writtenOff,
-    ]);
+    return new OutstandingCapitalService().of(schedule, notedInForce, [Money.ofCents(earlyRepaid), ...writtenOff]);
+  }
+
+  /** The schedule in force: the one of the payout, or the one that replaced it at the last rescheduling. */
+  get currentSchedule(): LoanSchedule | undefined {
+    return this.state.rescheduling?.schedule ?? this.state.schedule;
   }
 
   get registeredAt(): Date {
@@ -203,6 +249,7 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
       [LoanEarlyRepaymentRecorded.eventName]: (event) => this.applyEarlyRepaymentRecorded(event),
       [LoanWrittenOff.eventName]: (event) => this.applyWrittenOff(event),
       [LoanWriteOffReversed.eventName]: () => this.applyWriteOffReversed(),
+      [LoanRescheduled.eventName]: (event) => this.applyRescheduled(event),
     };
   }
 
@@ -210,17 +257,22 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
     this.state = state;
   }
 
-  /** The months of the schedule still to run at `now`: its duration less the monthly due dates passed since the payout. */
-  private monthsRemaining(now: Date): number {
-    const duration = this.state.schedule?.durationMonths ?? 0;
-    const dueDates = new InstalmentDueDateService();
-    let elapsed = 0;
+  /** The instalments noted due before the schedule in force: its instalments are numbered after them. */
+  private get notedBefore(): number {
+    return this.state.rescheduling?.notedBefore ?? 0;
+  }
 
-    while (elapsed < duration && dueDates.dueOn(this.state.registeredAt, elapsed + 1).getTime() <= now.getTime()) {
-      elapsed += 1;
+  /** The months of the schedule in force still to run at `now`: the monthly due dates passed since the payout are counted. */
+  private monthsRemaining(now: Date): number {
+    const lastNumber = this.notedBefore + (this.currentSchedule?.durationMonths ?? 0);
+    const dueDates = new InstalmentDueDateService();
+    let passed = 0;
+
+    while (passed < lastNumber && dueDates.dueOn(this.state.registeredAt, passed + 1).getTime() <= now.getTime()) {
+      passed += 1;
     }
 
-    return duration - elapsed;
+    return lastNumber - Math.max(passed, this.notedBefore);
   }
 
   private applyPaidOut(event: LoanPaidOut): void {
@@ -249,5 +301,18 @@ export class Loan extends EventSourcedAggregate<LoanEvent, LoanState> {
 
   private applyWriteOffReversed(): void {
     this.state = { ...this.state, writtenOff: undefined, closedAt: undefined };
+  }
+
+  /** The new schedule is numbered after the instalments noted so far, and counts the early repayments from now on. */
+  private applyRescheduled(event: LoanRescheduled): void {
+    this.state = {
+      ...this.state,
+      rescheduling: {
+        schedule: event.schedule,
+        notedBefore: this.state.instalmentsDue.length,
+        earlyRepaidBefore: this.state.earlyRepaid,
+      },
+      rescheduledBy: [...this.state.rescheduledBy, event.decisionId],
+    };
   }
 }

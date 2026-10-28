@@ -57,6 +57,7 @@ Running the loans day after day is necessary to the business, but the lending ju
 | High | Above the outstanding capital of the loan: a repayment too high is refused |  |
 | Reverse | Undo a write-off by a movement of opposite effect: the outstanding capital is open again |  |
 | Outstanding capital | The capital still owed by a loan: its principal, less the capital repaid by the instalments noted due, the early repayments and the write-off |  |
+| Decision | The approval of a rescheduling by credit-application, executed by the ledger as a new schedule |  |
 
 ## Modules
 
@@ -94,6 +95,7 @@ No personal data declared.
 - `servicing:loan.compute-due`
 - `servicing:loan.repay-early`
 - `servicing:loan.write-off`
+- `servicing:loan.reschedule`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -152,6 +154,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadLoan` | query | `loan.read` |
 | `RecordPayout` | command | `loan.record-payout` |
 | `RepayEarly` | command | `loan.repay-early` |
+| `RescheduleLoan` | command | `loan.reschedule` |
 | `ReverseWriteOff` | command | `loan.write-off` |
 | `WriteOffLoan` | command | `loan.write-off` |
 
@@ -170,6 +173,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Event | Version | From | Handler | Consumer |
 |---|---|---|---|---|
 | `credit-application.credit-application.payout-authorised` | 1 | `credit-application` | `RecordPayoutOnPayoutAuthorisedIntegrationHandler` | `servicing.record-payout-on-payout-authorised` |
+| `credit-application.credit-application.reschedule-decided` | 1 | `credit-application` | `RescheduleOnDecisionIntegrationHandler` | `servicing.reschedule-on-decision` |
 
 ### Publishers
 

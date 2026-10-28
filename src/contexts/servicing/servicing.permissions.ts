@@ -9,5 +9,6 @@ export const servicingPermissions = definePermissions('servicing', {
   'loan.compute-due': { description: 'Compute due instalments' },
   'loan.repay-early': { description: 'Repay early' },
   'loan.write-off': { description: 'Write off loan' },
+  'loan.reschedule': { description: 'Reschedule loan' },
   // /ddd-ts-kit:permissions
 });

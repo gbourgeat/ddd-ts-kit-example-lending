@@ -14,7 +14,10 @@ import { RemotePersonalDataErasure } from '@/contexts/servicing/ledger/infrastru
 import { CloseLoanCommand } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.command';
 import { CloseLoanHandler } from '@/contexts/servicing/ledger/application/commands/close-loan/close-loan.handler';
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
-import { creditApplicationPayoutAuthorisedV1 as recordPayoutOnPayoutAuthorisedDefinition } from '@/contexts/credit-application/published-language';
+import {
+  creditApplicationPayoutAuthorisedV1 as recordPayoutOnPayoutAuthorisedDefinition,
+  creditApplicationRescheduleDecidedV1 as rescheduleOnDecisionDefinition,
+} from '@/contexts/credit-application/published-language';
 import { RecordPayoutOnPayoutAuthorisedIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/record-payout-on-payout-authorised.integration-handler';
 import { RecordPayoutCommand } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.command';
 import { RecordPayoutHandler } from '@/contexts/servicing/ledger/application/commands/record-payout/record-payout.handler';
@@ -33,6 +36,9 @@ import { WriteOffLoanCommand } from '@/contexts/servicing/ledger/application/com
 import { WriteOffLoanHandler } from '@/contexts/servicing/ledger/application/commands/write-off-loan/write-off-loan.handler';
 import { ReverseWriteOffCommand } from '@/contexts/servicing/ledger/application/commands/reverse-write-off/reverse-write-off.command';
 import { ReverseWriteOffHandler } from '@/contexts/servicing/ledger/application/commands/reverse-write-off/reverse-write-off.handler';
+import { RescheduleOnDecisionIntegrationHandler } from '@/contexts/servicing/ledger/application/integration/handlers/reschedule-on-decision.integration-handler';
+import { RescheduleLoanCommand } from '@/contexts/servicing/ledger/application/commands/reschedule-loan/reschedule-loan.command';
+import { RescheduleLoanHandler } from '@/contexts/servicing/ledger/application/commands/reschedule-loan/reschedule-loan.handler';
 // /ddd-ts-kit:imports
 
 export interface ServicingWiring {
@@ -108,6 +114,10 @@ function registerHandlers(platform: Platform): void {
   platform.commands.register(ReverseWriteOffCommand, new ReverseWriteOffHandler(loanRepository, platform.clock), {
     context: 'servicing',
   });
+
+  platform.commands.register(RescheduleLoanCommand, new RescheduleLoanHandler(loanRepository, platform.clock), {
+    context: 'servicing',
+  });
   // /ddd-ts-kit:handlers
 }
 
@@ -148,6 +158,21 @@ function registerReactions(platform: Platform): void {
       await loanPaidOutPublisher.handle(event);
     }
   });
+
+  const rescheduleOnDecisionIntegrationHandler = new RescheduleOnDecisionIntegrationHandler(platform.commands);
+
+  subscribeAll(platform.subscriberFor('servicing'), [
+    consume(
+      rescheduleOnDecisionDefinition,
+      {
+        consumer: 'servicing.reschedule-on-decision',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      (event) => rescheduleOnDecisionIntegrationHandler.handle(event),
+    ),
+  ]);
   // /ddd-ts-kit:reactions
 }
 
@@ -200,6 +225,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     requires(ReverseWriteOffCommand, servicingPermissions['loan.write-off'], {
+      resource: () => ({ type: 'context', id: 'servicing' }),
+    }),
+    requires(RescheduleLoanCommand, servicingPermissions['loan.reschedule'], {
       resource: () => ({ type: 'context', id: 'servicing' }),
     }),
     // /ddd-ts-kit:authorization

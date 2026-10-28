@@ -16,6 +16,13 @@ import { LoanInstalmentDueNoted } from '@/contexts/servicing/ledger/domain/event
 import { LoanEarlyRepaymentRecorded } from '@/contexts/servicing/ledger/domain/events/loan-early-repayment-recorded.event';
 import { LoanWrittenOff } from '@/contexts/servicing/ledger/domain/events/loan-written-off.event';
 import { LoanWriteOffReversed } from '@/contexts/servicing/ledger/domain/events/loan-write-off-reversed.event';
+import { LoanRescheduled } from '@/contexts/servicing/ledger/domain/events/loan-rescheduled.event';
+
+/** The decision that rescheduled the loan, and the schedule that replaces the one in force. */
+interface LoanRescheduledData {
+  readonly decisionId: string;
+  readonly schedule: LoanScheduledData;
+}
 
 /** The capital repaid early and the fee charged on it, in whole cents. */
 interface LoanEarlyRepaymentRecordedData {
@@ -143,7 +150,35 @@ export const loanEvents: StoredEventTypes<LoanEvent> = {
     decode: (data, { aggregateId, occurredAt }) =>
       new LoanWriteOffReversed(aggregateId, occurredAt, Money.ofCents(data.number('amountCents'))),
   }),
+  [LoanRescheduled.eventName]: defineStoredEvent(LoanRescheduled, {
+    version: 1,
+    encode: (event): LoanRescheduledData => ({
+      decisionId: event.decisionId,
+      schedule: scheduleDataOf(event.schedule),
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new LoanRescheduled(aggregateId, occurredAt, data.text('decisionId'), scheduleOf(data.record('schedule'))),
+  }),
 };
+
+/** The schedule of the loan, in whole cents: the same shape for the payout and for a rescheduling. */
+function scheduleDataOf(schedule: LoanSchedule): LoanScheduledData {
+  return {
+    principalCents: schedule.principal.cents,
+    annualRateBasisPoints: schedule.annualRateBasisPoints,
+    durationMonths: schedule.durationMonths,
+    instalments: schedule.instalments.map((instalment) => ({ cents: instalment.cents })),
+  };
+}
+
+function scheduleOf(data: StoredEventData): LoanSchedule {
+  return LoanSchedule.recorded({
+    principal: Money.ofCents(data.number('principalCents')),
+    annualRateBasisPoints: data.number('annualRateBasisPoints'),
+    durationMonths: data.number('durationMonths'),
+    instalments: data.records('instalments').map((instalment) => Money.ofCents(instalment.number('cents'))),
+  });
+}
 
 /** The name and the postal address of the borrower, sealed by the subject of the loan. */
 function borrowerDataOf(subject: string, borrower: Borrower): BorrowerData {

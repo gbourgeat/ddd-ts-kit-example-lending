@@ -15,13 +15,14 @@ export class EventStoreReadLoanReader implements ReadLoanReader {
       throw UnknownLoan.forLoan(query.loanId);
     }
 
-    const { schedule } = loan;
+    // The principal is the amount paid out, kept by a rescheduling; the duration and the instalments are those in force.
+    const schedule = loan.currentSchedule ?? loan.schedule;
 
     return {
       loanId: loan.id,
       status: loan.closedAt === undefined ? 'paid-out' : 'closed',
-      principalCents: schedule.principal.cents,
-      annualRateBasisPoints: schedule.annualRateBasisPoints,
+      principalCents: loan.schedule.principal.cents,
+      annualRateBasisPoints: loan.schedule.annualRateBasisPoints,
       durationMonths: schedule.durationMonths,
       instalmentsCents: schedule.instalments.map((instalment) => instalment.cents),
       instalmentsDue: [...loan.instalmentsDue],

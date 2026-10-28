@@ -105,6 +105,9 @@
     "1": "sha256:733dac3b56fba725",
     "2": "sha256:a1d9654655ebb58f"
   },
+  "servicing.loan.rescheduled": {
+    "1": "sha256:4914db0ac40c6f51"
+  },
   "servicing.loan.scheduled": {
     "1": "sha256:78206acad92d34f1"
   },
