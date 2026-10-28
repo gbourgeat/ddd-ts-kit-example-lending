@@ -7,6 +7,7 @@ import type {
 import type { DeciderLimitReader } from '@/contexts/credit-application/decision/application/projections/decider-limit-reader.projection';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { DecisionLimitService } from '@/contexts/credit-application/decision/domain/services/decision-limit.service';
+import { ExceptionLimitService } from '@/contexts/credit-application/decision/domain/services/exception-limit.service';
 import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { UnknownCreditApplication } from '@/contexts/credit-application/file/domain/errors/unknown-credit-application.error';
 
@@ -34,6 +35,8 @@ export class DecideApplicationHandler implements CommandHandler<DecideApplicatio
     const approvedAmountCents = this.approvedAmountOf(command.decision, creditApplication.amount.cents);
     const conflictedIds = await this.conflictedStaffMembersOf(creditApplication.applicantId);
 
+    const exceptionApproved = new ExceptionLimitService().lifts(command.actor.id, creditApplication.toState());
+
     new DecisionLimitService().check({
       deciderId: command.actor.id,
       level: limit.level,
@@ -41,6 +44,7 @@ export class DecideApplicationHandler implements CommandHandler<DecideApplicatio
       levels: limit.levels,
       preparerIds: creditApplication.preparerIds,
       conflictedIds,
+      exceptionApproved,
     });
 
     creditApplication.decide({
@@ -51,6 +55,7 @@ export class DecideApplicationHandler implements CommandHandler<DecideApplicatio
       conditions: command.decision.conditions,
       approvedAmountCents,
       decidedAt,
+      exception: exceptionApproved,
     });
 
     await this.creditApplicationRepository.save(creditApplication);

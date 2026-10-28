@@ -111,6 +111,7 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Issue | the offer sent to the borrower after its pre-contractual sheet, refused when its annual percentage rate is at or above the legal maximum rate in force that day |  |
 | Show | to give back, to a decider or a reviewer, what a decision rests on, read from the file as it was recorded |  |
 | View | what the decider saw of an application when they decided: the decision with the assessment, the register answer and the refusal review it rested on, as the file recorded them, never the current data |  |
+| Committee | the credit committee, the level of staff that decides an exception and bounds no amount |  |
 
 ## Modules
 
@@ -170,6 +171,8 @@ No personal data declared.
 - `credit-application:application.request-exception`
 - `credit-application:offer.issue`
 - `credit-application:application.request-review`
+- `credit-application:exception.decide`
+- `credit-application:application.contest`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -227,8 +230,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `BringApplication` | command | not read |
 | `CheckRequestAgainstProduct` | command | not read |
 | `ConsultRepaymentIncidentRegister` | command | `application.consult-register` |
+| `ContestDecision` | command | `application.contest` |
 | `CorrectEntry` | command | `application.correct` |
 | `DecideApplication` | command | not read |
+| `DecideException` | command | `exception.decide` |
 | `DraftOffer` | command | `offer.draft` |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
@@ -269,12 +274,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/applications/:id/assessment` | `assessApplication` | `ApplicationsRoutes` | `Authenticated` | `AssessApplication` | `application.assess` | params: `AssessApplicationParams` | 201: `AssessApplicationAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.MissingAccountInformation`, `CreditApplicationCodes.RegisterNotConsulted`, `CreditApplicationCodes.NoScoreAvailable` |
 | POST | `/applications/:id/co-borrowers` | `nameCoBorrower` | `ApplicationsRoutes` | `Authenticated` | `NameCoBorrower` | `application.name-party` | params: `NameCoBorrowerParams`, body: `NameCoBorrowerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/consent` | `giveAccountConsent` | `ApplicationsRoutes` | `Authenticated` | `GiveAccountConsent` | `application.consent` | params: `GiveAccountConsentParams`, body: `GiveAccountConsentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
+| POST | `/applications/:id/contestation` | `contestDecision` | `ApplicationsRoutes` | `Authenticated` | `ContestDecision` | `application.contest` | params: `ContestDecisionParams`, body: `ContestDecisionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.ContestNotDecided`, `CreditApplicationCodes.ContestAlreadyRecorded` |
 | POST | `/applications/:id/corrections` | `correctEntry` | `ApplicationsRoutes` | `Authenticated` | `CorrectEntry` | `application.correct` | params: `CorrectEntryParams`, body: `CorrectEntryBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry`, `CreditApplicationCodes.CorrectionAlreadyRecorded`, `CreditApplicationCodes.InvalidCorrectionReason` |
 | POST | `/applications/:id/decision` | `decideApplication` | `ApplicationsRoutes` | `Authenticated` | `DecideApplication` | not read | params: `DecideApplicationParams`, body: `DecideApplicationBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotAssessed`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.RefusalNotReviewed`, `CreditApplicationCodes.RefusalProposalStands`, `CreditApplicationCodes.InvalidDecisionReasons`, `CreditApplicationCodes.InvalidDecisionConditions`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable`, `CreditApplicationCodes.DecisionAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide` |
 | GET | `/applications/:id/decision-view` | `showDecisionView` | `ApplicationsRoutes` | `Authenticated` | `ShowDecisionView` | `application.decide` | params: `ShowDecisionViewParams` | 200: `ShowDecisionViewAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotDecided` |
 | GET | `/applications/:id/declared-conflicts` | `readDeclaredConflicts` | `ApplicationsRoutes` | `Authenticated` | `ReadDeclaredConflicts` | not read | params: `ReadDeclaredConflictsParams` | 200: `ReadDeclaredConflictsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/documents` | `attachDocument` | `ApplicationsRoutes` | `Authenticated` | `AttachDocument` | `application.attach-document` |  | 201: `AttachDocumentAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
+| POST | `/applications/:id/exception-decision` | `decideException` | `ApplicationsRoutes` | `Authenticated` | `DecideException` | `exception.decide` | params: `DecideExceptionParams`, body: `DecideExceptionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.NoExceptionRequested`, `CreditApplicationCodes.ExceptionAlreadyDecided`, `CreditApplicationCodes.InvalidDecisionReasons`, `CreditApplicationCodes.PreparerCannotDecide`, `CreditApplicationCodes.ConflictedDecider`, `CreditApplicationCodes.NotCreditCommittee` |
 | POST | `/applications/:id/exceptions` | `requestException` | `ApplicationsRoutes` | `Authenticated` | `RequestException` | `application.request-exception` | params: `RequestExceptionParams`, body: `RequestExceptionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.NotAssessed`, `CreditApplicationCodes.AlreadyDecided`, `CreditApplicationCodes.ExceptionAlreadyRequested`, `CreditApplicationCodes.InvalidExceptionJustification`, `CreditApplicationCodes.ExceptionNotAboveLimit`, `CreditApplicationCodes.PreparerCannotDecide`, `CreditApplicationCodes.ConflictedDecider`, `CreditApplicationCodes.UnknownDeciderLevel`, `CreditApplicationCodes.UnknownDelegationTable` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/human-review` | `requestHumanReview` | `ApplicationsRoutes` | `Authenticated` | `RequestHumanReview` | `application.request-review` | params: `RequestHumanReviewParams` | 204 | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.HumanReviewNotAvailable` |
@@ -370,7 +377,10 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|
 | `AlreadyDecided` | `forAlreadyDecided` | `ALREADY_DECIDED` | none |
 | `BrokerRegistrationLapsed` | `forBroker` | `BROKER_REGISTRATION_LAPSED` | `brokerId` |
+| `ContestAlreadyRecorded` | `forContestAlreadyRecorded` | `CONTEST_ALREADY_RECORDED` | none |
+| `ContestNotDecided` | `forContestNotDecided` | `CONTEST_NOT_DECIDED` | none |
 | `CorrectionAlreadyRecorded` | `forEntry` | `CORRECTION_ALREADY_RECORDED` | none |
+| `ExceptionAlreadyDecided` | `forExceptionAlreadyDecided` | `EXCEPTION_ALREADY_DECIDED` | none |
 | `ExceptionAlreadyRequested` | `forExceptionAlreadyRequested` | `EXCEPTION_ALREADY_REQUESTED` | none |
 | `HumanReviewNotAvailable` | `forHumanReviewNotAvailable` | `HUMAN_REVIEW_NOT_AVAILABLE` | none |
 | `InvalidAmount` | `forCents` | `INVALID_AMOUNT` | none |
@@ -381,6 +391,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `InvalidExceptionJustification` | `forInvalidExceptionJustification` | `INVALID_EXCEPTION_JUSTIFICATION` | none |
 | `InvalidReviewReason` | `forReason` | `INVALID_REVIEW_REASON` | none |
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
+| `NoExceptionRequested` | `forNoExceptionRequested` | `NO_EXCEPTION_REQUESTED` | none |
 | `NoRefusalToReview` | `forApplication` | `NO_REFUSAL_TO_REVIEW` | none |
 | `NotAssessed` | `forNotAssessed` | `NOT_ASSESSED` | none |
 | `RefusalAlreadyReviewed` | `forApplication` | `REFUSAL_ALREADY_REVIEWED` | none |
@@ -399,6 +410,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ConflictedDecider` | `forConflictedDecider` | `CONFLICTED_DECIDER` | none |
 | `DecisionAboveLimit` | `forAboveLimit` | `DECISION_ABOVE_LIMIT` | `levelNeeded` |
 | `ExceptionNotAboveLimit` | `forExceptionNotAboveLimit` | `EXCEPTION_NOT_ABOVE_LIMIT` | `deciderLevel` |
+| `NotCreditCommittee` | `forNotCreditCommittee` | `NOT_CREDIT_COMMITTEE` | `deciderLevel` |
 | `NotDecided` | `forNotDecided` | `NOT_DECIDED` | none |
 | `PreparerCannotDecide` | `forPreparerCannotDecide` | `PREPARER_CANNOT_DECIDE` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |

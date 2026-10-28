@@ -462,6 +462,42 @@ export function giveAccountConsent(
   return send<GiveAccountConsentResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ContestDecisionInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    reason: string;
+  };
+}
+
+export type ContestDecisionResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'CONTEST_ALREADY_RECORDED' | 'CONTEST_NOT_DECIDED' | 'UNKNOWN_CREDIT_APPLICATION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Contest decision: `POST /applications/{id}/contestation`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), CONTEST_ALREADY_RECORDED (422), CONTEST_NOT_DECIDED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+ */
+export function contestDecision(
+  connection: Connection,
+  input: ContestDecisionInput,
+  options: CallOptions = {},
+): Promise<ContestDecisionResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/contestation',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ContestDecisionResult>(connection, operation, { ...input, ...options });
+}
+
 export interface CorrectEntryInput {
   readonly path: {
     readonly id: string;
@@ -683,6 +719,43 @@ export function readDocument(
   };
 
   return send<ReadDocumentResult>(connection, operation, { ...input, ...options });
+}
+
+export interface DecideExceptionInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    outcome: 'approve' | 'refuse';
+    reasons: string;
+  };
+}
+
+export type DecideExceptionResult =
+  | Success<204, undefined>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ALREADY_DECIDED' | 'CONFLICTED_DECIDER' | 'EXCEPTION_ALREADY_DECIDED' | 'INVALID_DECISION_REASONS' | 'NOT_CREDIT_COMMITTEE' | 'NO_EXCEPTION_REQUESTED' | 'PREPARER_CANNOT_DECIDE' | 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_DECIDER_LEVEL' | 'UNKNOWN_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Decide exception: `POST /applications/{id}/exception-decision`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), CONFLICTED_DECIDER (422), EXCEPTION_ALREADY_DECIDED (422), INVALID_DECISION_REASONS (422), NOT_CREDIT_COMMITTEE (422), NO_EXCEPTION_REQUESTED (422), PREPARER_CANNOT_DECIDE (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+ */
+export function decideException(
+  connection: Connection,
+  input: DecideExceptionInput,
+  options: CallOptions = {},
+): Promise<DecideExceptionResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/exception-decision',
+    security: [['bearer']],
+    responses: { 204: 'none', 401: 'json', 403: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DecideExceptionResult>(connection, operation, { ...input, ...options });
 }
 
 export interface RequestExceptionInput {

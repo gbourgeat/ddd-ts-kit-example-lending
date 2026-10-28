@@ -89,6 +89,12 @@ export interface Client {
    */
   giveAccountConsent(input: operations.GiveAccountConsentInput, options?: CallOptions): Promise<operations.GiveAccountConsentResult>;
   /**
+   * Contest decision: `POST /applications/{id}/contestation`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), CONTEST_ALREADY_RECORDED (422), CONTEST_NOT_DECIDED (422), UNKNOWN_CREDIT_APPLICATION (422), VALIDATION_FAILED (422).
+   */
+  contestDecision(input: operations.ContestDecisionInput, options?: CallOptions): Promise<operations.ContestDecisionResult>;
+  /**
    * Correct entry: `POST /applications/{id}/corrections`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), CORRECTION_ALREADY_RECORDED (422), INVALID_CORRECTION_REASON (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
@@ -124,6 +130,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_ENTRY (422), VALIDATION_FAILED (422).
    */
   readDocument(input: operations.ReadDocumentInput, options?: CallOptions): Promise<operations.ReadDocumentResult>;
+  /**
+   * Decide exception: `POST /applications/{id}/exception-decision`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), CONFLICTED_DECIDER (422), EXCEPTION_ALREADY_DECIDED (422), INVALID_DECISION_REASONS (422), NOT_CREDIT_COMMITTEE (422), NO_EXCEPTION_REQUESTED (422), PREPARER_CANNOT_DECIDE (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  decideException(input: operations.DecideExceptionInput, options?: CallOptions): Promise<operations.DecideExceptionResult>;
   /**
    * Request exception: `POST /applications/{id}/exceptions`.
    *
@@ -502,12 +514,14 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     assessApplication: (input, call) => operations.assessApplication(connection, input, call),
     nameCoBorrower: (input, call) => operations.nameCoBorrower(connection, input, call),
     giveAccountConsent: (input, call) => operations.giveAccountConsent(connection, input, call),
+    contestDecision: (input, call) => operations.contestDecision(connection, input, call),
     correctEntry: (input, call) => operations.correctEntry(connection, input, call),
     decideApplication: (input, call) => operations.decideApplication(connection, input, call),
     showDecisionView: (input, call) => operations.showDecisionView(connection, input, call),
     readDeclaredConflicts: (input, call) => operations.readDeclaredConflicts(connection, input, call),
     attachDocument: (input, call) => operations.attachDocument(connection, input, call),
     readDocument: (input, call) => operations.readDocument(connection, input, call),
+    decideException: (input, call) => operations.decideException(connection, input, call),
     requestException: (input, call) => operations.requestException(connection, input, call),
     nameGuarantor: (input, call) => operations.nameGuarantor(connection, input, call),
     requestHumanReview: (input, call) => operations.requestHumanReview(connection, input, call),

@@ -1,4 +1,5 @@
 import type { Money } from '@/shared-kernel/money.vo';
+import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import type { AccountConsentState } from '@/contexts/credit-application/file/domain/entities/account-consent.entity';
 import type { ProposedOutcome } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
 import type { DecisionRecord } from '@/contexts/credit-application/file/domain/values/decision-record';
@@ -40,4 +41,10 @@ export interface CreditApplicationState {
   readonly exception: ExceptionRequest | undefined;
   /** The human review the applicant asked for on the refusal standing, undefined until the applicant asks. */
   readonly humanReview: { readonly requesterId: string; readonly requestedAt: Date } | undefined;
+  /** The credit committee's decision on the exception requested, undefined until it decides. */
+  readonly exceptionDecision: { readonly outcome: DecisionOutcome; readonly deciderId: string } | undefined;
+  /** The applicant's contestation of the decision, undefined until the applicant contests it: once only. */
+  readonly contestation:
+    | { readonly requesterId: string; readonly contestedAt: Date; readonly reason: string }
+    | undefined;
 }

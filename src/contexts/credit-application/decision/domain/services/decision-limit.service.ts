@@ -18,6 +18,8 @@ export class DecisionLimitService {
     readonly levels: readonly { readonly level: string; readonly amountCents: number }[];
     readonly preparerIds: readonly string[];
     readonly conflictedIds: readonly string[];
+    /** An approved exception to the policy, requested by this decider, lifts the ceiling of their level. */
+    readonly exceptionApproved?: boolean;
   }): void {
     if (decision.preparerIds.includes(decision.deciderId)) {
       throw PreparerCannotDecide.forPreparerCannotDecide();
@@ -27,7 +29,7 @@ export class DecisionLimitService {
       throw ConflictedDecider.forConflictedDecider();
     }
 
-    if (decision.level === CREDIT_COMMITTEE) {
+    if (decision.level === CREDIT_COMMITTEE || decision.exceptionApproved === true) {
       return;
     }
 

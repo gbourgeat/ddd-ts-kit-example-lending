@@ -1014,6 +1014,75 @@ paths:
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
             - VALIDATION_FAILED
+  /applications/{id}/contestation:
+    post:
+      operationId: contestDecision
+      summary: Contest decision
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                reason:
+                  type: string
+              type: object
+              required:
+                - reason
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: CONTEST_ALREADY_RECORDED, CONTEST_NOT_DECIDED, UNKNOWN_CREDIT_APPLICATION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - CONTEST_ALREADY_RECORDED
+            - CONTEST_NOT_DECIDED
+            - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
   /applications/{id}/corrections:
     post:
       operationId: correctEntry
@@ -1521,6 +1590,88 @@ paths:
           x-error-codes:
             - UNKNOWN_CREDIT_APPLICATION
             - UNKNOWN_ENTRY
+            - VALIDATION_FAILED
+  /applications/{id}/exception-decision:
+    post:
+      operationId: decideException
+      summary: Decide exception
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                outcome:
+                  type: string
+                  enum:
+                    - approve
+                    - refuse
+                reasons:
+                  type: string
+              type: object
+              required:
+                - outcome
+                - reasons
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: ALREADY_DECIDED, CONFLICTED_DECIDER, EXCEPTION_ALREADY_DECIDED, INVALID_DECISION_REASONS, NOT_CREDIT_COMMITTEE, NO_EXCEPTION_REQUESTED, PREPARER_CANNOT_DECIDE, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_DECIDER_LEVEL, UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - ALREADY_DECIDED
+            - CONFLICTED_DECIDER
+            - EXCEPTION_ALREADY_DECIDED
+            - INVALID_DECISION_REASONS
+            - NOT_CREDIT_COMMITTEE
+            - NO_EXCEPTION_REQUESTED
+            - PREPARER_CANNOT_DECIDE
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_DECIDER_LEVEL
+            - UNKNOWN_DELEGATION_TABLE
             - VALIDATION_FAILED
   /applications/{id}/exceptions:
     post:

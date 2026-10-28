@@ -17,6 +17,8 @@ import type { DecisionOutcome } from '@/contexts/credit-application/decision/dom
 import { CreditApplicationBrought } from '@/contexts/credit-application/file/domain/events/credit-application-brought.event';
 import { CreditApplicationExceptionRequested } from '@/contexts/credit-application/file/domain/events/credit-application-exception-requested.event';
 import { CreditApplicationHumanReviewRequested } from '@/contexts/credit-application/file/domain/events/credit-application-human-review-requested.event';
+import { CreditApplicationExceptionDecided } from '@/contexts/credit-application/file/domain/events/credit-application-exception-decided.event';
+import { CreditApplicationContested } from '@/contexts/credit-application/file/domain/events/credit-application-contested.event';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -101,6 +103,17 @@ interface CreditApplicationExceptionRequestedData {
 
 interface CreditApplicationHumanReviewRequestedData {
   readonly requesterId: string;
+}
+
+interface CreditApplicationExceptionDecidedData {
+  readonly outcome: string;
+  readonly deciderId: string;
+  readonly reasons: string;
+}
+
+interface CreditApplicationContestedData {
+  readonly requesterId: string;
+  readonly reason: string;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -308,5 +321,27 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
     encode: (event): CreditApplicationHumanReviewRequestedData => ({ requesterId: event.requesterId }),
     decode: (data, { aggregateId, occurredAt }) =>
       new CreditApplicationHumanReviewRequested(aggregateId, occurredAt, data.text('requesterId')),
+  }),
+  [CreditApplicationExceptionDecided.eventName]: defineStoredEvent(CreditApplicationExceptionDecided, {
+    version: 1,
+    encode: (event): CreditApplicationExceptionDecidedData => ({
+      outcome: event.outcome,
+      deciderId: event.deciderId,
+      reasons: event.reasons,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationExceptionDecided(
+        aggregateId,
+        occurredAt,
+        data.text('outcome') as DecisionOutcome,
+        data.text('deciderId'),
+        data.text('reasons'),
+      ),
+  }),
+  [CreditApplicationContested.eventName]: defineStoredEvent(CreditApplicationContested, {
+    version: 1,
+    encode: (event): CreditApplicationContestedData => ({ requesterId: event.requesterId, reason: event.reason }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationContested(aggregateId, occurredAt, data.text('requesterId'), data.text('reason')),
   }),
 };

@@ -42,6 +42,10 @@ import { RequestHumanReviewHandler } from '@/contexts/credit-application/decisio
 import { ShowDecisionViewHandler } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.handler';
 import { ShowDecisionViewQuery } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.query';
 import { RepositoryShowDecisionViewReader } from '@/contexts/credit-application/decision/infrastructure/persistence/repository-show-decision-view.reader';
+import { DecideExceptionCommand } from '@/contexts/credit-application/decision/application/commands/decide-exception/decide-exception.command';
+import { DecideExceptionHandler } from '@/contexts/credit-application/decision/application/commands/decide-exception/decide-exception.handler';
+import { ContestDecisionCommand } from '@/contexts/credit-application/decision/application/commands/contest-decision/contest-decision.command';
+import { ContestDecisionHandler } from '@/contexts/credit-application/decision/application/commands/contest-decision/contest-decision.handler';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -84,6 +88,11 @@ export const decisionModule = {
     platform.queries.register(ShowDecisionViewQuery, new ShowDecisionViewHandler(showDecisionViewReader), {
       context: 'credit-application',
     });
+
+    registerExceptionAndContest(platform, repository, {
+      deciderLimits: new DeciderLimitReader(deciderLevels, delegationTables),
+      declaredConflicts,
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -116,6 +125,12 @@ export const decisionModule = {
       requires(ShowDecisionViewQuery, creditApplicationPermissions['application.decide'], {
         resource: () => ({ type: 'context', id: 'credit-application' }),
       }),
+      requires(DecideExceptionCommand, creditApplicationPermissions['exception.decide'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
+      }),
+      requires(ContestDecisionCommand, creditApplicationPermissions['application.contest'], {
+        resource: (command) => ({ type: 'application', id: command.applicationId }),
+      }),
       // /ddd-ts-kit:authorization
     ];
   },
@@ -138,6 +153,25 @@ function readModel<T extends object>(
   const instance = new Model(platform.persistence.database, platform.scope);
 
   return platform.adapter(instance, { kind: 'repository', context: 'credit-application', token });
+}
+
+/** The commands that decide the exception requested and that contest a decision, over the repository of the file. */
+function registerExceptionAndContest(
+  platform: Platform,
+  repository: CreditApplicationRepository,
+  readModels: { readonly deciderLimits: DeciderLimitReader; readonly declaredConflicts: DeclaredConflictsStore },
+): void {
+  const { deciderLimits, declaredConflicts } = readModels;
+
+  platform.commands.register(
+    DecideExceptionCommand,
+    new DecideExceptionHandler(repository, deciderLimits, platform.clock, declaredConflicts),
+    { context: 'credit-application' },
+  );
+
+  platform.commands.register(ContestDecisionCommand, new ContestDecisionHandler(repository, platform.clock), {
+    context: 'credit-application',
+  });
 }
 
 /** The command that keeps the level of each decider and the query that reads it, over the read model the module binds. */

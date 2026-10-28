@@ -12,6 +12,9 @@
   "credit-application.credit-application.co-borrower-named": {
     "1": "sha256:a3b8eb43c397ea60"
   },
+  "credit-application.credit-application.contested": {
+    "1": "sha256:1c6412b42d4b670a"
+  },
   "credit-application.credit-application.decided": {
     "1": "sha256:6f4c0bca797a9304",
     "2": "sha256:c82e5b7a35a32bb7"
@@ -22,8 +25,17 @@
   "credit-application.credit-application.entry-corrected": {
     "1": "sha256:5b747a08750d0be3"
   },
+  "credit-application.credit-application.exception-decided": {
+    "1": "sha256:4da3338277652f7b"
+  },
+  "credit-application.credit-application.exception-requested": {
+    "1": "sha256:9c7516279fdb28be"
+  },
   "credit-application.credit-application.guarantor-named": {
     "1": "sha256:25dd58ec9a66b312"
+  },
+  "credit-application.credit-application.human-review-requested": {
+    "1": "sha256:a054ed6a8da013e9"
   },
   "credit-application.credit-application.refusal-reviewed": {
     "1": "sha256:7bed8c0c6650bb3d"

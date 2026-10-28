@@ -32,6 +32,10 @@ import { ExceptionRequestCheckService } from '@/contexts/credit-application/file
 import type { ExceptionRequest } from '@/contexts/credit-application/file/domain/values/exception-request';
 import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
 import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
+import { CreditApplicationExceptionDecided } from '@/contexts/credit-application/file/domain/events/credit-application-exception-decided.event';
+import { CreditApplicationContested } from '@/contexts/credit-application/file/domain/events/credit-application-contested.event';
+import { ExceptionDecisionCheckService } from '@/contexts/credit-application/file/domain/services/exception-decision-check.service';
+import { ContestCheckService } from '@/contexts/credit-application/file/domain/services/contest-check.service';
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
   private state: CreditApplicationState = {
@@ -55,6 +59,8 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     decision: undefined,
     exception: undefined,
     humanReview: undefined,
+    exceptionDecision: undefined,
+    contestation: undefined,
   };
 
   private constructor(id: string) {
@@ -151,6 +157,16 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
     this.record(new ExceptionRequestCheckService().eventOf(this.id, this.state, request));
   }
 
+  /** The credit committee decides the exception requested on the application: approved or refused, with its reasons. */
+  decideException(decision: Parameters<ExceptionDecisionCheckService['eventOf']>[2]): void {
+    this.record(new ExceptionDecisionCheckService().eventOf(this.id, this.state, decision));
+  }
+
+  /** The applicant contests the decision on the file, once: the contestation is kept and a person reviews the file. */
+  contest(contest: { requesterId: string; reason: string; contestedAt: Date }): void {
+    this.record(new ContestCheckService().eventOf(this.id, this.state, contest));
+  }
+
   /** A broker brought the application for the customer it was submitted for: the broker is kept in the file. */
   recordBrought(brokerId: string, broughtAt: Date): void {
     this.record(new CreditApplicationBrought(this.id, broughtAt, brokerId));
@@ -244,6 +260,10 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationBrought.eventName]: () => undefined,
       [CreditApplicationExceptionRequested.eventName]: (event) => this.applyExceptionRequested(event),
       [CreditApplicationHumanReviewRequested.eventName]: (event) => this.applyHumanReviewRequested(event),
+      [CreditApplicationExceptionDecided.eventName]: (event) =>
+        this.applyEntryAppended(new ExceptionDecisionCheckService().changesOf(event)),
+      [CreditApplicationContested.eventName]: (event) =>
+        this.applyEntryAppended(new ContestCheckService().changesOf(event, this.state)),
     };
   }
 
@@ -324,8 +344,6 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   }
 
   private applyHumanReviewRequested(event: CreditApplicationHumanReviewRequested): void {
-    this.applyEntryAppended({
-      humanReview: { requesterId: event.requesterId, requestedAt: event.occurredAt },
-    });
+    this.applyEntryAppended({ humanReview: { requesterId: event.requesterId, requestedAt: event.occurredAt } });
   }
 }

@@ -6,7 +6,9 @@ import { AssessApplicationController } from '@/contexts/credit-application/asses
 import { ConsultRepaymentIncidentRegisterController } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.controller';
 import { ReadAccountInformationController } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.controller';
 import { ReviewProposedRefusalController } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.controller';
+import { ContestDecisionController } from '@/contexts/credit-application/decision/presentation/http/applications/contest-decision/contest-decision.controller';
 import { DecideApplicationController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.controller';
+import { DecideExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.controller';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
 import { RequestExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.controller';
 import { RequestHumanReviewController } from '@/contexts/credit-application/decision/presentation/http/applications/request-human-review/request-human-review.controller';
@@ -38,8 +40,12 @@ import { ReadAccountInformationParams } from '@/contexts/credit-application/asse
 import { ReadAccountInformationBody } from '@/contexts/credit-application/assessment/presentation/http/applications/read-account-information/read-account-information.body';
 import { ReviewProposedRefusalParams } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.params';
 import { ReviewProposedRefusalBody } from '@/contexts/credit-application/assessment/presentation/http/applications/review-proposed-refusal/review-proposed-refusal.body';
+import { ContestDecisionParams } from '@/contexts/credit-application/decision/presentation/http/applications/contest-decision/contest-decision.params';
+import { ContestDecisionBody } from '@/contexts/credit-application/decision/presentation/http/applications/contest-decision/contest-decision.body';
 import { DecideApplicationParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.params';
 import { DecideApplicationBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.body';
+import { DecideExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.params';
+import { DecideExceptionBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
 import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.answer';
 import { RequestExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.params';
@@ -104,8 +110,14 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
       answer: acceptedSchema,
     },
   }),
+  withSignatures(ContestDecisionController, {
+    contestDecision: { params: ContestDecisionParams, body: ContestDecisionBody, answer: null },
+  }),
   withSignatures(DecideApplicationController, {
     decideApplication: { params: DecideApplicationParams, body: DecideApplicationBody, answer: acceptedSchema },
+  }),
+  withSignatures(DecideExceptionController, {
+    decideException: { params: DecideExceptionParams, body: DecideExceptionBody, answer: null },
   }),
   withSignatures(ReadDeclaredConflictsController, {
     readDeclaredConflicts: { params: ReadDeclaredConflictsParams, answer: ReadDeclaredConflictsAnswer },
