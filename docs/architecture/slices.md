@@ -384,7 +384,7 @@ Notes:
 | US15.01 | platform | slice | Contracts current: OpenAPI, AsyncAPI, SDK | `npm run regenerate` (after the contracts of US4.05, US5.04, US7.12, US7.14, US8.13, US9.08, US9.09, US10.08, US12.06) | US8.13, US9.08, US9.09, US10.08, US12.06, US12.07 | conductor | done |
 | US15.02 | platform | slice | Traceability matrix from each need to its stories and specs | edit `docs/compliance/traceability.md` (no generator) | US15.01, US14.06 | conductor | done |
 | US15.03 | platform | slice | A recorded real run with docker compose, a demo script from an application to a payout and a first instalment | `npm run infra:up`; `npm run dev`; the demo script under `scripts/` (no generator) | US9.07, US8.12, US15.01 | conductor | blocked |
-| US15.04 | platform | slice | One trace crossing the API and servicing | the correlation id carried through the outbox (platform, no generator); spec on the trace of the demo | US15.03, US9.01 | conductor | blocked |
+| US15.04 | platform | slice | One trace crossing the API and servicing | the correlation id carried through the outbox (platform, no generator); spec on the trace of the demo | US15.03, US9.01 | conductor | done |
 | US15.05 | platform | slice | Close: `ddd-ts-kit check` with zero finding, `npm run verify` green | `npx ddd-ts-kit check`; `npm run verify` | US15.02, US15.04 | conductor | blocked |
 
 Serves: close 1 (US15.05); close 13 (US15.01); close 15 (US15.03, US15.04); close 16 (US15.02); the story of
