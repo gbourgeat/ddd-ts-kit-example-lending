@@ -10,7 +10,6 @@ import type { CustomerAdvisorBranchGateway } from '@/contexts/credit-application
 import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import { SubmitApplicationCommand } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.command';
-import { SubmitApplicationHandler } from '@/contexts/credit-application/file/application/commands/submit-application/submit-application.handler';
 import { GiveAccountConsentCommand } from '@/contexts/credit-application/file/application/commands/give-account-consent/give-account-consent.command';
 import { SearchApplicationsHandler } from '@/contexts/credit-application/file/application/queries/search-applications/search-applications.handler';
 import { SearchApplicationsQuery } from '@/contexts/credit-application/file/application/queries/search-applications/search-applications.query';
@@ -22,7 +21,7 @@ import { NameGuarantorCommand } from '@/contexts/credit-application/file/applica
 import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-declared-conflicts-store.repository';
-import { ReadDeclaredConflictsHandler } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.handler';
+import { registerSubmissionAndConflictsHandlers } from '@/contexts/credit-application/composition/register-submission-and-conflicts-handlers.module';
 import { ReadDeclaredConflictsQuery } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.query';
 import { AttachDocumentCommand } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.command';
 import { registerDocumentRetentionHandlers } from '@/contexts/credit-application/composition/register-document-retention-handlers.module';
@@ -49,7 +48,6 @@ import { SimulatedRepaymentIncidentRegister } from '@/contexts/credit-applicatio
 import { ErasePersonalDataPastRetentionCommand } from '@/contexts/credit-application/file/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
 import { registerNightlyJobs } from '@/contexts/credit-application/composition/register-nightly-jobs.module';
 import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
-import { registerFileReactions } from '@/contexts/credit-application/composition/register-file-reactions.module';
 import { registerFileHandlers } from '@/contexts/credit-application/composition/register-file-handlers.module';
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { registerDelegationTableHandlers } from '@/contexts/credit-application/composition/register-delegation-table-handlers.module';
@@ -66,6 +64,10 @@ import { PrismaRateGrids } from '@/contexts/credit-application/offer/infrastruct
 import { registerRateGridHandlers } from '@/contexts/credit-application/composition/register-rate-grid-handlers.module';
 import { PrismaLegalMaximumRates } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-legal-maximum-rates.repository';
 import { registerLegalMaximumRateHandlers } from '@/contexts/credit-application/composition/register-legal-maximum-rate-handlers.module';
+import { PrismaProductTerms } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-product-terms.repository';
+import { registerProductTermsHandlers } from '@/contexts/credit-application/composition/register-product-terms-handlers.module';
+import { KeepProductTermsCommand } from '@/contexts/credit-application/file/application/commands/keep-product-terms/keep-product-terms.command';
+import { ReadProductTermsQuery } from '@/contexts/credit-application/file/application/queries/read-product-terms/read-product-terms.query';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -142,12 +144,6 @@ function registerHandlers(
     { kind: 'repository', context: 'credit-application', token: 'CreditApplicationRepository' },
   );
 
-  platform.commands.register(
-    SubmitApplicationCommand,
-    new SubmitApplicationHandler(creditApplicationRepository, platform.ids, platform.clock, customerAdvisorBranch),
-    { context: 'credit-application' },
-  );
-
   registerFileHandlers(platform, creditApplicationRepository);
 
   const searchApplicationsReader = platform.adapter(
@@ -161,13 +157,11 @@ function registerHandlers(
     { context: 'credit-application' },
   );
 
-  platform.queries.register(
-    ReadDeclaredConflictsQuery,
-    new ReadDeclaredConflictsHandler(declaredConflicts, creditApplicationRepository),
-    {
-      context: 'credit-application',
-    },
-  );
+  registerSubmissionAndConflictsHandlers(platform, {
+    repository: creditApplicationRepository,
+    declaredConflicts,
+    customerAdvisorBranch,
+  });
 
   registerAssessmentHandlers(platform, {
     repository: creditApplicationRepository,
@@ -204,6 +198,14 @@ function registerHandlers(
   );
 
   registerLegalMaximumRateHandlers(platform, legalMaximumRates);
+
+  const productTerms = platform.adapter(new PrismaProductTerms(platform.persistence.database, platform.scope), {
+    kind: 'repository',
+    context: 'credit-application',
+    token: 'ProductTerms',
+  });
+
+  registerProductTermsHandlers(platform, productTerms);
   // /ddd-ts-kit:handlers
 }
 
@@ -223,7 +225,6 @@ function registerReactions(platform: Platform, declaredConflicts: DeclaredConfli
 
   keepReferenceData(platform);
 
-  registerFileReactions(platform);
   // /ddd-ts-kit:reactions
 }
 
@@ -325,6 +326,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     ...declareOfferUseCases(),
+    requires(KeepProductTermsCommand, creditApplicationPermissions['product-terms.keep'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(ReadProductTermsQuery, creditApplicationPermissions['application.decide'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }

@@ -2161,6 +2161,47 @@ export function searchPortfolioCustomers(
   return send<SearchPortfolioCustomersResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadProductTermsInput {
+  readonly path: {
+    readonly productId: string;
+  };
+}
+
+export type ReadProductTermsResult =
+  | Success<200, {
+    productId: string;
+    amountMinimumCents: number;
+    amountMaximumCents: number;
+    durationMinimumMonths: number;
+    durationMaximumMonths: number;
+    arrangementFeeCents: number;
+    insuranceMandatory: boolean;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_PRODUCT_TERMS' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read product terms: `GET /product-terms/{productId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PRODUCT_TERMS (422), VALIDATION_FAILED (422).
+ */
+export function readProductTerms(
+  connection: Connection,
+  input: ReadProductTermsInput,
+  options: CallOptions = {},
+): Promise<ReadProductTermsResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/product-terms/{productId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadProductTermsResult>(connection, operation, { ...input, ...options });
+}
+
 export interface DefineProductInput {
   readonly body: {
     amountMinimumCents: number;

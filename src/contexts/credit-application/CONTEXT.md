@@ -132,6 +132,7 @@ No personal data declared.
 - `credit-application:decider-level.keep`
 - `credit-application:rate-grid.keep`
 - `credit-application:legal-maximum-rate.keep`
+- `credit-application:product-terms.keep`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -192,6 +193,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `KeepDeciderLevel` | command | `decider-level.keep` |
 | `KeepDelegationTable` | command | `delegation-table.keep` |
 | `KeepLegalMaximumRate` | command | not read |
+| `KeepProductTerms` | command | `product-terms.keep` |
 | `KeepRateGrid` | command | not read |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
@@ -201,6 +203,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ReadDelegationTable` | query | `application.decide` |
 | `ReadDocument` | query | `application.read` |
 | `ReadLegalMaximumRate` | query | not read |
+| `ReadProductTerms` | query | `application.decide` |
 | `ReadRateGrid` | query | not read |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
@@ -223,6 +226,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/deciders/:staffMemberId/level` | `readDeciderLevel` | `DecidersRoutes` | `Authenticated` | `ReadDeciderLevel` | `application.decide` | params: `ReadDeciderLevelParams` | 200: `ReadDeciderLevelAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDeciderLevel` |
 | GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | `application.decide` | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 | GET | `/legal-maximum-rates/:legalMaximumRateId` | `readLegalMaximumRate` | `LegalMaximumRatesRoutes` | `Authenticated` | `ReadLegalMaximumRate` | not read | params: `ReadLegalMaximumRateParams` | 200: `ReadLegalMaximumRateAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownLegalMaximumRate` |
+| GET | `/product-terms/:productId` | `readProductTerms` | `ProductTermsRoutes` | `Authenticated` | `ReadProductTerms` | `application.decide` | params: `ReadProductTermsParams` | 200: `ReadProductTermsAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownProductTerms` |
 | GET | `/rate-grids/:rateGridId` | `readRateGrid` | `RateGridsRoutes` | `Authenticated` | `ReadRateGrid` | not read | params: `ReadRateGridParams` | 200: `ReadRateGridAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownRateGrid` |
 
 ### Consumed events
@@ -245,7 +249,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Projection | Class | Applies |
 |---|---|---|
-| not read | `ProductTermsProjection` |  |
+| not read | not read |  |
+| not read | not read |  |
 | not read | not read |  |
 | not read | not read |  |
 | not read | `DeclaredConflictRow` |  |
@@ -273,6 +278,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `LegalMaximumRates` | not bound |  |
 | `OfferRepository` | external | `PrismaOfferRepository` |
+| `ProductTerms` | not bound |  |
 | `RateGrids` | not bound |  |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
 | `ScoringGateway` | gateway | `InProcessScoringGateway` |
@@ -295,6 +301,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `MissingAccountConsent` | `forApplication` | `MISSING_ACCOUNT_CONSENT` | none |
 | `UnknownCreditApplication` | `forCreditApplication` | `UNKNOWN_CREDIT_APPLICATION` | none |
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
+| `UnknownProductTerms` | `forUnknownProductTerms` | `UNKNOWN_PRODUCT_TERMS` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
 | `UnknownDeciderLevel` | `forUnknownDeciderLevel` | `UNKNOWN_DECIDER_LEVEL` | none |

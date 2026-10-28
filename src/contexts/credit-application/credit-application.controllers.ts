@@ -15,6 +15,7 @@ import { NameGuarantorController } from '@/contexts/credit-application/file/pres
 import { ReadDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/read-document/read-document.controller';
 import { SearchApplicationsController } from '@/contexts/credit-application/file/presentation/http/applications/search-applications/search-applications.controller';
 import { SubmitApplicationController } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.controller';
+import { ReadProductTermsController } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.controller';
 import { ReadLegalMaximumRateController } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.controller';
 import { ReadRateGridController } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.controller';
 import { ConsultRepaymentIncidentRegisterParams } from '@/contexts/credit-application/assessment/presentation/http/applications/consult-repayment-incident-register/consult-repayment-incident-register.params';
@@ -37,6 +38,8 @@ import { NameCoBorrowerBody } from '@/contexts/credit-application/file/presentat
 import { NameGuarantorParams } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.params';
 import { NameGuarantorBody } from '@/contexts/credit-application/file/presentation/http/applications/name-guarantor/name-guarantor.body';
 import { SubmitApplicationBody } from '@/contexts/credit-application/file/presentation/http/applications/submit-application/submit-application.body';
+import { ReadProductTermsParams } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.params';
+import { ReadProductTermsAnswer } from '@/contexts/credit-application/file/presentation/http/product-terms/read-product-terms/read-product-terms.answer';
 import { ReadLegalMaximumRateParams } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.params';
 import { ReadLegalMaximumRateAnswer } from '@/contexts/credit-application/offer/presentation/http/legal-maximum-rates/read-legal-maximum-rate/read-legal-maximum-rate.answer';
 import { ReadRateGridParams } from '@/contexts/credit-application/offer/presentation/http/rate-grids/read-rate-grid/read-rate-grid.params';
@@ -82,6 +85,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   withSignatures(ReadDocumentController, {}),
   withSignatures(SearchApplicationsController, {}),
   withSignatures(SubmitApplicationController, { submitApplication: { body: SubmitApplicationBody } }),
+  withSignatures(ReadProductTermsController, {
+    readProductTerms: { params: ReadProductTermsParams, answer: ReadProductTermsAnswer },
+  }),
   withSignatures(ReadLegalMaximumRateController, {
     readLegalMaximumRate: { params: ReadLegalMaximumRateParams, answer: ReadLegalMaximumRateAnswer },
   }),

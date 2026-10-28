@@ -91,6 +91,26 @@ model CreditApplicationRateGrid {
   @@schema("credit_application")
 }
 
+/// The product terms read model: one row per product credit-policy defined, with the amounts, durations, fee and insurance it is sold with.
+model CreditApplicationProductTerms {
+  productId             String   @id @map("product_id")
+  amountMinimumCents    Int      @map("amount_minimum_cents")
+  amountMaximumCents    Int      @map("amount_maximum_cents")
+  durationMinimumMonths Int      @map("duration_minimum_months")
+  durationMaximumMonths Int      @map("duration_maximum_months")
+  arrangementFeeCents   Int      @map("arrangement_fee_cents")
+  insuranceMandatory    Boolean  @map("insurance_mandatory")
+  lastEventAt           DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId           String   @map("last_event_id")
+  lastEventVersion      Int?     @map("last_event_version")
+  deleted               Boolean  @default(false)
+  tenantId              String   @map("tenant_id")
+
+  @@index([tenantId, productId], map: "product_terms_tenant_idx")
+  @@map("product_terms")
+  @@schema("credit_application")
+}
+
 /// The legal maximum rates read model: one row per maximum credit-policy published, for one category, from its day of effect.
 model CreditApplicationLegalMaximumRate {
   legalMaximumRateId String   @id @map("legal_maximum_rate_id")

@@ -359,6 +359,12 @@ export interface Client {
    */
   searchPortfolioCustomers(input: operations.SearchPortfolioCustomersInput, options?: CallOptions): Promise<operations.SearchPortfolioCustomersResult>;
   /**
+   * Read product terms: `GET /product-terms/{productId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_PRODUCT_TERMS (422), VALIDATION_FAILED (422).
+   */
+  readProductTerms(input: operations.ReadProductTermsInput, options?: CallOptions): Promise<operations.ReadProductTermsResult>;
+  /**
    * Define product: `POST /products`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_ARRANGEMENT_FEE (422), INVALID_SCORE_THRESHOLD (422), PRODUCT_BOUNDS_INVERTED (422), VALIDATION_FAILED (422).
@@ -463,6 +469,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     erasePersonalDataPastRetention: (input, call) => operations.erasePersonalDataPastRetention(connection, input, call),
     searchAdvisorPortfolios: (input, call) => operations.searchAdvisorPortfolios(connection, input, call),
     searchPortfolioCustomers: (input, call) => operations.searchPortfolioCustomers(connection, input, call),
+    readProductTerms: (input, call) => operations.readProductTerms(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
     readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
