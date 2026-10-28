@@ -31,7 +31,7 @@ export class ReadAccountInformationHandler implements CommandHandler<ReadAccount
 
     const figures = await this.accounts.readIncomeAndExpenses(creditApplication.id);
     const content = Buffer.from(JSON.stringify(figures), 'utf8');
-    const key = `${creditApplication.id}/accounts/${readAt.toISOString()}.json`;
+    const key = `${creditApplication.id}/accounts/${readAt.toISOString().replace(/[:.]/g, '-')}.json`;
 
     await this.storage.put(key, this.chunksOf(content), { mediaType: DOCUMENT_MEDIA_TYPE });
     creditApplication.attachDocument({ key, mediaType: DOCUMENT_MEDIA_TYPE, sizeBytes: content.byteLength }, readAt);
