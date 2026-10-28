@@ -1841,6 +1841,127 @@ paths:
             - IDENTITY_DOCUMENT_EXPIRED
             - PROOF_OF_ADDRESS_TOO_OLD
             - VALIDATION_FAILED
+  /customers/{customerId}/due-diligence/flag-overdue:
+    post:
+      operationId: flagOverdueDueDiligence
+      summary: Flag the due diligence of a customer as overdue when its refresh is past its date
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: customerId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
+  /customers/{customerId}/high-risk-approval:
+    post:
+      operationId: approveHighRiskCustomer
+      summary: Approve a customer rated high risk, as compliance; a re-rating clears the approval
+      tags:
+        - customer-due-diligence
+      security:
+        - bearer: []
+      parameters:
+        - name: customerId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '201':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accepted'
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: CUSTOMER_NOT_HIGH_RISK, UNKNOWN_CUSTOMER, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - CUSTOMER_NOT_HIGH_RISK
+            - UNKNOWN_CUSTOMER
+            - VALIDATION_FAILED
   /customers/{id}/advisor:
     put:
       operationId: assignAdvisor
@@ -2043,6 +2164,9 @@ paths:
                     pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
                     type: string
                   nextDueOn:
+                    pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
+                    type: string
+                  flaggedOverdueOn:
                     pattern: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d.\d+Z?
                     type: string
                 type: object

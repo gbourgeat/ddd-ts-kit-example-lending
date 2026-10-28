@@ -143,6 +143,18 @@ export interface Client {
    */
   identifyCustomer(input: operations.IdentifyCustomerInput, options?: CallOptions): Promise<operations.IdentifyCustomerResult>;
   /**
+   * Flag the due diligence of a customer as overdue when its refresh is past its date: `POST /customers/{customerId}/due-diligence/flag-overdue`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  flagOverdueDueDiligence(input: operations.FlagOverdueDueDiligenceInput, options?: CallOptions): Promise<operations.FlagOverdueDueDiligenceResult>;
+  /**
+   * Approve a customer rated high risk, as compliance; a re-rating clears the approval: `POST /customers/{customerId}/high-risk-approval`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), CUSTOMER_NOT_HIGH_RISK (422), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
+   */
+  approveHighRiskCustomer(input: operations.ApproveHighRiskCustomerInput, options?: CallOptions): Promise<operations.ApproveHighRiskCustomerResult>;
+  /**
    * Give a customer its advisor: `PUT /customers/{id}/advisor`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_CUSTOMER (422), VALIDATION_FAILED (422).
@@ -343,6 +355,8 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     declareConflictOfInterest: (input, call) => operations.declareConflictOfInterest(connection, input, call),
     getCustomerFile: (input, call) => operations.getCustomerFile(connection, input, call),
     identifyCustomer: (input, call) => operations.identifyCustomer(connection, input, call),
+    flagOverdueDueDiligence: (input, call) => operations.flagOverdueDueDiligence(connection, input, call),
+    approveHighRiskCustomer: (input, call) => operations.approveHighRiskCustomer(connection, input, call),
     assignAdvisor: (input, call) => operations.assignAdvisor(connection, input, call),
     declareDirectorsAndOwners: (input, call) => operations.declareDirectorsAndOwners(connection, input, call),
     getCustomerDueDiligence: (input, call) => operations.getCustomerDueDiligence(connection, input, call),
