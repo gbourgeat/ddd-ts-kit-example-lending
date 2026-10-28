@@ -43,4 +43,67 @@ model CreditApplicationDeclaredConflict {
   @@map("declared_conflicts")
   @@schema("credit_application")
 }
+/// The delegation tables read model: one row per table credit-policy published, the newest event of each kept.
+model CreditApplicationDelegationTable {
+  delegationTableId String   @id @map("delegation_table_id")
+  effectiveFrom     DateTime @map("effective_from") @db.Timestamptz(3)
+  levels            Json
+  lastEventAt       DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId       String   @map("last_event_id")
+  lastEventVersion  Int?     @map("last_event_version")
+  deleted           Boolean  @default(false)
+  tenantId          String   @map("tenant_id")
+
+  @@index([tenantId, delegationTableId], map: "delegation_tables_tenant_idx")
+  @@map("delegation_tables")
+  @@schema("credit_application")
+}
+/// The decider levels read model: one row per staff member, the level branch-network appointed them to, the newest event kept.
+model CreditApplicationDeciderLevel {
+  staffMemberId    String   @id @map("staff_member_id")
+  branchId         String   @map("branch_id")
+  level            String   @map("level")
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+  tenantId         String   @map("tenant_id")
+
+  @@index([tenantId, staffMemberId], map: "decider_levels_tenant_idx")
+  @@map("decider_levels")
+  @@schema("credit_application")
+}
 // /ddd-ts-kit:models
+
+/// The rate grids read model: one row per grid credit-policy published, for one product, from its day of effect.
+model CreditApplicationRateGrid {
+  rateGridId       String   @id @map("rate_grid_id")
+  productId        String   @map("product_id")
+  effectiveFrom    DateTime @map("effective_from") @db.Timestamptz(3)
+  lastEventAt      DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId      String   @map("last_event_id")
+  lastEventVersion Int?     @map("last_event_version")
+  deleted          Boolean  @default(false)
+  tenantId         String   @map("tenant_id")
+
+  @@index([tenantId, rateGridId], map: "rate_grids_tenant_idx")
+  @@map("rate_grids")
+  @@schema("credit_application")
+}
+
+/// The legal maximum rates read model: one row per maximum credit-policy published, for one category, from its day of effect.
+model CreditApplicationLegalMaximumRate {
+  legalMaximumRateId String   @id @map("legal_maximum_rate_id")
+  category           String   @map("category")
+  rateBasisPoints    Int      @map("rate_basis_points")
+  effectiveFrom      DateTime @map("effective_from") @db.Timestamptz(3)
+  lastEventAt        DateTime @map("last_event_at") @db.Timestamptz(3)
+  lastEventId        String   @map("last_event_id")
+  lastEventVersion   Int?     @map("last_event_version")
+  deleted            Boolean  @default(false)
+  tenantId           String   @map("tenant_id")
+
+  @@index([tenantId, legalMaximumRateId], map: "legal_maximum_rates_tenant_idx")
+  @@map("legal_maximum_rates")
+  @@schema("credit_application")
+}

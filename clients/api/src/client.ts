@@ -239,11 +239,23 @@ export interface Client {
    */
   requestPersonalDataCopyLink(input: operations.RequestPersonalDataCopyLinkInput, options?: CallOptions): Promise<operations.RequestPersonalDataCopyLinkResult>;
   /**
+   * Read decider level: `GET /deciders/{staffMemberId}/level`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DECIDER_LEVEL (422), VALIDATION_FAILED (422).
+   */
+  readDeciderLevel(input: operations.ReadDeciderLevelInput, options?: CallOptions): Promise<operations.ReadDeciderLevelResult>;
+  /**
    * Set delegation table: `PUT /delegation-table`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
    */
   setDelegationTable(input: operations.SetDelegationTableInput, options?: CallOptions): Promise<operations.SetDelegationTableResult>;
+  /**
+   * Read delegation table: `GET /delegation-tables/{delegationTableId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+   */
+  readDelegationTable(input: operations.ReadDelegationTableInput, options?: CallOptions): Promise<operations.ReadDelegationTableResult>;
   /**
    * Flag overdue every due diligence that falls due before the instant, for all customers: `POST /due-diligence/flag-overdue`.
    *
@@ -274,6 +286,12 @@ export interface Client {
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
    */
   publishLegalMaximumRate(input: operations.PublishLegalMaximumRateInput, options?: CallOptions): Promise<operations.PublishLegalMaximumRateResult>;
+  /**
+   * Read legal maximum rate: `GET /legal-maximum-rates/{legalMaximumRateId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+   */
+  readLegalMaximumRate(input: operations.ReadLegalMaximumRateInput, options?: CallOptions): Promise<operations.ReadLegalMaximumRateResult>;
   /**
    * Open an organisation: `POST /organisations`.
    *
@@ -353,11 +371,23 @@ export interface Client {
    */
   publishRateGrid(input: operations.PublishRateGridInput, options?: CallOptions): Promise<operations.PublishRateGridResult>;
   /**
+   * Read rate grid: `GET /rate-grids/{rateGridId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_RATE_GRID (422), VALIDATION_FAILED (422).
+   */
+  readRateGrid(input: operations.ReadRateGridInput, options?: CallOptions): Promise<operations.ReadRateGridResult>;
+  /**
    * Set residual income minimum: `PUT /residual-income-minimums`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
    */
   setResidualIncomeMinimum(input: operations.SetResidualIncomeMinimumInput, options?: CallOptions): Promise<operations.SetResidualIncomeMinimumResult>;
+  /**
+   * Score applicant: `POST /scores`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_MODEL_VERSION (422), VALIDATION_FAILED (422).
+   */
+  scoreApplicant(input: operations.ScoreApplicantInput, options?: CallOptions): Promise<operations.ScoreApplicantResult>;
   /**
    * Publish scoring model version: `POST /scoring-models`.
    *
@@ -413,12 +443,15 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     screenCustomer: (input, call) => operations.screenCustomer(connection, input, call),
     requestPersonalDataCopy: (input, call) => operations.requestPersonalDataCopy(connection, input, call),
     requestPersonalDataCopyLink: (input, call) => operations.requestPersonalDataCopyLink(connection, input, call),
+    readDeciderLevel: (input, call) => operations.readDeciderLevel(connection, input, call),
     setDelegationTable: (input, call) => operations.setDelegationTable(connection, input, call),
+    readDelegationTable: (input, call) => operations.readDelegationTable(connection, input, call),
     flagAllOverdueDueDiligence: (input, call) => operations.flagAllOverdueDueDiligence(connection, input, call),
     recordScoringImpactAssessment: (input, call) => operations.recordScoringImpactAssessment(connection, input, call),
     acceptInvitation: (input, call) => operations.acceptInvitation(connection, input, call),
     declineInvitation: (input, call) => operations.declineInvitation(connection, input, call),
     publishLegalMaximumRate: (input, call) => operations.publishLegalMaximumRate(connection, input, call),
+    readLegalMaximumRate: (input, call) => operations.readLegalMaximumRate(connection, input, call),
     openOrganisation: (input, call) => operations.openOrganisation(connection, input, call),
     grantDelegation: (input, call) => operations.grantDelegation(connection, input, call),
     revokeDelegation: (input, call) => operations.revokeDelegation(connection, input, call),
@@ -432,7 +465,9 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchPortfolioCustomers: (input, call) => operations.searchPortfolioCustomers(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
+    readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
+    scoreApplicant: (input, call) => operations.scoreApplicant(connection, input, call),
     publishScoringModelVersion: (input, call) => operations.publishScoringModelVersion(connection, input, call),
     getSuspiciousActivityReport: (input, call) => operations.getSuspiciousActivityReport(connection, input, call),
   };

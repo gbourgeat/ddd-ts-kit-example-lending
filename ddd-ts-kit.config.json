@@ -75,6 +75,7 @@
     },
     "customer-due-diligence": {
       "classification": "supporting",
+      "extraDirectories": ["composition"],
       "upstreams": [
         {
           "context": "identity",
@@ -127,6 +128,7 @@
           "relationship": "conformist"
         }
       ],
+      "extraDirectories": ["composition"],
       "modules": {
         "file": {},
         "assessment": {},
@@ -212,6 +214,16 @@
       "what": "contexts.identity.tenancy",
       "adr": "0001",
       "reason": "The identity context is the control plane of the tenants: it decides who belongs to which, and its rows belong to none of them."
+    },
+    {
+      "what": "contexts.credit-application.extraDirectories.composition",
+      "adr": "0003",
+      "reason": "The context module reached the 350-line limit; the wiring of a module of the model moves to composition/register-<module>-reactions.module.ts, called by the context module (owner, wave 6f, no raise of the limit)"
+    },
+    {
+      "what": "contexts.customer-due-diligence.extraDirectories.composition",
+      "adr": "0003",
+      "reason": "The context module reached the 350-line limit; the nightly jobs move to composition/register-nightly-jobs.module.ts, called by the context module (owner, wave 6f, no raise of the limit)"
     }
   ]
 }

@@ -1415,6 +1415,43 @@ export function requestPersonalDataCopyLink(
   return send<RequestPersonalDataCopyLinkResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadDeciderLevelInput {
+  readonly path: {
+    readonly staffMemberId: string;
+  };
+}
+
+export type ReadDeciderLevelResult =
+  | Success<200, {
+    staffMemberId: string;
+    branchId: string;
+    level: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_DECIDER_LEVEL' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read decider level: `GET /deciders/{staffMemberId}/level`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DECIDER_LEVEL (422), VALIDATION_FAILED (422).
+ */
+export function readDeciderLevel(
+  connection: Connection,
+  input: ReadDeciderLevelInput,
+  options: CallOptions = {},
+): Promise<ReadDeciderLevelResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/deciders/{staffMemberId}/level',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDeciderLevelResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetDelegationTableInput {
   readonly body: {
     effectiveFrom: string;
@@ -1451,6 +1488,43 @@ export function setDelegationTable(
   };
 
   return send<SetDelegationTableResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadDelegationTableInput {
+  readonly path: {
+    readonly delegationTableId: string;
+  };
+}
+
+export type ReadDelegationTableResult =
+  | Success<200, {
+    delegationTableId: string;
+    effectiveFrom: string;
+    levels: Array<Schemas.DelegationTableLevelAnswer>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read delegation table: `GET /delegation-tables/{delegationTableId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+ */
+export function readDelegationTable(
+  connection: Connection,
+  input: ReadDelegationTableInput,
+  options: CallOptions = {},
+): Promise<ReadDelegationTableResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/delegation-tables/{delegationTableId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadDelegationTableResult>(connection, operation, { ...input, ...options });
 }
 
 export interface FlagAllOverdueDueDiligenceInput {
@@ -1619,6 +1693,44 @@ export function publishLegalMaximumRate(
   };
 
   return send<PublishLegalMaximumRateResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ReadLegalMaximumRateInput {
+  readonly path: {
+    readonly legalMaximumRateId: string;
+  };
+}
+
+export type ReadLegalMaximumRateResult =
+  | Success<200, {
+    legalMaximumRateId: string;
+    category: string;
+    rateBasisPoints: number;
+    effectiveFrom: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_LEGAL_MAXIMUM_RATE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read legal maximum rate: `GET /legal-maximum-rates/{legalMaximumRateId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_LEGAL_MAXIMUM_RATE (422), VALIDATION_FAILED (422).
+ */
+export function readLegalMaximumRate(
+  connection: Connection,
+  input: ReadLegalMaximumRateInput,
+  options: CallOptions = {},
+): Promise<ReadLegalMaximumRateResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/legal-maximum-rates/{legalMaximumRateId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadLegalMaximumRateResult>(connection, operation, { ...input, ...options });
 }
 
 export interface OpenOrganisationInput {
@@ -2124,6 +2236,43 @@ export function publishRateGrid(
   return send<PublishRateGridResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadRateGridInput {
+  readonly path: {
+    readonly rateGridId: string;
+  };
+}
+
+export type ReadRateGridResult =
+  | Success<200, {
+    rateGridId: string;
+    productId: string;
+    effectiveFrom: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_RATE_GRID' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read rate grid: `GET /rate-grids/{rateGridId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_RATE_GRID (422), VALIDATION_FAILED (422).
+ */
+export function readRateGrid(
+  connection: Connection,
+  input: ReadRateGridInput,
+  options: CallOptions = {},
+): Promise<ReadRateGridResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/rate-grids/{rateGridId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadRateGridResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetResidualIncomeMinimumInput {
   readonly body: {
     perAdultInCents: number;
@@ -2157,6 +2306,49 @@ export function setResidualIncomeMinimum(
   };
 
   return send<SetResidualIncomeMinimumResult>(connection, operation, { ...input, ...options });
+}
+
+export interface ScoreApplicantInput {
+  readonly body: {
+    debtToIncomePercent: number;
+    repaymentIncidents: number;
+    residualIncomeCents: number;
+    modelVersion: string;
+  };
+}
+
+export type ScoreApplicantResult =
+  | Success<200, {
+    score: number;
+    band: 'green' | 'amber' | 'red';
+    modelVersion: string;
+    inputs: Record<string, unknown>;
+    factors: Array<string>;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_MODEL_VERSION' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Score applicant: `POST /scores`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), UNKNOWN_MODEL_VERSION (422), VALIDATION_FAILED (422).
+ */
+export function scoreApplicant(
+  connection: Connection,
+  input: ScoreApplicantInput,
+  options: CallOptions = {},
+): Promise<ScoreApplicantResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/scores',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<ScoreApplicantResult>(connection, operation, { ...input, ...options });
 }
 
 export interface PublishScoringModelVersionInput {

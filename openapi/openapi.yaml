@@ -3101,6 +3101,77 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - VALIDATION_FAILED
+  /deciders/{staffMemberId}/level:
+    get:
+      operationId: readDeciderLevel
+      summary: Read decider level
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: staffMemberId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  staffMemberId:
+                    type: string
+                  branchId:
+                    type: string
+                  level:
+                    type: string
+                type: object
+                required:
+                  - staffMemberId
+                  - branchId
+                  - level
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_DECIDER_LEVEL, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_DECIDER_LEVEL
+            - VALIDATION_FAILED
   /delegation-table:
     put:
       operationId: setDelegationTable
@@ -3186,6 +3257,83 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - INVALID_DELEGATION_TABLE
+            - VALIDATION_FAILED
+  /delegation-tables/{delegationTableId}:
+    get:
+      operationId: readDelegationTable
+      summary: Read delegation table
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: delegationTableId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  delegationTableId:
+                    type: string
+                  effectiveFrom:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                  levels:
+                    items:
+                      $ref: '#/components/schemas/DelegationTableLevelAnswer'
+                    type: array
+                type: object
+                required:
+                  - delegationTableId
+                  - effectiveFrom
+                  - levels
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_DELEGATION_TABLE
             - VALIDATION_FAILED
   /due-diligence/flag-overdue:
     post:
@@ -3552,6 +3700,84 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - INVALID_LEGAL_MAXIMUM_RATE
+            - VALIDATION_FAILED
+  /legal-maximum-rates/{legalMaximumRateId}:
+    get:
+      operationId: readLegalMaximumRate
+      summary: Read legal maximum rate
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: legalMaximumRateId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  legalMaximumRateId:
+                    type: string
+                  category:
+                    type: string
+                  rateBasisPoints:
+                    type: integer
+                  effectiveFrom:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                type: object
+                required:
+                  - legalMaximumRateId
+                  - category
+                  - rateBasisPoints
+                  - effectiveFrom
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_LEGAL_MAXIMUM_RATE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_LEGAL_MAXIMUM_RATE
             - VALIDATION_FAILED
   /organisations:
     post:
@@ -4695,6 +4921,81 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - VALIDATION_FAILED
+  /rate-grids/{rateGridId}:
+    get:
+      operationId: readRateGrid
+      summary: Read rate grid
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: rateGridId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  rateGridId:
+                    type: string
+                  productId:
+                    type: string
+                  effectiveFrom:
+                    oneOf:
+                      - format: date
+                        type: string
+                      - format: date-time
+                        type: string
+                type: object
+                required:
+                  - rateGridId
+                  - productId
+                  - effectiveFrom
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_RATE_GRID, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_RATE_GRID
+            - VALIDATION_FAILED
   /residual-income-minimums:
     put:
       operationId: setResidualIncomeMinimum
@@ -4770,6 +5071,112 @@ paths:
                 $ref: '#/components/schemas/Problem'
           x-error-codes:
             - INVALID_RESIDUAL_INCOME_MINIMUM
+            - VALIDATION_FAILED
+  /scores:
+    post:
+      operationId: scoreApplicant
+      summary: Score applicant
+      tags:
+        - credit-scoring
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                debtToIncomePercent:
+                  type: integer
+                repaymentIncidents:
+                  minimum: 0
+                  type: integer
+                residualIncomeCents:
+                  type: integer
+                modelVersion:
+                  type: string
+              type: object
+              required:
+                - debtToIncomePercent
+                - repaymentIncidents
+                - residualIncomeCents
+                - modelVersion
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  score:
+                    type: integer
+                  band:
+                    type: string
+                    enum:
+                      - green
+                      - amber
+                      - red
+                  modelVersion:
+                    type: string
+                  inputs:
+                    type: object
+                  factors:
+                    items:
+                      type: string
+                    type: array
+                type: object
+                required:
+                  - score
+                  - band
+                  - modelVersion
+                  - inputs
+                  - factors
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: UNKNOWN_MODEL_VERSION, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNKNOWN_MODEL_VERSION
             - VALIDATION_FAILED
   /scoring-models:
     post:
@@ -4974,6 +5381,16 @@ components:
         - conflictOfInterestId
         - staffMemberId
         - customerId
+    DelegationTableLevelAnswer:
+      properties:
+        level:
+          type: string
+        amountCents:
+          type: integer
+      type: object
+      required:
+        - level
+        - amountCents
     IdentifierLine:
       properties:
         id:

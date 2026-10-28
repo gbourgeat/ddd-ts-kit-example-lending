@@ -35,6 +35,9 @@ const elements: SchemaDefinition = {
       'credit-application:application.submit': 'self',
       'data-protection:data-subject.request-copy': 'self',
       'branch-network:portfolio.search-customers': { anyOf: ['advisor'], butNot: ['conflicted'] },
+      // The advisor of a customer, through the portfolio, views its risk and its due diligence unless conflicted; compliance reads them all as an operator of the context, on the permissions `customer.read-risk` and `due-diligence.read`.
+      'customer-due-diligence:customer.view-risk': { anyOf: ['advisor'], butNot: ['conflicted'] },
+      'customer-due-diligence:due-diligence.view': { anyOf: ['advisor'], butNot: ['conflicted'] },
       advisor: via('portfolio', 'advisor'),
     },
   },
@@ -73,7 +76,7 @@ export const relationshipSchema = defineSchema({
   user: {},
   system: {},
   context: {
-    relations: { operator: ['user', 'system'], eraser: ['system'] },
+    relations: { operator: ['user', 'system'], eraser: ['system'], keeper: ['system'] },
     derived: {
       ...Object.fromEntries(
         permissions
@@ -82,6 +85,13 @@ export const relationshipSchema = defineSchema({
           .map((permission) => [permission.id, 'operator']),
       ),
       'data-protection:data.erase': { anyOf: ['operator', 'eraser'] },
+      'credit-application:delegation-table.keep': 'keeper',
+      'credit-application:decider-level.keep': 'keeper',
+      'credit-application:rate-grid.keep': 'keeper',
+      'credit-application:legal-maximum-rate.keep': 'keeper',
+      'credit-application:product-terms.keep': 'keeper',
+      'credit-application:broker-registration.keep': 'keeper',
+      'credit-application:broker-registration.lapse': 'keeper',
       'data-protection:data-subject.request-copy': 'operator',
       'data-protection:impact-assessment.record': 'operator',
     },

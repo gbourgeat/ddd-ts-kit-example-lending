@@ -19,6 +19,8 @@ import { auditPermissions } from '@/platform/audit/audit.permissions';
 import { auditedEvents } from '@/platform/audit/audited-events';
 import { chainOfStream } from '@/platform/audit/streams/chain-of-stream';
 import { GetCustomerFileQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-file/get-customer-file.query';
+import { GetCustomerDueDiligenceQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-due-diligence/get-customer-due-diligence.query';
+import { GetCustomerRiskRatingQuery } from '@/contexts/customer-due-diligence/application/queries/get-customer-risk-rating/get-customer-risk-rating.query';
 import { SearchAuditEntriesQuery } from '@/platform/audit/search-audit-entries/search-audit-entries.query';
 
 /** The name the audit trail consumes integration events under: its idempotency scope, and its queues behind a broker. */
@@ -63,7 +65,15 @@ export function createAudit(persistence: Persistence, source: AuditSource): Audi
     decisions: auditDecisions(trail, { ...source, sensitivePermissions: [auditPermissions['trail.read'].id] }),
     // Each command declares what may go into `changes` with `fields: [auditedFields(SomeCommand, ['status'])]` as it arrives; until then an entry carries identifiers and codes only.
     commands: auditMiddleware(trail, { ...source, unitOfWork }),
-    queries: auditMiddleware(trail, { ...source, queries: [SearchAuditEntriesQuery, GetCustomerFileQuery] }),
+    queries: auditMiddleware(trail, {
+      ...source,
+      queries: [
+        SearchAuditEntriesQuery,
+        GetCustomerFileQuery,
+        GetCustomerDueDiligenceQuery,
+        GetCustomerRiskRatingQuery,
+      ],
+    }),
     subscriptions: auditIntegrationEvents(trail, {
       registry: auditedEvents,
       clock: source.clock,

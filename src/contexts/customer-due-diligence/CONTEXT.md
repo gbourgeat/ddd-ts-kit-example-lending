@@ -56,6 +56,7 @@ Knowing each customer is a legal duty the bank meets before any credit, so it su
 | Calendar | The dates a due diligence falls due and is overdue, by the risk rating of the customer |  |
 | All | every customer the bank knows, at once, rather than one named customer |  |
 | Validity | whether the identity facts the bank checked still hold on the day: the document valid, the proof of address recent |  |
+| Erase personal data past retention | Destroy the key of the personal values of every customer whose relationship ended five years ago, so that the file can no longer be read | Delete a customer |
 
 ## Aggregates
 
@@ -90,10 +91,13 @@ No personal data declared.
 - `customer-due-diligence:match.dismiss`
 - `customer-due-diligence:customer.rate-risk`
 - `customer-due-diligence:customer.read-risk`
+- `customer-due-diligence:customer.view-risk`
 - `customer-due-diligence:due-diligence.refresh`
 - `customer-due-diligence:due-diligence.read`
+- `customer-due-diligence:due-diligence.view`
 - `customer-due-diligence:customer.approve-high-risk`
 - `customer-due-diligence:due-diligence.flag-overdue`
+- `customer-due-diligence:customer.erase-past-retention`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -101,6 +105,7 @@ No personal data declared.
 <!-- ddd-ts-kit:jobs -->
 | Job | Schedule | Command |
 |---|---|---|
+| `ErasePersonalDataPastRetentionJob` | `` | `ErasePersonalDataPastRetention` |
 | `FlagOverdueDueDiligenceJob` | `` | `FlagAllOverdueDueDiligence` |
 <!-- /ddd-ts-kit:jobs -->
 
@@ -148,11 +153,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `DeclareDirectorsAndOwners` | command | `business.declare-owners` |
 | `DismissMatch` | command | `match.dismiss` |
 | `EndRelationship` | command | `relationship.end` |
+| `ErasePersonalDataPastRetention` | command | `customer.erase-past-retention` |
 | `FlagAllOverdueDueDiligence` | command | `due-diligence.flag-overdue` |
 | `FlagOverdueDueDiligence` | command | `due-diligence.flag-overdue` |
-| `GetCustomerDueDiligence` | query | `due-diligence.read` |
+| `GetCustomerDueDiligence` | query | `public` |
 | `GetCustomerFile` | query | `customer.read` |
-| `GetCustomerRiskRating` | query | `customer.read-risk` |
+| `GetCustomerRiskRating` | query | `public` |
 | `IdentifyCustomer` | command | `customer.identify` |
 | `RateCustomerRisk` | command | `customer.rate-risk` |
 | `RefreshDueDiligence` | command | `due-diligence.refresh` |
@@ -170,12 +176,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | POST | `/customers/:customerId/high-risk-approval` | `approveHighRiskCustomer` | `CustomersRoutes` | `Authenticated` | `ApproveHighRiskCustomer` | `customer.approve-high-risk` | params: `ApproveHighRiskCustomerParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `CUSTOMER_NOT_HIGH_RISK` |
 | PUT | `/customers/:id/advisor` | `assignAdvisor` | `CustomersRoutes` | `Authenticated` | `AssignAdvisor` | `customer.assign-advisor` | params: `AssignAdvisorParams`, body: `AssignAdvisorBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/customers/:id/directors-and-owners` | `declareDirectorsAndOwners` | `CustomersRoutes` | `Authenticated` | `DeclareDirectorsAndOwners` | `business.declare-owners` | params: `DeclareDirectorsAndOwnersParams`, body: `DeclareDirectorsAndOwnersBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `BUSINESS_NOT_REGISTERED`, `UNKNOWN_CUSTOMER`, `IDENTITY_DOCUMENT_EXPIRED`, `PROOF_OF_ADDRESS_TOO_OLD` |
-| GET | `/customers/:id/due-diligence` | `getCustomerDueDiligence` | `CustomersRoutes` | `Authenticated` | `GetCustomerDueDiligence` | `due-diligence.read` | params: `GetCustomerDueDiligenceParams` | 200: `GetCustomerDueDiligenceAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
+| GET | `/customers/:id/due-diligence` | `getCustomerDueDiligence` | `CustomersRoutes` | `Authenticated` | `GetCustomerDueDiligence` | `public` | params: `GetCustomerDueDiligenceParams` | 200: `GetCustomerDueDiligenceAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/customers/:id/matches/confirm` | `confirmSanctionsMatch` | `CustomersRoutes` | `Authenticated` | `ConfirmSanctionsMatch` | `match.confirm` | params: `ConfirmSanctionsMatchParams` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `NO_POSSIBLE_MATCH` |
 | POST | `/customers/:id/matches/dismiss` | `dismissMatch` | `CustomersRoutes` | `Authenticated` | `DismissMatch` | `match.dismiss` | params: `DismissMatchParams`, body: `DismissMatchBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER`, `NO_POSSIBLE_MATCH` |
 | POST | `/customers/:id/refresh` | `refreshDueDiligence` | `CustomersRoutes` | `Authenticated` | `RefreshDueDiligence` | `due-diligence.refresh` | params: `RefreshDueDiligenceParams`, body: `RefreshDueDiligenceBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | PUT | `/customers/:id/risk` | `rateCustomerRisk` | `CustomersRoutes` | `Authenticated` | `RateCustomerRisk` | `customer.rate-risk` | params: `RateCustomerRiskParams`, body: `RateCustomerRiskBody` | 200: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
-| GET | `/customers/:id/risk-rating` | `getCustomerRiskRating` | `CustomersRoutes` | `Authenticated` | `GetCustomerRiskRating` | `customer.read-risk` | params: `GetCustomerRiskRatingParams` | 200: `GetCustomerRiskRatingAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
+| GET | `/customers/:id/risk-rating` | `getCustomerRiskRating` | `CustomersRoutes` | `Authenticated` | `GetCustomerRiskRating` | `public` | params: `GetCustomerRiskRatingParams` | 200: `GetCustomerRiskRatingAnswer` | `UNAUTHORIZED`, `FORBIDDEN` |
 | POST | `/customers/:id/screening` | `screenCustomer` | `CustomersRoutes` | `Authenticated` | `ScreenCustomer` | `customer.screen` | params: `ScreenCustomerParams`, body: `ScreenCustomerBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `UNKNOWN_CUSTOMER` |
 | POST | `/due-diligence/flag-overdue` | `flagAllOverdueDueDiligence` | `DueDiligenceRoutes` | `Authenticated` | `FlagAllOverdueDueDiligence` | `due-diligence.flag-overdue` | body: `FlagAllOverdueDueDiligenceBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 
@@ -195,6 +201,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `GetCustomerDueDiligenceReader` | repository | `EventStoreGetCustomerDueDiligenceReader` |
 | `GetCustomerFileReader` | repository | `PrismaGetCustomerFileReader` |
 | `GetCustomerRiskRatingReader` | repository | `EventStoreGetCustomerRiskRatingReader` |
+| `PersonalDataErasure` | external | `RemotePersonalDataErasure` |
 | `ScreeningProvider` | external | `SimulatedScreeningProvider` |
 
 ### Errors

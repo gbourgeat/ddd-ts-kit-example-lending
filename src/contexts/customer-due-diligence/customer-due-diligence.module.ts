@@ -4,12 +4,13 @@ import { customerDueDiligenceControllers } from '@/contexts/customer-due-diligen
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 import type { ScreeningProvider } from '@/contexts/customer-due-diligence/application/ports/screening-provider.port';
+import type { CustomerRepository } from '@/contexts/customer-due-diligence/domain/repositories/customer.repository';
 // ddd-ts-kit:imports
 import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/infrastructure/external/simulated-screening-provider.adapter';
 import { CustomerIdentifiedPublisher } from '@/contexts/customer-due-diligence/application/integration/publishers/customer-identified.publisher';
 import { CustomerIdentified } from '@/contexts/customer-due-diligence/domain/events/customer-identified.event';
 import { EventStoreCustomerRepository } from '@/contexts/customer-due-diligence/infrastructure/persistence/event-store-customer.repository';
-import { requires } from '@ddd-ts-kit/auth';
+import { publicUseCase, requires } from '@ddd-ts-kit/auth';
 import { customerDueDiligencePermissions } from '@/contexts/customer-due-diligence/customer-due-diligence.permissions';
 import { RegisterBusinessCommand } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.command';
 import { RegisterBusinessHandler } from '@/contexts/customer-due-diligence/application/commands/register-business/register-business.handler';
@@ -52,7 +53,10 @@ import { FlagOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligenc
 import { FlagOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-overdue-due-diligence/flag-overdue-due-diligence.handler';
 import { FlagAllOverdueDueDiligenceCommand } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.command';
 import { FlagAllOverdueDueDiligenceHandler } from '@/contexts/customer-due-diligence/application/commands/flag-all-overdue-due-diligence/flag-all-overdue-due-diligence.handler';
-import { FlagOverdueDueDiligenceJob } from '@/contexts/customer-due-diligence/application/scheduling/flag-overdue-due-diligence.job';
+import { ErasePersonalDataPastRetentionCommand } from '@/contexts/customer-due-diligence/application/commands/erase-personal-data-past-retention/erase-personal-data-past-retention.command';
+import { RemotePersonalDataErasure } from '@/contexts/customer-due-diligence/infrastructure/external/remote-personal-data-erasure.adapter';
+import { registerPersonalDataErasure } from '@/contexts/customer-due-diligence/composition/register-personal-data-erasure.module';
+import { registerNightlyJobs } from '@/contexts/customer-due-diligence/composition/register-nightly-jobs.module';
 // /ddd-ts-kit:imports
 
 export interface CustomerDueDiligenceWiring {
@@ -198,7 +202,19 @@ function registerHandlers(platform: Platform, screening: ScreeningProvider): voi
     new FlagAllOverdueDueDiligenceHandler(customerRepository, platform.clock),
     { context: 'customer-due-diligence' },
   );
+
   // /ddd-ts-kit:handlers
+  registerErasure(platform, customerRepository);
+}
+
+function registerErasure(platform: Platform, customerRepository: CustomerRepository): void {
+  const personalDataErasure = platform.adapter(new RemotePersonalDataErasure(platform.eventSourcing.subjectKeys), {
+    kind: 'external',
+    context: 'customer-due-diligence',
+    token: 'PersonalDataErasure',
+  });
+
+  registerPersonalDataErasure(platform, customerRepository, personalDataErasure);
 }
 
 /** What the context does when an event happens: its own events and those of the other contexts. */
@@ -262,14 +278,7 @@ function registerReactions(platform: Platform): void {
 /** The jobs of the context, scheduled and in the background. */
 function registerJobs(platform: Platform): void {
   // ddd-ts-kit:jobs
-  const flagOverdueDueDiligenceJob = new FlagOverdueDueDiligenceJob(platform.commands);
-
-  platform.jobs.register({
-    name: 'customer-due-diligence.flag-overdue-due-diligence',
-    schedule: { cron: '0 1 * * *', timeZone: 'Europe/Paris' },
-    tenancy: 'per-tenant',
-    run: (execution) => flagOverdueDueDiligenceJob.run(execution),
-  });
+  registerNightlyJobs(platform);
   // /ddd-ts-kit:jobs
 }
 
@@ -307,15 +316,13 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(RateCustomerRiskCommand, customerDueDiligencePermissions['customer.rate-risk'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
-    requires(GetCustomerRiskRatingQuery, customerDueDiligencePermissions['customer.read-risk'], {
-      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
-    }),
+    // Public: the handler narrows the ratings to the operators of the context, or to the customers of the actor's portfolios.
+    publicUseCase(GetCustomerRiskRatingQuery),
     requires(RefreshDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.refresh'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
-    requires(GetCustomerDueDiligenceQuery, customerDueDiligencePermissions['due-diligence.read'], {
-      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
-    }),
+    // Public: the handler narrows the due diligences to the operators of the context, or to the customers of the actor's portfolios.
+    publicUseCase(GetCustomerDueDiligenceQuery),
     requires(ApproveHighRiskCustomerCommand, customerDueDiligencePermissions['customer.approve-high-risk'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
@@ -323,6 +330,9 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     requires(FlagAllOverdueDueDiligenceCommand, customerDueDiligencePermissions['due-diligence.flag-overdue'], {
+      resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
+    }),
+    requires(ErasePersonalDataPastRetentionCommand, customerDueDiligencePermissions['customer.erase-past-retention'], {
       resource: () => ({ type: 'context', id: 'customer-due-diligence' }),
     }),
     // /ddd-ts-kit:authorization

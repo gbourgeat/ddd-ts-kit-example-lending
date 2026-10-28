@@ -29,7 +29,16 @@ describe('Product', () => {
 
     const recorded = aProduct().identifiedBy('product-7').bornAt(bornAt).build();
 
-    expect(recorded.pullEvents()).toEqual([new ProductDefined('product-7', bornAt)]);
+    expect(recorded.pullEvents()).toEqual([
+      new ProductDefined('product-7', bornAt, {
+        amountMinimumCents: 100_000,
+        amountMaximumCents: 2_500_000,
+        durationMinimumMonths: 12,
+        durationMaximumMonths: 84,
+        arrangementFeeCents: 4_500,
+        insuranceMandatory: false,
+      }),
+    ]);
   });
 
   it('is rehydrated in its stored state without recording a new fact', () => {

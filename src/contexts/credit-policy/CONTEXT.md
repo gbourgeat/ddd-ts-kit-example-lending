@@ -56,6 +56,7 @@ It holds the bank's reference data and decides nothing, so it supports the decis
 - `credit-policy.legal-maximum-rate.published` (version 1)
 - `credit-policy.legal-maximum-rate.published` (version 2)
 - `credit-policy.product.defined` (version 1)
+- `credit-policy.product.defined` (version 2)
 - `credit-policy.rate-grid.published` (version 1)
 - `credit-policy.rate-grid.published` (version 2)
 - `credit-policy.residual-income-minimum.published` (version 1)
@@ -142,7 +143,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | `credit-policy.delegation-table.published` | 1, 2 | `DelegationTablePublishedPublisher` |
 | `credit-policy.legal-maximum-rate.published` | 1, 2 | `LegalMaximumRatePublishedPublisher` |
-| `credit-policy.product.defined` | 1 | `ProductDefinedPublisher` |
+| `credit-policy.product.defined` | 1, 2 | `ProductDefinedPublisher`, `ProductDefinedV2Publisher` |
 | `credit-policy.rate-grid.published` | 1, 2 | `RateGridPublishedPublisher` |
 | `credit-policy.residual-income-minimum.published` | 1 | `ResidualIncomeMinimumPublishedPublisher` |
 

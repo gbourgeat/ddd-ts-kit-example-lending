@@ -28,6 +28,7 @@ import {
   legalMaximumRatePublishedV2,
   delegationTablePublishedV2,
   rateGridPublishedV2,
+  productDefinedV2,
 } from '@/contexts/credit-policy/published-language';
 import { brokerRegisteredV1, brokerRegistrationLapsedV1 } from '@/contexts/brokerage/published-language';
 // /ddd-ts-kit:imports
@@ -59,5 +60,6 @@ export const auditedEvents = createEventRegistry([
   staffMemberAppointedV2,
   rateGridPublishedV2,
   creditApplicationSubmittedV2,
+  productDefinedV2,
   // /ddd-ts-kit:events
 ]);

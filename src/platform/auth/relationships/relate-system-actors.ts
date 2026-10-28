@@ -33,6 +33,56 @@ const systemRelationships: readonly RelationTuple[] = [
     relation: 'operator',
     subject: 'system:system:customer-due-diligence.flag-overdue-due-diligence',
   },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-delegation-table',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-decider-level',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-rate-grid',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-legal-maximum-rate',
+  },
+  {
+    object: 'context:customer-due-diligence',
+    relation: 'operator',
+    subject: 'system:system:customer-due-diligence.erase-personal-data-past-retention',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'operator',
+    subject: 'system:system:credit-application.erase-personal-data-past-retention',
+  },
+  {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:servicing.erase-personal-data-past-retention',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-product-terms',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.keep-broker-registration',
+  },
+  {
+    object: 'context:credit-application',
+    relation: 'keeper',
+    subject: 'system:system:credit-application.lapse-broker-registration',
+  },
   // /ddd-ts-kit:system-grants
 ];
 

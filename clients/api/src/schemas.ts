@@ -18,6 +18,11 @@ export type DeclaredConflictLine = {
   customerId: string;
 };
 
+export type DelegationTableLevelAnswer = {
+  level: string;
+  amountCents: number;
+};
+
 export type IdentifierLine = {
   id: string;
 };

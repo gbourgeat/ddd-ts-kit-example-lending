@@ -5,12 +5,15 @@ import { SimulatedScreeningProvider } from '@/contexts/customer-due-diligence/in
 import { customerDueDiligenceModule } from '@/contexts/customer-due-diligence/customer-due-diligence.module';
 import { brokerageModule } from '@/contexts/brokerage/brokerage.module';
 import { FakeIntermediariesRegister } from '@/contexts/brokerage/test/fakes/intermediaries-register.fake';
+import { identityModule } from '@/contexts/identity/identity.module';
+import { FakeIdentityProviderAdmin } from '@/contexts/identity/test/fakes/identity-provider-admin.fake';
 import { composeApplication, everyContext, type ApplicationOptions } from '@/platform/composition/compose-application';
 import type { Platform } from '@/platform/composition/platform';
 import type { AppConfig } from '@/platform/config/app-config';
 import type { Persistence } from '@/platform/database/persistence';
 import { loadConfig } from '@/platform/config/load-config';
 import { openTestDatabase, type TestDatabase } from '@/platform/database/open-test-database';
+import { relateSystemActors } from '@/platform/auth/relationships/relate-system-actors';
 import { createEventProvider } from '@/platform/events/create-event-provider';
 import type { EventProvider } from '@/platform/events/event-provider';
 import { inProcessEvents } from '@/platform/events/in-process-events';
@@ -93,7 +96,7 @@ export async function startApplication(): Promise<RunningApplication> {
     publish: (events) => started.publish(events),
     relate: (tuple) => started.relate(tuple),
     settled: (options) => started.settled(options),
-    reset: () => database.reset(),
+    reset: () => started.reset(),
     close: () => started.close(),
   };
 }
@@ -109,6 +112,9 @@ interface Started {
   runJob(name: string): Promise<unknown>;
 
   settled(options?: SettledOptions): Promise<void>;
+
+  /** Empties the database, then grants the system actors again: the reset removes their relationships too. */
+  reset(): Promise<void>;
 
   close(): Promise<void>;
 }
@@ -133,13 +139,9 @@ async function start({ database, config, credentials, screening, register }: Sta
   );
 
   await application.start();
+  await relateSystemActors(application.platform.relations);
 
-  const relay = startOutboxRelay({
-    store: database.persistence.outbox,
-    publisher: application.eventBus,
-    intervalMs: 20,
-    logger: application.logger,
-  });
+  const relay = relayOf(database, application);
 
   const server = await startHttpServer(application, config);
 
@@ -150,6 +152,10 @@ async function start({ database, config, credentials, screening, register }: Sta
     relate: (tuple) => application.platform.relations.write([tuple]),
     runJob: (name) => application.platform.jobs.runNow(name),
     settled: (options) => settled({ outbox: () => database.persistence.outbox.stats() }, options),
+    reset: async () => {
+      await database.reset();
+      await relateSystemActors(application.platform.relations);
+    },
     close: async () => {
       await server.close();
       await relay.stop();
@@ -190,6 +196,10 @@ function contextsWith(
       return brokerageWithRegister(register);
     }
 
+    if (context === identityModule) {
+      return identityWithProviderFake(new FakeIdentityProviderAdmin());
+    }
+
     return context;
   });
 }
@@ -206,6 +216,31 @@ function brokerageWithRegister(register: FakeIntermediariesRegister) {
     };
 
     return brokerageModule({ ...platform, adapter });
+  };
+}
+
+/** The identity context as the application wires it, except that its identity provider is the fake (no Keycloak answers in a test). */
+/** The outbox relay of the application: what it stores is published, and the handlers it reaches run. */
+function relayOf(database: TestDatabase, application: ReturnType<typeof composeApplication>) {
+  return startOutboxRelay({
+    store: database.persistence.outbox,
+    publisher: application.eventBus,
+    intervalMs: 20,
+    logger: application.logger,
+  });
+}
+
+function identityWithProviderFake(provider: FakeIdentityProviderAdmin) {
+  return (platform: Platform): ReturnType<typeof identityModule> => {
+    const adapter: Platform['adapter'] = (instance, info) => {
+      if (info.token === 'IdentityProviderAdmin') {
+        return provider as unknown as typeof instance;
+      }
+
+      return platform.adapter(instance, info);
+    };
+
+    return identityModule({ ...platform, adapter });
   };
 }
 
