@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { AuthorizationMap, RoleBasedAuthorizer, authorizationMiddleware, requires } from '@ddd-ts-kit/auth';
 import { anActor } from '@ddd-ts-kit/auth/testing';
 import { createTestBuses } from '@ddd-ts-kit/testing';
+import type { CreditApplicationEvent } from '@/contexts/credit-application/file/domain/values/credit-application-event';
 import { creditApplicationPermissions } from '@/contexts/credit-application/credit-application.permissions';
 import type { CreditApplication } from '@/contexts/credit-application/file/domain/aggregates/credit-application.aggregate';
 import { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
@@ -33,6 +34,10 @@ class KnownApplications extends CreditApplicationRepository {
   }
 
   async findRefusedOnOrBefore(): Promise<readonly CreditApplication[]> {
+    return [];
+  }
+
+  async historyOf(): Promise<readonly CreditApplicationEvent[]> {
     return [];
   }
 

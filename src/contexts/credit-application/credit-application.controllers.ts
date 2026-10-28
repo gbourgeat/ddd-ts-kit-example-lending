@@ -10,6 +10,7 @@ import { DecideApplicationController } from '@/contexts/credit-application/decis
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
 import { RequestExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.controller';
 import { RequestHumanReviewController } from '@/contexts/credit-application/decision/presentation/http/applications/request-human-review/request-human-review.controller';
+import { ShowDecisionViewController } from '@/contexts/credit-application/decision/presentation/http/applications/show-decision-view/show-decision-view.controller';
 import { ReadDeciderLevelController } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.controller';
 import { ReadDelegationTableController } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.controller';
 import { AttachDocumentController } from '@/contexts/credit-application/file/presentation/http/applications/attach-document/attach-document.controller';
@@ -44,6 +45,8 @@ import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decis
 import { RequestExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.params';
 import { RequestExceptionBody } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.body';
 import { RequestHumanReviewParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-human-review/request-human-review.params';
+import { ShowDecisionViewParams } from '@/contexts/credit-application/decision/presentation/http/applications/show-decision-view/show-decision-view.params';
+import { ShowDecisionViewAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/show-decision-view/show-decision-view.answer';
 import { ReadDeciderLevelParams } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.params';
 import { ReadDeciderLevelAnswer } from '@/contexts/credit-application/decision/presentation/http/deciders/read-decider-level/read-decider-level.answer';
 import { ReadDelegationTableParams } from '@/contexts/credit-application/decision/presentation/http/delegation-tables/read-delegation-table/read-delegation-table.params';
@@ -112,6 +115,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(RequestHumanReviewController, {
     requestHumanReview: { params: RequestHumanReviewParams, answer: null },
+  }),
+  withSignatures(ShowDecisionViewController, {
+    showDecisionView: { params: ShowDecisionViewParams, answer: ShowDecisionViewAnswer },
   }),
   withSignatures(ReadDeciderLevelController, {
     readDeciderLevel: { params: ReadDeciderLevelParams, answer: ReadDeciderLevelAnswer },

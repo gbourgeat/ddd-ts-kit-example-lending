@@ -39,6 +39,9 @@ import { RequestExceptionCommand } from '@/contexts/credit-application/decision/
 import { RequestExceptionHandler } from '@/contexts/credit-application/decision/application/commands/request-exception/request-exception.handler';
 import { RequestHumanReviewCommand } from '@/contexts/credit-application/decision/application/commands/request-human-review/request-human-review.command';
 import { RequestHumanReviewHandler } from '@/contexts/credit-application/decision/application/commands/request-human-review/request-human-review.handler';
+import { ShowDecisionViewHandler } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.handler';
+import { ShowDecisionViewQuery } from '@/contexts/credit-application/decision/application/queries/show-decision-view/show-decision-view.query';
+import { RepositoryShowDecisionViewReader } from '@/contexts/credit-application/decision/infrastructure/persistence/repository-show-decision-view.reader';
 // /ddd-ts-kit:imports
 
 /** What the handlers of the decision module are given besides the platform: the application file and the declared conflicts. */
@@ -72,6 +75,15 @@ export const decisionModule = {
     platform.commands.register(RequestHumanReviewCommand, new RequestHumanReviewHandler(repository, platform.clock), {
       context: 'credit-application',
     });
+
+    const showDecisionViewReader = platform.adapter(new RepositoryShowDecisionViewReader(repository), {
+      kind: 'repository',
+      context: 'credit-application',
+    });
+
+    platform.queries.register(ShowDecisionViewQuery, new ShowDecisionViewHandler(showDecisionViewReader), {
+      context: 'credit-application',
+    });
     // /ddd-ts-kit:handlers
   },
 
@@ -100,6 +112,9 @@ export const decisionModule = {
       }),
       requires(RequestHumanReviewCommand, creditApplicationPermissions['application.request-review'], {
         resource: (command) => ({ type: 'application', id: command.applicationId }),
+      }),
+      requires(ShowDecisionViewQuery, creditApplicationPermissions['application.decide'], {
+        resource: () => ({ type: 'context', id: 'credit-application' }),
       }),
       // /ddd-ts-kit:authorization
     ];
