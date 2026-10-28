@@ -93,7 +93,7 @@ the loan in the same ledger entry sequence. A repayment above the outstanding ca
       throw EarlyRepaymentTooHigh.forRepayment(capital.cents, outstanding.cents);
     }
 
-    const fee = new EarlyRepaymentFeeService().of(capital, this.monthsRemaining(now));
+    const fee = new EarlyRepaymentFeeService().of(capital, new MonthsRemainingService().ofLoan(this.state, now));
 
     this.record(new LoanEarlyRepaymentRecorded(this.id, now, capital, fee));
 
@@ -184,17 +184,7 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
 
   /** The capital still owed: the principal, less what the noted instalments repaid, the early repayments and the write-off. */
   get outstandingCapital(): Money {
-    const schedule = this.currentSchedule;
-
-    if (schedule === undefined) {
-      return Money.ofCents(0);
-    }
-
-    const writtenOff = this.state.writtenOff === undefined ? [] : [this.state.writtenOff];
-    const earlyRepaid = this.state.earlyRepaid.cents - (this.state.rescheduling?.earlyRepaidBefore.cents ?? 0);
-    const notedInForce = this.state.instalmentsDue.length - this.notedBefore;
-
-    return new OutstandingCapitalService().of(schedule, notedInForce, [Money.ofCents(earlyRepaid), ...writtenOff]);
+    return new OutstandingCapitalService().ofLoan(this.state);
   }
 
   /** The schedule in force: the one of the payout, or the one that replaced it at the last rescheduling. */
@@ -264,14 +254,6 @@ payout, then closes it. A loan already closed has nothing left to repay, so a de
   /** The instalments noted due before the schedule in force: its instalments are numbered after them. */
   private get notedBefore(): number {
     return this.state.rescheduling?.notedBefore ?? 0;
-  }
-
-  /** The months of the schedule in force still to run at `now`. */
-  private monthsRemaining(now: Date): number {
-    const notedBefore = this.notedBefore;
-    const lastNumber = notedBefore + (this.currentSchedule?.durationMonths ?? 0);
-
-    return new MonthsRemainingService().of({ paidOutAt: this.registeredAt, now, notedBefore, lastNumber });
   }
 
   private applyPaidOut(event: LoanPaidOut): void {
