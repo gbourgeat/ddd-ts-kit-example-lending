@@ -365,6 +365,12 @@ export interface Client {
    */
   publishRateGrid(input: operations.PublishRateGridInput, options?: CallOptions): Promise<operations.PublishRateGridResult>;
   /**
+   * Read rate grid: `GET /rate-grids/{rateGridId}`.
+   *
+   * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_RATE_GRID (422), VALIDATION_FAILED (422).
+   */
+  readRateGrid(input: operations.ReadRateGridInput, options?: CallOptions): Promise<operations.ReadRateGridResult>;
+  /**
    * Set residual income minimum: `PUT /residual-income-minimums`.
    *
    * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), INVALID_RESIDUAL_INCOME_MINIMUM (422), VALIDATION_FAILED (422).
@@ -446,6 +452,7 @@ export function createClient(options: ClientOptions<SchemeName>): Client {
     searchPortfolioCustomers: (input, call) => operations.searchPortfolioCustomers(connection, input, call),
     defineProduct: (input, call) => operations.defineProduct(connection, input, call),
     publishRateGrid: (input, call) => operations.publishRateGrid(connection, input, call),
+    readRateGrid: (input, call) => operations.readRateGrid(connection, input, call),
     setResidualIncomeMinimum: (input, call) => operations.setResidualIncomeMinimum(connection, input, call),
     publishScoringModelVersion: (input, call) => operations.publishScoringModelVersion(connection, input, call),
     getSuspiciousActivityReport: (input, call) => operations.getSuspiciousActivityReport(connection, input, call),

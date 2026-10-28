@@ -2198,6 +2198,43 @@ export function publishRateGrid(
   return send<PublishRateGridResult>(connection, operation, { ...input, ...options });
 }
 
+export interface ReadRateGridInput {
+  readonly path: {
+    readonly rateGridId: string;
+  };
+}
+
+export type ReadRateGridResult =
+  | Success<200, {
+    rateGridId: string;
+    productId: string;
+    effectiveFrom: string;
+  }>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<422, 'UNKNOWN_RATE_GRID' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Read rate grid: `GET /rate-grids/{rateGridId}`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNKNOWN_RATE_GRID (422), VALIDATION_FAILED (422).
+ */
+export function readRateGrid(
+  connection: Connection,
+  input: ReadRateGridInput,
+  options: CallOptions = {},
+): Promise<ReadRateGridResult> {
+  const operation: Operation = {
+    method: 'GET',
+    path: '/rate-grids/{rateGridId}',
+    security: [['bearer']],
+    responses: { 200: 'json', 401: 'json', 403: 'json', 406: 'json', 422: 'json' },
+  };
+
+  return send<ReadRateGridResult>(connection, operation, { ...input, ...options });
+}
+
 export interface SetResidualIncomeMinimumInput {
   readonly body: {
     perAdultInCents: number;
