@@ -17,7 +17,8 @@ const runner = { describe, it, expect, beforeEach, afterEach };
 
 const expectations = {
   createAggregate: () => aScoringModel().build(),
-  // TODO(domain): add `mutate: (changed: ScoringModel) => changed.<a business method that records a change of state>(...)`, so that the suite proves an update is stored and a stale save is refused; the case stays pending until then.
+  mutate: (changed: ScoringModel) =>
+    changed.publish('version-after-change', 'low', '2026.1', new Date('2026-02-01T00:00:00.000Z')),
   idOf: (subject: ScoringModel) => subject.id,
   stateOf: (subject: ScoringModel) => subject.toState(),
 };

@@ -4,6 +4,11 @@ import { creditScoringControllers } from '@/contexts/credit-scoring/credit-scori
 import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
+import { PrismaScoringModelRepository } from '@/contexts/credit-scoring/infrastructure/persistence/prisma-scoring-model.repository';
+import { requires } from '@ddd-ts-kit/auth';
+import { creditScoringPermissions } from '@/contexts/credit-scoring/credit-scoring.permissions';
+import { PublishScoringModelVersionCommand } from '@/contexts/credit-scoring/application/commands/publish-scoring-model-version/publish-scoring-model-version.command';
+import { PublishScoringModelVersionHandler } from '@/contexts/credit-scoring/application/commands/publish-scoring-model-version/publish-scoring-model-version.handler';
 // /ddd-ts-kit:imports
 
 export interface CreditScoringWiring {
@@ -30,6 +35,16 @@ export function creditScoringModule(platform: Platform): CreditScoringWiring {
 /** The command and query handlers of the context, with the repositories and readers they are given. */
 function registerHandlers(platform: Platform): void {
   // ddd-ts-kit:handlers
+  const scoringModelRepository = platform.adapter(
+    new PrismaScoringModelRepository(platform.persistence.database, platform.scope, platform.clock),
+    { kind: 'repository', context: 'credit-scoring', token: 'ScoringModelRepository' },
+  );
+
+  platform.commands.register(
+    PublishScoringModelVersionCommand,
+    new PublishScoringModelVersionHandler(scoringModelRepository, platform.ids, platform.clock),
+    { context: 'credit-scoring' },
+  );
   // /ddd-ts-kit:handlers
 }
 
@@ -49,6 +64,9 @@ function registerJobs(platform: Platform): void {
 function declaredUseCases(): UseCaseDeclaration[] {
   return [
     // ddd-ts-kit:authorization
+    requires(PublishScoringModelVersionCommand, creditScoringPermissions['scoring-model.publish'], {
+      resource: () => ({ type: 'context', id: 'credit-scoring' }),
+    }),
     // /ddd-ts-kit:authorization
   ];
 }
