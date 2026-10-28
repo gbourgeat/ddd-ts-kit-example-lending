@@ -50,6 +50,7 @@ export const CreditApplicationCodes = {
   OfferAlreadyAccepted: 'OFFER_ALREADY_ACCEPTED',
   OfferExpired: 'OFFER_EXPIRED',
   ApplicationNotVisible: 'APPLICATION_NOT_VISIBLE',
+  ReschedulingNotApproved: 'RESCHEDULING_NOT_APPROVED',
 } as const;
 
 export type CreditApplicationCode = (typeof CreditApplicationCodes)[keyof typeof CreditApplicationCodes];

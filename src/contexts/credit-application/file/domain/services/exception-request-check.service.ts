@@ -4,6 +4,7 @@ import { NotAssessed } from '@/contexts/credit-application/file/domain/errors/no
 import { ExceptionAlreadyRequested } from '@/contexts/credit-application/file/domain/errors/exception-already-requested.error';
 import { InvalidExceptionJustification } from '@/contexts/credit-application/file/domain/errors/invalid-exception-justification.error';
 import type { ExceptionRequest } from '@/contexts/credit-application/file/domain/values/exception-request';
+import type { CreditApplicationState } from '@/contexts/credit-application/file/domain/values/credit-application-state';
 
 /**
  * The checks of an exception requested on the application: it is assessed and not decided yet, no exception is already
@@ -42,5 +43,17 @@ export class ExceptionRequestCheckService {
       request.targetLevel,
       request.justification,
     );
+  }
+
+  /** The field the requested exception sets on the file: who requested it, the level it goes to, its justification and the instant. */
+  changesOf(event: CreditApplicationExceptionRequested): Pick<CreditApplicationState, 'exception'> {
+    return {
+      exception: {
+        requesterId: event.requesterId,
+        targetLevel: event.targetLevel,
+        justification: event.justification,
+        requestedAt: event.occurredAt,
+      },
+    };
   }
 }

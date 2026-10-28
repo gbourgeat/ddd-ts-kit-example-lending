@@ -30,5 +30,6 @@ export const creditApplicationPermissions = definePermissions('credit-applicatio
   'exception.decide': { description: 'Decide exception' },
   'application.contest': { description: 'Contest decision' },
   'offer.accept': { description: 'Accept offer' },
+  'application.reschedule': { description: 'Decide rescheduling' },
   // /ddd-ts-kit:permissions
 });

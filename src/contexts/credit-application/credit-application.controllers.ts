@@ -9,6 +9,7 @@ import { ReviewProposedRefusalController } from '@/contexts/credit-application/a
 import { ContestDecisionController } from '@/contexts/credit-application/decision/presentation/http/applications/contest-decision/contest-decision.controller';
 import { DecideApplicationController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.controller';
 import { DecideExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.controller';
+import { DecideReschedulingController } from '@/contexts/credit-application/decision/presentation/http/applications/decide-rescheduling/decide-rescheduling.controller';
 import { ReadDeclaredConflictsController } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.controller';
 import { RequestExceptionController } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.controller';
 import { RequestHumanReviewController } from '@/contexts/credit-application/decision/presentation/http/applications/request-human-review/request-human-review.controller';
@@ -48,6 +49,8 @@ import { DecideApplicationParams } from '@/contexts/credit-application/decision/
 import { DecideApplicationBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-application/decide-application.body';
 import { DecideExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.params';
 import { DecideExceptionBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-exception/decide-exception.body';
+import { DecideReschedulingParams } from '@/contexts/credit-application/decision/presentation/http/applications/decide-rescheduling/decide-rescheduling.params';
+import { DecideReschedulingBody } from '@/contexts/credit-application/decision/presentation/http/applications/decide-rescheduling/decide-rescheduling.body';
 import { ReadDeclaredConflictsParams } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.params';
 import { ReadDeclaredConflictsAnswer } from '@/contexts/credit-application/decision/presentation/http/applications/read-declared-conflicts/read-declared-conflicts.answer';
 import { RequestExceptionParams } from '@/contexts/credit-application/decision/presentation/http/applications/request-exception/request-exception.params';
@@ -124,6 +127,9 @@ export const creditApplicationControllers: readonly Type<unknown>[] = [
   }),
   withSignatures(DecideExceptionController, {
     decideException: { params: DecideExceptionParams, body: DecideExceptionBody, answer: null },
+  }),
+  withSignatures(DecideReschedulingController, {
+    decideRescheduling: { params: DecideReschedulingParams, body: DecideReschedulingBody, answer: null },
   }),
   withSignatures(ReadDeclaredConflictsController, {
     readDeclaredConflicts: { params: ReadDeclaredConflictsParams, answer: ReadDeclaredConflictsAnswer },

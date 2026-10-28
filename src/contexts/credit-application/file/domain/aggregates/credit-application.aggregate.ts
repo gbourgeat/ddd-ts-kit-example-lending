@@ -36,6 +36,9 @@ import { CreditApplicationExceptionDecided } from '@/contexts/credit-application
 import { CreditApplicationContested } from '@/contexts/credit-application/file/domain/events/credit-application-contested.event';
 import { ExceptionDecisionCheckService } from '@/contexts/credit-application/file/domain/services/exception-decision-check.service';
 import { ContestCheckService } from '@/contexts/credit-application/file/domain/services/contest-check.service';
+import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
+import { ReschedulingCheckService } from '@/contexts/credit-application/file/domain/services/rescheduling-check.service';
+import type { ReschedulingInput } from '@/contexts/credit-application/file/domain/values/rescheduling-input';
 
 export class CreditApplication extends EventSourcedAggregate<CreditApplicationEvent, CreditApplicationState> {
   private state: CreditApplicationState = {
@@ -145,6 +148,11 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
   /** The decider decides the application: approve, approve with conditions or refuse, checked against the file. */
   decide(decision: DecisionInput): void {
     this.record(new DecisionCheckService().eventOf(this.id, this.state, decision));
+  }
+
+  /** The decider decides a rescheduling of the approved application: the schedule changes, the rate and the amount stay. */
+  decideRescheduling(rescheduling: ReschedulingInput): void {
+    this.record(new ReschedulingCheckService().eventOf(this.id, this.state, rescheduling));
   }
 
   /** The applicant asks for a human review of the refusal standing on the application: a person reviews it. */
@@ -258,10 +266,12 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
       [CreditApplicationDecided.eventName]: (event) => this.applyDecided(event),
       // The broker changes no state of the file: the event itself keeps who brought the application.
       [CreditApplicationBrought.eventName]: () => undefined,
-      [CreditApplicationExceptionRequested.eventName]: (event) => this.applyExceptionRequested(event),
+      [CreditApplicationExceptionRequested.eventName]: (event) =>
+        this.applyEntryAppended(new ExceptionRequestCheckService().changesOf(event)),
       [CreditApplicationHumanReviewRequested.eventName]: (event) => this.applyHumanReviewRequested(event),
       [CreditApplicationExceptionDecided.eventName]: (event) =>
         this.applyEntryAppended(new ExceptionDecisionCheckService().changesOf(event)),
+      [CreditApplicationRescheduleDecided.eventName]: () => this.applyEntryAppended({}),
       [CreditApplicationContested.eventName]: (event) =>
         this.applyEntryAppended(new ContestCheckService().changesOf(event, this.state)),
     };
@@ -330,17 +340,6 @@ export class CreditApplication extends EventSourcedAggregate<CreditApplicationEv
 
   private applyDecided(event: CreditApplicationDecided): void {
     this.applyEntryAppended({ decision: DecisionRecord.of(event) });
-  }
-
-  private applyExceptionRequested(event: CreditApplicationExceptionRequested): void {
-    this.applyEntryAppended({
-      exception: {
-        requesterId: event.requesterId,
-        targetLevel: event.targetLevel,
-        justification: event.justification,
-        requestedAt: event.occurredAt,
-      },
-    });
   }
 
   private applyHumanReviewRequested(event: CreditApplicationHumanReviewRequested): void {

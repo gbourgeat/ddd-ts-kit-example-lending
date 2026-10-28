@@ -19,6 +19,8 @@ import { CreditApplicationExceptionRequested } from '@/contexts/credit-applicati
 import { CreditApplicationHumanReviewRequested } from '@/contexts/credit-application/file/domain/events/credit-application-human-review-requested.event';
 import { CreditApplicationExceptionDecided } from '@/contexts/credit-application/file/domain/events/credit-application-exception-decided.event';
 import { CreditApplicationContested } from '@/contexts/credit-application/file/domain/events/credit-application-contested.event';
+import { CreditApplicationRescheduleDecided } from '@/contexts/credit-application/decision/domain/events/credit-application-reschedule-decided.event';
+import { creditApplicationRescheduleDecidedStored } from '@/contexts/credit-application/file/infrastructure/persistence/credit-application-reschedule-decided.mapper';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -338,6 +340,7 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.text('reasons'),
       ),
   }),
+  [CreditApplicationRescheduleDecided.eventName]: creditApplicationRescheduleDecidedStored,
   [CreditApplicationContested.eventName]: defineStoredEvent(CreditApplicationContested, {
     version: 1,
     encode: (event): CreditApplicationContestedData => ({ requesterId: event.requesterId, reason: event.reason }),

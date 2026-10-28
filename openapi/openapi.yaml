@@ -689,6 +689,71 @@ paths:
             - INVALID_AMOUNT
             - INVALID_DURATION
             - VALIDATION_FAILED
+  /applications/{id}/access-explanation:
+    get:
+      operationId: explainRefusal
+      summary: Explain refusal
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: The answer.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                properties:
+                  outcome:
+                    type: string
+                type: object
+                required:
+                  - outcome
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '406':
+          description: 'Not Acceptable. Error codes: NOT_ACCEPTABLE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - NOT_ACCEPTABLE
+        '422':
+          description: 'Unprocessable Content. Error codes: APPLICATION_NOT_VISIBLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - APPLICATION_NOT_VISIBLE
+            - VALIDATION_FAILED
   /applications/{id}/account-information:
     post:
       operationId: readAccountInformation
@@ -2238,6 +2303,84 @@ paths:
           x-error-codes:
             - UNIDENTIFIED_PARTY
             - UNKNOWN_CREDIT_APPLICATION
+            - VALIDATION_FAILED
+  /applications/{id}/rescheduling-decision:
+    post:
+      operationId: decideRescheduling
+      summary: Decide rescheduling
+      tags:
+        - credit-application
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                durationMonths:
+                  type: integer
+                outstandingAmountCents:
+                  minimum: 0
+                  type: integer
+              type: object
+              required:
+                - durationMonths
+                - outstandingAmountCents
+      responses:
+        '204':
+          description: Done.
+          headers:
+            Cache-Control:
+              description: How the caches on the way may keep this answer.
+              schema:
+                type: string
+                const: no-store
+        '401':
+          description: 'Unauthorized. Error codes: UNAUTHORIZED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNAUTHORIZED
+        '403':
+          description: 'Forbidden. Error codes: FORBIDDEN.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - FORBIDDEN
+        '415':
+          description: 'Unsupported Media Type. Error codes: UNSUPPORTED_MEDIA_TYPE.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - UNSUPPORTED_MEDIA_TYPE
+        '422':
+          description: 'Unprocessable Content. Error codes: CONFLICTED_DECIDER, DECISION_ABOVE_LIMIT, INVALID_DURATION, PREPARER_CANNOT_DECIDE, RESCHEDULING_NOT_APPROVED, UNKNOWN_CREDIT_APPLICATION, UNKNOWN_DECIDER_LEVEL, UNKNOWN_DELEGATION_TABLE, VALIDATION_FAILED.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          x-error-codes:
+            - CONFLICTED_DECIDER
+            - DECISION_ABOVE_LIMIT
+            - INVALID_DURATION
+            - PREPARER_CANNOT_DECIDE
+            - RESCHEDULING_NOT_APPROVED
+            - UNKNOWN_CREDIT_APPLICATION
+            - UNKNOWN_DECIDER_LEVEL
+            - UNKNOWN_DELEGATION_TABLE
             - VALIDATION_FAILED
   /audit/entries:
     get:
