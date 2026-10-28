@@ -83,6 +83,7 @@ export const relationshipSchema = defineSchema({
       ),
       'data-protection:data.erase': { anyOf: ['operator', 'eraser'] },
       'data-protection:data-subject.request-copy': 'operator',
+      'data-protection:impact-assessment.record': 'operator',
     },
   },
   ...elements,

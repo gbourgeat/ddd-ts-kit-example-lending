@@ -27,10 +27,15 @@ Retention and erasure are a legal obligation every context serves, with no busin
 | Data erase | The removal of the personal data of a data subject past their retention | Erasure |
 | Request | A data subject asks the bank for a copy of the personal data it keeps |  |
 | Link | The signed address that downloads a copy of data, valid one hour |  |
+| Record | The written impact assessment of one scoring model version for one month, kept once and never amended | Register entry |
+| Scoring | The scoring model that decides a customer's access to credit, assessed by impact assessments | Scoring model of credit-scoring |
+| Year-month | A calendar month written YYYY-MM, the month an impact assessment is for |  |
+| Scoring model version | The identifier of the version of the scoring model an impact assessment assesses |  |
 
 ## Aggregates
 
 <!-- ddd-ts-kit:aggregates -->
+- `ImpactAssessment`
 - `RetentionPeriod`
 <!-- /ddd-ts-kit:aggregates -->
 
@@ -50,6 +55,7 @@ No personal data declared.
 <!-- ddd-ts-kit:permissions -->
 - `data-protection:data.erase`
 - `data-protection:data-subject.request-copy`
+- `data-protection:impact-assessment.record`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -102,6 +108,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Use case | Kind | Permission |
 |---|---|---|
 | `ErasePersonalDataPastRetention` | command | `data.erase` |
+| `RecordScoringImpactAssessment` | command | `impact-assessment.record` |
 | `RequestPersonalDataCopy` | command | `public` |
 | `RequestPersonalDataCopyLink` | command | `public` |
 
@@ -111,6 +118,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|---|---|---|---|---|---|---|
 | POST | `/data-subjects/:customerId/copies` | `requestPersonalDataCopy` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopy` | `public` |  | 201: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN` |
 | GET | `/data-subjects/:customerId/copies/:copyId/link` | `requestPersonalDataCopyLink` | `DataSubjectsRoutes` | `Authenticated` | `RequestPersonalDataCopyLink` | `public` | params: `RequestPersonalDataCopyLinkParams` | 200: `PersonalDataCopyLink` | `UNAUTHORIZED`, `FORBIDDEN`, `FILE_NOT_FOUND` |
+| POST | `/impact-assessments` | `recordScoringImpactAssessment` | `ImpactAssessmentsRoutes` | `Authenticated` | `RecordScoringImpactAssessment` | `impact-assessment.record` | body: `RecordScoringImpactAssessmentBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `DataProtectionCodes.InvalidYearMonth`, `DataProtectionCodes.InvalidScoringModelVersion`, `DataProtectionCodes.ImpactAssessmentAlreadyRecorded` |
 | POST | `/personal-data/erasures` | `erasePersonalDataPastRetention` | `PersonalDataRoutes` | `Authenticated` | `ErasePersonalDataPastRetention` | `data.erase` | body: `ErasePersonalDataPastRetentionBody` | 204 | `UNAUTHORIZED`, `FORBIDDEN` |
 
 ### Ports
@@ -118,6 +126,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | Port | Kind | Adapters |
 |---|---|---|
 | `CopyOfDataStore` | external | `FileCopyOfDataStore` |
+| `ImpactAssessmentRepository` | repository | `PrismaImpactAssessmentRepository` |
 | `PersonalDataGathering` | external | `PlatformPersonalDataGathering` |
 | `PersonalDataPurge` | external | `PlatformPersonalDataPurge` |
 | `RetentionPeriodRepository` | repository | `PrismaRetentionPeriodRepository` |
@@ -126,5 +135,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Refusal | Factory | Code | Exposed facts |
 |---|---|---|---|
+| `ImpactAssessmentAlreadyRecorded` | `forVersionAndMonth` | `IMPACT_ASSESSMENT_ALREADY_RECORDED` | none |
+| `InvalidScoringModelVersion` | `forVersion` | `INVALID_SCORING_MODEL_VERSION` | none |
+| `InvalidYearMonth` | `forText` | `INVALID_YEAR_MONTH` | none |
 | `UnknownPersonalDataCopy` | `forUnknownPersonalDataCopy` | `FILE_NOT_FOUND` | none |
 <!-- /ddd-ts-kit:reference -->
