@@ -10,6 +10,12 @@ const systemRelationships: readonly RelationTuple[] = [
   {
     object: 'context:servicing',
     relation: 'operator',
+    subject: 'system:system:servicing.reschedule-on-decision',
+  },
+  { object: 'context:servicing', relation: 'operator', subject: 'system:system:servicing.repay-withdrawn-loan' },
+  {
+    object: 'context:servicing',
+    relation: 'operator',
     subject: 'system:system:servicing.record-payout-on-payout-authorised',
   },
   {
