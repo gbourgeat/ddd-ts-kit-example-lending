@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { ERASED_PERSONAL_DATA } from '@ddd-ts-kit/kernel';
 import { expectStatus } from '@ddd-ts-kit/testing/e2e';
+import { expectJobAuditedFor } from '$test/e2e/support/job-audit';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { readLoan, storePaidOutLoan } from '$test/e2e/support/servicing/paid-out-loan';
 import { NIGHTLY_RUN, servicingOperatorAt } from '$test/e2e/support/servicing/loan-retention';
@@ -83,4 +84,5 @@ async function runNightlyErasure(app: RunningApplication): Promise<void> {
   await servicingOperatorAt(app, 'ada', NIGHTLY_RUN);
   await app.runJob(ERASE_JOB);
   await app.settled();
+  await expectJobAuditedFor(app, ERASE_JOB, tenantId);
 }

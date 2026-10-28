@@ -8,6 +8,11 @@ import type { RelationTuple, RelationTupleStore } from '@ddd-ts-kit/auth/rebac';
 const systemRelationships: readonly RelationTuple[] = [
   // ddd-ts-kit:system-grants
   {
+    object: 'context:servicing',
+    relation: 'operator',
+    subject: 'system:system:servicing.record-payout-on-payout-authorised',
+  },
+  {
     object: 'context:branch-network',
     relation: 'operator',
     subject: 'system:system:OpenPortfolioForAdvisorEventHandler',

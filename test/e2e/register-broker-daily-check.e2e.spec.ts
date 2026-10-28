@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { collectEvents, expectStatus } from '@ddd-ts-kit/testing/e2e';
+import { expectJobAuditedFor } from '$test/e2e/support/job-audit';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 
 const dailyCheck = 'brokerage.check-registration';
@@ -30,6 +31,7 @@ describe('The daily check of the broker registrations, end to end', () => {
 
     await application.runJob(dailyCheck);
     await application.settled();
+    await expectJobAuditedFor(application, dailyCheck, bank);
     published.stop();
 
     const [event] = published.received(registrationLapsed);
@@ -45,6 +47,7 @@ describe('The daily check of the broker registrations, end to end', () => {
 
     await application.runJob(dailyCheck);
     await application.settled();
+    await expectJobAuditedFor(application, dailyCheck, bank);
     published.stop();
 
     expect(published.received(registrationLapsed)).toHaveLength(0);

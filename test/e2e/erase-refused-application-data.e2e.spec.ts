@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { expectStatus } from '@ddd-ts-kit/testing/e2e';
+import { expectJobAuditedFor } from '$test/e2e/support/job-audit';
 import { startApplication, type RunningApplication } from '$test/e2e/support/start-application';
 import { openBank } from '$test/e2e/support/credit-application/broker-world';
 import {
@@ -128,6 +129,7 @@ describe('Erase the personal data of a refused application, end to end', () => {
     const run = await application.runJob(ERASE_JOB);
 
     await application.settled();
+    await expectJobAuditedFor(application, ERASE_JOB, 'acme-bank');
 
     return run;
   }
