@@ -22,6 +22,7 @@ Figures for management and the supervisor are read from the events of other cont
 | Portfolio at risk | The share of the outstanding amount of loans 30 days, or 90 days, past due | Arrears |
 | Defaults list | The loans in default, for the supervisor, as CSV | Default (servicing) |
 | Supervisor | The banking supervisor, who receives the defaults list | Financial intelligence unit |
+| Decision | A decider's ruling on a credit application: an approval, an approval with conditions or a refusal. | Exception (credit-application) |
 
 ## Aggregates
 
@@ -91,12 +92,14 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 |---|---|---|
 | not read | not read |  |
 | not read | `ApplicationCountProjection` |  |
+| not read | `DecisionProjection` |  |
 
 ### Ports
 
 | Port | Kind | Adapters |
 |---|---|---|
 | `ApplicationCounts` | not bound |  |
+| `DecisionCounts` | not bound |  |
 
 ### Errors
 

@@ -5,9 +5,14 @@ import type { Route } from '@ddd-ts-kit/http';
 import type { Platform } from '@/platform/composition/platform';
 // ddd-ts-kit:imports
 import { consume, subscribeAll } from '@ddd-ts-kit/events';
-import { creditApplicationSubmittedV2 as applicationCountDefinition } from '@/contexts/credit-application/published-language';
+import {
+  creditApplicationDecidedV1 as decisionDefinition,
+  creditApplicationSubmittedV2 as applicationCountDefinition,
+} from '@/contexts/credit-application/published-language';
 import { ApplicationCountProjection } from '@/contexts/reporting/application/projections/application-count.projection';
 import { PrismaApplicationCounts } from '@/contexts/reporting/infrastructure/persistence/prisma-application-counts.repository';
+import { DecisionProjection } from '@/contexts/reporting/application/projections/decision.projection';
+import { PrismaDecisionCounts } from '@/contexts/reporting/infrastructure/persistence/prisma-decision-counts.repository';
 // /ddd-ts-kit:imports
 
 export interface ReportingWiring {
@@ -54,6 +59,24 @@ function registerReactions(platform: Platform): void {
       },
       async (event) => {
         await applicationCountProjection.submitted(event);
+      },
+    ),
+  ]);
+
+  const decisionCounts = new PrismaDecisionCounts(platform.persistence.database, platform.scope);
+  const decisionProjection = new DecisionProjection(decisionCounts);
+
+  subscribeAll(platform.subscriberFor('reporting'), [
+    consume(
+      decisionDefinition,
+      {
+        consumer: 'reporting.decision',
+        processed: platform.persistence.processedEvents,
+        unitOfWork: platform.persistence.unitOfWork,
+        scope: platform.scope,
+      },
+      async (event) => {
+        await decisionProjection.decided(event);
       },
     ),
   ]);
