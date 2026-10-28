@@ -128,6 +128,7 @@ No personal data declared.
 - `credit-application:application.read-accounts`
 - `credit-application:application.consult-register`
 - `credit-application:application.erase-past-retention`
+- `credit-application:delegation-table.keep`
 <!-- /ddd-ts-kit:permissions -->
 
 ## Scheduled jobs
@@ -185,10 +186,12 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CorrectEntry` | command | `application.correct` |
 | `ErasePersonalDataPastRetention` | command | `application.erase-past-retention` |
 | `GiveAccountConsent` | command | `application.consent` |
+| `KeepDelegationTable` | command | `delegation-table.keep` |
 | `NameCoBorrower` | command | `application.name-party` |
 | `NameGuarantor` | command | `application.name-party` |
 | `ReadAccountInformation` | command | `application.read-accounts` |
 | `ReadDeclaredConflicts` | query | `application.decide` |
+| `ReadDelegationTable` | query | `application.decide` |
 | `ReadDocument` | query | `application.read` |
 | `SearchApplications` | query | `public` |
 | `SubmitApplication` | command | `application.submit` |
@@ -208,6 +211,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | GET | `/applications/:id/documents/:documentKey` | `readDocument` | `ApplicationsRoutes` | `Authenticated` | `ReadDocument` | `application.read` |  | 200: `documentContent` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnknownEntry` |
 | POST | `/applications/:id/guarantors` | `nameGuarantor` | `ApplicationsRoutes` | `Authenticated` | `NameGuarantor` | `application.name-party` | params: `NameGuarantorParams`, body: `NameGuarantorBody` | 201: `acceptedSchema` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication` |
 | POST | `/applications/:id/register-consultations` | `consultRepaymentIncidentRegister` | `ApplicationsRoutes` | `Authenticated` | `ConsultRepaymentIncidentRegister` | `application.consult-register` | params: `ConsultRepaymentIncidentRegisterParams` | 201: `ConsultRepaymentIncidentRegisterAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownCreditApplication`, `CreditApplicationCodes.UnidentifiedParty` |
+| GET | `/delegation-tables/:delegationTableId` | `readDelegationTable` | `DelegationTablesRoutes` | `Authenticated` | `ReadDelegationTable` | `application.decide` | params: `ReadDelegationTableParams` | 200: `ReadDelegationTableAnswer` | `UNAUTHORIZED`, `FORBIDDEN`, `CreditApplicationCodes.UnknownDelegationTable` |
 
 ### Consumed events
 
@@ -233,7 +237,8 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | not read | `DeciderLevelProjection` |  |
 | not read | `DeclaredConflictRow` |  |
 | not read | `DeclaredConflictsProjection` |  |
-| not read | `DelegationTableProjection` |  |
+| not read | not read |  |
+| not read | not read |  |
 | not read | `LegalMaximumRateProjection` |  |
 | not read | `RateGridProjection` |  |
 
@@ -247,6 +252,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `CustomerAdvisorBranchGateway` | external | `InProcessCustomerAdvisorBranchGateway` |
 | `CustomerIdentityGateway` | gateway | `InProcessCustomerIdentityGateway` |
 | `DeclaredConflictsStore` | repository | `PrismaDeclaredConflictsStore` |
+| `DelegationTables` | not bound |  |
 | `ElectronicSignature` | external | `SimulatedElectronicSignature` |
 | `OfferRepository` | external | `PrismaOfferRepository` |
 | `RepaymentIncidentRegister` | external | `SimulatedRepaymentIncidentRegister` |
@@ -265,6 +271,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `UnknownEntry` | `forEntry` | `UNKNOWN_ENTRY` | none |
 | `InvalidNetIncome` | `forCents` | `INVALID_NET_INCOME` | none |
 | `UnidentifiedParty` | `forCustomer` | `UNIDENTIFIED_PARTY` | none |
+| `UnknownDelegationTable` | `forUnknownDelegationTable` | `UNKNOWN_DELEGATION_TABLE` | none |
 | `InvalidAnnualPercentageRate` | `forValue` | `INVALID_ANNUAL_PERCENTAGE_RATE` | none |
 
 ### Gateways

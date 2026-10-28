@@ -56,6 +56,10 @@ import { registerNightlyJobs } from '@/contexts/credit-application/composition/r
 import { KeepProductTermsIntegrationHandler } from '@/contexts/credit-application/file/application/integration/handlers/keep-product-terms.integration-handler';
 import { registerFileReactions } from '@/contexts/credit-application/composition/register-file-reactions.module';
 import { registerFileHandlers } from '@/contexts/credit-application/composition/register-file-handlers.module';
+import { KeepDelegationTableCommand } from '@/contexts/credit-application/decision/application/commands/keep-delegation-table/keep-delegation-table.command';
+import { ReadDelegationTableQuery } from '@/contexts/credit-application/decision/application/queries/read-delegation-table/read-delegation-table.query';
+import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
+import { registerDelegationTableHandlers } from '@/contexts/credit-application/composition/register-delegation-table-handlers.module';
 // /ddd-ts-kit:imports
 
 export interface CreditApplicationWiring {
@@ -76,9 +80,16 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     },
   );
 
+  const delegationTables = platform.adapter(new PrismaDelegationTables(platform.persistence.database, platform.scope), {
+    kind: 'repository',
+    context: 'credit-application',
+    token: 'DelegationTables',
+  });
+
   const customerAdvisorBranch = registerGateways(platform);
 
   registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
+  registerDelegationTableHandlers(platform, delegationTables);
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 
@@ -168,6 +179,7 @@ function registerHandlers(
     new ErasePersonalDataPastRetentionHandler(creditApplicationRepository, platform.ids, platform.clock),
     { context: 'credit-application' },
   );
+
   // /ddd-ts-kit:handlers
 }
 
@@ -279,6 +291,12 @@ function declaredUseCases(): UseCaseDeclaration[] {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
     requires(ReadDeclaredConflictsQuery, creditApplicationPermissions['application.decide'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(KeepDelegationTableCommand, creditApplicationPermissions['delegation-table.keep'], {
+      resource: () => ({ type: 'context', id: 'credit-application' }),
+    }),
+    requires(ReadDelegationTableQuery, creditApplicationPermissions['application.decide'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
     requires(AttachDocumentCommand, creditApplicationPermissions['application.attach-document'], {
