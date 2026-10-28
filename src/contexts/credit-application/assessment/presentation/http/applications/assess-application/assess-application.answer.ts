@@ -1,3 +1,5 @@
+import type { ProposedOutcome } from '@/contexts/credit-application/file/domain/events/credit-application-assessed.event';
+import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { IsArray, IsIn, IsInt, IsString } from 'class-validator';
 
 /** The assessment of the application: the ratios and the register answer it rests on, the score with its model version and factors, and the outcome proposed. */
@@ -30,6 +32,6 @@ export class AssessApplicationAnswer {
   factors: string[] = [];
 
   /** Approve, or refuse: a proposed refusal is reviewed by a person before it stands. */
-  @IsIn(['approve', 'refuse'])
-  proposedOutcome: 'approve' | 'refuse' = 'refuse';
+  @IsIn([DecisionOutcome.Approve, DecisionOutcome.Refuse])
+  proposedOutcome: ProposedOutcome = DecisionOutcome.Refuse;
 }

@@ -12,6 +12,8 @@ import { CreditApplicationAssessed } from '@/contexts/credit-application/file/do
 import { CreditApplicationRequestFoundOutsideProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-found-outside-product-terms.event';
 import { CreditApplicationRequestCheckedWithUnknownProductTerms } from '@/contexts/credit-application/file/domain/events/credit-application-request-checked-with-unknown-product-terms.event';
 import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
+import { CreditApplicationDecided } from '@/contexts/credit-application/file/domain/events/credit-application-decided.event';
+import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 
 interface CreditApplicationSubmittedData {
   readonly applicantId: string;
@@ -71,6 +73,15 @@ interface CreditApplicationRefusalReviewedData {
   readonly reviewerId: string;
   readonly conclusion: 'confirm' | 'overturn';
   readonly reason: string;
+}
+
+interface CreditApplicationDecidedData {
+  readonly outcome: string;
+  readonly deciderId: string;
+  readonly level: string;
+  readonly reasons: string;
+  readonly conditions: string;
+  readonly approvedAmountCents: number;
 }
 
 /** How the events of CreditApplication are kept in its stream: one entry per event, read back by `decode`. */
@@ -219,6 +230,28 @@ export const creditApplicationEvents: StoredEventTypes<CreditApplicationEvent> =
         data.text('reviewerId'),
         data.text('conclusion') as 'confirm' | 'overturn',
         data.text('reason'),
+      ),
+  }),
+  [CreditApplicationDecided.eventName]: defineStoredEvent(CreditApplicationDecided, {
+    version: 1,
+    encode: (event): CreditApplicationDecidedData => ({
+      outcome: event.outcome,
+      deciderId: event.deciderId,
+      level: event.level,
+      reasons: event.reasons,
+      conditions: event.conditions,
+      approvedAmountCents: event.approvedAmountCents,
+    }),
+    decode: (data, { aggregateId, occurredAt }) =>
+      new CreditApplicationDecided(
+        aggregateId,
+        occurredAt,
+        data.text('outcome') as DecisionOutcome,
+        data.text('deciderId'),
+        data.text('level'),
+        data.text('reasons'),
+        data.text('conditions'),
+        data.number('approvedAmountCents'),
       ),
   }),
 };

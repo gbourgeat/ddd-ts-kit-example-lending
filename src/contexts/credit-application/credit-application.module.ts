@@ -17,12 +17,12 @@ import { PrismaSearchApplicationsReader } from '@/contexts/credit-application/fi
 import { PrismaApplicationListProjection } from '@/contexts/credit-application/file/infrastructure/persistence/prisma-application-list-projection.repository';
 import { NameCoBorrowerCommand } from '@/contexts/credit-application/file/application/commands/name-co-borrower/name-co-borrower.command';
 import { EventStoreCreditApplicationRepository } from '@/contexts/credit-application/file/infrastructure/persistence/event-store-credit-application.repository';
+import type { CreditApplicationRepository } from '@/contexts/credit-application/file/domain/repositories/credit-application.repository';
 import { NameGuarantorCommand } from '@/contexts/credit-application/file/application/commands/name-guarantor/name-guarantor.command';
 import { CorrectEntryCommand } from '@/contexts/credit-application/file/application/commands/correct-entry/correct-entry.command';
 import type { DeclaredConflictsStore } from '@/contexts/credit-application/decision/application/ports/declared-conflicts-store.port';
 import { PrismaDeclaredConflictsStore } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-declared-conflicts-store.repository';
 import { registerSubmissionAndConflictsHandlers } from '@/contexts/credit-application/composition/register-submission-and-conflicts-handlers.module';
-import { ReadDeclaredConflictsQuery } from '@/contexts/credit-application/decision/application/queries/read-declared-conflicts/read-declared-conflicts.query';
 import { AttachDocumentCommand } from '@/contexts/credit-application/file/application/commands/attach-document/attach-document.command';
 import { registerDocumentRetentionHandlers } from '@/contexts/credit-application/composition/register-document-retention-handlers.module';
 import { ReadDocumentQuery } from '@/contexts/credit-application/file/application/queries/read-document/read-document.query';
@@ -39,13 +39,11 @@ import { registerFileHandlers } from '@/contexts/credit-application/composition/
 import { PrismaDelegationTables } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-delegation-tables.repository';
 import { registerDelegationTableHandlers } from '@/contexts/credit-application/composition/register-delegation-table-handlers.module';
 import { InProcessCustomerDiligenceGateway } from '@/contexts/credit-application/offer/infrastructure/external/in-process-customer-diligence.gateway';
-import { KeepDelegationTableCommand } from '@/contexts/credit-application/decision/application/commands/keep-delegation-table/keep-delegation-table.command';
-import { ReadDelegationTableQuery } from '@/contexts/credit-application/decision/application/queries/read-delegation-table/read-delegation-table.query';
-import { KeepDeciderLevelCommand } from '@/contexts/credit-application/decision/application/commands/keep-decider-level/keep-decider-level.command';
-import { ReadDeciderLevelQuery } from '@/contexts/credit-application/decision/application/queries/read-decider-level/read-decider-level.query';
 import { PrismaDeciderLevels } from '@/contexts/credit-application/decision/infrastructure/persistence/prisma-decider-levels.repository';
 import { registerDeciderLevelHandlers } from '@/contexts/credit-application/composition/register-decider-level-handlers.module';
+import { registerDecisionHandlers } from '@/contexts/credit-application/composition/register-decision-handlers.module';
 import { registerSubmissionReactions } from '@/contexts/credit-application/composition/register-submission-reactions.module';
+import { declareDecisionUseCases } from '@/contexts/credit-application/decision/application/authorization/declare-decision-use-cases.policy';
 import { declareFileReferenceUseCases } from '@/contexts/credit-application/file/application/authorization/declare-file-reference-use-cases.policy';
 import { declareOfferUseCases } from '@/contexts/credit-application/offer/application/authorization/declare-offer-use-cases.policy';
 import { PrismaRateGrids } from '@/contexts/credit-application/offer/infrastructure/persistence/prisma-rate-grids.repository';
@@ -98,12 +96,14 @@ export function creditApplicationModule(platform: Platform): CreditApplicationWi
     token: 'CustomerDiligenceGateway',
   });
 
-  registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
+  const creditApplicationRepository = registerHandlers(platform, declaredConflicts, customerAdvisorBranch);
+
   registerDelegationTableHandlers(platform, delegationTables);
 
   const deciderLevels = readModel(platform, 'DeciderLevels', PrismaDeciderLevels);
 
   registerDeciderLevelHandlers(platform, deciderLevels);
+  registerDecisionHandlers(platform, creditApplicationRepository, { deciderLevels, delegationTables });
   registerReactions(platform, declaredConflicts);
   registerJobs(platform);
 
@@ -140,7 +140,7 @@ function registerHandlers(
   platform: Platform,
   declaredConflicts: DeclaredConflictsStore,
   customerAdvisorBranch: CustomerAdvisorBranchGateway,
-): void {
+): CreditApplicationRepository {
   // ddd-ts-kit:handlers
   const creditApplicationRepository = platform.adapter(
     new EventStoreCreditApplicationRepository(platform.eventSourcing.events, platform.eventSourcing.cipher),
@@ -205,6 +205,8 @@ function registerHandlers(
 
   registerBrokerRegistrationHandlers(platform, brokerRegistrations);
   // /ddd-ts-kit:handlers
+
+  return creditApplicationRepository;
 }
 
 /** What the context does when an event happens: its own events and those of the other contexts. */
@@ -292,21 +294,6 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(CorrectEntryCommand, creditApplicationPermissions['application.correct'], {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
-    requires(ReadDeclaredConflictsQuery, creditApplicationPermissions['application.decide'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
-    }),
-    requires(KeepDelegationTableCommand, creditApplicationPermissions['delegation-table.keep'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
-    }),
-    requires(ReadDelegationTableQuery, creditApplicationPermissions['application.decide'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
-    }),
-    requires(KeepDeciderLevelCommand, creditApplicationPermissions['decider-level.keep'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
-    }),
-    requires(ReadDeciderLevelQuery, creditApplicationPermissions['application.decide'], {
-      resource: () => ({ type: 'context', id: 'credit-application' }),
-    }),
     requires(AttachDocumentCommand, creditApplicationPermissions['application.attach-document'], {
       resource: (command) => ({ type: 'application', id: command.applicationId }),
     }),
@@ -326,6 +313,7 @@ function declaredUseCases(): UseCaseDeclaration[] {
     requires(AssessApplicationCommand, creditApplicationPermissions['application.assess'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),
     }),
+    ...declareDecisionUseCases(),
     ...declareFileReferenceUseCases(),
     requires(ReviewProposedRefusalCommand, creditApplicationPermissions['application.review-refusal'], {
       resource: () => ({ type: 'context', id: 'credit-application' }),

@@ -1,7 +1,8 @@
+import type { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { NamedDomainEvent } from '@ddd-ts-kit/kernel';
 
 /** The outcome the assessment proposes: a refusal is only proposed, a person reviews it before it stands. */
-export type ProposedOutcome = 'approve' | 'refuse';
+export type ProposedOutcome = typeof DecisionOutcome.Approve | typeof DecisionOutcome.Refuse;
 
 /** What an assessment rests on: the inputs of the score, the model version, the score, its band, the factors that lowered it, in words, and the outcome proposed. */
 export type AssessmentRecord = {

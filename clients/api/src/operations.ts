@@ -463,6 +463,46 @@ export function correctEntry(
   return send<CorrectEntryResult>(connection, operation, { ...input, ...options });
 }
 
+export interface DecideApplicationInput {
+  readonly path: {
+    readonly id: string;
+  };
+  readonly body: {
+    outcome: 'approve' | 'approve-with-conditions' | 'refuse';
+    reasons: string;
+    conditions: string;
+    approvedAmountCents: number;
+  };
+}
+
+export type DecideApplicationResult =
+  | Success<201, Schemas.Accepted>
+  | Failure<401, 'UNAUTHORIZED', Schemas.Problem>
+  | Failure<403, 'FORBIDDEN', Schemas.Problem>
+  | Failure<406, 'NOT_ACCEPTABLE', Schemas.Problem>
+  | Failure<415, 'UNSUPPORTED_MEDIA_TYPE', Schemas.Problem>
+  | Failure<422, 'ALREADY_DECIDED' | 'DECISION_ABOVE_LIMIT' | 'INVALID_DECISION_CONDITIONS' | 'INVALID_DECISION_REASONS' | 'NOT_ASSESSED' | 'PREPARER_CANNOT_DECIDE' | 'REFUSAL_NOT_REVIEWED' | 'REFUSAL_PROPOSAL_STANDS' | 'UNKNOWN_CREDIT_APPLICATION' | 'UNKNOWN_DECIDER_LEVEL' | 'UNKNOWN_DELEGATION_TABLE' | 'VALIDATION_FAILED', Schemas.Problem>;
+
+/**
+ * Decide application: `POST /applications/{id}/decision`.
+ *
+ * Error codes: UNAUTHORIZED (401), FORBIDDEN (403), NOT_ACCEPTABLE (406), UNSUPPORTED_MEDIA_TYPE (415), ALREADY_DECIDED (422), DECISION_ABOVE_LIMIT (422), INVALID_DECISION_CONDITIONS (422), INVALID_DECISION_REASONS (422), NOT_ASSESSED (422), PREPARER_CANNOT_DECIDE (422), REFUSAL_NOT_REVIEWED (422), REFUSAL_PROPOSAL_STANDS (422), UNKNOWN_CREDIT_APPLICATION (422), UNKNOWN_DECIDER_LEVEL (422), UNKNOWN_DELEGATION_TABLE (422), VALIDATION_FAILED (422).
+ */
+export function decideApplication(
+  connection: Connection,
+  input: DecideApplicationInput,
+  options: CallOptions = {},
+): Promise<DecideApplicationResult> {
+  const operation: Operation = {
+    method: 'POST',
+    path: '/applications/{id}/decision',
+    security: [['bearer']],
+    responses: { 201: 'json', 401: 'json', 403: 'json', 406: 'json', 415: 'json', 422: 'json' },
+  };
+
+  return send<DecideApplicationResult>(connection, operation, { ...input, ...options });
+}
+
 export interface ReadDeclaredConflictsInput {
   readonly path: {
     readonly id: string;

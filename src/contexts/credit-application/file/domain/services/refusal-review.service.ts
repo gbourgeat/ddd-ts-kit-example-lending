@@ -1,3 +1,4 @@
+import { DecisionOutcome } from '@/contexts/credit-application/decision/domain/vocabularies/decision-outcome.vocabulary';
 import { CreditApplicationRefusalReviewed } from '@/contexts/credit-application/file/domain/events/credit-application-refusal-reviewed.event';
 import { InvalidReviewReason } from '@/contexts/credit-application/file/domain/errors/invalid-review-reason.error';
 import { NoRefusalToReview } from '@/contexts/credit-application/file/domain/errors/no-refusal-to-review.error';
@@ -27,7 +28,7 @@ export class RefusalReviewService {
       throw InvalidReviewReason.forReason();
     }
 
-    if (file.lastAssessment?.proposedOutcome !== 'refuse') {
+    if (file.lastAssessment?.proposedOutcome !== DecisionOutcome.Refuse) {
       throw NoRefusalToReview.forApplication();
     }
 
