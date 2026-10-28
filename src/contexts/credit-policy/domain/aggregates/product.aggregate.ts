@@ -33,7 +33,16 @@ export class Product extends AggregateRoot<string> {
       scoreThreshold: terms.scoreThreshold.score,
     });
 
-    created.record(new ProductDefined(id, now));
+    created.record(
+      new ProductDefined(id, now, {
+        amountMinimumCents: terms.amount.minimumCents,
+        amountMaximumCents: terms.amount.maximumCents,
+        durationMinimumMonths: terms.duration.minimumMonths,
+        durationMaximumMonths: terms.duration.maximumMonths,
+        arrangementFeeCents: terms.arrangementFee.cents,
+        insuranceMandatory: terms.insuranceMandatory,
+      }),
+    );
 
     return created;
   }

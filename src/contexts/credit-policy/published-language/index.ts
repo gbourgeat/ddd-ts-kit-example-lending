@@ -14,3 +14,5 @@ export * from '@/contexts/credit-policy/published-language/delegation-table-publ
 export * from '@/contexts/credit-policy/published-language/delegation-table-published.v2.integration-event';
 export * from '@/contexts/credit-policy/published-language/rate-grid-published.v2.payload';
 export * from '@/contexts/credit-policy/published-language/rate-grid-published.v2.integration-event';
+export * from '@/contexts/credit-policy/published-language/product-defined.v2.payload';
+export * from '@/contexts/credit-policy/published-language/product-defined.v2.integration-event';

@@ -35,6 +35,7 @@ import { ResidualIncomeMinimumPublished } from '@/contexts/credit-policy/domain/
 import { SearchProductCatalogueHandler } from '@/contexts/credit-policy/application/queries/search-product-catalogue/search-product-catalogue.handler';
 import { SearchProductCatalogueQuery } from '@/contexts/credit-policy/application/queries/search-product-catalogue/search-product-catalogue.query';
 import { PrismaSearchProductCatalogueReader } from '@/contexts/credit-policy/infrastructure/persistence/prisma-search-product-catalogue.reader';
+import { ProductDefinedV2Publisher } from '@/contexts/credit-policy/application/integration/publishers/product-defined-v2.publisher';
 // /ddd-ts-kit:imports
 
 export interface CreditPolicyWiring {
@@ -184,6 +185,17 @@ function registerReactions(platform: Platform): void {
   platform.domainEvents.on(ResidualIncomeMinimumPublished.eventName, async (event) => {
     if (event instanceof ResidualIncomeMinimumPublished) {
       await residualIncomeMinimumPublishedPublisher.handle(event);
+    }
+  });
+
+  const productDefinedV2Publisher = platform.adapter(new ProductDefinedV2Publisher(platform.publisher, platform.ids), {
+    kind: 'domain-event-handler',
+    context: 'credit-policy',
+  });
+
+  platform.domainEvents.on(ProductDefined.eventName, async (event) => {
+    if (event instanceof ProductDefined) {
+      await productDefinedV2Publisher.handle(event);
     }
   });
   // /ddd-ts-kit:reactions

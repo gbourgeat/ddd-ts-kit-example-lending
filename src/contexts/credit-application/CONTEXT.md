@@ -83,6 +83,8 @@ It is the bank's core business: every credit the bank grants is decided here, an
 | Grid | The nominal rate of each product by risk rating and duration, as credit-policy publishes it | Annual percentage rate |
 | Legal maximum rate | The highest annual rate for a category of loan in force on a day | Rate grid |
 | Erase personal data past retention | Destroy the key of the personal values of every application refused six months ago, so that the file can no longer be read | Delete an application |
+| Product | A credit offer of the bank, with the amounts, durations, fee and insurance it is sold with | Offer |
+| Terms | The amounts, durations, arrangement fee and insurance a product is sold with | Condition |
 
 ## Modules
 
@@ -214,6 +216,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDeciderLevelIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepDelegationTableIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepLegalMaximumRateIntegrationHandler` | `credit-application.keep-delegation-table` |
+| `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepProductTermsIntegrationHandler` | `credit-application.keep-delegation-table` |
 | `credit-policy.delegation-table.published` | 2 | `credit-policy` | `KeepRateGridIntegrationHandler` | `credit-application.keep-delegation-table` |
 
 ### Publishers
@@ -226,6 +229,7 @@ Generated from the code by `ddd-ts-kit docs`; the same facts as data: `ddd-ts-ki
 
 | Projection | Class | Applies |
 |---|---|---|
+| not read | `ProductTermsProjection` |  |
 | not read | `DeciderLevelProjection` |  |
 | not read | `DeclaredConflictRow` |  |
 | not read | `DeclaredConflictsProjection` |  |
